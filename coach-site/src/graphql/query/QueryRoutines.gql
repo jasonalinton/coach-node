@@ -1,0 +1,19 @@
+query routines {
+  routines {
+    id
+    text
+    description
+    metrics {
+      id
+      text
+    }
+    goals {
+      id
+      text
+    }
+    todos {
+      id
+      text
+    }
+  }
+}

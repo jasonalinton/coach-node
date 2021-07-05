@@ -1,0 +1,19 @@
+query todos {
+  todos {
+    id
+    text
+    description
+    metrics {
+      id
+      text
+    }
+    goals {
+      id
+      text
+    }
+    routines {
+      id
+      text
+    }
+  }
+}

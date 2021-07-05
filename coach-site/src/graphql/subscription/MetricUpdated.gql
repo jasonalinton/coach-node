@@ -1,0 +1,19 @@
+subscription metricUpdated {
+  metricUpdated {
+    id
+    text
+    description
+    goals {
+      id
+      text
+    }
+    todos {
+      id
+      text
+    }
+    routines {
+      id
+      text
+    }
+  }
+}

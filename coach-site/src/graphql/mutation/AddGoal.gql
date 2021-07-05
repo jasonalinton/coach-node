@@ -1,0 +1,27 @@
+mutation addGoal($goal: GoalInput!) {
+  addGoal(goal: $goal) {
+    id
+    text
+    description
+    parents {
+      id
+      text
+    }
+    children {
+      id
+      text
+    }
+    metrics {
+      id
+      text
+    }
+    todos {
+      id
+      text
+    }
+    routines {
+      id
+      text
+    }
+  }
+}

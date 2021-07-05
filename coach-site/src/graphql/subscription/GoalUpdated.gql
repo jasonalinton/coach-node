@@ -1,0 +1,27 @@
+subscription goalUpdated {
+  goalUpdated {
+    id
+    text
+    description
+    parents {
+      id
+      text
+    }
+    children {
+      id
+      text
+    }
+    metrics {
+      id
+      text
+    }
+    todos {
+      id
+      text
+    }
+    routines {
+      id
+      text
+    }
+  }
+}
