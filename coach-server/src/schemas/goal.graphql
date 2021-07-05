@@ -1,0 +1,24 @@
+type Goal {
+  id: Int!
+  text: String!
+  description: String
+  isDeleted: Int
+  parents: [Goal]
+  children: [Goal]
+  metrics: [Metric]
+  todos: [Todo]
+  routines: [Routine]
+}
+
+input GoalInput {
+  id: Int
+  text: String
+  description: String
+  # isDeleted:   Int
+  parents: [GoalInput]
+  children: [GoalInput]
+  metrics: [MetricInput]
+  todos: [TodoInput]
+  routines: [RoutineInput]
+  unmappedItemIDs: UnmappedItemIDs
+}

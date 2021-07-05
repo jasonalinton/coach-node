@@ -1,0 +1,17 @@
+type Metric {
+  id: Int!
+  text: String!
+  description: String
+  goals: [Goal]
+  todos: [Todo]
+  routines: [Routine]
+}
+
+input MetricInput {
+  id: Int!
+  text: String
+  description: String
+  goals: [GoalInput]
+  todos: [TodoInput]
+  routines: [RoutineInput]
+}

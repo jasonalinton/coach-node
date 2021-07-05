@@ -1,0 +1,23 @@
+type Routine {
+  id: Int!
+  text: String!
+  description: String
+  isDeleted: Int
+  parents: [Routine]
+  children: [Routine]
+  metrics: [Metric]
+  todos: [Todo]
+  goals: [Goal]
+}
+
+input RoutineInput {
+  id: Int
+  text: String
+  description: String
+  # isDeleted:   Int
+  parents: [RoutineInput]
+  children: [RoutineInput]
+  metrics: [MetricInput]
+  todos: [TodoInput]
+  goals: [GoalInput]
+}

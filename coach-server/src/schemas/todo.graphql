@@ -1,0 +1,23 @@
+type Todo {
+  id: Int!
+  text: String!
+  description: String
+  isDeleted: Int
+  parents: [Todo]
+  children: [Todo]
+  metrics: [Metric]
+  goals: [Goal]
+  routines: [Routine]
+}
+
+input TodoInput {
+  id: Int
+  text: String
+  description: String
+  # isDeleted:   Int
+  parents: [TodoInput]
+  children: [TodoInput]
+  metrics: [MetricInput]
+  goals: [GoalInput]
+  routines: [RoutineInput]
+}

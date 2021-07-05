@@ -1,0 +1,100 @@
+type Query {
+  # Goal
+  goals: [Goal!]!
+
+  # Todo
+  todos: [Todo!]!
+}
+
+type Mutation {
+  # Goal
+  addGoal(goal: GoalInput!): Goal!
+  updateGoal(goal: GoalInput!): Goal!
+  deleteGoal(id: Int!): Goal!
+
+  # Todo
+  addTodo(todo: TodoInput!): Todo!
+  updateTodo(todo: TodoInput!): Todo!
+  deleteTodo(id: Int!): Todo!
+}
+
+type Subscription {
+  # Goal
+  goalAdded: Goal!
+  goalUpdated: Goal!
+  goalDeleted: Goal!
+
+  # Todo
+  todoAdded: Todo!
+  todoUpdated: Todo!
+  todoDeleted: Todo!
+}
+
+# # Goal
+# type Goal {
+#   id: Int!
+#   text: String!
+#   description: String
+#   isDeleted: Int
+#   parents: [Goal]
+#   children: [Goal]
+#   todos: [Todo]
+#   routines: [Routine]
+# }
+
+# input GoalInput {
+#   id: Int
+#   text: String
+#   description: String
+#   # isDeleted:   Int
+#   parents: [GoalInput]
+#   children: [GoalInput]
+#   todos: [TodoInput]
+#   routines: [RoutineInput]
+# }
+
+# Todo
+type Todo {
+  id: Int!
+  text: String!
+  description: String
+  isDeleted: Int
+  parents: [Todo]
+  children: [Todo]
+  goals: [Goal]
+  routines: [Routine]
+}
+
+input TodoInput {
+  id: Int
+  text: String
+  description: String
+  # isDeleted:   Int
+  parents: [TodoInput]
+  children: [TodoInput]
+  goals: [GoalInput]
+  routines: [RoutineInput]
+}
+
+# Routine
+type Routine {
+  id: Int!
+  text: String!
+  description: String
+  isDeleted: Int
+  parents: [Routine]
+  children: [Routine]
+  todos: [Todo]
+  routines: [Routine]
+}
+
+input RoutineInput {
+  id: Int
+  text: String
+  description: String
+  # isDeleted:   Int
+  parents: [RoutineInput]
+  children: [RoutineInput]
+  todos: [TodoInput]
+  goals: [GoalInput]
+}

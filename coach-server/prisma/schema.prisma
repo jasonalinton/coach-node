@@ -1,0 +1,71 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Metric {
+  id          Int      @id @default(autoincrement())
+  text        String
+  description String?
+  createdAt   DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt   DateTime @default(now()) @updatedAt @db.Timestamptz(6)
+
+  goals    Goal[]
+  todos    Todo[]
+  routines Routine[]
+}
+
+model Goal {
+  id          Int      @id @default(autoincrement())
+  text        String
+  description String?
+  isDeleted   Boolean  @default(false)
+  createdAt   DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt   DateTime @default(now()) @updatedAt @db.Timestamptz(6)
+
+  parents  Goal[] @relation("GoalFamily")
+  children Goal[] @relation("GoalFamily")
+
+  metrics  Metric[]
+  todos    Todo[]
+  routines Routine[]
+}
+
+model Todo {
+  id          Int      @id @default(autoincrement())
+  text        String
+  description String?
+  isDeleted   Boolean  @default(false)
+  createdAt   DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt   DateTime @default(now()) @updatedAt @db.Timestamptz(6)
+
+  parents  Todo[] @relation("TodoFamily")
+  children Todo[] @relation("TodoFamily")
+
+  metrics  Metric[]
+  goals    Goal[]
+  routines Routine[]
+}
+
+model Routine {
+  id          Int      @id @default(autoincrement())
+  text        String
+  description String?
+  isDeleted   Boolean  @default(false)
+  createdAt   DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt   DateTime @default(now()) @updatedAt @db.Timestamptz(6)
+
+  parents  Routine[] @relation("RoutineFamily")
+  children Routine[] @relation("RoutineFamily")
+
+  metrics Metric[]
+  goals   Goal[]
+  todos   Todo[]
+}
