@@ -1,10 +1,10 @@
 import {
-    addTodo, updateTodo, deleteTodo,
-    onTodoAdded, onTodoUpdated, onTodoDeleted
-} from '../../resolvers/todo-resolvers'
+    addRoutine, updateRoutine, deleteRoutine,
+    onRoutineAdded, onRoutineUpdated, onRoutineDeleted
+} from '../../resolvers/routine-resolvers'
 
 let config = {
-    itemType: "todo",
+    itemType: "routine",
     props: [
         {
             id: 1,
@@ -42,11 +42,11 @@ let config = {
         },
         {
             id: 6,
-            name: 'Routines',
-            prop: 'routines',
+            name: 'Todos',
+            prop: 'todos',
             type: 'objects',
             isItem: true,
-            optionsQuery: require('../../graphql/query/QueryRoutines.gql'),
+            optionsQuery: require('../../graphql/query/QueryTodos.gql'),
         },
     ],
     itemModel: {
@@ -56,36 +56,36 @@ let config = {
         children: [],
         metrics: [],
         goals: [],
-        routines: []
+        todos: []
     },
-    addItem: addTodo,
-    updateItem: updateTodo,
-    deleteItem: deleteTodo,
+    addItem: addRoutine,
+    updateItem: updateRoutine,
+    deleteItem: deleteRoutine,
     query: {
-        name: "todos",
-        document: require('../../graphql/query/QueryTodos.gql'),
+        name: "routines",
+        document: require('../../graphql/query/QueryRoutines.gql'),
         variables: {},
     },
     subscriptions: [
         {
-            name: 'todoAdded',
+            name: 'routineAdded',
             object: {
-                query: require('../../graphql/subscription/todo/TodoAdded.gql'),
-                result({ data }) { onTodoAdded(this.$apollo.getClient().cache, data.todoAdded) },
+                query: require('../../graphql/subscription/routine/RoutineAdded.gql'),
+                result({ data }) { onRoutineAdded(this.$apollo.getClient().cache, data.routineAdded) },
             }
         },
         {
-            name: 'todoUpdated',
+            name: 'routineUpdated',
             object: {
-                query: require('../../graphql/subscription/todo/TodoUpdated.gql'),
-                result({ data }) { onTodoUpdated(this.$apollo.getClient().cache, data.todoUpdated) },
+                query: require('../../graphql/subscription/routine/RoutineUpdated.gql'),
+                result({ data }) { onRoutineUpdated(this.$apollo.getClient().cache, data.routineUpdated) },
             }
         },
         {
-            name: 'todoDeleted',
+            name: 'routineDeleted',
             object: {
-                query: require('../../graphql/subscription/todo/TodoDeleted.gql'),
-                result({ data }) { onTodoDeleted(this.$apollo.getClient().cache, data.todoDeleted) },
+                query: require('../../graphql/subscription/routine/RoutineDeleted.gql'),
+                result({ data }) { onRoutineDeleted(this.$apollo.getClient().cache, data.routineDeleted) },
             }
         }
     ]

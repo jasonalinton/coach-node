@@ -52,8 +52,10 @@ export function updatePropertyInCache(cache, QUERY, propertyType, itemType, item
     })
     cache.writeQuery({
         query: QUERY,
-        data: cacheData
+        data: cacheData,
+        broadcast: true
     });
+    // cache.readQuery({ query: QUERY });
 }
 
 export function deleteItemInCache(cache, QUERY, itemType, item) {

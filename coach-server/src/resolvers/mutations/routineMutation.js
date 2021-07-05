@@ -15,7 +15,7 @@ async function addRoutine(parent, args, context, info) {
 }
 
 async function updateRoutine(parent, args, context, info) {
-    let id = args.goal.id;
+    let id = args.routine.id;
     let data = controller.initData(args.routine);
 
     let routine = await context.prisma.routine.update({

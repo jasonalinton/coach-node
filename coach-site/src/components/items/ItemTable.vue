@@ -10,7 +10,11 @@
                 <thead class="thead-light">
                     <tr>
                         <th v-for="column in config.table.columns" :key="column.id">{{ column.name }}</th>
-                        <th  v-if="config.itemType != 'metric'"><button type="button" @click="onAddItem">Add</button></th>
+                        <th  v-if="config.itemType != 'metric'">
+                            <button class="btn btn-primary btn-sm" type="button" @click="onAddItem">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </th>
                     </tr>
                 </thead>
                 <tbody>
@@ -32,7 +36,6 @@
 
 <script>
 import { listToString } from '../../../utility';
-// import { clone, listToString } from '../../../utility';
 
 export default {
     name: 'ItemTable',
@@ -55,7 +58,7 @@ export default {
                 }
             },
             loadingKey: 'loadingQueriesCount',
-            // pollInterval: 2000,
+            pollInterval: 10000,
             update(data) { return data[this.config.query.name] },
             error: function(error) {
                 this.errorMessage = 'Error occurred while loading query'
@@ -81,7 +84,6 @@ function columnData(column, item) {
 
 function onAddItem() {
     let item = this.config.newItem();
-    // let item = clone(this.config.itemModel);
     this.$emit('itemSelected', item)
 }
 

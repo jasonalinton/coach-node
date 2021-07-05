@@ -8,10 +8,14 @@ class ItemConfigModel {
         this.props = config.props;
         this.query = config.query;
         this.subscriptions = config.subscriptions;
-        this.#itemModel = config.itemModel
-        this.addItem = config.addItem;
-        this.updateItem = config.updateItem;
-        this.deleteItem = config.deleteItem;
+        this.#itemModel = config.itemModel;
+
+        if (config.addItem)
+            this.addItem = config.addItem;
+        if (config.updateItem)
+            this.updateItem = config.updateItem;
+        if (config.deleteItem)
+            this.deleteItem = config.deleteItem;
     }
 
     get name() {
@@ -29,16 +33,6 @@ class ItemConfigModel {
     newItem() {
         return clone(this.#itemModel);
     }
-
-    // deleteSubscription(data, resultName, thisTypes, itemTypes) {
-    //     let id = data[resultName].id
-    //     this[thisTypes].forEach(item => {
-    //         let itemWith = item[itemTypes].find(itemWith => itemWith.id == id);
-    //         if (itemWith != undefined) {
-    //             removeItem(itemWith, item[itemTypes]);
-    //         }
-    //     })
-    // }
 }
 
 export default ItemConfigModel;

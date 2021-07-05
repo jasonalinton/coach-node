@@ -1,0 +1,7 @@
+mutation deleteRoutine($id: Int!) {
+  deleteRoutine(id: $id) {
+    id
+    text
+    description
+  }
+}

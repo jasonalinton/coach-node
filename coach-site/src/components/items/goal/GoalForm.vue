@@ -102,7 +102,7 @@
 <script>
 import SelectItem from '../../controls/SelectItem.vue';
 import { removeItem, unmapItem } from '../../../../utility';
-import { addGoal, updateGoal } from '../../../resolvers/goal/goal-resolvers'
+import { addGoal, updateGoal } from '../../../resolvers/goal-resolvers'
 
 export default {
     name: 'GoalForm',

@@ -37,10 +37,9 @@ export default {
         }
     },
     created() {
-        this.cache == this.$apollo.getClient().cache;
-        this.config.subscriptions.forEach(sub => {
-            this.$apollo.addSmartSubscription(sub.name, sub.object);
-        });
+        // this.config.subscriptions.forEach(sub => {
+        //     this.$apollo.addSmartSubscription(sub.name, sub.object);
+        // });
     },
     methods: {
         itemSelected,

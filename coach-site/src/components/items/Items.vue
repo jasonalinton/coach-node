@@ -22,61 +22,45 @@
         :class="[{ active: selectedTab == 'goal', show: selectedTab == 'goal' }]"
         :config="goalConfig"
         role="tabpanel" aria-labelledby="item-goal-tab"></Item>
-        <!-- <MetricItem v-if="selectedTab == 'metric'" id="nav-metric" class="tab-pane fade" :class="[{ active: selectedTab == 'metric', show: selectedTab == 'metric' }]" 
-                    role="tabpanel" aria-labelledby="item-metric-tab"></MetricItem> -->
-        <!-- <GoalItem v-if="selectedTab == 'goal'" id="nav-goal" class="tab-pane fade" :class="[{ active: selectedTab == 'goal', show: selectedTab == 'goal' }]" 
-                  role="tabpanel" aria-labelledby="item-goal-tab"></GoalItem> -->
-        <TodoItem v-show="selectedTab == 'todo'" id="nav-todo" class="tab-pane fade" :class="[{ active: selectedTab == 'todo', show: selectedTab == 'todo' }]" 
-                  role="tabpanel" aria-labelledby="item-todo-tab"></TodoItem>
-        <RoutineItem v-show="selectedTab == 'routine'" id="nav-routine" class="tab-pane fade" :class="[{ active: selectedTab == 'routine', show: selectedTab == 'routine' }]" 
-                     role="tabpanel" aria-labelledby="item-routine-tab"></RoutineItem>
+        <Item v-show="selectedTab == 'todo'" 
+        id="nav-todo" class="tab-pane fade" 
+        :class="[{ active: selectedTab == 'todo', show: selectedTab == 'todo' }]" 
+        :config="todoConfig"
+        role="tabpanel" aria-labelledby="item-todo-tab"></Item>
+        <Item v-show="selectedTab == 'routine'" 
+        id="nav-routine" class="tab-pane fade" 
+        :class="[{ active: selectedTab == 'routine', show: selectedTab == 'routine' }]"
+        :config="routineConfig"
+        role="tabpanel" aria-labelledby="item-routine-tab"></Item>
     </div>
 </template>
 
 <script>
-// import MetricItem from '../items/metric/MetricItem.vue'
-// import GoalItem from '../items/goal/GoalItem.vue'
-import TodoItem from './todo/TodoItem.vue'
-import RoutineItem from '../items/RoutineItem.vue'
 import Item from './Item.vue'
 
 import MetricConfig from '../../config/items/metric-config'
 import GoalConfig from '../../config/items/goal-config'
+import TodoConfig from '../../config/items/todo-config'
+import RoutineConfig from '../../config/items/routine-config'
 import ItemConfigModel from '../../config/items/item-config'
 
 export default {
   name: 'Items',
-  components: { TodoItem, RoutineItem, Item },
-  // components: { MetricItem, GoalItem, TodoItem, RoutineItem, Item },
+  components: { Item },
   data: function() {
     return {
-      selectedTab: "metric",
-      metricConfig: MetricConfig,
-      goalConfig: null
+      selectedTab: "todo",
+      metricConfig: null,
+      goalConfig: null,
+      todoConfig: null,
+      routineConfig: null
     }
   },
   created: function() {
-    // this.metricConfig = new ItemConfigModel('metric', MetricConfig.props, MetricConfig.query);
+    this.metricConfig = new ItemConfigModel(MetricConfig);
     this.goalConfig = new ItemConfigModel(GoalConfig);
-    console.log(this.goalConfig.query)
-    console.log(this.metricConfig.query);
-    // this.$apollo.addSmartSubscription('goalupdated', {
-    //         query: require('../../graphql/subscription/GoalUpdated.gql'),
-    //         result({ data }) {
-    //         let goal = data.goalUpdated;
-    //         let id = goal.id;
-
-    //         goal.metrics.forEach(_metric => {
-    //             let metric = this.metrics.find(metric => metric.id == _metric.id);
-    //             let existingGoal = metric.goals.find(_metric => _metric.id == id)
-    //             if (existingGoal) {
-    //                 replaceItem(goal, metric.goals)
-    //             } else {
-    //                 metric.goals.push(goal);
-    //             }
-    //         })
-    //     },
-    //     });
+    this.todoConfig = new ItemConfigModel(TodoConfig);
+    this.routineConfig = new ItemConfigModel(RoutineConfig);
   }
 }
 </script>

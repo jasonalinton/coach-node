@@ -1,0 +1,27 @@
+mutation updateRoutine($routine: RoutineInput!) {
+  updateRoutine(routine: $routine) {
+    id
+    text
+    description
+    parents {
+      id
+      text
+    }
+    children {
+      id
+      text
+    }
+    metrics {
+      id
+      text
+    }
+    goals {
+      id
+      text
+    }
+    todos {
+      id
+      text
+    }
+  }
+}

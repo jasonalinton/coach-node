@@ -15,7 +15,7 @@ async function addTodo(parent, args, context, info) {
 }
 
 async function updateTodo(parent, args, context, info) {
-    let id = args.goal.id;
+    let id = args.todo.id;
     let data = controller.initData(args.todo);
 
     let todo = await context.prisma.todo.update({

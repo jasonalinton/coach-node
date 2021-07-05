@@ -14,7 +14,7 @@ type Query {
 
 type Mutation {
   # Metric
-  updateMetric(metric: MetricInput!, unmappedItemIDs: UnmappedItemIDs): Metric!
+  updateMetric(metric: MetricInput!): Metric!
 
   # Goal
   addGoal(goal: GoalInput!): Goal!
@@ -23,12 +23,12 @@ type Mutation {
 
   # Todo
   addTodo(todo: TodoInput!): Todo!
-  updateTodo(todo: TodoInput!, unmappedItemIDs: UnmappedItemIDs): Todo!
+  updateTodo(todo: TodoInput!): Todo!
   deleteTodo(id: Int!): Todo!
 
   # Routine
   addRoutine(routine: RoutineInput!): Routine!
-  updateRoutine(routine: RoutineInput!, unmappedItemIDs: UnmappedItemIDs): Routine!
+  updateRoutine(routine: RoutineInput!): Routine!
   deleteRoutine(id: Int!): Routine!
 }
 

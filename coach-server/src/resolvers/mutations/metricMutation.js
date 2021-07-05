@@ -2,8 +2,11 @@ const controller = require('../../controller/itemController');
 const { metricInclude } = require('../../properties/metricProperties');
 
 async function updateMetric(parent, args, context, info) {
-    let id = args.goal.id;
+    let id = args.metric.id;
     let data = controller.initData(args.metric);
+
+    delete data.text;
+    delete data.description;
 
     let metric = await context.prisma.metric.update({
         where: { id },

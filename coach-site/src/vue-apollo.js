@@ -46,41 +46,81 @@ export const typeDefs = gql`
     metrics: [MetricInput]
     todos: [TodoInput]
     routines: [RoutineInput]
+    unmappedItemIDs: UnmappedItemIDs
+  }
+
+    type Metric {
+    id: Int!
+    text: String!
+    description: String
+    goals: [Goal]
+    todos: [Todo]
+    routines: [Routine]
+  }
+
+  input MetricInput {
+    id: Int!
+    text: String
+    description: String
+    goals: [GoalInput]
+    todos: [TodoInput]
+    routines: [RoutineInput]
+    unmappedItemIDs: UnmappedItemIDs
   }
 
   type Query {
-    # Goal
+    metrics: [Metric!]!
     goals: [Goal!]!
+    todos: [Todo!]!
+    routines: [Routine!]!
   }
 
   type Mutation {
-    # Goal
-    addGoal(goal: GoalInput!): Goal!
-    updateGoal(goal: GoalInput!, unmappedItemIDs: UnmappedItemIDs): Goal!
-    deleteGoal(id: Int!): Goal!
+  # Metric
+  updateMetric(metric: MetricInput!): Metric!
+  # Goal
+  addGoal(goal: GoalInput!): Goal!
+  updateGoal(goal: GoalInput!): Goal!
+  deleteGoal(id: Int!): Goal!
+  # Todo
+  addTodo(todo: TodoInput!): Todo!
+  updateTodo(todo: TodoInput!): Todo!
+  deleteTodo(id: Int!): Todo!
+  # Routine
+  addRoutine(routine: RoutineInput!): Routine!
+  updateRoutine(routine: RoutineInput!): Routine!
+  deleteRoutine(id: Int!): Routine!
   }
 
   type Subscription {
-    # Goal
-    goalAdded: Goal!
-    goalUpdated: Goal!
-    goalDeleted: Goal!
+  # Metric
+  metricUpdated: Metric!
+  # Goal
+  goalAdded: Goal!
+  goalUpdated: Goal!
+  goalDeleted: Goal!
+  # Todo
+  todoAdded: Todo!
+  todoUpdated: Todo!
+  todoDeleted: Todo!
+  # Routine
+  routineAdded: Routine!
+  routineUpdated: Routine!
+  routineDeleted: Routine!
   }
 
   input UnmappedItemIDs {
-    goals: [Int]
+  metrics: [Int]
+  goals: [Int]
+  todos: [Int]
+  routines: [Int]
   }
 `;
 
 const cache = new InMemoryCache();
 
-// const apolloClient = new ApolloClient({
-//   cache,
-//   typeDefs,
-//   resolvers: {},
-// });
-
 // Apollo Link
+// Remove __typename before sending to server
 // https://stackoverflow.com/questions/47211778/cleaning-unwanted-fields-from-graphql-responses/51380645#51380645
 const cleanTypeName = new ApolloLink((operation, forward) => {
   if (operation.variables) {

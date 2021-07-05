@@ -1,0 +1,27 @@
+mutation addTodo($todo: TodoInput!) {
+  addTodo(todo: $todo) {
+    id
+    text
+    description
+    parents {
+      id
+      text
+    }
+    children {
+      id
+      text
+    }
+    metrics {
+      id
+      text
+    }
+    goals {
+      id
+      text
+    }
+    routines {
+      id
+      text
+    }
+  }
+}

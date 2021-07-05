@@ -1,0 +1,5 @@
+subscription todoDeleted {
+  todoDeleted {
+    id
+  }
+}

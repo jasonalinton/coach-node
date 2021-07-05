@@ -20,4 +20,5 @@ input TodoInput {
   metrics: [MetricInput]
   goals: [GoalInput]
   routines: [RoutineInput]
+  unmappedItemIDs: UnmappedItemIDs
 }

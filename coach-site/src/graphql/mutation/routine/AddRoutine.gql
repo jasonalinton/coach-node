@@ -1,0 +1,27 @@
+mutation addRoutine($routine: RoutineInput!) {
+  addRoutine(routine: $routine) {
+    id
+    text
+    description
+    parents {
+      id
+      text
+    }
+    children {
+      id
+      text
+    }
+    metrics {
+      id
+      text
+    }
+    goals {
+      id
+      text
+    }
+    todos {
+      id
+      text
+    }
+  }
+}
