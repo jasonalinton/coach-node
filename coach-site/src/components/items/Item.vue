@@ -1,5 +1,5 @@
 <template>
-    <div class="item row g-0">
+    <div class="item row g-0" tabindex="0" v-on:keyup.esc="closeForm">
         <div :class="{ split: selectedItem }">
             <ItemTable 
                 :id="`${config.itemType}-table`"
@@ -10,7 +10,8 @@
                 v-if="selectedItem"
                 :id="`${config.itemType}-form`" class="h-100" 
                     :config="config"
-                    :item="selectedItem" 
+                    :item="selectedItem"
+                    @refreshForm="refreshForm"
                     @closeForm="closeForm"></ItemForm>
         </div>
     </div>
@@ -33,7 +34,7 @@ export default {
             items: null,
             selectedItem: null,
             split: null,
-            cache: null
+            cache: null,
         }
     },
     created() {
@@ -43,14 +44,18 @@ export default {
     },
     methods: {
         itemSelected,
-        closeForm
+        refreshForm,
+        closeForm,
     }
 }
 
 function itemSelected(item) {
+    item.repeats = [];
+
     if (this.selectedItem != item) {
         if (this.split) this.split.destroy();
 
+        this.selectedItem = null;
         this.selectedItem = item;
         this.$nextTick(() => {
             let sizes = localStorage.getItem(`${this.config.itemType}-split-sizes`);
@@ -77,6 +82,10 @@ function closeForm() {
         this.split = null;
     }
     this.selectedItem = null;
+}
+
+function refreshForm() {
+    this.selectedItem = this.config.newItem();
 }
 </script>
 

@@ -48,6 +48,8 @@ export function deleteTodo(todo, apollo) {
 
 export function onTodoAdded(cache, addedTodo) {
     addItemToCache(cache, TODOS, 'todos', addedTodo);
+    // addPropertyToCache(cache, TODOS, 'parents', 'todos', addedTodo);
+    // addPropertyToCache(cache, TODOS, 'children', 'todos', addedTodo);
     addPropertyToCache(cache, METRICS, 'metrics', 'todos', addedTodo);
     addPropertyToCache(cache, GOALS, 'goals', 'todos', addedTodo);
     addPropertyToCache(cache, ROUTINES, 'routines', 'todos', addedTodo);
@@ -55,6 +57,8 @@ export function onTodoAdded(cache, addedTodo) {
 
 export function onTodoUpdated(cache, updatedTodo) {
     updateItemInCache(cache, TODOS, 'todos', updatedTodo);
+    // updatePropertyInCache(cache, TODOS, 'parents', 'todos', updatedTodo);
+    // updatePropertyInCache(cache, TODOS, 'children', 'todos', updatedTodo);
     updatePropertyInCache(cache, METRICS, 'metrics', 'todos', updatedTodo);
     updatePropertyInCache(cache, GOALS, 'goals', 'todos', updatedTodo);
     updatePropertyInCache(cache, ROUTINES, 'routines', 'todos', updatedTodo);
@@ -62,6 +66,8 @@ export function onTodoUpdated(cache, updatedTodo) {
 
 export function onTodoDeleted(cache, deletedTodo) {
     deleteItemInCache(cache, TODOS, 'todos', deletedTodo);
+    // deletePropertyInCache(cache, TODOS, 'parents', 'todos', deletedTodo);
+    // deletePropertyInCache(cache, TODOS, 'children', 'todos', deletedTodo);
     deletePropertyInCache(cache, METRICS, 'metrics', 'todos', deletedTodo);
     deletePropertyInCache(cache, GOALS, 'goals', 'todos', deletedTodo);
     deletePropertyInCache(cache, ROUTINES, 'routines', 'todos', deletedTodo);

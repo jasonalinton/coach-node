@@ -16,9 +16,10 @@ function initData(data) {
                 // Loop through items
                 // Connect or create connected item
                 data[items].forEach(item => {
-                    if (item.id) {
+                    if (item.id && item.id > 0) {
                         connect.push({ id: item.id });
                     } else {
+                        delete item.id;
                         create.push(item);
                     }
                 });

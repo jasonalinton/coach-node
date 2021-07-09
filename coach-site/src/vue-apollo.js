@@ -144,7 +144,7 @@ const defaultOptions = {
   // LocalStorage token
   tokenName: AUTH_TOKEN,
   // Enable Automatic Query persisting with Apollo Engine
-  persisting: false,
+  persisting: true,
   // Use websockets for everything (no HTTP)
   // You need to pass a `wsEndpoint` for this to work
   websocketsOnly: false,
@@ -164,6 +164,7 @@ const defaultOptions = {
 
   // Additional ApolloClient options
   // apollo: { ... }
+
 
   // Client local data (see apollo-link-state)
   // clientState: { resolvers: { ... }, defaults: { ... } }
@@ -201,6 +202,9 @@ export function createProvider (options = {}) {
       $query: {
         fetchPolicy: 'cache-and-network',
       },
+      // $watchQuery: {
+      //   fetchPolicy: 'cache-and-network',
+      // },
     },
     errorHandler (error) {
       // eslint-disable-next-line no-console

@@ -3,6 +3,14 @@ query routines {
     id
     text
     description
+    parents {
+      id
+      text
+    }
+    children {
+      id
+      text
+    }
     metrics {
       id
       text

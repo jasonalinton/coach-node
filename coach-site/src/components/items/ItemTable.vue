@@ -5,7 +5,7 @@
     <div v-else-if="errorMessage">{{ errorMessage }}</div>
     <!-- Table -->
     <div v-else-if="items" class="row g-0">
-        <div class="col">
+        <div class="table col">
             <table class="table table-striped table-hover">
                 <thead class="thead-light">
                     <tr>
@@ -17,7 +17,7 @@
                         </th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody is="transition-group" :name="`item-list`" v-cloak>
                     <tr v-for="item in items" :key="item.id" @click.prevent="$emit('itemSelected', item)">
                         <td v-for="column in config.table.columns" :key="column.id">{{ columnData(column, item) }}</td>
                         <td v-if="config.itemType != 'metric'">
@@ -58,13 +58,22 @@ export default {
                 }
             },
             loadingKey: 'loadingQueriesCount',
-            pollInterval: 10000,
             update(data) { return data[this.config.query.name] },
             error: function(error) {
                 this.errorMessage = 'Error occurred while loading query'
                 console.log(this.errorMessage, error);
             }
         },
+    },
+    mounted: function() {
+        this.config.subscriptions.forEach(sub => {
+            this.$apollo.addSmartSubscription(sub.name, sub.object);
+        });
+
+        this.$apollo.queries.items.setOptions({
+            fetchPolicy: 'cache-and-network',
+            pollInterval: 2000,
+        })
     },
     methods: {
         columnData,
@@ -94,6 +103,23 @@ function onDeleteItem(item) {
 </script>
 
 <style scoped>
+    [v-cloak] {
+        display: none;
+    }
+
+    .item-list-leave-to, .item-list-enter {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    .item-list-enter-active {
+        transition: all 1s;
+    }
+
+    .item-list-leave-active {
+        transition: all .1s;
+    }
+
     td {
         max-width: 150px;
         overflow: hidden;

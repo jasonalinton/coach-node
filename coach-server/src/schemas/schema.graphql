@@ -53,6 +53,8 @@ type Subscription {
 }
 
 input UnmappedItemIDs {
+  parents: [Int]
+  children: [Int]
   metrics: [Int]
   goals: [Int]
   todos: [Int]

@@ -49,7 +49,7 @@ export default {
   components: { Item },
   data: function() {
     return {
-      selectedTab: "todo",
+      selectedTab: null,
       metricConfig: null,
       goalConfig: null,
       todoConfig: null,
@@ -61,6 +61,19 @@ export default {
     this.goalConfig = new ItemConfigModel(GoalConfig);
     this.todoConfig = new ItemConfigModel(TodoConfig);
     this.routineConfig = new ItemConfigModel(RoutineConfig);
+
+    let selectedTab_Store = localStorage.getItem(`selected-item-tab`);
+    if (selectedTab_Store) {
+        this.selectedTab = selectedTab_Store;
+    } else {
+        localStorage.setItem(`selected-item-tab`, this.selectedTab);
+        this.selectedTab = 'goal';
+    }
+  },
+  watch: {
+      selectedTab(value) {
+          localStorage.setItem(`selected-item-tab`, value);
+      }
   }
 }
 </script>
@@ -79,6 +92,6 @@ export default {
     text-align: start;
     margin-bottom: 0px;
     /* display: block; */
-    /* overflow: scroll; */
+    overflow: scroll;
 }
 </style>

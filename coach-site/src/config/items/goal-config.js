@@ -26,6 +26,24 @@ let config = {
         },
         {
             id: 4,
+            name: 'Parents',
+            prop: 'parents',
+            queryField: 'goals',
+            type: 'objects',
+            isItem: true,
+            optionsQuery: require('../../graphql/query/QueryGoals.gql'),
+        },
+        {
+            id: 5,
+            name: 'Children',
+            prop: 'children',
+            queryField: 'goals',
+            type: 'objects',
+            isItem: true,
+            optionsQuery: require('../../graphql/query/QueryGoals.gql'),
+        },
+        {
+            id: 6,
             name: 'Metrics',
             prop: 'metrics',
             type: 'objects',
@@ -33,7 +51,7 @@ let config = {
             optionsQuery: require('../../graphql/query/QueryMetrics.gql'),
         },
         {
-            id: 5,
+            id: 7,
             name: 'Todos',
             prop: 'todos',
             type: 'objects',
@@ -41,7 +59,7 @@ let config = {
             optionsQuery: require('../../graphql/query/QueryTodos.gql'),
         },
         {
-            id: 6,
+            id: 8,
             name: 'Routines',
             prop: 'routines',
             type: 'objects',
