@@ -11,18 +11,21 @@ let config = {
             name: 'ID',
             prop: 'id',
             type: 'int',
+            isColumn: true,
         },
         {
             id: 2,
             name: 'Name',
             prop: 'text',
-            type: 'string'
+            type: 'string',
+            isColumn: true,
         },
         {
             id: 3,
             name: 'Description',
             prop: 'description',
-            type: 'blurd'
+            type: 'blurd',
+            isColumn: true,
         },
         {
             id: 4,
@@ -31,6 +34,7 @@ let config = {
             queryField: 'goals',
             type: 'objects',
             isItem: true,
+            isColumn: true,
             optionsQuery: require('../../graphql/query/QueryGoals.gql'),
         },
         {
@@ -40,6 +44,7 @@ let config = {
             queryField: 'goals',
             type: 'objects',
             isItem: true,
+            isColumn: true,
             optionsQuery: require('../../graphql/query/QueryGoals.gql'),
         },
         {
@@ -48,6 +53,7 @@ let config = {
             prop: 'metrics',
             type: 'objects',
             isItem: true,
+            isColumn: true,
             optionsQuery: require('../../graphql/query/QueryMetrics.gql'),
         },
         {
@@ -56,6 +62,7 @@ let config = {
             prop: 'todos',
             type: 'objects',
             isItem: true,
+            isColumn: true,
             optionsQuery: require('../../graphql/query/QueryTodos.gql'),
         },
         {
@@ -64,6 +71,7 @@ let config = {
             prop: 'routines',
             type: 'objects',
             isItem: true,
+            isColumn: true,
             optionsQuery: require('../../graphql/query/QueryRoutines.gql'),
         },
     ],

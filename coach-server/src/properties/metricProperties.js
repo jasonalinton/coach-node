@@ -1,4 +1,4 @@
-let metricInclude = {
+const metricInclude = {
     goals: {
         where: { isDeleted: false}
     },

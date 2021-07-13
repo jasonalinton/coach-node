@@ -34,13 +34,7 @@ export default {
             items: null,
             selectedItem: null,
             split: null,
-            cache: null,
         }
-    },
-    created() {
-        // this.config.subscriptions.forEach(sub => {
-        //     this.$apollo.addSmartSubscription(sub.name, sub.object);
-        // });
     },
     methods: {
         itemSelected,
@@ -50,8 +44,6 @@ export default {
 }
 
 function itemSelected(item) {
-    item.repeats = [];
-
     if (this.selectedItem != item) {
         if (this.split) this.split.destroy();
 

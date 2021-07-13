@@ -12,20 +12,23 @@ let config = {
             prop: 'id',
             queryField: 'id',
             type: 'int',
+            isColumn: true,
         },
         {
             id: 2,
             name: 'Name',
             prop: 'text',
             queryField: 'text',
-            type: 'string'
+            type: 'string',
+            isColumn: true,
         },
         {
             id: 3,
             name: 'Description',
             prop: 'description',
             queryField: 'description',
-            type: 'blurd'
+            type: 'blurd',
+            isColumn: true,
         },
         {
             id: 4,
@@ -34,6 +37,7 @@ let config = {
             queryField: 'routines',
             type: 'objects',
             isItem: true,
+            isColumn: true,
             optionsQuery: require('../../graphql/query/QueryRoutines.gql'),
         },
         {
@@ -43,6 +47,7 @@ let config = {
             queryField: 'rouitnes',
             type: 'objects',
             isItem: true,
+            isColumn: true,
             optionsQuery: require('../../graphql/query/QueryRoutines.gql'),
         },
         {
@@ -52,6 +57,7 @@ let config = {
             queryField: 'metrics',
             type: 'objects',
             isItem: true,
+            isColumn: true,
             optionsQuery: require('../../graphql/query/QueryMetrics.gql'),
         },
         {
@@ -61,6 +67,7 @@ let config = {
             queryField: 'goals',
             type: 'objects',
             isItem: true,
+            isColumn: true,
             optionsQuery: require('../../graphql/query/QueryGoals.gql'),
         },
         {
@@ -70,6 +77,7 @@ let config = {
             queryField: 'todos',
             type: 'objects',
             isItem: true,
+            isColumn: true,
             optionsQuery: require('../../graphql/query/QueryTodos.gql'),
         },
     ],

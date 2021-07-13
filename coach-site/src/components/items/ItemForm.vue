@@ -120,6 +120,9 @@ export default {
     watch: {
         togglePanel(value) {
             localStorage.setItem(`${this.config.itemType}-toggle-panel`, value);
+        },
+        item(value) {
+            this.originalItem = clone(value);
         }
     }
 }
@@ -193,9 +196,6 @@ function updateRepeat(repeat) {
 function save(item) {
     var title = item.text.trim();
     if (title == "") return;
-
-    // TEMP
-    delete item.repeats;
 
     item.unmappedItemIDs = this.getUnmappedIDs();
 

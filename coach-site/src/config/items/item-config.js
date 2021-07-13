@@ -27,7 +27,7 @@ class ItemConfigModel {
     }
 
     get table() {
-        return { columns: this.props }
+        return { columns: this.props.filter(x => x.isColumn) }
     }
 
     newItem() {

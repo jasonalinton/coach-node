@@ -17,107 +17,41 @@ export const filesRoot = process.env.VUE_APP_FILES_ROOT || httpEndpoint.substr(0
 
 Vue.prototype.$filesRoot = filesRoot
 
-import gql from 'graphql-tag';
 // import ApolloClient from 'apollo-boost';
 import { InMemoryCache } from 'apollo-cache-inmemory';
 
 // import GOALS from './graphql/query/QueryGoals.gql'
 
-export const typeDefs = gql`
-  type Goal {
-    id: Int!
-    text: String!
-    description: String
-    isDeleted: Int
-    parents: [Goal]
-    children: [Goal]
-    metrics: [Metric]
-    todos: [Todo]
-    routines: [Routine]
-  }
 
-  input GoalInput {
-    id: Int
-    text: String
-    description: String
-    # isDeleted:   Int
-    parents: [GoalInput]
-    children: [GoalInput]
-    metrics: [MetricInput]
-    todos: [TodoInput]
-    routines: [RoutineInput]
-    unmappedItemIDs: UnmappedItemIDs
-  }
+import { typeDefs } from './schemas/typeDefs'
 
-    type Metric {
-    id: Int!
-    text: String!
-    description: String
-    goals: [Goal]
-    todos: [Todo]
-    routines: [Routine]
-  }
-
-  input MetricInput {
-    id: Int!
-    text: String
-    description: String
-    goals: [GoalInput]
-    todos: [TodoInput]
-    routines: [RoutineInput]
-    unmappedItemIDs: UnmappedItemIDs
-  }
-
-  type Query {
-    metrics: [Metric!]!
-    goals: [Goal!]!
-    todos: [Todo!]!
-    routines: [Routine!]!
-  }
-
-  type Mutation {
-  # Metric
-  updateMetric(metric: MetricInput!): Metric!
-  # Goal
-  addGoal(goal: GoalInput!): Goal!
-  updateGoal(goal: GoalInput!): Goal!
-  deleteGoal(id: Int!): Goal!
-  # Todo
-  addTodo(todo: TodoInput!): Todo!
-  updateTodo(todo: TodoInput!): Todo!
-  deleteTodo(id: Int!): Todo!
-  # Routine
-  addRoutine(routine: RoutineInput!): Routine!
-  updateRoutine(routine: RoutineInput!): Routine!
-  deleteRoutine(id: Int!): Routine!
-  }
-
-  type Subscription {
-  # Metric
-  metricUpdated: Metric!
-  # Goal
-  goalAdded: Goal!
-  goalUpdated: Goal!
-  goalDeleted: Goal!
-  # Todo
-  todoAdded: Todo!
-  todoUpdated: Todo!
-  todoDeleted: Todo!
-  # Routine
-  routineAdded: Routine!
-  routineUpdated: Routine!
-  routineDeleted: Routine!
-  }
-
-  input UnmappedItemIDs {
-  metrics: [Int]
-  goals: [Int]
-  todos: [Int]
-  routines: [Int]
-  }
-`;
-
-const cache = new InMemoryCache();
+const cache = new InMemoryCache({
+  // addTypename: false,
+  typePolicies: {
+    Todo: {
+      keyFields: ["text"],
+      fields: {
+        text: {
+          read(text) {
+            return text;
+          }
+        }
+      }
+    },
+    Time: {
+      fields: {
+        dateTime: {
+          read(dateTime) {
+            // Return the cached name, transformed to upper case
+            let timestamp = Number(dateTime);
+            dateTime = new Date(timestamp);
+            return dateTime;
+          }
+        }
+      },
+    },
+  },
+});
 
 // Apollo Link
 // Remove __typename before sending to server

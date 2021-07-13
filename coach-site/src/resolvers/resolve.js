@@ -1,6 +1,7 @@
 import { removeItem } from '../../utility'
 
 export function addItemToCache(cache, QUERY, itemType, item) {
+    formatRepeatDates(item);
     let cacheData = cache.readQuery({ query: QUERY });
     cacheData[itemType].splice(0, 0, item);
     cache.writeQuery({
@@ -10,6 +11,7 @@ export function addItemToCache(cache, QUERY, itemType, item) {
 }
 
 export function addPropertyToCache(cache, QUERY, propertyType, itemType, item) {
+    formatRepeatDates(item);
     let cacheData = cache.readQuery({ query: QUERY });
     cacheData[propertyType].forEach(prop => {
         let isMapped = item[propertyType].some(_prop => _prop.id == prop.id);
@@ -24,6 +26,7 @@ export function addPropertyToCache(cache, QUERY, propertyType, itemType, item) {
 }
 
 export function updateItemInCache(cache, QUERY, itemType, item) {
+    formatRepeatDates(item);
     let cacheData = cache.readQuery({ query: QUERY });
     let prevItem = cacheData[itemType].find(_item => _item.id == item.id);
     replaceProperties(item, prevItem);
@@ -34,6 +37,7 @@ export function updateItemInCache(cache, QUERY, itemType, item) {
 }
 
 export function updatePropertyInCache(cache, QUERY, propertyType, itemType, item) {
+    formatRepeatDates(item);
     let cacheData = cache.readQuery({ query: QUERY });
     cacheData[propertyType].forEach(prop => {
         let isMapped = item[propertyType].some(_prop => _prop.id == prop.id);
@@ -85,6 +89,18 @@ export function deletePropertyInCache(cache, QUERY, propertyType, itemType, item
 function replaceProperties(newObject, oldObject) {
     for (let prop in newObject) {
         oldObject[prop] = newObject[prop];
+    }
+}
+
+function formatRepeatDates(item) {
+    if (item.repeats) {
+        item.repeats.forEach(repeat => {
+            ['startRepeat', 'endRepeat', 'startIteration', 'endIteration'].forEach(timeProp => {
+                if (repeat[timeProp]) {
+                    repeat[timeProp].dateTime = new Date(repeat[timeProp].dateTime);
+                }
+            })
+        })
     }
 }
 

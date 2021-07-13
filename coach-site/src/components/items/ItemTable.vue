@@ -58,7 +58,11 @@ export default {
                 }
             },
             loadingKey: 'loadingQueriesCount',
-            update(data) { return data[this.config.query.name] },
+            update(data) { 
+                let items = data[this.config.query.name];
+                // this.formatRepeatDates(items);
+                return items;
+            },
             error: function(error) {
                 this.errorMessage = 'Error occurred while loading query'
                 console.log(this.errorMessage, error);
@@ -70,9 +74,10 @@ export default {
             this.$apollo.addSmartSubscription(sub.name, sub.object);
         });
 
+        // An error gets thrown if pollInterval is set with the query
         this.$apollo.queries.items.setOptions({
             fetchPolicy: 'cache-and-network',
-            pollInterval: 2000,
+            pollInterval: 30000,
         })
     },
     methods: {
@@ -80,6 +85,7 @@ export default {
         listToString,
         onAddItem,
         onDeleteItem,
+        formatRepeatDates
     }
 }
 
@@ -99,6 +105,20 @@ function onAddItem() {
 function onDeleteItem(item) {
     this.$emit('closeForm');
     this.config.deleteItem(item, this.$apollo);
+}
+
+function formatRepeatDates(items) {
+    items.forEach(item => {
+        if (item.repeats) {
+            item.repeats.forEach(repeat => {
+                ['startRepeat', 'endRepeat', 'startIteration', 'endIteration'].forEach(timeProp => {
+                    if (repeat[timeProp]) {
+                        repeat[timeProp].dateTime = new Date(repeat[timeProp].dateTime);
+                    }
+                })
+            })
+        }
+    })
 }
 </script>
 

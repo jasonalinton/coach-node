@@ -56,7 +56,7 @@ export default {
   },
   computed: {
       type: function () {
-          var moment = findItem(this.time.idMoment, moments);
+          var moment = findItem(this.time.moment.id, moments);
           return moment.inputType;
       }
   },

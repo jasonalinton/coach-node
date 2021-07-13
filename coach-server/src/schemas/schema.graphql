@@ -59,4 +59,6 @@ input UnmappedItemIDs {
   goals: [Int]
   todos: [Int]
   routines: [Int]
+  timePairs: [Int]
+  repeats: [Int]
 }

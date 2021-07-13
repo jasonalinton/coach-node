@@ -23,5 +23,148 @@ mutation addRoutine($routine: RoutineInput!) {
       id
       text
     }
+    timePairs {
+      timeType {
+        id
+        text
+      }
+      startTime {
+        id
+        type {
+          id
+          text
+        }
+        endpoint {
+          id
+          text
+        }
+        moment {
+          id
+          text
+        }
+        flexibility {
+          id
+          text
+        }
+        dateTime
+      }
+      endTime {
+        id
+        type {
+          id
+          text
+        }
+        endpoint {
+          id
+          text
+        }
+        moment {
+          id
+          text
+        }
+        flexibility {
+          id
+          text
+        }
+        dateTime
+      }
+    }
+    repeats {
+      id
+      type {
+        id
+        text
+      }
+      timeframe {
+        id
+        text
+      }
+      startRepeat {
+        id
+        type {
+          id
+          text
+        }
+        endpoint {
+          id
+          text
+        }
+        moment {
+          id
+          text
+        }
+        flexibility {
+          id
+          text
+        }
+        dateTime
+      }
+      endRepeat {
+        id
+        type {
+          id
+          text
+        }
+        endpoint {
+          id
+          text
+        }
+        moment {
+          id
+          text
+        }
+        flexibility {
+          id
+          text
+        }
+        dateTime
+      }
+      startIteration {
+        id
+        type {
+          id
+          text
+        }
+        endpoint {
+          id
+          text
+        }
+        moment {
+          id
+          text
+        }
+        flexibility {
+          id
+          text
+        }
+        dateTime
+      }
+      endIteration {
+        id
+        type {
+          id
+          text
+        }
+        endpoint {
+          id
+          text
+        }
+        moment {
+          id
+          text
+        }
+        flexibility {
+          id
+          text
+        }
+        dateTime
+      }
+      interval
+      frequency
+      dayIndecies {
+        id
+        index
+      }
+    }
   }
 }

@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Type" ALTER COLUMN "altText" DROP NOT NULL,
+ALTER COLUMN "description" DROP NOT NULL;

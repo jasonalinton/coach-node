@@ -1,0 +1,62 @@
+type Query {
+  # Metric
+  metrics: [Metric!]!
+
+  # Goal
+  goals: [Goal!]!
+
+  # Todo
+  todos: [Todo!]!
+
+  # Routine
+  routines: [Routine!]!
+}
+
+type Mutation {
+  # Metric
+  updateMetric(metric: MetricInput!): Metric!
+
+  # Goal
+  addGoal(goal: GoalInput!): Goal!
+  updateGoal(goal: GoalInput!): Goal!
+  deleteGoal(id: Int!): Goal!
+
+  # Todo
+  addTodo(todo: TodoInput!): Todo!
+  updateTodo(todo: TodoInput!): Todo!
+  deleteTodo(id: Int!): Todo!
+
+  # Routine
+  addRoutine(routine: RoutineInput!): Routine!
+  updateRoutine(routine: RoutineInput!): Routine!
+  deleteRoutine(id: Int!): Routine!
+}
+
+type Subscription {
+  # Metric
+  metricUpdated: Metric!
+
+  # Goal
+  goalAdded: Goal!
+  goalUpdated: Goal!
+  goalDeleted: Goal!
+
+  # Todo
+  todoAdded: Todo!
+  todoUpdated: Todo!
+  todoDeleted: Todo!
+
+  # Routine
+  routineAdded: Routine!
+  routineUpdated: Routine!
+  routineDeleted: Routine!
+}
+
+input UnmappedItemIDs {
+  parents: [Int]
+  children: [Int]
+  metrics: [Int]
+  goals: [Int]
+  todos: [Int]
+  routines: [Int]
+}

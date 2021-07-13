@@ -1,6 +1,8 @@
 const { ApolloServer, PubSub } = require('apollo-server');
 const { PrismaClient } = require('@prisma/client');
 const requestLogger = require('../shared/lib/requestLogger');
+const initMiddleware = require('./resolvers/middleware')
+// const moment = require('moment');
 
 const { typeDefs } = require('./schemas/typeDefs');
 
@@ -63,6 +65,10 @@ const server = new ApolloServer({
     };
   }
 });
+
+initMiddleware(prisma);
+// Date.prototype.toJSON = function(){ return moment(this).format(); }
+
 
 server.listen({ port: PORT }, () => {
   console.log(`🚀 Server ready at http://localhost:${PORT}${server.graphqlPath}`);

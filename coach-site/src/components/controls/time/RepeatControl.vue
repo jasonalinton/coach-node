@@ -9,7 +9,7 @@
         <!-- Timeframe -->
         <div class="d-flex flew-rowalign-middle mb-2">
           <div v-for="repetition in repetitions.filter(rep => rep.isActive)" v-bind:key="repetition.id" class="form-check form-check-inline">
-            <input class="form-check-input" type="radio" :id="repetition.text" :value="repetition.id" v-model="activeRepeat.idTimeframe">
+            <input class="form-check-input" type="radio" :id="repetition.text" :value="repetition.id" v-model="activeRepeat.timeframe.id">
             <label class="form-check-label" :for="repetition.text">{{ repetition.text }}</label>
           </div>
         </div>
@@ -44,15 +44,15 @@
         <div class="d-flex flex-column">
           <div class="d-flex flex-column mt-2">
             <span class="align-self-start">Repeat Start</span>
-            <TimeControl class="mt-2" label="Repeat Start" :time="activeRepeat.repeatStart"></TimeControl>
+            <TimeControl class="mt-2" label="Repeat Start" :time="activeRepeat.startRepeat"></TimeControl>
           </div>
           <div class="d-flex flex-column mt-1">
             <div class="d-flex flex-row justify-content-between">
               <span>Repeat End</span>
-              <i v-if="!activeRepeat.repeatEnd" class="fas fa-plus btn btn-sm" @click="addEndRepeat()"></i>
-              <i v-if="activeRepeat.repeatEnd" class="fas fa-minus btn btn-sm" @click="removeEndRepeat()"></i>
+              <i v-if="!activeRepeat.endRepeat" class="fas fa-plus btn btn-sm" @click="addEndRepeat()"></i>
+              <i v-if="activeRepeat.endRepeat" class="fas fa-minus btn btn-sm" @click="removeEndRepeat()"></i>
             </div>
-            <TimeControl v-if="activeRepeat.repeatEnd" class="mt-2" label="Repeat End" :time="activeRepeat.repeatEnd"></TimeControl>
+            <TimeControl v-if="activeRepeat.endRepeat" class="mt-2" label="Repeat End" :time="activeRepeat.endRepeat"></TimeControl>
           </div>
         </div>
         <!-- Iteration -->
@@ -61,26 +61,26 @@
           <div class="d-flex flex-column mt-2">
             <div class="d-flex flex-row justify-content-between">
               <span>Iteration Start</span>
-              <i v-if="!activeRepeat.iterationStart" class="fas fa-plus btn btn-sm" @click="addIterationStart()"></i>
-              <i v-if="activeRepeat.iterationStart" class="fas fa-minus btn btn-sm" @click="removeIterationStart()"></i>
+              <i v-if="!activeRepeat.startIteration" class="fas fa-plus btn btn-sm" @click="addIterationStart()"></i>
+              <i v-if="activeRepeat.startIteration" class="fas fa-minus btn btn-sm" @click="removeIterationStart()"></i>
             </div>
-            <TimeControl v-if="activeRepeat.iterationStart" class="mt-2" label="Iteration End" :time="activeRepeat.iterationStart"></TimeControl>
+            <TimeControl v-if="activeRepeat.startIteration" class="mt-2" label="Iteration End" :time="activeRepeat.startIteration"></TimeControl>
           </div>
           <!-- End -->
           <div class="d-flex flex-column mt-2">
             <div class="d-flex flex-row justify-content-between">
               <span>Iteration End</span>
-              <i v-if="!activeRepeat.iterationEnd" class="fas fa-plus btn btn-sm" @click="addIterationEnd()"></i>
-              <i v-if="activeRepeat.iterationEnd" class="fas fa-minus btn btn-sm" @click="removeIterationEnd()"></i>
+              <i v-if="!activeRepeat.endIteration" class="fas fa-plus btn btn-sm" @click="addIterationEnd()"></i>
+              <i v-if="activeRepeat.endIteration" class="fas fa-minus btn btn-sm" @click="removeIterationEnd()"></i>
             </div>
-            <TimeControl v-if="activeRepeat.iterationEnd" class="mt-2" label="Iteration End" :time="activeRepeat.iterationEnd"></TimeControl>
+            <TimeControl v-if="activeRepeat.endIteration" class="mt-2" label="Iteration End" :time="activeRepeat.endIteration"></TimeControl>
           </div>
         </div>
         <!-- End - Iteration -->
         <!-- Recommended -->
         <div class="form-check">
           <input class="form-check-input mt-1" type="checkbox" value="" id="flexCheckDefault" v-model="activeRepeat.isRecommended">
-          <label class="form-check-label" for="flexCheckDefault">
+          <label class="form-check-label float-start" for="flexCheckDefault">
             Recommended
           </label>
         </div>
@@ -91,17 +91,17 @@
         </div>
       </div>
       <!-- Repeat List -->
-      <div class="list-group" v-for="repeat in repeats" v-bind:key="repeat.id">
+      <div class="list-group mt-1" v-for="repeat in repeats" v-bind:key="repeat.id">
         <div class="list-group-item list-group-item-light list-group-item-action d-flex flew-row justify-content-between">
           <div>
             <div class="d-flex flex-row">
               <span class="me-2">Every</span>
               <span class="me-2">{{ repeat.frequency }}</span>
-              <span>{{ getTimeframe(repeat.idTimeframe) }}</span>
+              <span>{{ getTimeframe(repeat.timeframe.id) }}</span>
             </div>
             <div class="d-flex flex-row">
               <span class="me-2">{{ repeat.interval }}</span>
-              <span>times a {{ getTimeframe(repeat.idTimeframe) }}</span>
+              <span>times a {{ getTimeframe(repeat.timeframe.id) }}</span>
             </div>
           </div>
           <div class="d-flex align-center">
@@ -138,6 +138,12 @@ var timeTypes = [
   { id: 80, text: "Scheduled", isActive: true },
   { id: 81, text: "Recommended", isActive: true }
 ];
+var flexibilityTypes = [
+  { id: 23, text: "Definitive", isActive: true },
+  { id: 24, text: "Strict", isActive: true },
+  { id: 25, text: "Elastic", isActive: true },
+  { id: 26, text: "Flexible", isActive: true }
+];
 
 export default {
   name: 'RepeatControl',
@@ -157,61 +163,77 @@ export default {
       selectedDays: [],
       repetitions,
       timeframes,
-      timeTypes
+      timeTypes,
+      flexibilityTypes,
     }
   },
   computed: {
     showDayPicker: function () {
       if (!this.activeRepeat) return [];
 
-      return (this.activeRepeat.idTimeframe === this.getTimeframeID("Weekly") || 
-              this.activeRepeat.idTimeframe === this.getTimeframeID("Monthly"));
+      return (this.activeRepeat.timeframe.id === this.getTimeframeID("Weekly") || 
+              this.activeRepeat.timeframe.id === this.getTimeframeID("Monthly"));
     },
     days: function () {
       if (!this.activeRepeat)
         return [];
 
       var days = [];
-      if (this.activeRepeat.idTimeframe == 68) {
+      if (this.activeRepeat.timeframe.id == 68) {
         for (var i = 1; i <= 7; i++)
             days.push(i);
-      } else if (this.activeRepeat.idTimeframe == 69) {
+      } else if (this.activeRepeat.timeframe.id == 69) {
         for (i = 1; i <= 31; i++)
             days.push(i);
       }
       return days;
     },
     timeframe: function () {
-      if (!this.activeRepeat.idTimeframe)
+      if (!this.activeRepeat.timeframe.id)
         return "____";
       
       var self = this;
-      var timeframe = this.timeframes.find(timeframe => timeframe.id == self.activeRepeat.idTimeframe);
+      var timeframe = this.timeframes.find(timeframe => timeframe.id == self.activeRepeat.timeframe.id);
       return timeframe.text;
+    },
+    // isRecommended: function() {
+    //   if (repeat.type.id == this.getTimeTypeID("Recommended"))
+    //     return true
+    //   else
+    //     return false
+    // }
+  },
+  watch: {
+    repeats(value) {
+      console.log(value)
     }
+    // isRecommended(value) {
+    //   if (value == true)
+    //     this.activeRepeat.type.id = this.getTimeTypeID("Recommended");
+    //   else if (value == false)
+    //     this.activeRepeat.type.id = this.getTimeTypeID("Scheduled");
+    // }
   },
   methods: {
     constructRepeat: function () {
+      let dateTime = new Date();
       this.activeRepeat = { 
         id: --this.newRepeatID,
-        repeatStart: { 
+        startRepeat: { 
           id: --this.newTimeID,
-          dateTime: null,
-          dateTimeString: new Date().toJSON(),
-          idType: 80,
-          idEndPoint: 84,
-          iterationEnd: null,
-          idMoment: 87,
-          idFlexibility: 0,
-          isActive: 1
+          dateTime: dateTime,
+          dateTimeString: dateString(dateTime.toJSON()),
+          type: { id: 80 },
+          endpoint: { id: 84 },
+          moment: { id: 87 },
+          flexibility: { id: this.getFlexibilityTypeID("Elastic") },
         },
-        repeatEnd: null,
-        iterationStart: null,
-        iterationEnd: null,
-        idType: 80,
-        idTimeframe: 0,
+        endRepeat: null,
+        startIteration: null,
+        endIteration: null,
+        type: { id: 80 },
+        timeframe: { id: 63 },
         isRecommended: 0,
-        isActive: 1,
         frequency: 1,
         interval: 1,
         dayIndecies: []
@@ -228,59 +250,108 @@ export default {
 
       return { 
         id: --this.newTimeID,
-        dateTime: null,
-        dateTimeString: dateTimeString,
-        idType: this.activeRepeat.idType,
-        idEndPoint: (endpoint == "start") ? 84 : 85,
-        iterationEnd: null,
-        idMoment: idMoment,
-        idFlexibility: 25,
-        isActive: 1
+        dateTime: new Date(dateTimeString),
+        dateTimeString: dateString(dateTimeString),
+        type: { id: this.activeRepeat.type.id },
+        endpoint: { id: (endpoint == "start") ? 84 : 85 },
+        moment: { id: idMoment },
+        flexibility: { id: 25 },
       };
     },
     addEndRepeat: function () {
-      this.activeRepeat.repeatEnd = this.constructTime(this.activeRepeat.repeatStart.dateTimeString, "start", "date");
+      this.activeRepeat.endRepeat = this.constructTime(this.activeRepeat.startRepeat.dateTimeString, "end", "date");
     },
     removeEndRepeat: function () {
-      this.activeRepeat.repeatEnd = null;
+      this.activeRepeat.endRepeat = null;
     },
     addIterationStart: function () {
-      this.activeRepeat.iterationStart = this.constructTime("06:00:00", "start", "time");
+      this.activeRepeat.startIteration = this.constructTime("06:00:00", "start", "time");
     },
     removeIterationStart: function () {
-      this.activeRepeat.iterationStart = null;
+      this.activeRepeat.startIteration = null;
     },
     addIterationEnd: function () {
       var time;
-      if (this.activeRepeat.iterationStart)
-        time = this.activeRepeat.iterationStart.dateTimeString
+      if (this.activeRepeat.startIteration)
+        time = this.activeRepeat.startIteration.dateTimeString
       else
         time = "06:00:00"
-      this.activeRepeat.iterationEnd = this.constructTime(time, "end", "time");
+      this.activeRepeat.endIteration = this.constructTime(time, "end", "time");
     },
     removeIterationEnd: function () {
-      this.activeRepeat.iterationEnd = null;
+      this.activeRepeat.endIteration = null;
+    },
+    editRepeat: function (repeat) {
+      repeat = this.repeats.find((object) => object.id == repeat.id);
+      var tempRepeat = JSON.parse(JSON.stringify(repeat));
+
+      // Init temp field, isRecommended
+      if (tempRepeat.type.id == this.getTimeTypeID("Recommended"))
+        tempRepeat.isRecommended = true;
+      else
+        tempRepeat.isRecommended = false;
+
+      // Init temp field, dateTimeString
+      if (tempRepeat.startRepeat) {
+        tempRepeat.startRepeat.dateTimeString = dateString(tempRepeat.startRepeat.dateTime);
+      }
+      if (tempRepeat.endRepeat) {
+        tempRepeat.endRepeat.dateTimeString = dateString(tempRepeat.endRepeat.dateTime);
+      }
+      // if (repeat.startIteration)
+      
+      // if (repeat.endIteration)
+
+      let indecies = [];
+      tempRepeat.dayIndecies.forEach(dayIndex => indecies.push(dayIndex.index));
+      tempRepeat.dayIndecies = indecies;
+
+      tempRepeat.isUpdated = true;
+
+      this.activeRepeat = tempRepeat;
     },
     saveRepeat: function () {
-      // if (!(this.activeRepeat && 
-      //     (this.activeRepeat.idTimeframe != 63 || this.activeRepeat.idTimeframe != 68 || this.activeRepeat.idTimeframe != 69) &&
-      //     this.activeRepeat.frequency > 0 &&
-      //     this.activeRepeat.interval > 0)) {
-      //     alert("Invalid form!");
-      //     return;
-      //     }
       var repeat = JSON.parse(JSON.stringify(this.activeRepeat));
 
+      // Set time type
+      if (repeat.isRecommended)
+        repeat.type = { id: this.getTimeTypeID("Recommended") }
+      else
+        repeat.type = { id: this.getTimeTypeID("Scheduled") };
+      delete repeat.isRecommended;
+
+      // Set datetime
+      if (repeat.startRepeat) {
+        repeat.startRepeat.dateTime = new Date(repeat.startRepeat.dateTime);
+        delete repeat.startRepeat.dateTimeString;
+      }
+      if (repeat.endRepeat) {
+        repeat.endRepeat.dateTime = new Date(repeat.endRepeat.dateTime);
+        delete repeat.endRepeat.dateTimeString;
+      }
+      // if (repeat.startIteration)
+      //   repeat.startIteration.dateTime = new Date(repeat.startIteration.dateTimeString);
+      // if (repeat.endIteration)
+      //   repeat.endIteration.dateTime = new Date(repeat.endIteration.dateTimeString);
+
+      let indecies = [];
+      repeat.dayIndecies.forEach(index => {
+        indecies.push({ index })
+      })
+      repeat.dayIndecies = indecies;
+
       // Set Type ID's
-      if (repeat.repeatEnd)
-        repeat.repeatEnd.idType = repeat.idType;
-      else if (repeat.iterationStart)
-        repeat.iterationStart.idType = repeat.idType;
-      else if (repeat.iterationEnd)
-        repeat.iterationEnd.idType = repeat.idType;
+      if (repeat.endRepeat)
+        repeat.endRepeat.idType = repeat.idType;
+      if (repeat.startIteration)
+        repeat.startIteration.idType = repeat.idType;
+      if (repeat.endIteration)
+        repeat.endIteration.idType = repeat.idType;
+
+      repeat.interval = parseInt(repeat.interval);
+      repeat.frequency = parseInt(repeat.frequency);
 
       if (this.activeRepeat.isUpdated) {
-        delete repeat.isUpdated;
         this.$emit('updateRepeat', repeat);
       } else
         this.$emit('addRepeat', repeat);
@@ -295,12 +366,6 @@ export default {
       if (index > -1)
         this.repeats.splice(index, 1);
     },
-    editRepeat: function (repeat) {
-      repeat = this.repeats.find((object) => object.id == repeat.id);
-      var tempRepeat = JSON.parse(JSON.stringify(repeat));
-      tempRepeat.isUpdated = true;
-      this.activeRepeat = tempRepeat;
-    },
     getTimeframe: function (idTimeframe) {
       if (idTimeframe == undefined || idTimeframe <= 0)
         return "____";
@@ -311,8 +376,20 @@ export default {
     },
     getTimeframeID(repetition) {
         return this.repetitions.find(_repetition => _repetition.text == repetition).id
+    },
+    getTimeTypeID(timeType) {
+        return this.timeTypes.find(_timeType => _timeType.text == timeType).id
+    },
+    getFlexibilityTypeID(flexibilityType) {
+        return this.flexibilityTypes.find(_flexibilityType => _flexibilityType.text == flexibilityType).id
     }
   }
+}
+
+function dateString(dateTimeJSON) {
+  let dateArray = dateTimeJSON.split("T");
+  dateArray = dateArray[0].split("-");
+  return `${dateArray[0]}-${dateArray[1]}-${dateArray[2]}`;
 }
 </script>
 

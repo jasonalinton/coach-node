@@ -23,12 +23,13 @@ model Metric {
 }
 
 model Goal {
-  id          Int      @id @default(autoincrement())
-  text        String
-  description String?
-  isDeleted   Boolean  @default(false)
-  createdAt   DateTime @default(now()) @db.Timestamptz(6)
-  updatedAt   DateTime @default(now()) @updatedAt @db.Timestamptz(6)
+  id              Int       @id @default(autoincrement())
+  text            String
+  description     String?
+  isDeleted       Boolean   @default(false)
+  dateTimeDeleted DateTime? @db.Timestamptz(6)
+  createdAt       DateTime  @default(now()) @db.Timestamptz(6)
+  updatedAt       DateTime  @default(now()) @updatedAt @db.Timestamptz(6)
 
   parents  Goal[] @relation("GoalFamily")
   children Goal[] @relation("GoalFamily")
@@ -36,15 +37,19 @@ model Goal {
   metrics  Metric[]
   todos    Todo[]
   routines Routine[]
+
+  timePairs Goal_TimePair[]
+  repeats   Goal_Repeat[]
 }
 
 model Todo {
-  id          Int      @id @default(autoincrement())
-  text        String
-  description String?
-  isDeleted   Boolean  @default(false)
-  createdAt   DateTime @default(now()) @db.Timestamptz(6)
-  updatedAt   DateTime @default(now()) @updatedAt @db.Timestamptz(6)
+  id              Int       @id @default(autoincrement())
+  text            String
+  description     String?
+  isDeleted       Boolean   @default(false)
+  dateTimeDeleted DateTime? @db.Timestamptz(6)
+  createdAt       DateTime  @default(now()) @db.Timestamptz(6)
+  updatedAt       DateTime  @default(now()) @updatedAt @db.Timestamptz(6)
 
   parents  Todo[] @relation("TodoFamily")
   children Todo[] @relation("TodoFamily")
@@ -52,15 +57,20 @@ model Todo {
   metrics  Metric[]
   goals    Goal[]
   routines Routine[]
+
+  repeats      Repeat[]
+  todo_repeats Todo_Repeat[]
+  timePairs    Todo_TimePair[]
 }
 
 model Routine {
-  id          Int      @id @default(autoincrement())
-  text        String
-  description String?
-  isDeleted   Boolean  @default(false)
-  createdAt   DateTime @default(now()) @db.Timestamptz(6)
-  updatedAt   DateTime @default(now()) @updatedAt @db.Timestamptz(6)
+  id              Int       @id @default(autoincrement())
+  text            String
+  description     String?
+  isDeleted       Boolean   @default(false)
+  dateTimeDeleted DateTime? @db.Timestamptz(6)
+  createdAt       DateTime  @default(now()) @db.Timestamptz(6)
+  updatedAt       DateTime  @default(now()) @updatedAt @db.Timestamptz(6)
 
   parents  Routine[] @relation("RoutineFamily")
   children Routine[] @relation("RoutineFamily")
@@ -68,4 +78,191 @@ model Routine {
   metrics Metric[]
   goals   Goal[]
   todos   Todo[]
+
+  timePairs Routine_TimePair[]
+  repeats   Routine_Repeat[]
+}
+
+model Type {
+  id          Int      @id @default(autoincrement())
+  text        String
+  altText     String?
+  description String?
+  createdAt   DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt   DateTime @default(now()) @updatedAt @db.Timestamptz(6)
+
+  times            Time[] @relation(name: "Time_Type")
+  endpointTimes    Time[] @relation(name: "Endpoint_TimeType")
+  momentTimes      Time[] @relation(name: "Moment_TimeType")
+  flexibilityTimes Time[] @relation(name: "Flexibility_TimeType")
+
+  goalTimePairs    Goal_TimePair[]
+  todoTimePairs    Todo_TimePair[]
+  routineTimePairs Routine_TimePair[]
+
+  repeats          Repeat[] @relation(name: "Repeat_Type")
+  timeframeRepeats Repeat[] @relation(name: "Timeframe_RepeatType")
+}
+
+model Time {
+  id            Int      @id @default(autoincrement())
+  idType        Int
+  idEndpoint    Int
+  idMoment      Int
+  idFlexibility Int
+  dateTime      DateTime @default(now()) @db.Timestamptz(6)
+  createdAt     DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt     DateTime @default(now()) @updatedAt @db.Timestamptz(6)
+
+  type        Type @relation(fields: [idType], references: [id], name: "Time_Type")
+  endpoint    Type @relation(fields: [idEndpoint], references: [id], name: "Endpoint_TimeType")
+  moment      Type @relation(fields: [idMoment], references: [id], name: "Moment_TimeType")
+  flexibility Type @relation(fields: [idFlexibility], references: [id], name: "Flexibility_TimeType")
+
+  goal_StartTimes Goal_TimePair[] @relation("Goal_StartTime")
+  goal_EndTimes   Goal_TimePair[] @relation("Goal_EndTime")
+
+  todo_StartTimes Todo_TimePair[] @relation("Todo_StartTime")
+  todo_EndTimes   Todo_TimePair[] @relation("Todo_EndTime")
+
+  routine_StartTimes Routine_TimePair[] @relation("Routine_StartTime")
+  routine_EndTimes   Routine_TimePair[] @relation("Routine_EndTime")
+
+  repeat_StartTimes Repeat[] @relation("Repeat_StartTime")
+  repeat_EndTimes   Repeat[] @relation("Repeat_EndTime")
+
+  repeatIteration_StartTimes Repeat[] @relation("Repeat_StartIteration")
+  repeatIteration_EndTimes   Repeat[] @relation("Repeat_EndIteration")
+}
+
+model Goal_TimePair {
+  id          Int      @id @default(autoincrement())
+  idGoal      Int
+  idTimeType  Int
+  idStartTime Int?
+  idEndTime   Int?
+  createdAt   DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt   DateTime @default(now()) @updatedAt @db.Timestamptz(6)
+
+  goal Goal @relation(fields: [idGoal], references: [id])
+
+  timeType Type @relation(fields: [idTimeType], references: [id])
+
+  startTime Time? @relation(fields: [idStartTime], references: [id], name: "Goal_StartTime")
+  endTime   Time? @relation(fields: [idEndTime], references: [id], name: "Goal_EndTime")
+}
+
+model Todo_TimePair {
+  id          Int      @id @default(autoincrement())
+  idTodo      Int
+  idTimeType  Int
+  idStartTime Int?
+  idEndTime   Int?
+  createdAt   DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt   DateTime @default(now()) @updatedAt @db.Timestamptz(6)
+
+  todo Todo @relation(fields: [idTodo], references: [id])
+
+  timeType Type @relation(fields: [idTimeType], references: [id])
+
+  startTime Time? @relation(fields: [idStartTime], references: [id], name: "Todo_StartTime")
+  endTime   Time? @relation(fields: [idEndTime], references: [id], name: "Todo_EndTime")
+}
+
+model Routine_TimePair {
+  id          Int      @id @default(autoincrement())
+  idRoutine   Int
+  idTimeType  Int
+  idStartTime Int?
+  idEndTime   Int?
+  createdAt   DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt   DateTime @default(now()) @updatedAt @db.Timestamptz(6)
+
+  routine Routine @relation(fields: [idRoutine], references: [id])
+
+  timeType Type @relation(fields: [idTimeType], references: [id])
+
+  startTime Time? @relation(fields: [idStartTime], references: [id], name: "Routine_StartTime")
+  endTime   Time? @relation(fields: [idEndTime], references: [id], name: "Routine_EndTime")
+}
+
+model Repeat {
+  id               Int      @id @default(autoincrement())
+  idType           Int
+  idTimeframe      Int
+  idStartRepeat    Int?
+  idEndRepeat      Int?
+  idStartIteration Int?
+  idEndIteration   Int?
+  interval         Int
+  frequency        Int
+  createdAt        DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt        DateTime @default(now()) @updatedAt @db.Timestamptz(6)
+
+  type      Type @relation(fields: [idType], references: [id], name: "Repeat_Type")
+  timeframe Type @relation(fields: [idTimeframe], references: [id], name: "Timeframe_RepeatType")
+
+  startRepeat Time? @relation(fields: [idStartRepeat], references: [id], name: "Repeat_StartTime")
+  endRepeat   Time? @relation(fields: [idEndRepeat], references: [id], name: "Repeat_EndTime")
+
+  startIteration Time? @relation(fields: [idStartIteration], references: [id], name: "Repeat_StartIteration")
+  endIteration   Time? @relation(fields: [idEndIteration], references: [id], name: "Repeat_EndIteration")
+
+  dayIndecies Repeat_DayIndex[]
+
+  todos Todo[]
+
+  goals        Goal_Repeat[]
+  todo_repeats Todo_Repeat[]
+  routines     Routine_Repeat[]
+
+}
+
+model Repeat_DayIndex {
+  id        Int      @id @default(autoincrement())
+  idRepeat  Int
+  index     Int
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt DateTime @default(now()) @updatedAt @db.Timestamptz(6)
+
+  repeats Repeat @relation(fields: [idRepeat], references: [id])
+}
+
+model Goal_Repeat {
+  id                    Int       @id @default(autoincrement())
+  idGoal                Int
+  idRepeat              Int
+  lastIterationDateTime DateTime? @db.Timestamptz(6)
+  isEventVisible        Boolean
+  createdAt             DateTime  @default(now()) @db.Timestamptz(6)
+  updatedAt             DateTime  @default(now()) @updatedAt @db.Timestamptz(6)
+
+  goal   Goal[]   @relation(fields: [idGoal], references: [id])
+  repeat Repeat[] @relation(fields: [idRepeat], references: [id])
+}
+
+model Todo_Repeat {
+  id                    Int       @id @default(autoincrement())
+  idTodo                Int
+  idRepeat              Int
+  lastIterationDateTime DateTime? @db.Timestamptz(6)
+  isEventVisible        Boolean
+  createdAt             DateTime  @default(now()) @db.Timestamptz(6)
+  updatedAt             DateTime  @default(now()) @updatedAt @db.Timestamptz(6)
+
+  todo   Todo[]   @relation(fields: [idTodo], references: [id])
+  repeat Repeat[] @relation(fields: [idRepeat], references: [id])
+}
+
+model Routine_Repeat {
+  id                    Int       @id @default(autoincrement())
+  idRoutine             Int
+  idRepeat              Int
+  lastIterationDateTime DateTime? @db.Timestamptz(6)
+  isEventVisible        Boolean
+  createdAt             DateTime  @default(now()) @db.Timestamptz(6)
+  updatedAt             DateTime  @default(now()) @updatedAt @db.Timestamptz(6)
+
+  routine Routine[] @relation(fields: [idRoutine], references: [id])
+  repeat  Repeat[]  @relation(fields: [idRepeat], references: [id])
 }
