@@ -5,7 +5,11 @@ function initData(data) {
 
     if (data.id || data.id >= 0) delete data.id; // Remove unnecessary ID
 
-    configureRepeats(data);
+    if (data.repeats)
+        configureRepeats(data);
+    else
+        delete data.repeats;
+    
     delete data.timePairs;
     initItems(data);
     
