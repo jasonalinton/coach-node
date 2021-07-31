@@ -1,7 +1,7 @@
 import METRICS from '../graphql/query/QueryMetrics.gql'
 import GOALS from '../graphql/query/QueryGoals.gql'
-import TODOS from '../graphql/query/QueryTodos.gql'
-import ROUTINES from '../graphql/query/QueryRoutines.gql'
+import TODOS from '../graphql/query/todo/QueryTodos.gql'
+import ROUTINES from '../graphql/query/routine/QueryRoutines.gql'
 
 import UPDATE_METRIC from '../graphql/mutation/metric/UpdateMetric.gql'
 

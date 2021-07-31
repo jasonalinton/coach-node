@@ -33,6 +33,14 @@ export default {
             },
         }
     },
+    created: function() {
+        let goalPanelSortBy_Store = localStorage.getItem(`goal-panel-sort-by`);
+        if (goalPanelSortBy_Store) {
+            this.sort.by = goalPanelSortBy_Store;
+        } else {
+            localStorage.setItem(`goal-panel-sort-by`, this.sort.by);
+        }
+    },
     methods: {
         onSortChange
     },
@@ -40,6 +48,7 @@ export default {
 
 function onSortChange(sortBy) {
     this.sort.by = sortBy;
+    localStorage.setItem(`goal-panel-sort-by`, sortBy);
 }
 </script>
 

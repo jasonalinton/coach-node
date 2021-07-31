@@ -7,14 +7,35 @@ const where_isDeleted_false = {
     }
 }
 
+const iterationInclude = {
+    include: {
+        todos: {
+            select: {
+                id: true,
+                text: true,
+                metrics: {
+                    select: {
+                        id: true,
+                        text: true
+                    }
+                }
+            }
+        },
+        routineRepeat: {
+            include: { todoIterations: true }
+        }
+    }
+}
+
 const routineInclude = {
     metrics: true,
     parents: where_isDeleted_false,
     children: where_isDeleted_false,
     goals: where_isDeleted_false,
     todos: where_isDeleted_false,
+    repeats: select_repeat,
+    iterations: iterationInclude,
     // timePairs: select_timePair,
-    // repeats: select_repeat,
 }
 
 module.exports = {

@@ -1,9 +1,11 @@
-const { removeItem } = require('../../utility')
+const { removeItem } = require('../../../utility');
+const { getTodoRepeat, getRoutineRepeat } = require('../../resolvers/mutations/time/repeatMutation');
 
 function configureRepeats(data) {
     let create = createRepeats(data);
     let updates = updateRepeat(data, 'repeats');
     let disconnect = disconnectObjet(data, 'repeats');
+    let connect = connectRepeat(data, 'repeats');
 
     data.repeats = {};
     if (create.length > 0)
@@ -12,8 +14,10 @@ function configureRepeats(data) {
         data.repeats.update = updates;
     if (disconnect.length > 0)
         data.repeats.disconnect = disconnect;
+    if (connect.length > 0)
+        data.repeats.connect = connect;
 
-    if (!data.repeats.create && !data.repeats.update && !data.repeats.disconnect)
+    if (!data.repeats.create && !data.repeats.update && !data.repeats.disconnect && !data.repeats.connect)
         delete data.repeats;
 }
 
@@ -85,10 +89,19 @@ function deleteExisting(data, prop) {
 
 function disconnectObjet(data, prop) {
     let disconnect = [];
-    if (data.unmappedItemIDs && data.unmappedItemIDs[prop]) {
-        data.unmappedItemIDs[prop].forEach(id => disconnect.push({ id }));
+    if (data.unmappedIDs && data.unmappedIDs[prop]) {
+        data.unmappedIDs[prop].forEach(id => disconnect.push({ id }));
     }
     return disconnect;
+}
+
+function connectRepeat(data, prop) {
+    let connected = [];
+    let list = data[prop].filter(repeat => repeat.isConnected);
+    connected = list.map(repeat => {
+        return { id: repeat.id };
+    });
+    return connected;
 }
 
 function configureTime(data, prop) {
@@ -190,8 +203,48 @@ function createItemRepeat(data) {
     data.todo_repeats = { create: item_repeats }        
 }
 
+async function getLastIterationDateTime(repeat, itemType, itemID, context) {
+    let item_repeat;
+
+    try {
+        if (itemType == 'todo') {
+            item_repeat = await getTodoRepeat(null, { idTodo: itemID, idRepeat: repeat.id }, context);
+        } else if (itemType == 'routine') {
+            item_repeat = await getRoutineRepeat(null, { idRoutine: itemID, idRepeat: repeat.id }, context);
+        }
+    } catch (error) {
+        console.log(error)
+    }
+    
+    return (item_repeat) ? item_repeat.lastIterationDateTime : null;
+}
+
+function setLastIterationDateTime(repeat, itemType, itemID, dateTime) {
+    let item_repeat = repeat[`${itemType}_repeats`].find(_item_repeat => _item_repeat[itemType].id == itemID);
+    if (item_repeat) {
+        item_repeat.lastIterationDateTime = dateTime;
+        item_repeat.isUpdated = true;
+    } else {
+        let new_item_repeat = {
+            lastIterationDateTime: dateTime,
+            isEventVisible: true,
+        }
+        new_item_repeat[itemType] = { id: itemID };
+        repeat[`${itemType}_repeats`].push(new_item_repeat);
+    }
+    repeat.isUpdated = true;
+}
+
+function isEventVisible(repeat, itemType, itemID) {
+    let item_repeat = repeat[`${itemType}_repeats`].find(_item_repeat => _item_repeat[itemType].id == itemID);
+    return (item_repeat) ? item_repeat.isEventVisible : true;
+}
+
 module.exports = {
     configureRepeats,
     configureTime,
-    configureMapObject
+    configureMapObject,
+    getLastIterationDateTime,
+    setLastIterationDateTime,
+    isEventVisible
 }

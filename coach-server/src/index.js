@@ -16,13 +16,15 @@ const RoutineQuery = require('./resolvers/queries/routineQuery');
 
 const MetricMutation = require('./resolvers/mutations/metricMutation');
 const GoalMutation = require('./resolvers/mutations/goalMutation');
-const TodoMutation = require('./resolvers/mutations/todoMutation');
+const TodoMutation = require('./resolvers/mutations/todo/todoMutation');
+const TodoIterationMutation = require('./resolvers/mutations/todo/todoIterationMutation');
 const RoutineMutation = require('./resolvers/mutations/routineMutation');
 
 const MetricSubscription = require('./resolvers/subscriptions/metricSubscription');
 const GoalSubscription = require('./resolvers/subscriptions/goalSubscription');
 const TodoSubscription = require('./resolvers/subscriptions/todoSubscription');
 const RoutineSubscription = require('./resolvers/subscriptions/routineSubscription');
+const PlannerSubscription = require('./resolvers/subscriptions/plannerSubscription');
 
 const Query = {
     ...MetricQuery,
@@ -31,16 +33,18 @@ const Query = {
     ...RoutineQuery
 }
 const Mutation = {
-    ...MetricMutation,
-    ...GoalMutation,
-    ...TodoMutation,
-    ...RoutineMutation
+  ...MetricMutation,
+  ...GoalMutation,
+  ...TodoMutation,
+  ...TodoIterationMutation,
+  ...RoutineMutation
 }
 const Subscription = {
     ...MetricSubscription,
     ...GoalSubscription,
     ...TodoSubscription,
-    ...RoutineSubscription
+    ...RoutineSubscription,
+    ...PlannerSubscription
 }
 
 const resolvers = {

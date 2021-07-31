@@ -1,0 +1,19 @@
+subscription iterationUpdated {
+  iterationUpdated {
+    id
+    text
+    startAt
+    endAt
+    attemptedAt
+    completedAt
+    isRecommended
+    todos {
+      id
+      text
+      metrics {
+        id
+        text
+      }
+    }
+  }
+}

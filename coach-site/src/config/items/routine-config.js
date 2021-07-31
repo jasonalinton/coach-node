@@ -38,7 +38,8 @@ let config = {
             type: 'objects',
             isItem: true,
             isColumn: true,
-            optionsQuery: require('../../graphql/query/QueryRoutines.gql'),
+            optionsQuery: require('../../graphql/query/routine/QueryRoutines.gql'),
+            icon: '/icon/parent-icon.png',
         },
         {
             id: 5,
@@ -48,7 +49,8 @@ let config = {
             type: 'objects',
             isItem: true,
             isColumn: true,
-            optionsQuery: require('../../graphql/query/QueryRoutines.gql'),
+            optionsQuery: require('../../graphql/query/routine/QueryRoutines.gql'),
+            icon: '/icon/child-icon.png',
         },
         {
             id: 6,
@@ -69,6 +71,7 @@ let config = {
             isItem: true,
             isColumn: true,
             optionsQuery: require('../../graphql/query/QueryGoals.gql'),
+            icon: '/icon/goal-icon.png',
         },
         {
             id: 8,
@@ -78,7 +81,17 @@ let config = {
             type: 'objects',
             isItem: true,
             isColumn: true,
-            optionsQuery: require('../../graphql/query/QueryTodos.gql'),
+            optionsQuery: require('../../graphql/query/todo/QueryTodos.gql'),
+            icon: '/icon/task-icon.png',
+        },
+        {
+            id: 9,
+            name: 'Repeats',
+            prop: 'repeats',
+            queryField: 'repeats',
+            type: 'objects',
+            isItem: false,
+            isColumn: false,
         },
     ],
     itemModel: {
@@ -88,14 +101,15 @@ let config = {
         children: [],
         metrics: [],
         goals: [],
-        todos: []
+        todos: [],
+        repeats: [],
     },
     addItem: addRoutine,
     updateItem: updateRoutine,
     deleteItem: deleteRoutine,
     query: {
         name: "routines",
-        document: require('../../graphql/query/QueryRoutines.gql'),
+        document: require('../../graphql/query/routine/QueryRoutines.gql'),
         variables: {},
     },
     subscriptions: [

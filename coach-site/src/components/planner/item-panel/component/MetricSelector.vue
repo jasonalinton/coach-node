@@ -26,6 +26,8 @@ span {
     border-radius: 20px;
     line-height: 40px;
     font-weight: 500;
+    text-align: center;
+    user-select: none;
 }
 
 .physical {

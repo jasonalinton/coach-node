@@ -24,6 +24,7 @@ subscription todoUpdated {
       text
     }
     timePairs {
+      id
       timeType {
         id
         text
@@ -165,6 +166,15 @@ subscription todoUpdated {
         id
         index
       }
+    }
+    iterations {
+      id
+      text
+      startAt
+      endAt
+      attemptedAt
+      completedAt
+      isRecommended
     }
   }
 }

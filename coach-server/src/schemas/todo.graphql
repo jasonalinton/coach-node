@@ -10,6 +10,8 @@ type Todo {
   routines: [Routine]
   timePairs: [Todo_TimePair]
   repeats: [Repeat]
+  iterations: [Iteration]
+  todo_repeats: [Todo_Repeat]
 }
 
 input TodoInput {
@@ -22,7 +24,9 @@ input TodoInput {
   metrics: [MetricInput]
   goals: [GoalInput]
   routines: [RoutineInput]
-  unmappedItemIDs: UnmappedItemIDs
+  unmappedIDs: unmappedIDs
   timePairs: [Todo_TimePairInput]
   repeats: [RepeatInput]
+  iterations: [IterationInput]
+  todo_repeats: [Todo_RepeatInput]
 }

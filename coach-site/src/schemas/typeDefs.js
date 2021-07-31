@@ -55,7 +55,7 @@ type Subscription {
   routineDeleted: Routine!
 }
 
-input UnmappedItemIDs {
+input unmappedIDs {
   parents: [Int]
   children: [Int]
   metrics: [Int]
@@ -81,7 +81,7 @@ input MetricInput {
   goals: [GoalInput]
   todos: [TodoInput]
   routines: [RoutineInput]
-  unmappedItemIDs: UnmappedItemIDs
+  unmappedIDs: unmappedIDs
 }
 
 type Goal {
@@ -108,7 +108,7 @@ input GoalInput {
   metrics: [MetricInput]
   todos: [TodoInput]
   routines: [RoutineInput]
-  unmappedItemIDs: UnmappedItemIDs
+  unmappedIDs: unmappedIDs
   timePairs: [Goal_TimePairInput]
   repeats: [RepeatInput]
 }
@@ -137,7 +137,7 @@ input TodoInput {
   metrics: [MetricInput]
   goals: [GoalInput]
   routines: [RoutineInput]
-  unmappedItemIDs: UnmappedItemIDs
+  unmappedIDs: unmappedIDs
   timePairs: [Todo_TimePairInput]
   repeats: [RepeatInput]
 }
@@ -166,7 +166,7 @@ input RoutineInput {
   metrics: [MetricInput]
   todos: [TodoInput]
   goals: [GoalInput]
-  unmappedItemIDs: UnmappedItemIDs
+  unmappedIDs: unmappedIDs
   timePairs: [Routine_TimePairInput]
   repeats: [RepeatInput]
 }
@@ -345,4 +345,57 @@ input TypeInput {
   altText: String
   description: String
 }
+
+type Iteration {
+  id: Int
+  text: String
+  startAt: String
+  endAt: String
+  attemptedAt: String
+  completedAt: String
+  isRecommended: Boolean
+
+  todos: [Todo]
+  routines: [Routine]
+
+  events: [Event]
+}
+
+input IterationInput {
+  id: Int
+  text: String!
+  startAt: String
+  endAt: String
+  attemptedAt: String
+  completedAt: String
+  isRecommended: Boolean
+
+  todos: [TodoInput]
+  routines: [RoutineInput]
+
+  events: [EventInput]
+}
+
+type Event {
+  id: Int
+  text: String
+  startAt: String
+  endAt: String
+  isAllDay: String
+  isRecommended: String
+
+  iterations: [Iteration]
+}
+
+input EventInput {
+  id: Int
+  text: String!
+  startAt: String
+  endAt: String
+  isAllDay: String
+  isRecommended: String!
+
+  iterations: [IterationInput]
+}
+
 `

@@ -1,7 +1,7 @@
 <template>
-    <div class="wrapper row g-0">
+    <div class="row g-0">
         <!-- Toolbar -->
-        <div class="col-12 d-flex flex-column justify-content-between" :style="{ 'padding': '0px 8px' }">
+        <div class="metric-selector-wrapper col-12 d-flex flex-column justify-content-between">
             <MetricSelector class="metric-selector" :selected="selectedMetrics"></MetricSelector>
         </div>
         <!-- Body -->
@@ -19,10 +19,7 @@
                                 <div class="goal-item">{{ goal.text }}</div>
                                 <ul>
                                     <li v-for="todo in goal.todos" :key="todo.id" class="todo">
-                                        <div class="d-flex flex-row align-items-center">
-                                            <IconButton src="/icon/checkbox.png" :width="26" :height="26"></IconButton>
-                                            <div>{{ todo.text }}</div>
-                                        </div>
+                                        <ListItem :iteration="todo"></ListItem>
                                     </li>
                                 </ul>
                             </div>
@@ -38,10 +35,11 @@
 import IconButton from '../../../controls/button/IconButton.vue'
 import MetricSelector from '../component/MetricSelector.vue'
 import goalConfig from '../../../../config/items/goal-config';
+import ListItem from '../component/ListItem.vue';
 
 export default {
     name: 'GoalPanelByMetric',
-    components: { MetricSelector, IconButton },
+    components: { MetricSelector, IconButton, ListItem },
     data: function() {
         return {
             config: goalConfig,
@@ -67,10 +65,6 @@ export default {
     created: function() {
     },
     mounted: function() {
-        this.config.subscriptions.forEach(sub => {
-            this.$apollo.addSmartSubscription(sub.name, sub.object);
-        });
-
         // An error gets thrown if pollInterval is set with the query
         this.$apollo.queries.goals.setOptions({
             fetchPolicy: 'cache-and-network',
@@ -113,6 +107,9 @@ function getMetricGoals(metric) {
 </script>
 
 <style scoped>
+.metric-selector-wrapper {
+    padding: 0 8px;
+}
 .metric-selector {
     width: 264px;
     margin-top: 12px;
@@ -126,6 +123,7 @@ h1 {
     margin-left: 20px;
     margin-bottom: 0px;
     text-transform: capitalize;
+    user-select: none;
 }
 
 .physical h1{
@@ -173,12 +171,12 @@ li.goal {
 .goal-item {
     padding:  4px 0px 4px 20px;
 }
-
+/* 
 li.todo { 
     min-height: 26px;
     vertical-align: middle;
     font-size: 14px;
     padding-top: 2px;
     padding-left: 16px;
-}
+} */
 </style>

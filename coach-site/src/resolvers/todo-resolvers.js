@@ -1,11 +1,15 @@
 import METRICS from '../graphql/query/QueryMetrics.gql'
-import TODOS from '../graphql/query/QueryTodos.gql'
+import TODOS from '../graphql/query/todo/QueryTodos.gql'
 import GOALS from '../graphql/query/QueryGoals.gql'
-import ROUTINES from '../graphql/query/QueryRoutines.gql'
+import ROUTINES from '../graphql/query/routine/QueryRoutines.gql'
 
 import ADD_TODO from '../graphql/mutation/todo/AddTodo.gql'
 import DELETE_TODO from '../graphql/mutation/todo/DeleteTodo.gql'
 import UPDATE_TODO from '../graphql/mutation/todo/UpdateTodo.gql'
+
+import CREATE_DEFAULT_TASK from '../graphql/mutation/todo/CreateDefaultTask.gql'
+import TOGGLE_COMPLETION from '../graphql/mutation/todo/ToggleCompletion.gql'
+import DELETE_ITERATION from '../graphql/mutation/todo/DeleteIteration.gql'
 
 import {
     addItemToCache, addPropertyToCache,
@@ -43,6 +47,27 @@ export function deleteTodo(todo, apollo) {
         //     deleteItemInCache(cache, TODOS, 'todos', deleteTodo);
         //     // onTodoDeleted(cache, deleteTodo);
         // }
+    });
+}
+
+export function createDefaultTask(iteration, apollo) {
+    apollo.mutate({
+        mutation: CREATE_DEFAULT_TASK,
+        variables: { iteration },
+    });
+}
+
+export function toggleCompletion(iteration, apollo) {
+    apollo.mutate({
+        mutation: TOGGLE_COMPLETION,
+        variables: { iteration },
+    });
+}
+
+export function deleteIteration(id, apollo) {
+    apollo.mutate({
+        mutation: DELETE_ITERATION,
+        variables: { id },
     });
 }
 

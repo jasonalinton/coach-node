@@ -1,0 +1,11 @@
+mutation toggleCompletion($iteration: IterationInput!) {
+  toggleCompletion(iteration: $iteration) {
+    id
+    text
+    startAt
+    endAt
+    attemptedAt
+    completedAt
+    isRecommended
+  }
+}

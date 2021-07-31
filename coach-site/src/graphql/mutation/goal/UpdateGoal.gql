@@ -24,6 +24,7 @@ mutation updateGoal($goal: GoalInput!) {
       text
     }
     timePairs {
+      id
       timeType {
         id
         text

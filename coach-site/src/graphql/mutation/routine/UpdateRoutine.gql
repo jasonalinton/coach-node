@@ -24,6 +24,7 @@ mutation updateRoutine($routine: RoutineInput!) {
       text
     }
     timePairs {
+      id
       timeType {
         id
         text

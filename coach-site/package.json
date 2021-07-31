@@ -13,8 +13,10 @@
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^5.15.3",
+    "@livelybone/vue-datepicker": "^4.0.3",
     "apollo-link": "^1.2.14",
     "core-js": "^3.6.5",
+    "date-and-time": "^1.0.1",
     "graphql-type-json": "^0.2.1",
     "jquery": "^3.6.0",
     "lowdb": "^1.0.0",

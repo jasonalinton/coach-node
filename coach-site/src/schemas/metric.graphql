@@ -14,5 +14,5 @@ input MetricInput {
   goals: [GoalInput]
   todos: [TodoInput]
   routines: [RoutineInput]
-  unmappedItemIDs: UnmappedItemIDs
+  unmappedIDs: unmappedIDs
 }

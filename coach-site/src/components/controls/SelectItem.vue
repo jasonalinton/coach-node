@@ -13,7 +13,7 @@ export default {
   },
   data: function() {
       return {
-          count: 5
+          count: 10
       }
   },
   computed: {

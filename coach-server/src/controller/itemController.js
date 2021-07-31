@@ -1,21 +1,22 @@
-const { configureRepeats } = require('./timeController');
+const { configureRepeats } = require('./time/repeatController');
+const { configureTimePairs } = require('./time/timePairController');
 
-function initData(data) {
-    data = (data) ? data : {};
-
+function initData(data = {}) {
     if (data.id || data.id >= 0) delete data.id; // Remove unnecessary ID
 
-    if (data.repeats)
-        configureRepeats(data);
-    else
-        delete data.repeats;
-    
-    delete data.timePairs;
+    if (data.repeats && data.repeats.length > 0) configureRepeats(data);
+    else delete data.repeats;
+
+    if (data.timePairs && data.timePairs.length > 0) configureTimePairs(data);
+    else delete data.timePairs;
+
+    //if (data.iterations && data.iterations.length == 0)
+        delete data.iterations;
+
     initItems(data);
     
-    delete data.unmappedItemIDs;
+    delete data.unmappedIDs;
 
-    // delete data.repeats;
     return data;
 }
 
@@ -65,8 +66,8 @@ function initItems(data) {
 //         {
 //             // Disconnect items
 //             let disconnect = [];
-//             if (data.unmappedItemIDs && data.unmappedItemIDs[items]) {
-//                 data.unmappedItemIDs[items].forEach(id => disconnect.push({ id }));
+//             if (data.unmappedIDs && data.unmappedIDs[items]) {
+//                 data.unmappedIDs[items].forEach(id => disconnect.push({ id }));
 
 //                 if (disconnect.length >= 1) {
 //                     if (!data[items]) data[items] = {};
@@ -76,7 +77,7 @@ function initItems(data) {
 //         }
 //     });
 
-//     delete data.unmappedItemIDs;
+//     delete data.unmappedIDs;
 
 //     return data;
 // }
@@ -113,8 +114,8 @@ function configureMappedObject(data, prop) {
 
     // Disconnect items
     let disconnect = [];
-    if (data.unmappedItemIDs && data.unmappedItemIDs[prop]) {
-        data.unmappedItemIDs[prop].forEach(id => disconnect.push({ id }));
+    if (data.unmappedIDs && data.unmappedIDs[prop]) {
+        data.unmappedIDs[prop].forEach(id => disconnect.push({ id }));
 
         if (disconnect.length >= 1) {
             if (!data[prop]) data[prop] = {};

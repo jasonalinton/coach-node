@@ -1,6 +1,6 @@
 <template>
     <div class="form-group mt-2">
-      <div class="d-flex justify-content-between align-items-center align-middle mb-1"
+      <div class="d-flex justify-content-between align-items-center align-middle"
             :style="{'height': '30px'}">
         <h2>Repeats</h2>
         <button v-if="!activeRepeat" class="btn btn-sm btn-link" type="button" @click="constructRepeat">Add</button>
@@ -44,7 +44,7 @@
         <div class="d-flex flex-column">
           <div class="d-flex flex-column mt-2">
             <span class="align-self-start">Repeat Start</span>
-            <TimeControl class="mt-2" label="Repeat Start" :time="activeRepeat.startRepeat"></TimeControl>
+            <TimeControl class="mt-2" label="Repeat Start" :time="activeRepeat.startRepeat" endpoint="Start" @setTime="setRepeatTime"></TimeControl>
           </div>
           <div class="d-flex flex-column mt-1">
             <div class="d-flex flex-row justify-content-between">
@@ -64,7 +64,7 @@
               <i v-if="!activeRepeat.startIteration" class="fas fa-plus btn btn-sm" @click="addIterationStart()"></i>
               <i v-if="activeRepeat.startIteration" class="fas fa-minus btn btn-sm" @click="removeIterationStart()"></i>
             </div>
-            <TimeControl v-if="activeRepeat.startIteration" class="mt-2" label="Iteration End" :time="activeRepeat.startIteration"></TimeControl>
+            <TimeControl v-if="activeRepeat.startIteration" class="mt-2" label="Iteration Start" :time="activeRepeat.startIteration"></TimeControl>
           </div>
           <!-- End -->
           <div class="d-flex flex-column mt-2">
@@ -91,16 +91,16 @@
         </div>
       </div>
       <!-- Repeat List -->
-      <div class="list-group mt-1" v-for="repeat in repeats" v-bind:key="repeat.id">
+      <div class="list-group" v-for="repeat in repeats" v-bind:key="repeat.id">
         <div class="list-group-item list-group-item-light list-group-item-action d-flex flew-row justify-content-between">
           <div>
             <div class="d-flex flex-row">
               <span class="me-2">Every</span>
-              <span class="me-2">{{ repeat.frequency }}</span>
+              <span class="me-2">{{ repeat.interval }}</span>
               <span>{{ getTimeframe(repeat.timeframe.id) }}</span>
             </div>
             <div class="d-flex flex-row">
-              <span class="me-2">{{ repeat.interval }}</span>
+              <span class="me-2">{{ repeat.frequency }}</span>
               <span>times a {{ getTimeframe(repeat.timeframe.id) }}</span>
             </div>
           </div>
@@ -115,6 +115,27 @@
 
 <script>
 import TimeControl from '../time/TimeControl.vue'
+import { today } from '../../../../utility'
+
+let timeTypes = [
+  { id: 80, text: "Scheduled", isActive: true },
+  { id: 81, text: "Recommended", isActive: true }
+];
+let endpointTypes = [
+    { id: 84, text: "Start" },
+    { id: 85, text: "End" },
+];
+let flexibilityTypes = [
+  { id: 23, text: "Definitive", isActive: true },
+  { id: 24, text: "Strict", isActive: true },
+  { id: 25, text: "Elastic", isActive: true },
+  { id: 26, text: "Flexible", isActive: true }
+];
+let momentTypes = [
+    { id: 87, text: "Date", inputType: "date" },
+    { id: 88, text: "Time", inputType: "time" },
+    { id: 89, text: "DateTime", inputType: "datetime-local" },
+]
 
 var repetitions = [
   { id: 63, text: "Daily", isActive: true },
@@ -133,16 +154,6 @@ var timeframes = [
   { id: 67, text: "weekend(s)", isActive: false },
   { id: 68, text: "week(s)", isActive: true },
   { id: 69, text: "month(s)", isActive: true },
-];
-var timeTypes = [
-  { id: 80, text: "Scheduled", isActive: true },
-  { id: 81, text: "Recommended", isActive: true }
-];
-var flexibilityTypes = [
-  { id: 23, text: "Definitive", isActive: true },
-  { id: 24, text: "Strict", isActive: true },
-  { id: 25, text: "Elastic", isActive: true },
-  { id: 26, text: "Flexible", isActive: true }
 ];
 
 export default {
@@ -165,6 +176,8 @@ export default {
       timeframes,
       timeTypes,
       flexibilityTypes,
+      endpointTypes,
+      momentTypes,
     }
   },
   computed: {
@@ -216,50 +229,58 @@ export default {
   },
   methods: {
     constructRepeat: function () {
-      let dateTime = new Date();
+      let dateTime = today();
       this.activeRepeat = { 
         id: --this.newRepeatID,
         startRepeat: { 
           id: --this.newTimeID,
-          dateTime: dateTime,
-          dateTimeString: dateString(dateTime.toJSON()),
-          type: { id: 80 },
-          endpoint: { id: 84 },
-          moment: { id: 87 },
+          dateTime: dateTime.toJSON(),
+          // dateTimeString: dateString(dateTime.toJSON()),
+          type: { id: this.getTimeTypeID("Scheduled") },
+          // endpoint: { id: 84 },
+          endpoint: { id: this.getEndpointTypeID("Start") },
+          moment: { id: 87, text: "Date" },
           flexibility: { id: this.getFlexibilityTypeID("Elastic") },
         },
         endRepeat: null,
         startIteration: null,
         endIteration: null,
-        type: { id: 80 },
-        timeframe: { id: 63 },
+        type: { id: this.getTimeTypeID("Scheduled") },
+        timeframe: { id: this.getTimeframeID("Daily") },
         isRecommended: 0,
         frequency: 1,
         interval: 1,
         dayIndecies: []
       };
     },
-    constructTime: function (dateTimeString, endpoint, moment) {
-      var idMoment;
-      if (moment == "date")
-        idMoment = 87;
-      else if (moment == "time")
-        idMoment = 88;
-      else
-        idMoment = 89;
+    // constructTime: function (dateTimeString, endpoint, moment) {
+    //   var idMoment;
+    //   if (moment == "date")
+    //     idMoment = 87;
+    //   else if (moment == "time")
+    //     idMoment = 88;
+    //   else
+    //     idMoment = 89;
 
-      return { 
-        id: --this.newTimeID,
-        dateTime: new Date(dateTimeString),
-        dateTimeString: dateString(dateTimeString),
-        type: { id: this.activeRepeat.type.id },
-        endpoint: { id: (endpoint == "start") ? 84 : 85 },
-        moment: { id: idMoment },
-        flexibility: { id: 25 },
-      };
-    },
+    //   return { 
+    //     id: --this.newTimeID,
+    //     dateTime: new Date(dateTimeString),
+    //     dateTimeString: dateString(dateTimeString),
+    //     type: { id: this.activeRepeat.type.id },
+    //     endpoint: { id: (endpoint == "start") ? 84 : 85 },
+    //     moment: { id: idMoment },
+    //     flexibility: { id: 25 },
+    //   };
+    // },
+    constructTime,
+    setRepeatTime,
+    setIterationTime,
+    getEndpointTypeID,
+    getTimeTypeID,
+    getFlexibilityTypeID,
+    getMomentTypeID,
     addEndRepeat: function () {
-      this.activeRepeat.endRepeat = this.constructTime(this.activeRepeat.startRepeat.dateTimeString, "end", "date");
+      this.activeRepeat.endRepeat = this.constructTime(this.activeRepeat.startRepeat.dateTime.toJSON(), "end", "date");
     },
     removeEndRepeat: function () {
       this.activeRepeat.endRepeat = null;
@@ -292,12 +313,12 @@ export default {
         tempRepeat.isRecommended = false;
 
       // Init temp field, dateTimeString
-      if (tempRepeat.startRepeat) {
-        tempRepeat.startRepeat.dateTimeString = dateString(tempRepeat.startRepeat.dateTime);
-      }
-      if (tempRepeat.endRepeat) {
-        tempRepeat.endRepeat.dateTimeString = dateString(tempRepeat.endRepeat.dateTime);
-      }
+      // if (tempRepeat.startRepeat) {
+      //   tempRepeat.startRepeat.dateTimeString = dateString(tempRepeat.startRepeat.dateTime);
+      // }
+      // if (tempRepeat.endRepeat) {
+      //   tempRepeat.endRepeat.dateTimeString = dateString(tempRepeat.endRepeat.dateTime);
+      // }
       // if (repeat.startIteration)
       
       // if (repeat.endIteration)
@@ -323,11 +344,9 @@ export default {
       // Set datetime
       if (repeat.startRepeat) {
         repeat.startRepeat.dateTime = new Date(repeat.startRepeat.dateTime);
-        delete repeat.startRepeat.dateTimeString;
       }
       if (repeat.endRepeat) {
         repeat.endRepeat.dateTime = new Date(repeat.endRepeat.dateTime);
-        delete repeat.endRepeat.dateTimeString;
       }
       // if (repeat.startIteration)
       //   repeat.startIteration.dateTime = new Date(repeat.startIteration.dateTimeString);
@@ -377,36 +396,79 @@ export default {
     getTimeframeID(repetition) {
         return this.repetitions.find(_repetition => _repetition.text == repetition).id
     },
-    getTimeTypeID(timeType) {
-        return this.timeTypes.find(_timeType => _timeType.text == timeType).id
-    },
-    getFlexibilityTypeID(flexibilityType) {
-        return this.flexibilityTypes.find(_flexibilityType => _flexibilityType.text == flexibilityType).id
-    }
   }
 }
 
-function dateString(dateTimeJSON) {
-  let dateArray = dateTimeJSON.split("T");
-  dateArray = dateArray[0].split("-");
-  return `${dateArray[0]}-${dateArray[1]}-${dateArray[2]}`;
+function constructTime(moment, endpoint, datetime = new Date(new Date().setSeconds(0))) {
+    return {
+        id: --this.newTimeID,
+        type: { id: this.getTimeTypeID("Scheduled") },
+        endpoint: { id: this.getEndpointTypeID(endpoint) },
+        moment: moment,
+        flexibility: { id: this.getFlexibilityTypeID("Elastic") },
+        dateTime: datetime.toJSON(),
+        isRecommended: false,
+    }
+}
+
+function setRepeatTime(dateTime, endpoint) {
+    this.activeRepeat[`${endpoint.toLowerCase()}Repeat`]
+}
+
+function setIterationTime(dateTime, endpoint) {
+    this.activeRepeat[`${endpoint.toLowerCase()}Iteration`]
+}
+
+function getEndpointTypeID(endpointType) {
+    return endpointTypes.find(_endpointType => _endpointType.text == endpointType).id
+}
+
+function getTimeTypeID(timeType) {
+    return timeTypes.find(_timeType => _timeType.text == timeType).id
+}
+
+function getFlexibilityTypeID(flexibilityType) {
+    return flexibilityTypes.find(_flexibilityType => _flexibilityType.text == flexibilityType).id
+}
+
+function getMomentTypeID(momentType) {
+    return momentTypes.find(_momentType => _momentType.text == momentType).id
 }
 </script>
 
 <style scoped>
-  h2 {
-    font-size: 16px;
-    margin-bottom: 0px;
-  }
+h2 {
+  font-size: 16px;
+  margin-bottom: 0px;
+  padding-left: 8px;
+  color: #343434
+}
 
-  
-  .btn-link {
-    padding: 2px 8px;
-  }
 
-  .list-group-item {
-    padding: 5px;
+.btn-link {
+  padding: 2px 8px;
+}
+
+/* .list-group-item {
+  padding: 5px;
+  font-size: 14px;
+} */
+
+.list-group-item {
+    padding: 4px 8px;
+    border-radius: initial;
+    border: none;
     font-size: 14px;
-  }
+    /* line-height: 14px; */
+    color: #343434;
+}
+
+.list-group-item:hover {
+    background-color:#F5F5F5;
+}
+
+.list-group-item:hover img {
+    visibility: visible;
+}
 
 </style>

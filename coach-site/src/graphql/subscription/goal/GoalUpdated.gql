@@ -24,6 +24,7 @@ subscription goalUpdated {
       text
     }
     timePairs {
+      id
       timeType {
         id
         text

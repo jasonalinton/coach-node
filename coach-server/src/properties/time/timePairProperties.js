@@ -30,6 +30,7 @@ const select_endTime = {
 }
 
 const timePair = {
+    id: true,
     timeType: select_timeType,
     startTime: select_startTime,
     endTime: select_endTime

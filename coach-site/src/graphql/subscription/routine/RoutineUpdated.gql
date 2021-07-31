@@ -24,6 +24,7 @@ subscription routineUpdated {
       text
     }
     timePairs {
+      id
       timeType {
         id
         text

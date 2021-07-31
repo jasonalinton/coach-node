@@ -1,0 +1,81 @@
+type Iteration {
+  id: Int
+  text: String
+  startAt: String
+  endAt: String
+  attemptedAt: String
+  completedAt: String
+  isRecommended: Boolean
+
+  todos: [Todo]
+  routines: [Routine]
+
+  todoRepeat: Repeat
+  routineRepeat: Repeat
+
+  events: [Event]
+
+  routineIteration: RoutineTodo_Iteration
+  todoIteration: RoutineTodo_Iteration
+}
+
+input IterationInput {
+  id: Int
+  text: String!
+  startAt: String
+  endAt: String
+  attemptedAt: String
+  completedAt: String
+  isRecommended: Boolean
+
+  todos: [TodoInput]
+  routines: [RoutineInput]
+
+  todoRepeat: RepeatInput
+  routineRepeat: RepeatInput
+
+  events: [EventInput]
+
+  routineIteration: RoutineTodo_IterationInput
+  todoIteration: RoutineTodo_IterationInput
+}
+
+type Event {
+  id: Int
+  text: String
+  startAt: String
+  endAt: String
+  isAllDay: String
+  isRecommended: String
+
+  iterations: [Iteration]
+}
+
+input EventInput {
+  id: Int
+  text: String!
+  startAt: String
+  endAt: String
+  isAllDay: String
+  isRecommended: String
+
+  iterations: [IterationInput]
+}
+
+type RoutineTodo_Iteration {
+  id: Int
+  idRoutineIteration: Int
+  hasTodoEvent: Boolean
+
+  routineIteration: Iteration
+  todoIterations: [Iteration]
+}
+
+input RoutineTodo_IterationInput {
+  id: Int
+  idRoutineIteration: Int
+  hasTodoEvent: Boolean
+
+  routineIteration: IterationInput
+  todoIterations: [IterationInput]
+}

@@ -94,4 +94,10 @@ export default {
     /* display: block; */
     overflow: scroll;
 }
+
+.nav-tabs .nav-link.active {
+  border-top: none;
+  border-radius: 0px;
+  border-bottom: 1px rgb(222, 226, 230) solid;
+}
 </style>

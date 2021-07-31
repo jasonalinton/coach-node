@@ -22,7 +22,7 @@ input RoutineInput {
   metrics: [MetricInput]
   todos: [TodoInput]
   goals: [GoalInput]
-  unmappedItemIDs: UnmappedItemIDs
+  unmappedIDs: unmappedIDs
   timePairs: [Routine_TimePairInput]
   repeats: [RepeatInput]
 }

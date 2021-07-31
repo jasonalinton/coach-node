@@ -1,5 +1,5 @@
 type Type {
-  id: Int!
+  id: Int
   text: String!
   altText: String
   description: String

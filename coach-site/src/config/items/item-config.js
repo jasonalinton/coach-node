@@ -26,6 +26,14 @@ class ItemConfigModel {
         return `${this.name}s`;
     }
 
+    get icon() {
+        if (['goal', 'todo', 'routine'].includes(this.itemType)) {
+            return `${this.itemType}-icon.png`;
+        } else {
+            return null
+        }
+    }
+
     get table() {
         return { columns: this.props.filter(x => x.isColumn) }
     }

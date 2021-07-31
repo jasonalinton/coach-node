@@ -1,0 +1,29 @@
+query routineIterations {
+  routineIterations {
+    id
+    idRoutineIteration
+    hasTodoEvent
+    routineIteration {
+      id
+      text
+      startAt
+      endAt
+      attemptedAt
+      completedAt
+      isRecommended
+    }
+    todoIterations {
+      id
+      text
+      startAt
+      endAt
+      todos {
+        id
+        text
+      }
+      attemptedAt
+      completedAt
+      isRecommended
+    }
+  }
+}

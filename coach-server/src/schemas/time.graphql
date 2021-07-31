@@ -14,6 +14,8 @@ input TimeInput {
   moment: TypeInput!
   flexibility: TypeInput!
   dateTime: String!
+
+  isUpdated: Boolean
 }
 
 type Goal_TimePair {
@@ -30,22 +32,27 @@ input Goal_TimePairInput {
   timeType: TypeInput!
   startTime: TimeInput
   endTime: TimeInput
+
+  isUpdated: Boolean
 }
 
 type Todo_TimePair {
-  id: Int!
-  todo: Todo!
-  timeType: Type!
+  id: Int
+  todo: Todo
+  timeType: Type
   startTime: Time
   endTime: Time
 }
 
 input Todo_TimePairInput {
   id: Int
-  todo: TodoInput!
+  todo: TodoInput
   timeType: TypeInput!
   startTime: TimeInput
   endTime: TimeInput
+
+  isUpdated: Boolean
+  unmappedIDs: unmappedIDs
 }
 
 type Routine_TimePair {
@@ -62,6 +69,9 @@ input Routine_TimePairInput {
   timeType: TypeInput!
   startTime: TimeInput
   endTime: TimeInput
+
+  isUpdated: Boolean
+  unmappedIDs: unmappedIDs
 }
 
 type Repeat {
@@ -82,20 +92,22 @@ type Repeat {
 
 input RepeatInput {
   id: Int
-  type: TypeInput!
-  timeframe: TypeInput!
+  type: TypeInput
+  timeframe: TypeInput
   startRepeat: TimeInput
   endRepeat: TimeInput
   startIteration: TimeInput
   endIteration: TimeInput
-  interval: Int!
-  frequency: Int!
+  interval: Int
+  frequency: Int
   dayIndecies: [Repeat_DayIndexInput]
   goal_repeats: [Goal_RepeatInput]
   todo_repeats: [Todo_RepeatInput]
   routine_repeats: [Routine_RepeatInput]
 
   isUpdated: Boolean
+  isConnected: Boolean
+  unmappedIDs: unmappedIDs
 }
 
 type Repeat_DayIndex {

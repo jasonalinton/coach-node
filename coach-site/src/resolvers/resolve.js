@@ -8,6 +8,7 @@ export function addItemToCache(cache, QUERY, itemType, item) {
         query: QUERY,
         data: cacheData
     });
+    console.log("Success!");
 }
 
 export function addPropertyToCache(cache, QUERY, propertyType, itemType, item) {
@@ -23,6 +24,7 @@ export function addPropertyToCache(cache, QUERY, propertyType, itemType, item) {
         query: QUERY,
         data: cacheData
     });
+    console.log("Success!");
 }
 
 export function updateItemInCache(cache, QUERY, itemType, item) {
@@ -34,6 +36,7 @@ export function updateItemInCache(cache, QUERY, itemType, item) {
         query: QUERY,
         data: cacheData
     });
+    console.log("Success!");
 }
 
 export function updatePropertyInCache(cache, QUERY, propertyType, itemType, item) {
@@ -59,6 +62,7 @@ export function updatePropertyInCache(cache, QUERY, propertyType, itemType, item
         data: cacheData,
         broadcast: true
     });
+    console.log("Success!");
     // cache.readQuery({ query: QUERY });
 }
 
@@ -69,6 +73,7 @@ export function deleteItemInCache(cache, QUERY, itemType, item) {
         query: QUERY,
         data: cacheData
     });
+    console.log("Success!");
 }
 
 export function deletePropertyInCache(cache, QUERY, propertyType, itemType, item) {
@@ -83,6 +88,7 @@ export function deletePropertyInCache(cache, QUERY, propertyType, itemType, item
         query: QUERY,
         data: cacheData
     });
+    console.log("Success!");
 }
 
 // Ten bucks says this causes a probalem in the future JL: 7/4/21

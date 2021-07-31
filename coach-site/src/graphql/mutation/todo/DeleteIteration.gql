@@ -1,0 +1,6 @@
+mutation deleteIteration($id: Int!) {
+  deleteIteration(id: $id) {
+    id
+    text
+  }
+}

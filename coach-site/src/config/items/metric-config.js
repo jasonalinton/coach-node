@@ -33,6 +33,7 @@ let config = {
             isItem: true,
             isColumn: true,
             optionsQuery: require('../../graphql/query/QueryGoals.gql'),
+            icon: '/icon/goal-icon.png',
         },
         {
             id: 5,
@@ -42,7 +43,8 @@ let config = {
             type: 'objects',
             isItem: true,
             isColumn: true,
-            optionsQuery: require('../../graphql/query/QueryRoutines.gql')
+            optionsQuery: require('../../graphql/query/routine/QueryRoutines.gql'),
+            icon: '/icon/routine-icon.png',
         },
         {
             id: 6,
@@ -52,7 +54,8 @@ let config = {
             type: 'objects',
             isItem: true,
             isColumn: true,
-            optionsQuery: require('../../graphql/query/QueryTodos.gql')
+            optionsQuery: require('../../graphql/query/todo/QueryTodos.gql'),
+            icon: '/icon/task-icon.png',
         }
     ],
     updateItem: updateMetric,

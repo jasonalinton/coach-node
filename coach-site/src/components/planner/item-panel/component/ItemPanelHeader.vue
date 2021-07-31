@@ -59,7 +59,7 @@ h1 {
     margin-left: 8px;
     font-size: 16px;
     line-height: 16px;
-    margin-bottom: 4px;
+    margin-bottom: 0px;
     color: #565656;
 }
 
@@ -73,10 +73,6 @@ h1 {
     line-height: 16px;
     border: none;
     color: #747474;
-}
-
-.panel-select:focus {
-    box-shadow: none;
 }
 
 #hierarchy-icon {

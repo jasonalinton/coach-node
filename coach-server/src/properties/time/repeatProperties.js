@@ -16,7 +16,8 @@ const dayIndex = {
 }
 
 const select_dayIndex = {
-    select: dayIndex
+    select: dayIndex,
+    orderBy: { index: 'asc' }
 }
 
 const time = {
@@ -49,6 +50,54 @@ const select_endIteration = {
     select: endIteration
 }
 
+const todo_repeat = {
+    id: true,
+    lastIterationDateTime: true,
+    isEventVisible: true,
+    todo: {
+        select: {
+            id: true,
+            text: true
+        }
+    }
+}
+
+const select_todo_repeat = {
+    select: todo_repeat
+}
+
+const routine_repeat = {
+    id: true,
+    lastIterationDateTime: true,
+    isEventVisible: true,
+    routine: {
+        select: {
+            id: true,
+            text: true
+        }
+    }
+}
+
+const select_routine_repeat = {
+    select: routine_repeat
+}
+
+const goal_repeat = {
+    id: true,
+    lastIterationDateTime: true,
+    isEventVisible: true,
+    goal: {
+        select: {
+            id: true,
+            text: true
+        }
+    }
+}
+
+const select_goal_repeat = {
+    select: goal_repeat
+}
+
 const repeat = {
     id: true,
     type: repeatType,
@@ -60,6 +109,9 @@ const repeat = {
     interval: true,
     frequency: true,
     dayIndecies: select_dayIndex,
+    todo_repeats: select_todo_repeat,
+    routine_repeats: select_routine_repeat,
+    goal_repeats: select_goal_repeat,
 }
 
 const select_repeat = {

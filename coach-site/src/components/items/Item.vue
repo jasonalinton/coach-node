@@ -5,10 +5,11 @@
                 :id="`${config.itemType}-table`"
                     :config="config"
                     @itemSelected="itemSelected"
+                    :selectedItem="selectedItem"
                     @closeForm="closeForm"/>
             <ItemForm 
                 v-if="selectedItem"
-                :id="`${config.itemType}-form`" class="h-100" 
+                :id="`${config.itemType}-form`"
                     :config="config"
                     :item="selectedItem"
                     @refreshForm="refreshForm"
@@ -59,7 +60,9 @@ function itemSelected(item) {
 
             this.split = Split([`#${this.config.itemType}-table`, `#${this.config.itemType}-form`], {
                 sizes,
-                minSize: [320, 200],
+                minSize: [320, 275],
+                gutterSize: 10,
+                snapOffset: 10,
                 onDragEnd: (sizes) => localStorage.setItem(`${this.config.itemType}-split-sizes`, JSON.stringify(sizes))
             });
         });
@@ -88,13 +91,16 @@ function refreshForm() {
     }   
 
     .item .gutter {
-        background-color: #eee;
+        /* background-color: rgba(220, 220, 220, .5); */
+        border-left: 1px solid rgba(220, 220, 220, .5);
+        
+        background-color: transparent;
         background-repeat: no-repeat;
         background-position: 50%;
     }
 
     .item .gutter.gutter-horizontal {
-        background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAeCAYAAADkftS9AAAAIklEQVQoU2M4c+bMfxAGAgYYmwGrIIiDjrELjpo5aiZeMwF+yNnOs5KSvgAAAABJRU5ErkJggg==');
+        /* background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAeCAYAAADkftS9AAAAIklEQVQoU2M4c+bMfxAGAgYYmwGrIIiDjrELjpo5aiZeMwF+yNnOs5KSvgAAAABJRU5ErkJggg=='); */
         cursor: col-resize;
     }   
 </style>

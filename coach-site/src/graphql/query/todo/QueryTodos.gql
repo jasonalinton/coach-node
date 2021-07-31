@@ -1,5 +1,5 @@
-query routines {
-  routines {
+query todos {
+  todos {
     id
     text
     description
@@ -19,11 +19,12 @@ query routines {
       id
       text
     }
-    todos {
+    routines {
       id
       text
     }
     timePairs {
+      id
       timeType {
         id
         text
@@ -165,6 +166,15 @@ query routines {
         id
         index
       }
+    }
+    iterations {
+      id
+      text
+      startAt
+      endAt
+      attemptedAt
+      completedAt
+      isRecommended
     }
   }
 }

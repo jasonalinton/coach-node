@@ -7,9 +7,13 @@ type Query {
 
   # Todo
   todos: [Todo!]!
+  repetitiveTodos: [Todo!]!
+  todoIterations: [Iteration!]!
 
   # Routine
   routines: [Routine!]!
+  repetitiveRoutines: [Routine!]!
+  routineIterations: [RoutineTodo_Iteration]!
 }
 
 type Mutation {
@@ -25,11 +29,23 @@ type Mutation {
   addTodo(todo: TodoInput!): Todo!
   updateTodo(todo: TodoInput!): Todo!
   deleteTodo(id: Int!): Todo!
+  createTodoIterations(todo: TodoInput!): Todo
+  createDefaultTask(iteration: IterationInput!): Todo
+  toggleCompletion(iteration: IterationInput!): Iteration
+  deleteIteration(id: Int!): Iteration
+  refreshRepetitive: [Todo!]!
+  getTodoRepeat(idTodo: Int, idRepeat: Int): Todo_Repeat
 
   # Routine
   addRoutine(routine: RoutineInput!): Routine!
   updateRoutine(routine: RoutineInput!): Routine!
   deleteRoutine(id: Int!): Routine!
+  createRoutineIterations(routine: RoutineInput!): Routine
+  getRoutineRepeat(idRoutine: Int, idRepeat: Int): Routine_Repeat
+  mapTodoIterations(routineTodo_Iteration: RoutineTodo_IterationInput): RoutineTodo_Iteration!
+
+  # Type
+  getTypes(parentType: String!): [Type!]!
 }
 
 type Subscription {
@@ -45,6 +61,9 @@ type Subscription {
   todoAdded: Todo!
   todoUpdated: Todo!
   todoDeleted: Todo!
+  iterationAdded: Iteration!
+  iterationUpdated: Iteration!
+  iterationDeleted: Iteration!
 
   # Routine
   routineAdded: Routine!
@@ -52,7 +71,7 @@ type Subscription {
   routineDeleted: Routine!
 }
 
-input UnmappedItemIDs {
+input unmappedIDs {
   parents: [Int]
   children: [Int]
   metrics: [Int]

@@ -1,4 +1,18 @@
-const { configureTime, configureMapObject } = require('../../controller/timeController');
+const { configureTime, configureMapObject, configureRepeats } = require('../../../controller/time/repeatController');
+
+async function configureRepeatTrans(data, transaction = [], context) {
+    if (data.repeats && data.repeats.update) {
+        for (let i = 0; i < data.repeats.update.length; i++) {
+            let _transaction = await updateRepeat(context, data.repeats.update[i], true);
+            _transaction.forEach(tran => transaction.push(tran));
+        }
+        delete data.repeats.update;
+        if (!data.repeats.create && !data.repeats.disconnect) {
+            delete data.repeats;
+        }
+    }
+    return transaction;
+}
 
 async function updateRepeat(context, repeat, useTransaction = false) {
     let transaction = [];
@@ -7,7 +21,7 @@ async function updateRepeat(context, repeat, useTransaction = false) {
     for (let i = 0; i < times.length; i++) {
         let time = repeat[times[i]];
         if (time) {
-            if (time.id > 0) {
+            if (time.id > 0 && time.isUpdated) {
                 await createTimeUpdateTransactions(time, context, transaction);
             } else {
                 await createTimeCreateTransactions(repeat, times[i], context, transaction);
@@ -137,6 +151,32 @@ function createDayIndexTransactions(repeat_in, existingRepeat, context, transact
     
 }
 
+async function getRoutineRepeat(parent, { idRepeat, idRoutine }, context, info) {
+    console.log("")
+    let routine_repeat = await context.prisma.routine_Repeat.findFirst({
+        where: {
+            idRoutine,
+            idRepeat
+        }
+    })
+    
+    return routine_repeat;
+}
+
+async function getTodoRepeat(parent, { idTodo, idRepeat }, context, info) {
+    console.log("")
+    let todo_repeat = await context.prisma.todo_Repeat.findFirst({
+        where: {
+            idTodo,
+            idRepeat
+        }
+    })
+    
+    return todo_repeat;
+}
+
 module.exports = {
-    updateRepeat
+    configureRepeatTrans,
+    getRoutineRepeat,
+    getTodoRepeat
 }

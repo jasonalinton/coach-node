@@ -52,7 +52,7 @@ type Subscription {
   routineDeleted: Routine!
 }
 
-input UnmappedItemIDs {
+input unmappedIDs {
   parents: [Int]
   children: [Int]
   metrics: [Int]

@@ -1,80 +1,62 @@
 <template>
-    <input class="form-control form-control-sm" :id="time.id" :type="type" @change="change" v-model="time.dateTimeString"/>
+    <div class="d-flex flex-column">
+        <div class="d-flex flex-row justify-content-between">
+            <label class="control-label" for="description">{{ endpoint }}</label>
+            <MomentSelector :moment="moment" :endpoint="endpoint" @addTime="addTime" @removeTime="removeTime"></MomentSelector>
+        </div>
+        <TimeInput v-if="time" :time="time" :momentID="time.moment.id" @setTime="setTime"></TimeInput>
+        <!-- Recommended -->
+        <!-- <div class="form-check mt-2">
+            <input id="flexCheckDefault" class="form-check-input" type="checkbox" value="" v-model="time.isRecommended">
+            <label class="form-check-label float-start" for="flexCheckDefault">Recommended</label>
+        </div> -->
+    </div>
 </template>
 
 <script>
-
-function findItem(id, itemList) {
-  var findObject = (object) => object.id == id;
-  var index = itemList.findIndex(findObject);
-  if (index == -1) 
-    null;
-  else
-      return itemList[index];
-}
-
-function inputDateToDate(dateString) {
-    var dateArray = dateString.split("-");
-    return new Date(dateArray[0], dateArray[1] - 1, dateArray[2]);
-}
-
-function inputTimeToDate(dateString) {
-    var timeArray = dateString.split(":");
-    return new Date(1, 0, 1, timeArray[0], timeArray[1], 0);
-}
-
-function inputDateTimeToDate(dateString) {
-    var array = dateString.split("T");
-    var dateArray = array[0].split("-");
-    var timeArray = array[1].split(":");
-    return new Date(dateArray[0], dateArray[1] - 1, dateArray[2], timeArray[0], timeArray[1], 0);
-}
-
-// var time = {
-//   types: [
-//     { id: 80, text: "Scheduled" },
-//     { id: 81, text: "Recommended" },
-//     { id: 82, text: "Due" }
-//   ],
-//   endpoint: [
-//     { id: 84, text: "Start" },
-//     { id: 85, text: "End" },
-//   ],
-  
-// }
-var moments = [
-    { id: 87, text: "Date", inputType: "date" },
-    { id: 88, text: "Time", inputType: "time" },
-    { id: 89, text: "Date Time", inputType: "datetime-local" },
-  ]
+import MomentSelector from "./MomentSelector.vue"
+import TimeInput from '../input/TimeInput.vue'
 
 export default {
-  name: 'TimeControl',
-  props: {
-      time: Object,
-      label: String
-  },
-  computed: {
-      type: function () {
-          var moment = findItem(this.time.moment.id, moments);
-          return moment.inputType;
-      }
-  },
-  data: function () {
-      return {
-        selectedTypes: [],
-      }
-  },
-  methods: {
-    change: function () {
-        if (this.type == "date") {
-            this.time.dateTime = inputDateToDate(this.time.dateTimeString);
-        } else if (this.type == "time") {
-            this.time.dateTime = inputTimeToDate(this.time.dateTimeString);
-        } else if (this.type == "datetime-local") {
-            this.time.dateTime = inputDateTimeToDate(this.time.dateTimeString);
+    name: 'TimeControl',
+    components: { MomentSelector, TimeInput },
+    props: {
+        time: Object,
+        endpoint: String
+    },
+    data: function () {
+        return {
+            moment: (this.time) ? this.time.moment : null,
+        }
+    },
+    methods: {
+        addTime(moment) {
+            this.$emit('addTime', moment, this.endpoint)
+        },
+        removeTime() {
+            this.$emit('removeTime', this.time)
+        },
+        setTime(dateTime) {
+            this.$emit('setTime', dateTime, this.endpoint)
+        },
+    },
+    watch: {
+        time(value) { 
+            if (value) {
+                this.moment = this.time.moment;
+            } else {
+                this.moment = null;
+            }
         }
     }
-  }
 }
 </script>
+
+<style scoped>
+label {
+    font-size: 14px;
+    padding: 0px 8px;
+    line-height: 24px;
+    height: 24px;
+}
+</style>

@@ -24,6 +24,7 @@ mutation updateTodo($todo: TodoInput!) {
       text
     }
     timePairs {
+      id
       timeType {
         id
         text
@@ -165,6 +166,15 @@ mutation updateTodo($todo: TodoInput!) {
         id
         index
       }
+    }
+    iterations {
+      id
+      text
+      startAt
+      endAt
+      attemptedAt
+      completedAt
+      isRecommended
     }
   }
 }

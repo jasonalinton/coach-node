@@ -1,28 +1,102 @@
 <template>
     <nav id="navbar" class="navbar navbar-expand-sm navbar-light">
-        <div class="container-fluid">
-            <MenuButton class="menu-button"></MenuButton>
-            <a class="navbar-brand" href="#">Inventory Planner</a>
+        <div class="container-fluid d-flex flex-row">
+            <div class="d-flex flex-row">
+                <div class="d-flex flex-row">
+                    <IconButton class="icon menu-button float-left" src="/icon/menu-button.png" :width="48" :height="48"></IconButton>
+                    <img class="icon calendar-button float-left" src="/icon/planner-icon.png" :width="36" :height="36"/>
+                    <a class="navbar-brand float-left" href="#">Inventory Planner</a>
+                </div>
+                <div class="d-flex flex-row">
+                    <button class="btn btn-sm" type="button" @click="$emit('showWeekView')">Planner</button>
+                    <button class="btn btn-sm" type="button" @click="$emit('showItems')">Items</button>
+                </div>
+            </div>
+            <div v-if="selectedPage == 'planner'" class="d-flex flex-row me-5">
+                <select v-if="view == 1" v-model="dayCountt">
+                    <option v-for="weekView in weekViews" :key="weekView.id" :value="weekView.id">{{ weekView.text }}</option>
+                </select>
+                <select v-model="view">
+                    <option v-for="_view in views" :key="_view.id" :value="_view.id">{{ _view.text }}</option>
+                </select>
+            </div>
         </div>
     </nav>
 </template>
 
 <script>
-import MenuButton from '../controls/button/icon/MenuButton.vue';
+import IconButton from '../controls/button/IconButton.vue';
+
+let views = [
+    { id: 1, text: 'Week', view: 'weekView'},
+    { id: 2, text: 'Month', view: 'monthView' },
+]
+
+let weekViews = [
+    { id: 1, text: 'One'},
+    { id: 2, text: 'Two'},
+    { id: 3, text: 'Three'},
+    { id: 4, text: 'Four'},
+    { id: 5, text: 'Five'},
+    { id: 7, text: 'Week'},
+]
+
 export default {
-    components: { MenuButton },
     name: "PlannerNavbar",
+    components: { IconButton },
+    props: {
+        dayCount: Number,
+        selectedView: String,
+        selectedPage: String,
+    },
+    data: function() {
+        return {
+            dayCountt: this.dayCount,
+            views,
+            view: null,
+            weekViews,
+        }
+    },
+    created: function() {
+        this.view = views.find(_view => _view.view == this.selectedView).id;
+    },
+    watch: {
+        dayCountt(value) { this.$emit('dayCountChange', value) },
+        view(value) { this.$emit('viewChange', views.find(view => view.id == value).view) },
+    }
 };
 </script>
 
-<style>
+<style scoped>
 .navbar {
-    border-bottom: 1px solid rgba(220, 220, 220, .5)
+    border-bottom: 1px solid rgba(220, 220, 220, .5);
+    padding-bottom: 7px;
+    line-height: 38px;
+}
+
+.icon {
+    margin: auto 12px auto 0px;
 }
 
 .menu-button {
     margin: 0 12px;
 }
 
+select {
+    font-size: 14px;
+    line-height: 14px;
+    padding: 0px 4px;
+    height: 32px;
+    /* border: 1px solid #BCBCBC; */
+    border: none;
+    border-radius: 4px;
+    color: #343434;
+    background-color: white;
+    margin: 0px 2px;
+    margin-top: -1px;
+}
 
+select:hover {
+    background-color: rgba(60, 64, 67, .08);
+}
 </style>

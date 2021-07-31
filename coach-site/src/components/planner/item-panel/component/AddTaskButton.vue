@@ -1,8 +1,8 @@
 <template>
-    <button class="add-item">
+    <button class="add-item" @click="onClick">
         <div class="d-flex align-items-center">
             <i class="fas fa-check"></i>
-            <span :style="{ 'line-height': '24px', 'font-size': '14px', 'color': '#F4511E' }" @click="onClick">Add a task</span>
+            <div class="text">Add a task</div>
         </div>
     </button>
 </template>
@@ -16,7 +16,7 @@ export default {
 }
 
 function onClick() {
-    this.$emit('onClick');
+    this.$emit('click');
 }
 </script>
 
@@ -34,10 +34,13 @@ i {
     margin-right: 12px;
 }
 
-span {
-    line-height: 24px;
+.text {
+    height: 14px;
+    line-height: 15px;
     font-size: 14px;
-    color: #F4511E
+    font-weight: 500;
+    color: #F4511E;
+    /* color: #565656 */
 }
 
 button.add-item {

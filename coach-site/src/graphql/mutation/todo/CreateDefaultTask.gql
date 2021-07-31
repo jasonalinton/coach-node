@@ -1,5 +1,5 @@
-query todos {
-  todos {
+mutation createDefaultTask($iteration: IterationInput!) {
+  createDefaultTask(iteration: $iteration) {
     id
     text
     description
@@ -24,6 +24,7 @@ query todos {
       text
     }
     timePairs {
+      id
       timeType {
         id
         text
@@ -165,6 +166,15 @@ query todos {
         id
         index
       }
+    }
+    iterations {
+      id
+      text
+      startAt
+      endAt
+      attemptedAt
+      completedAt
+      isRecommended
     }
   }
 }
