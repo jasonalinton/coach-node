@@ -26,7 +26,7 @@ import Split from 'split.js'
 
 export default {
     components: { ItemTable, ItemForm },
-    name: 'Item',
+    name: 'ItemTab',
     props: {
         config: Object
     },

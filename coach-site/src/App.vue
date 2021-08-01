@@ -4,10 +4,10 @@
         <div id="app-body" class="row g-0">
             <div class="col">
                 <Planner v-if="selectedPage == 'planner'" :selectedPage="selectedPage"></Planner>
-                <Items
+                <ItemTabs
                     v-if="selectedPage == 'items'"
                     :style="{ height: `${bodyHeight}px` }"
-                ></Items>
+                ></ItemTabs>
             </div>
         </div>
     </div>
@@ -18,14 +18,14 @@ import $ from "jquery";
 import { style } from "../app.config";
 import Navbar from "./components/nav/Navbar.vue";
 import Planner from "./components/planner/Planner.vue";
-import Items from "./components/items/Items.vue";
+import ItemTabs from "./components/items/ItemTabs.vue";
 
 export default {
     name: "App",
     components: {
         Navbar,
         Planner,
-        Items,
+        ItemTabs,
     },
     data: function () {
         return {

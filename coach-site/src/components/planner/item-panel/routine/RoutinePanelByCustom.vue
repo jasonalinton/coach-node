@@ -25,8 +25,8 @@
                 </li>
             </ul>
             <!-- Complete  -->
-            <div class="d-flex flex-column">
-                <div class="header">Completed ({{ iterations.complete.length }})</div>
+            <div class="complete d-flex flex-column">
+                <div class="header">Completed ({{ completeCount }} of {{ totalCount }}) {{ percentComplete }}%</div>
                 <ul v-if="iterations.complete" class="item-list">
                     <li v-for="(iteration, index) in iterations.complete" v-bind:key="index" :style="{ 'z-index': -index }">
                         <ListItem class="complete" :iteration="iteration" @markIncomplete="markIncomplete" @onDelete="removeIteration"></ListItem>
@@ -43,7 +43,7 @@
 // import AddTaskButton from '../component/AddTaskButton.vue'
 // import ItemCheckbox from '../component/ItemCheckbox.vue';
 import ListItem from '../component/ListItem.vue'
-import { replaceItem, removeItem, today } from '../../../../../utility';
+import { replaceItem, removeItem, today, Percent } from '../../../../../utility';
 import { createDefaultTask, toggleCompletion, deleteIteration } from '../../../../resolvers/todo-resolvers';
 
 export default {
@@ -107,6 +107,12 @@ export default {
                 },
             ]
         },
+    },
+    computed: {
+        pendingCount() { return this.iterations.pending.length },
+        completeCount() { return this.iterations.complete.length },
+        totalCount() { return this.pendingCount + this.completeCount },
+        percentComplete() { return Percent(this.completeCount, this.totalCount); },
     },
     methods: {
         initIteration,
@@ -234,7 +240,7 @@ function removeIteration(iteration) {
 
 ul {
     font-size: 14px;
-    color: #3C4043;
+    color: #343434;
     list-style: none;
     padding: 0px;
     margin: 0px;
@@ -264,6 +270,10 @@ ul {
 .complete .header {
     background-color: white;
     z-index: 3;
-    padding: 0 8px;
+    padding: 0 16px;
+    font-size: 14px;
+    font-family: SF Pro Rounded, 'Roboto', sans-serif;
+    border-top: 1px solid #D8D8D8;
+    height: 48px;
 }
 </style>

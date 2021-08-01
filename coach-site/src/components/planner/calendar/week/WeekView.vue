@@ -9,9 +9,16 @@
                     <div class="date-icon">{{ day.date }}</div><!-- Date -->
                 </div>
                 <div class="task-list d-flex flex-column" :style="{ 'min-height': `${maxTasks * 22}px` }">
-                    <div v-for="(task, index) in day.tasks" :key="index" class="task d-flex" :class="{ complete: task.completedAt }">
-                        <img src="/icon/task-icon-white.png" width="14" height="14"/>
+                    <div v-for="(task, index) in day.tasks" :key="index" class="task d-flex" :class="{ complete: task.attemptedAt, incomplete: !task.attemptedAt }">
+                        <!-- <img src="/icon/task-icon-white.png" width="14" height="14"/> -->
+                        <img class="check" :src="`/icon/task-icon-${(task.attemptedAt)?'black':'white'}.png`" width="14" height="14"/>
                         <div>{{ task.text }}</div>
+                        <img class="next button" :src="`/icon/next-${(task.attemptedAt)?'dark':'lite'}.png`" 
+                             width="14" height="14"
+                             @click="toNextDay(task)"/>
+                        <img class="attempted button" :src="`/icon/thumbs-up-${(task.attemptedAt)?'dark':'lite'}-2.png`"
+                             width="14" height="14"
+                             @click="markAttempted(task)"/>
                     </div>
                 </div>
             </div>
@@ -21,7 +28,8 @@
 
 <script>
 import date from "date-and-time";
-// import { replaceItem, removeItem } from '../../../../../utility';
+import { rescheduleIteration, attemptIteration } from "../../../../resolvers/todo-resolvers";
+import { addDay } from "../../../../../utility";
 
 export default {
     name: 'WeekView',
@@ -62,7 +70,11 @@ export default {
     },
     methods: {
         initTimeline,
-        iterationsToDays
+        iterationsToDays,
+        rescheduleIteration,
+        toNextDay,
+        attemptIteration,
+        markAttempted
     },
     watch: {
         dayCount() { 
@@ -94,7 +106,6 @@ function iterationsToDays() {
              const start = new Date(iteration.startAt).toDateString();
              const end = new Date(iteration.endAt).toDateString();
             return start == dateString || (!iteration.startAt && iteration.endAt && end == dateString);
-            //  return date.isSameDay(new Date(iteration.startAt), _day) || date.isSameDay(new Date(iteration.endAt), _day)
         });
 
         let day = { 
@@ -115,6 +126,16 @@ function iterationsToDays() {
         this.maxTasks = (iterations.length > this.maxTasks) ? iterations.length : this.maxTasks;
     });
     return days;
+}
+
+function toNextDay(iteration) {
+    let nextDay = addDay(new Date(iteration.startAt));
+    this.rescheduleIteration(iteration.id, nextDay, this.$apollo);
+}
+
+function markAttempted(iteration) {
+    // let attemptedAt = (this.selected)
+    this.attemptIteration(iteration.id, new Date(iteration.startAt), this.$apollo);
 }
 </script>
 
@@ -194,8 +215,12 @@ function iterationsToDays() {
     font-size: 12px;
     user-select: none;
     width: calc(100% - 8px);
-    margin-right: 8px;
     font-family: SF Pro Display, 'Roboto', sans-serif;
+    position: relative;
+}
+
+.task.incomplete:hover {
+    color: rgba(255, 255, 255, .25);
 }
 
 .task.complete { 
@@ -206,7 +231,7 @@ function iterationsToDays() {
     font-weight: 500;
 }
 
-.task img {
+.task .check {
     color: white;
     padding: 4px 4px 2px 0px;
 }
@@ -214,5 +239,28 @@ function iterationsToDays() {
 .task div { 
     overflow: hidden;
     white-space: nowrap;
+}
+
+.button {
+    position: absolute;
+    border-radius: 7px;
+    visibility: hidden;
+    margin-top: 1px
+}
+
+.task.incomplete:hover .button {
+    visibility: visible;
+}
+
+.task.incomplete:hover .button:hover {
+    background-color: rgba(0, 0, 0, .5);
+}
+
+.attempted {
+    right: 18px;
+}
+
+.next {
+    right: 2px;
 }
 </style>

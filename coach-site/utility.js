@@ -126,10 +126,22 @@ export function month_short(dateTime = new Date()) {
     return date.format(dateTime, 'MMM');   
 }
 
+export function addDay(dateTime = new Date(), days = 1) {
+    return moment(dateTime).add( days, 'day').toDate();   
+}
+
+export function subtractDay(dateTime = new Date(), days = 1) {
+    return moment(dateTime).add( -days, 'day').toDate();   
+}
+
 export function addMonth(dateTime = new Date(), months = 1) {
     return moment(dateTime).add( months, 'month').toDate();   
 }
 
 export function subtractMonth(dateTime = new Date(), months = 1) {
     return moment(dateTime).add( -months, 'month').toDate();   
+}
+
+export function Percent(numberator, denominator) {
+    return new Intl.NumberFormat([ ], { style: 'decimal', maximumFractionDigits: 0 }).format(numberator / denominator * 100);
 }

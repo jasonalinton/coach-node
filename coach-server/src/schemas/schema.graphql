@@ -32,6 +32,8 @@ type Mutation {
   createTodoIterations(todo: TodoInput!): Todo
   createDefaultTask(iteration: IterationInput!): Todo
   toggleCompletion(iteration: IterationInput!): Iteration
+  rescheduleIteration(id: Int!, startAt: String!): Iteration
+  attemptIteration(id: Int!, attemptedAt: String!): Iteration
   deleteIteration(id: Int!): Iteration
   refreshRepetitive: [Todo!]!
   getTodoRepeat(idTodo: Int, idRepeat: Int): Todo_Repeat

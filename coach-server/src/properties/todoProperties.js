@@ -7,17 +7,15 @@ const where_isDeleted_false = {
     }
 }
 
-const iterationInclude = {
-    include: {
-        todos: {
-            select: {
-                id: true,
-                text: true,
-                metrics: {
-                    select: {
-                        id: true,
-                        text: true
-                    }
+const todoIterationIncude = {
+    todos: {
+        select: {
+            id: true,
+            text: true,
+            metrics: {
+                select: {
+                    id: true,
+                    text: true
                 }
             }
         }
@@ -32,10 +30,11 @@ const todoInclude = {
     routines: where_isDeleted_false,
     timePairs: select_timePair,
     repeats: select_repeat,
-    iterations: iterationInclude,
+    iterations: { include: todoIterationIncude },
     // todo_repeats: false,
 }
 
 module.exports = {
-    todoInclude
+    todoInclude,
+    todoIterationIncude
 }

@@ -4,18 +4,18 @@
             <div :style="{'width': '100%', 'height': '64px', 'border-bottom': '1px solid rgba(220, 220, 220, .5)'}"></div>
             <div :style="{'width': '56px', 'height': '192px', 'padding-left': '8px', 'overflow': 'hidden'}">
                 <div class="d-flex flex-row mb-1">
-                    <img class="goal" :class="[{ active: selectedPanel == 'goal' }]" src='/icon/goal-icon.png' width="40" height="40" :style="{'margin-top': '8px'}" @click="selectedPanel = (selectedPanel != 'goal') ? 'goal' : null"/>
-                    <div v-if="selectedPanel == 'goal'">
-                    <div :style="{ 'width': '12px', 'height': '40px', 'background-color': '#4285F4', 'margin-left': '3px', 'margin-top': '8px', 'border-radius': '4px'}"></div></div>
-                </div>
-                <div class="d-flex flex-row mb-1">
-                    <img class="todo" :class="[{ active: selectedPanel == 'todo' }]" src='/icon/todo-icon.png' width="40" height="40" @click="selectedPanel = (selectedPanel != 'todo') ? 'todo' : null"/>
+                    <img class="todo" :class="[{ active: selectedPanel == 'todo' }]" src='/icon/todo-icon.png' width="40" height="40" :style="{'margin-top': '8px'}" @click="selectedPanel = (selectedPanel != 'todo') ? 'todo' : null"/>
                     <div v-if="selectedPanel == 'todo'">
-                    <div :style="{ 'width': '12px', 'height': '40px', 'background-color': '#4C6EF5', 'margin-left': '3px', 'border-radius': '4px'}"></div></div>
+                    <div :style="{ 'width': '12px', 'height': '40px', 'background-color': '#4285F4', 'margin-left': '3px', 'margin-top': '8px', 'border-radius': '4px'}"></div></div>
                 </div>
                 <div class="d-flex flex-row mb-1">
                     <img class="routine" :class="[{ active: selectedPanel == 'routine' }]" src='/icon/routine-icon.png' width="40" height="40" @click="selectedPanel = (selectedPanel != 'routine') ? 'routine' : null"/>
                     <div v-if="selectedPanel == 'routine'">
+                    <div :style="{ 'width': '12px', 'height': '40px', 'background-color': '#4C6EF5', 'margin-left': '3px', 'border-radius': '4px'}"></div></div>
+                </div>
+                <div class="d-flex flex-row mb-1">
+                    <img class="goal" :class="[{ active: selectedPanel == 'goal' }]" src='/icon/goal-icon.png' width="40" height="40" @click="selectedPanel = (selectedPanel != 'goal') ? 'goal' : null"/>
+                    <div v-if="selectedPanel == 'goal'">
                     <div :style="{ 'width': '12px', 'height': '40px', 'background-color': '#9013FE', 'margin-left': '3px', 'border-radius': '4px'}"></div></div>
                 </div>
                 <div class="d-flex flex-row mb-1">

@@ -3,40 +3,40 @@
         <nav id="nav-tab">
             <div class="nav nav-tabs justify-content-between" role="tablist">
                 <button id="item-metric-tab" class="nav-link flex-fill" :class="[{ active: selectedTab == 'metric' }]" 
-                        data-bs-toggle="tab" data-bs-target="#nav-metric" type="button" role="tab" aria-controls="nav-home" aria-selected="true" @click="selectedTab = 'metric'">Metric</button>
+                        data-bs-toggle="tab" data-bs-target="#nav-metric" type="button" role="tab" aria-controls="nav-home" aria-selected="true" @click="selectedTab = 'metric'">Metrics</button>
                 <button id="item-goal-tab" class="nav-link flex-fill" :class="[{ active: selectedTab == 'goal' }]"
-                        data-bs-toggle="tab" data-bs-target="#nav-goal" type="button" role="tab" aria-controls="nav-goal" aria-selected="false" @click="selectedTab = 'goal'">Goal</button>
+                        data-bs-toggle="tab" data-bs-target="#nav-goal" type="button" role="tab" aria-controls="nav-goal" aria-selected="false" @click="selectedTab = 'goal'">Goals</button>
                 <button id="item-todo-tab" class="nav-link flex-fill" :class="[{ active: selectedTab == 'todo' }]"
-                        data-bs-toggle="tab" data-bs-target="#nav-todo" type="button" role="tab" aria-controls="nav-todo" aria-selected="false" @click="selectedTab = 'todo'">Todo</button>
+                        data-bs-toggle="tab" data-bs-target="#nav-todo" type="button" role="tab" aria-controls="nav-todo" aria-selected="false" @click="selectedTab = 'todo'">Todos</button>
                 <button id="item-routine-tab" class="nav-link flex-fill" :class="[{ active: selectedTab == 'routine' }]"
-                        data-bs-toggle="tab" data-bs-target="#nav-routine" type="button" role="tab" aria-controls="nav-routine" aria-selected="false" @click="selectedTab = 'routine'">Routine</button>
+                        data-bs-toggle="tab" data-bs-target="#nav-routine" type="button" role="tab" aria-controls="nav-routine" aria-selected="false" @click="selectedTab = 'routine'">Routines</button>
             </div>
         </nav>
-        <Item v-show="selectedTab == 'metric'" 
+        <ItemTab v-show="selectedTab == 'metric'" 
         id="nav-metric" class="tab-pane fade" 
         :class="[{ active: selectedTab == 'metric', show: selectedTab == 'metric' }]"
         :config="metricConfig"
-        role="tabpanel" aria-labelledby="item-metric-tab"></Item>
-        <Item v-show="selectedTab == 'goal'" 
+        role="tabpanel" aria-labelledby="item-metric-tab"></ItemTab>
+        <ItemTab v-show="selectedTab == 'goal'" 
         id="nav-goal" class="tab-pane fade" 
         :class="[{ active: selectedTab == 'goal', show: selectedTab == 'goal' }]"
         :config="goalConfig"
-        role="tabpanel" aria-labelledby="item-goal-tab"></Item>
-        <Item v-show="selectedTab == 'todo'" 
+        role="tabpanel" aria-labelledby="item-goal-tab"></ItemTab>
+        <ItemTab v-show="selectedTab == 'todo'" 
         id="nav-todo" class="tab-pane fade" 
         :class="[{ active: selectedTab == 'todo', show: selectedTab == 'todo' }]" 
         :config="todoConfig"
-        role="tabpanel" aria-labelledby="item-todo-tab"></Item>
-        <Item v-show="selectedTab == 'routine'" 
+        role="tabpanel" aria-labelledby="item-todo-tab"></ItemTab>
+        <ItemTab v-show="selectedTab == 'routine'" 
         id="nav-routine" class="tab-pane fade" 
         :class="[{ active: selectedTab == 'routine', show: selectedTab == 'routine' }]"
         :config="routineConfig"
-        role="tabpanel" aria-labelledby="item-routine-tab"></Item>
+        role="tabpanel" aria-labelledby="item-routine-tab"></ItemTab>
     </div>
 </template>
 
 <script>
-import Item from './Item.vue'
+import ItemTab from './ItemTab.vue'
 
 import MetricConfig from '../../config/items/metric-config'
 import GoalConfig from '../../config/items/goal-config'
@@ -45,8 +45,8 @@ import RoutineConfig from '../../config/items/routine-config'
 import ItemConfigModel from '../../config/items/item-config'
 
 export default {
-  name: 'Items',
-  components: { Item },
+  name: 'ItemTabs',
+  components: { ItemTab },
   data: function() {
     return {
       selectedTab: null,
@@ -95,9 +95,13 @@ export default {
     overflow: scroll;
 }
 
-.nav-tabs .nav-link.active {
+.nav-tabs {
   border-top: none;
+}
+
+.nav-tabs .nav-link.active {
   border-radius: 0px;
   border-bottom: 1px rgb(222, 226, 230) solid;
+  background-color: #DEECF9;
 }
 </style>

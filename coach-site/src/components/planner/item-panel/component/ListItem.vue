@@ -105,6 +105,7 @@ function onDelete() {
 
 .iteration:hover .button-group {
     visibility: visible;
+    margin-right: 10px;
 }
 
 .iteration:hover {

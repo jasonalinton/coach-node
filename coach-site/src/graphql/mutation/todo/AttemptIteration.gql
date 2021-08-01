@@ -1,0 +1,11 @@
+mutation attemptIteration($id: Int!, $attemptedAt: String!) {
+  attemptIteration(id: $id, attemptedAt: $attemptedAt) {
+    id
+    text
+    startAt
+    endAt
+    attemptedAt
+    completedAt
+    isRecommended
+  }
+}

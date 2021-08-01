@@ -79,8 +79,8 @@ export default {
                     return !(ti.todoRepeat && ti.startAt != self.selectedDate.toJSON()) &&
                            new Date(ti.startAt) <= self.selectedDate
                 });
-                this.todos.complete = iterations.filter(iteration => iteration.completedAt);
-                this.todos.pending = iterations.filter(iteration => !iteration.completedAt);
+                this.todos.complete = iterations.filter(iteration => iteration.attemptedAt);
+                this.todos.pending = iterations.filter(iteration => !iteration.attemptedAt);
                 return iterations
             },
             subscribeToMore: [
@@ -134,10 +134,11 @@ export default {
         selectedDate(value) {
             let iterations = this.allIterations.filter(ti => {
                 // Ignore repeat iterations that don't start on current day
-                return !(ti.todoRepeat && ti.startAt != value.toJSON())
+                return !(ti.todoRepeat && ti.startAt != value.toJSON()) &&
+                           new Date(ti.startAt) <= value
             });
-            this.todos.complete = iterations.filter(iteration => iteration.completedAt);
-            this.todos.pending = iterations.filter(iteration => !iteration.completedAt);
+            this.todos.complete = iterations.filter(iteration => iteration.attemptedAt);
+            this.todos.pending = iterations.filter(iteration => !iteration.attemptedAt);
             this.iterations;
         }
     }
@@ -147,7 +148,7 @@ function initIteration() {
     return {
         id: this.newItemID--,
         text: '',
-        startAt: new Date(),
+        startAt: this.selectedDate,
         endAt: null,
         attemptedAt: null,
         completedAt: null,
