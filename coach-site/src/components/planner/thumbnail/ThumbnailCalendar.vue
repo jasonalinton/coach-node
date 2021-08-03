@@ -207,6 +207,14 @@ function previous() {
     color: rgba(0, 0, 0, .87);
 }
 
+.day:not(:hover) {
+    color: rgba(0, 0, 0, .87);
+    transition-property: background-color;
+    transition-duration: 0.15s;
+    transition-timing-function: ease-in-out;
+    transition-delay: 0s;
+}
+
 .day:hover {
     background-color: #F1F3F4;
 }

@@ -1,7 +1,6 @@
 <template>
     <div id="app" class="grid-container">
         <div class="nav-bar">
-            <!-- <Navbar v-if="selectedPage != 'navbar'"></Navbar> -->
             <PlannerNavbar
                 :dayCount="navbar.week.dayCount" 
                 :selectedView="navbar.selectedView" 
@@ -16,36 +15,28 @@
                 v-if="navbar.selectedPage == 'planner'" 
                 :selectedPage="navbar.selectedPage"
                 :dayCount="navbar.week.dayCount"
-                :selectedView="navbar.selectedView" ></Planner>
-            <ItemTabs v-if="navbar.selectedPage == 'items'" :selectedPage="navbar.selectedPage"></ItemTabs>
+                :selectedView="navbar.selectedView"
+                :selectedDate="navbar.selectedDate"
+                @dateChange="dateChange">
+            </Planner>
+            <ItemTabs v-if="navbar.selectedPage == 'items'"></ItemTabs>
         </div>
         <div class="grid-right-panel">
-            <ItemPanel></ItemPanel>
+            <ItemPanel :selectedDate="selectedDate"></ItemPanel>
         </div>
-        <!-- <Navbar v-if="selectedPage != 'planner'"></Navbar>
-        <div id="app-body" class="row g-0">
-            <div class="col">
-                <Planner v-if="selectedPage == 'planner'" :selectedPage="selectedPage"></Planner>
-                <ItemTabs
-                    v-if="selectedPage == 'items'"
-                    :style="{ height: `${bodyHeight}px` }"
-                ></ItemTabs>
-            </div>
-        </div> -->
     </div>
 </template>
 
 <script>
-// import Navbar from "./components/nav/Navbar.vue";
 import PlannerNavbar from "./components/nav/PlannerNavbar.vue";
 import ItemPanel from './components/planner/item-panel/ItemPanel.vue';
 import Planner from "./components/planner/Planner.vue";
 import ItemTabs from "./components/items/ItemTabs.vue";
+import { today } from "../utility"
 
 export default {
     name: "App",
     components: {
-        // Navbar,
         PlannerNavbar,
         ItemPanel,
         Planner,
@@ -62,11 +53,9 @@ export default {
             },
             itemsPage: {
                 selectedTab: "metric",
-            }
+            },
+            selectedDate: today()
         };
-    },
-    computed: {
-        selectedPage() { return this.navbar.selectedPage}
     },
     created: function () {
         let selectedPage_Store = localStorage.getItem(`selected-page`);
@@ -75,14 +64,31 @@ export default {
         } else {
             localStorage.setItem(`selected-page`, this.navbar.selectedPage);
         }
+
+        let selectedView_Store = localStorage.getItem(`selected-planner-view`);
+        if (selectedView_Store) {
+            this.selectedView = selectedView_Store;
+        } else {
+            localStorage.setItem(`selected-planner-view`, this.selectedView);
+        }
+
+        let dayCount_Store = localStorage.getItem(`week-view-day-count`);
+        if (dayCount_Store) {
+            this.dayCount = Number(dayCount_Store);
+        } else {
+            localStorage.setItem(`week-view-day-count`, this.dayCount);
+        }
     },
     methods: {
         dayCountChange,
         viewChange,
         showPage,
+        dateChange,
     },
     watch: {
         'navbar.selectedPage'(value) { localStorage.setItem(`selected-page`, value); },
+        'navbar.selectedView'(value) { localStorage.setItem(`selected-planner-view`, value); },
+        'navbar.week.dayCount'(value) { localStorage.setItem(`week-view-day-count`, value); },
     },
 };
 
@@ -96,6 +102,10 @@ function viewChange(view) {
 
 function showPage(page) {
     this.navbar.selectedPage = page;
+}
+
+function dateChange(date) {
+    this.selectedDate = date;
 }
 </script>
 
@@ -115,7 +125,7 @@ body {
 }
 
 .nav-bar {
-    background-color: darkcyan;
+    /* background-color: darkcyan; */
     grid-row: 1;
     grid-column: 1 / span 2;
 }
@@ -124,13 +134,13 @@ body {
     height: 100%;
     width: 100%;
     overflow: hidden;
-    background-color: darkgoldenrod;
+    /* background-color: darkgoldenrod; */
     grid-row: 2;
     grid-column: 1 / span 2;
 }
 
 .grid-right-panel {
-    background-color:mediumseagreen;
+    /* background-color:mediumseagreen; */
     grid-row: 1 / span 2;
     grid-column: 3;
     overflow-y: hidden;
