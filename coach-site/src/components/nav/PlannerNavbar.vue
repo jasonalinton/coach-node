@@ -8,8 +8,8 @@
                     <a class="navbar-brand float-left" href="#">Inventory Planner</a>
                 </div>
                 <div class="d-flex flex-row">
-                    <button class="btn btn-sm" type="button" @click="$emit('showWeekView')">Planner</button>
-                    <button class="btn btn-sm" type="button" @click="$emit('showItems')">Items</button>
+                    <button class="btn btn-sm" type="button" @click="$emit('showPage', 'planner')">Planner</button>
+                    <button class="btn btn-sm" type="button" @click="$emit('showPage', 'items')">Items</button>
                 </div>
             </div>
             <div v-if="selectedPage == 'planner'" class="d-flex flex-row me-5">
@@ -60,6 +60,11 @@ export default {
     created: function() {
         this.view = views.find(_view => _view.view == this.selectedView).id;
     },
+    // computed: {
+    //     selectedPage() { return this.$navbarConfig.selectedPage },
+    //     selectedView() { return this.$navbarConfig.planner.selectedView },
+    //     dayCount() { return this.$navbarConfig.planner.week.dayCount },
+    // },
     watch: {
         dayCountt(value) { this.$emit('dayCountChange', value) },
         view(value) { this.$emit('viewChange', views.find(view => view.id == value).view) },

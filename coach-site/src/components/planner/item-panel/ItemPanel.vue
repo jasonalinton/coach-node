@@ -73,9 +73,9 @@ export default {
     height: 100%;
 }
 .item-panel { 
-    width: 296px;
+    width: 295px;
     box-shadow: 7px 0px 9px 5px rgba(0,0,0,.5);
-    height: 100vh;
+    height: 100%;
     overflow-y: scroll;
 }
 

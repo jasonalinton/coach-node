@@ -1,6 +1,8 @@
 <template>
-    <div class="week-view d-flex flex-row d-flex flex-row" ref="weekView">
-        <div v-for="(day, index) in dayModels" :key="index" class="day-view flex-fill" :class="day.pointInTime"  :style="{ 'min-width': `${weekWidth}px`, 'max-width': `${weekWidth}px` }">
+    <!-- <div class="week-view" ref="weekView" :style="{ 'grid-template-columns': `${grid}`} "> -->
+    <div class="week-view" ref="weekView" :style="{ 'min-width': `${64 * dayCount}px` } ">
+        <div v-for="(day, index) in dayModels" :key="index" class="day-view flex-fill" :class="day.pointInTime"  :style="{ 'min-width': `${width / dayCount}px`, 'max-width': `${width / dayCount}px` }">
+        <!-- <div v-for="(day, index) in dayModels" :key="index" class="day-view flex-fill" :class="day.pointInTime" > -->
             <!-- Head -->
             <div class="head d-flex flex-column">
                 <!-- Date Label -->
@@ -44,9 +46,19 @@ export default {
             date,
             iterations: [],
             maxTasks: 0,
+            width: 0,
+            grid: "",
         }
     },
     beforeMount: function() {
+    },
+    mounted: function() {
+        this.width = this.$refs.weekView.clientWidth
+        let grid = "";
+        for (let i = 0; i < this.dayCount; i++)
+            grid += "fr "
+        this.dayCount.forEach
+        this.grid = grid;
         this.initTimeline();
     },
     apollo: {
@@ -65,8 +77,13 @@ export default {
             }
         },
     },
+    created: function() {
+        window.addEventListener("resize", () => {
+            this.width = this.$refs.weekView.clientWidth;
+        });
+    },
     computed: {
-        weekWidth() { return this.$refs.weekView.clientWidth / this.dayCount }
+        weekWidth() { return this.$refs.weekView.clientWidth },
     },
     methods: {
         initTimeline,
@@ -142,12 +159,17 @@ function markAttempted(iteration) {
 <style scoped>
 .week-view {
     overflow-x: scroll;
-    width: 100%;
+    /* width: 100%; */
+    height: 100%;
+    display: grid;
+    grid-template-columns: auto auto auto auto auto auto auto;
 }
 
 .day-view {
-    min-width: 64px;
-    height: calc(100vh - 64px);
+    /* min-width: 64px; */
+    /* height: calc(100vh - 64px); */
+    height: 100%;
+    min-width: calc(100% / 7);
     border-left: 1px solid #D8D8D8;
     font-family: SF Pro Display;
 }

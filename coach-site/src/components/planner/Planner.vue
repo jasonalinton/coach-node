@@ -1,14 +1,14 @@
 <template>
     <div class="planner row g-0">
         <div id="left-and-body" class="col">
-            <PlannerNavbar class="nav" 
+            <!-- <PlannerNavbar class="nav" 
                 :dayCount="dayCount" 
                 :selectedView="selectedView" 
                 :selectedPage="selectedPage" 
                 @dayCountChange="dayCountChange"
                 @viewChange="viewChange" 
                 @showWeekView="selectedPage = 'planner'; showLeft = true" 
-                @showItems="selectedPage = 'items'; showLeft = false"></PlannerNavbar>
+                @showItems="selectedPage = 'items'; showLeft = false"></PlannerNavbar> -->
             <div class="left-wrapper row g-0">
                 <div class="col d-flex flex-row">
                     <div class="left" :class="{open: showLeft}">
@@ -23,15 +23,15 @@
                 </div>
             </div>
         </div>
-        <div id="right" class="col-auto">
+        <!-- <div id="right" class="col-auto">
             <ItemPanel :selectedDate="selectedDate"></ItemPanel>
-        </div>
+        </div> -->
     </div>
 </template>
 
 <script>
-import PlannerNavbar from "../nav/PlannerNavbar.vue";
-import ItemPanel from "./item-panel/ItemPanel.vue";
+// import PlannerNavbar from "../nav/PlannerNavbar.vue";
+// import ItemPanel from "./item-panel/ItemPanel.vue";
 import Split from 'split.js'
 import Items from '../items/ItemTabs.vue';
 import WeekView from './calendar/week/WeekView.vue';
@@ -42,14 +42,21 @@ import { today } from "../../../utility";
 
 export default {
     name: "Planner",
-    components: { PlannerNavbar, ItemPanel, Items, WeekView, LeftPanel, MonthView },
+    components: { 
+        // PlannerNavbar, 
+        // ItemPanel,
+         Items, WeekView, LeftPanel, MonthView },
+    props: {
+        dayCount: Number,
+        selectedView: String,
+    },
     data: function() {
         return {
             split: null,
-            selectedView: "monthView",
+            // selectedView: "monthView",
             selectedPage: "items",
             showLeft: true,
-            dayCount: 5,
+            // dayCount: 5,
             today: today(),
             selectedDate: today(),
         }
@@ -72,17 +79,17 @@ export default {
             localStorage.setItem(`selected-planner-view`, this.selectedView);
         }
 
-        let dayCount_Store = localStorage.getItem(`week-view-day-count`);
-        if (dayCount_Store) {
-            this.dayCount = Number(dayCount_Store);
-        } else {
-            localStorage.setItem(`week-view-day-count`, this.dayCount);
-        }
+        // let dayCount_Store = localStorage.getItem(`week-view-day-count`);
+        // if (dayCount_Store) {
+        //     this.dayCount = Number(dayCount_Store);
+        // } else {
+        //     localStorage.setItem(`week-view-day-count`, this.dayCount);
+        // }
     },
     methods: {
         initSplit,
-        dayCountChange,
-        viewChange,
+        // dayCountChange,
+        // viewChange,
         dateChange
     },
     watch: {
@@ -112,13 +119,13 @@ function initSplit() {
     });
 }
 
-function dayCountChange(count) {
-    this.dayCount = count;
-}
+// function dayCountChange(count) {
+//     this.dayCount = count;
+// }
 
-function viewChange(view) {
-    this.selectedView = view;
-}
+// function viewChange(view) {
+//     this.selectedView = view;
+// }
 
 function dateChange(date) {
     this.selectedDate = date;
@@ -149,12 +156,12 @@ function dateChange(date) {
 
 <style scoped>
 .planner {
-    height: 100vh;
-    min-width: 100vw;
+    height: 100%;
+    width: 100%;
 }
 
 #left-and-body {
-    height: 100vh;
+    /* height: 100vh; */
     overflow-y: hidden;
 }
 
@@ -173,8 +180,7 @@ function dateChange(date) {
 }
 
 .body {
-    /* margin-left: 262px; */
-    /* width: calc(100% - 262px); */
     width: 100%;
+    overflow: scroll;
 }
 </style>

@@ -3,7 +3,17 @@ import App from './App.vue'
 import { createProvider } from './vue-apollo'
 import moment from 'moment'
 
-Vue.config.productionTip = false
+Vue.config.productionTip = false;
+
+Vue.prototype.$navbarConfig = {
+  selectedPage: 'planner',
+  planner: {
+    selectedView: 'weekView',
+    week: {
+      dayCount: 5
+    }
+  }
+}
 
 new Vue({
   apolloProvider: createProvider(),

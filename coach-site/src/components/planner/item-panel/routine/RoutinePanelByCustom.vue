@@ -223,7 +223,7 @@ function removeIteration(iteration) {
 
 <style scoped>
 .custom {
-    height: calc(100vh - 64px);
+    height: calc(100% - 64px);
     overflow: scroll;
 }
 
@@ -234,7 +234,7 @@ function removeIteration(iteration) {
 }
 
 .item-list {
-    margin-bottom: 8px;
+    /* margin-bottom: 8px; */
     z-index: 2;
 }
 
