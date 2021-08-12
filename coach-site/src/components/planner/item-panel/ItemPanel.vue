@@ -1,6 +1,6 @@
 <template>
     <div class="item-panel-wrapper row g-0">
-        <div class="col" :style="{'border-left': '1px solid rgba(220, 220, 220, .5)'}">
+        <div class="col h-100" :style="{'border-left': '1px solid rgba(220, 220, 220, .5)'}">
             <div :style="{'width': '100%', 'height': '64px', 'border-bottom': '1px solid rgba(220, 220, 220, .5)'}"></div>
             <div :style="{'width': '56px', 'height': '192px', 'padding-left': '8px', 'overflow': 'hidden'}">
                 <div class="d-flex flex-row mb-1">
@@ -25,7 +25,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-auto">
+        <div class="col-auto h-100">
             <MetricPanel v-show="selectedPanel == 'metric'" :selectedDate="selectedDate" class="item-panel"/>
             <GoalPanel v-show="selectedPanel == 'goal'" :selectedDate="selectedDate" class="item-panel"></GoalPanel>
             <TodoPanel v-show="selectedPanel == 'todo'" :selectedDate="selectedDate" class="item-panel"/>

@@ -1,13 +1,13 @@
 <template>
     <div class="btn-group" role="group" :aria-label="`moment`">
-        <input type="checkbox" class="btn-check" :name="`${endpoint}-date`" :id="`${endpoint}-date`" v-model="selectedDate" autocomplete="off" @click="selectDate">
-        <label class="btn btn-outline-primary" :for="`${endpoint}-date`">Date</label>
+        <input type="checkbox" class="btn-check" :name="`${(type) ? type : ''}-${endpoint}-date`" :id="`${(type) ? type : ''}-${endpoint}-date`" v-model="selectedDate" autocomplete="off" @click="selectDate">
+        <label class="btn btn-outline-primary" :for="`${(type) ? type : ''}-${endpoint}-date`">Date</label>
 
-        <input type="checkbox" class="btn-check" :name="`${endpoint}-time`" :id="`${endpoint}-time`" v-model="selectedTime" autocomplete="off" @click="selectTime">
-        <label class="btn btn-outline-primary" :for="`${endpoint}-time`">Time</label>
+        <input type="checkbox" class="btn-check" :name="`${(type) ? type : ''}-${endpoint}-time`" :id="`${(type) ? type : ''}-${endpoint}-time`" v-model="selectedTime" autocomplete="off" @click="selectTime">
+        <label class="btn btn-outline-primary" :for="`${(type) ? type : ''}-${endpoint}-time`">Time</label>
 
-        <input type="checkbox" class="btn-check" :name="`${endpoint}-dateTime`" :id="`${endpoint}-dateTime`" v-model="selectedDateTime" autocomplete="off" @click="selectDateTime">
-        <label class="btn btn-outline-primary" :for="`${endpoint}-dateTime`">Date-Time</label>
+        <input type="checkbox" class="btn-check" :name="`${(type) ? type : ''}-${endpoint}-dateTime`" :id="`${(type) ? type : ''}-${endpoint}-dateTime`" v-model="selectedDateTime" autocomplete="off" @click="selectDateTime">
+        <label class="btn btn-outline-primary" :for="`${(type) ? type : ''}-${endpoint}-dateTime`">Date-Time</label>
     </div>
 </template>
 
@@ -22,7 +22,8 @@ export default {
     name: 'MomentSelector',
     props: {
         moment: Object,
-        endpoint: String
+        endpoint: String,
+        type: String
     },
     data: function() {
         return {
@@ -41,11 +42,11 @@ export default {
     },
     methods: {
         getMomentID,
-        selectDate() {
+        selectDate: function() {
             if (!this.selectedDate) {
                 if (!this.selectedTime && !this.selectedDateTime) {
                     let moment = { id: this.getMomentID("Date"), text: "Date" }
-                    this.$emit('addTime', moment);
+                    this.$emit('addTime', moment, this.type);
                 } else {
                     this.moment.text = "Date";
                     this.moment.id = this.getMomentID("Date");
@@ -56,11 +57,11 @@ export default {
                     this.$emit('removeTime');
             }
         },
-        selectTime() {
+        selectTime: function() {
             if (!this.selectedTime) {
                 if (!this.selectedDate && !this.selectedDateTime) {
                     let moment = { id: this.getMomentID("Time"), text: "Time" }
-                    this.$emit('addTime', moment);
+                    this.$emit('addTime', moment, this.type);
                 } else {
                     this.moment.text = "Time";
                     this.moment.id = this.getMomentID("Time");
@@ -71,7 +72,7 @@ export default {
                     this.$emit('removeTime');
             }
         },
-        selectDateTime() {
+        selectDateTime: function() {
             if (!this.selectedDateTime) {
                 if (!this.selectedDate && !this.selectedTime) {
                     let moment = { id: this.getMomentID("DateTime"), text: "DateTime" }

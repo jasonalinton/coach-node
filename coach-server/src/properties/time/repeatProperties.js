@@ -98,7 +98,7 @@ const select_goal_repeat = {
     select: goal_repeat
 }
 
-const repeat = {
+const repeat_properties = {
     id: true,
     type: repeatType,
     timeframe,
@@ -112,13 +112,43 @@ const repeat = {
     todo_repeats: select_todo_repeat,
     routine_repeats: select_routine_repeat,
     goal_repeats: select_goal_repeat,
+    routines: { select: { id: true } },
+
+    todoIterations: { select: { 
+        id: true,
+        text: true,
+        startAt: true,
+     } 
+    },
+    routineIterations: { select: { 
+        id: true,
+        text: true,
+     } 
+    },
+
+    routineRepeat: { 
+        select: { 
+            id: true ,
+            todoRepeats: { select: { id: true } }
+        }
+     },
+    todoRepeats: { 
+        select: { 
+            id: true,
+            todoIterations: { select: { 
+                id: true,
+                startAt: true,
+             } 
+            }
+        } 
+    },
 }
 
 const select_repeat = {
-    select: repeat
+    select: repeat_properties
 }
 
 module.exports = {
-    repeat,
+    repeat_properties,
     select_repeat
 }

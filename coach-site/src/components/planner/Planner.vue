@@ -7,7 +7,7 @@
                         <LeftPanel @dateChange="dateChange"></LeftPanel>
                     </div>
                     <div class="body">
-                        <WeekView v-if="selectedView=='weekView'" :dayCount="dayCount"></WeekView>
+                        <WeekView v-if="selectedView=='weekView'" :dayCount="dayCount" :selectedDate="selectedDate"></WeekView>
                         <MonthView v-if="selectedView=='monthView'" :today="today" :selectedDate="selectedDate"></MonthView>
                     </div>
                 </div>
@@ -29,7 +29,7 @@ export default {
     props: {
         dayCount: Number,
         selectedView: String,
-        selectedDate: String,
+        selectedDate: Date,
     },
     data: function() {
         return {

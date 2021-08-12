@@ -1,5 +1,12 @@
 <template>
     <div class="custom d-flex flex-column flex-grow-1">
+         <!-- Toggle Panel - Checkbox -->
+        <div class="d-flex flex-row justify-content-start">
+            <input id="show-recommended" class="form-check-input mx-2" type="checkbox" v-model="showRecommended" >
+            <label class="form-check-label" for="show-recommended">
+                Show Recommended
+            </label>
+        </div>  
         <!-- Toolbar -->
         <!-- <div class="toolbar d-flex flex-row justify-content-between align-items-center">
             <AddTaskButton @click="addNewTask"></AddTaskButton>
@@ -20,7 +27,7 @@
                                autofocus/>
                     </div> -->
                 <!-- </li> -->
-                <li v-for="(iteration, index) in iterations.pending" v-bind:key="iteration.id" :style="{ 'z-index': -index }">
+                <li v-for="(iteration, index) in pending" v-bind:key="iteration.id" :class="{ recommended: iteration.isRecommended }" :style="{ 'z-index': -index }">
                     <ListItem :iteration="iteration" @markComplete="markComplete" @onDelete="removeIteration"></ListItem>
                 </li>
             </ul>
@@ -28,7 +35,7 @@
             <div class="complete d-flex flex-column">
                 <div class="header">Completed ({{ completeCount }} of {{ totalCount }}) {{ percentComplete }}%</div>
                 <ul v-if="iterations.complete" class="item-list">
-                    <li v-for="(iteration, index) in iterations.complete" v-bind:key="index" :style="{ 'z-index': -index }">
+                    <li v-for="(iteration, index) in complete" v-bind:key="index" :class="{ recommended: iteration.isRecommended }" :style="{ 'z-index': -index }">
                         <ListItem class="complete" :iteration="iteration" @markIncomplete="markIncomplete" @onDelete="removeIteration"></ListItem>
                     </li>
                 </ul>
@@ -55,14 +62,20 @@ export default {
     },
     data: function () {
         return {
-            iterations: {
-                complete: [],
-                pending: [],
-                new: null
-            },
+            iterations: this.newIterations(),
             routineIterations: [],
             newItemID: -1,
-            today: today()
+            today: today(),
+            showRecommended: false
+        }
+    },
+    created: function() {
+        let showRec_Store = (localStorage.getItem(`show-recc-routine-items-by-custom`) === 'true');
+        if (showRec_Store) {
+            this.showRecommended = Boolean(showRec_Store);
+        } else {
+            localStorage.setItem(`show-recc-routine-items-by-custom`, this.showRecommended);
+            this.showRecommended = false;
         }
     },
     apollo: {
@@ -76,23 +89,35 @@ export default {
                 this.routineIterations = data.routineIterations;
                 let routineIterations = this.getRoutineIterations(data.routineIterations, this.selectedDate);
 
-                let iterations = routineIterations[0].todoIterations
-                iterations.complete = iterations.filter(iteration => iteration.completedAt);
-                iterations.pending = iterations.filter(iteration => !iteration.completedAt);
-                return iterations
+                if (routineIterations[0]) {
+                    let iterations = routineIterations[0].todoIterations
+                    iterations.complete = iterations.filter(iteration => iteration.completedAt);
+                    iterations.pending = iterations.filter(iteration => !iteration.completedAt);
+                    return iterations
+                } else {
+                    return this.newIterations();
+                }
             },
             subscribeToMore: [
                 {
                     document: require('../../../../graphql/subscription/todo/IterationAdded.gql'),
-                    updateQuery: (previousResult, { subscriptionData: { data: { iterationAdded }} }) => {
-                        previousResult.todoIterations.splice(0, 0, iterationAdded);
+                    updateQuery: function(previousResult, { subscriptionData: { data: { iterationAdded }} }) {
+                        let routineIterations = this.getRoutineIterations(previousResult.routineIterations, this.selectedDate);
+                        if (routineIterations[0]) {
+                            let todoIterations = routineIterations[0].todoIterations;
+                            todoIterations.splice(0, 0, iterationAdded);
+                        }
                         return previousResult;
                     },
                 },
                 {
                     document: require('../../../../graphql/subscription/todo/IterationUpdated.gql'),
-                    updateQuery: (previousResult, { subscriptionData: { data: { iterationUpdated }} }) => {
-                        replaceItem(iterationUpdated, previousResult.todoIterations);
+                    updateQuery: function(previousResult, { subscriptionData: { data: { iterationUpdated }} }) {
+                        let routineIterations = this.getRoutineIterations(previousResult.routineIterations, this.selectedDate);
+                        if (routineIterations[0]) {
+                            let todoIterations = routineIterations[0].todoIterations;
+                            replaceItem(iterationUpdated, todoIterations);
+                        }
                         return previousResult;
                     },
                 },
@@ -100,8 +125,10 @@ export default {
                     document: require('../../../../graphql/subscription/todo/IterationDeleted.gql'),
                     updateQuery: function(previousResult, { subscriptionData: { data: { iterationDeleted }} }) {
                         let routineIterations = this.getRoutineIterations(previousResult.routineIterations, this.selectedDate);
-                        let todoIterations = routineIterations[0].todoIterations;
-                        removeItem(iterationDeleted, todoIterations);
+                        if (routineIterations[0]) {
+                            let todoIterations = routineIterations[0].todoIterations;
+                            removeItem(iterationDeleted, todoIterations);
+                        }
                         return previousResult;
                     },
                 },
@@ -109,11 +136,31 @@ export default {
         },
     },
     computed: {
-        pendingCount() { return this.iterations.pending.length },
-        completeCount() { return this.iterations.complete.length },
+        pendingCount() { return this.pending.length },
+        completeCount() { return this.complete.length },
         totalCount() { return this.pendingCount + this.completeCount },
         percentComplete() { return Percent(this.completeCount, this.totalCount); },
+        pending() {
+            if (this.showRecommended) {
+                return this.iterations.pending;
+            } else {
+                return this.iterations.pending.filter(i => !i.isRecommended);
+            }
+        },
+        complete() {
+            if (this.showRecommended) {
+                return this.iterations.complete;
+            } else {
+                return this.iterations.complete.filter(i => !i.isRecommended);
+            }
+        },
     },
+    // computed: {
+    //     pendingCount() { return (this.iterations.pending) ? this.iterations.pending.length : 0},
+    //     completeCount() { return (this.iterations.complete) ? this.iterations.complete.length : 0 },
+    //     totalCount() { return this.pendingCount + this.completeCount },
+    //     percentComplete() { return Percent(this.completeCount, this.totalCount); },
+    // },
     methods: {
         initIteration,
         getRoutineIterations,
@@ -128,7 +175,8 @@ export default {
         removeIteration,
         deleteIteration,
         replaceItem,
-        removeItem
+        removeItem,
+        newIterations,
     },
     mounted: function() {
         // An error gets thrown if pollInterval is set with the query
@@ -155,8 +203,10 @@ export default {
                 new: null
             };
             }
-
-        }
+        },
+        showRecommended(value) {
+            localStorage.setItem(`show-recc-routine-items-by-custom`, value);
+        },
     }
 }
 
@@ -219,6 +269,14 @@ function markIncomplete(iteration) {
 function removeIteration(iteration) {
     this.deleteIteration(iteration.id, this.$apollo);
 }
+
+function newIterations() {
+    return {
+        complete: [],
+        pending: [],
+        new: null
+    }
+}
 </script>
 
 <style scoped>
@@ -249,6 +307,10 @@ ul {
 
 .item-list li {
     position: relative;
+}
+
+.item-list li.recommended {
+    opacity: .38;
 }
 
 .new-task {

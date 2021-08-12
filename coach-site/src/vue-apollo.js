@@ -11,6 +11,7 @@ Vue.use(VueApollo)
 const AUTH_TOKEN = 'apollo-token'
 
 // Http endpoint
+// const httpEndpoint = process.env.VUE_APP_GRAPHQL_HTTP || 'http://localhost:4010/graphql'
 const httpEndpoint = process.env.VUE_APP_GRAPHQL_HTTP || 'http://192.168.1.71:4010/graphql'
 // Files URL root
 export const filesRoot = process.env.VUE_APP_FILES_ROOT || httpEndpoint.substr(0, httpEndpoint.indexOf('/graphql'))

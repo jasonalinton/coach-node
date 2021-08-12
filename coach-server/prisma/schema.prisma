@@ -47,6 +47,7 @@ model Todo {
   id              Int       @id @default(autoincrement())
   text            String
   description     String?
+  isGroup         Boolean   @default(false)
   isDeleted       Boolean   @default(false)
   dateTimeDeleted DateTime? @db.Timestamptz(6)
   createdAt       DateTime  @default(now()) @db.Timestamptz(6)
@@ -194,6 +195,7 @@ model Routine_TimePair {
 
 model Repeat {
   id               Int      @id @default(autoincrement())
+  idRoutineRepeat  Int?
   idType           Int
   idTimeframe      Int
   idStartRepeat    Int?
@@ -228,6 +230,8 @@ model Repeat {
   todo_repeats     Todo_Repeat[]
   routine_repeats  Routine_Repeat[]
 
+  routineRepeat   Repeat?  @relation(fields: [idRoutineRepeat], references: [id], name: "RoutineTodo_Repeat")
+  todoRepeats     Repeat[] @relation("RoutineTodo_Repeat")
 }
 
 model Repeat_DayIndex {
@@ -250,8 +254,8 @@ model Goal_Repeat {
   createdAt             DateTime  @default(now()) @db.Timestamptz(6)
   updatedAt             DateTime  @default(now()) @updatedAt @db.Timestamptz(6)
 
-  goal                  Goal[]   @relation(fields: [idGoal], references: [id])
-  repeat                Repeat[] @relation(fields: [idRepeat], references: [id])
+  goal                  Goal   @relation(fields: [idGoal], references: [id])
+  repeat                Repeat @relation(fields: [idRepeat], references: [id])
 }
 
 model Todo_Repeat {
@@ -264,8 +268,8 @@ model Todo_Repeat {
   createdAt             DateTime  @default(now()) @db.Timestamptz(6)
   updatedAt             DateTime  @default(now()) @updatedAt @db.Timestamptz(6)
 
-  todo                  Todo[]   @relation(fields: [idTodo], references: [id])
-  repeat                Repeat[] @relation(fields: [idRepeat], references: [id])
+  todo                  Todo   @relation(fields: [idTodo], references: [id])
+  repeat                Repeat @relation(fields: [idRepeat], references: [id])
 }
 
 model Routine_Repeat {
@@ -278,8 +282,8 @@ model Routine_Repeat {
   createdAt             DateTime  @default(now()) @db.Timestamptz(6)
   updatedAt             DateTime  @default(now()) @updatedAt @db.Timestamptz(6)
 
-  routine               Routine[] @relation(fields: [idRoutine], references: [id])
-  repeat                Repeat[]  @relation(fields: [idRepeat], references: [id])
+  routine               Routine @relation(fields: [idRoutine], references: [id])
+  repeat                Repeat  @relation(fields: [idRepeat], references: [id])
 }
 
 model Iteration {

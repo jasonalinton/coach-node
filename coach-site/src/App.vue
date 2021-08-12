@@ -16,7 +16,7 @@
                 :selectedPage="navbar.selectedPage"
                 :dayCount="navbar.week.dayCount"
                 :selectedView="navbar.selectedView"
-                :selectedDate="navbar.selectedDate"
+                :selectedDate="selectedDate"
                 @dateChange="dateChange">
             </Planner>
             <ItemTabs v-if="navbar.selectedPage == 'items'"></ItemTabs>

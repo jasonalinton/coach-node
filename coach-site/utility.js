@@ -86,6 +86,10 @@ export function today(dateTime) {
     return moment(dateTime).startOf('day').toDate();
 }
 
+export function startOfDay(dateTime) {
+    return moment(dateTime).hour(0).minute(0).second(0).millisecond(0).toDate();
+}
+
 export function firstDayOfWeek(dateTime) {
     return moment(dateTime).startOf('week').toDate();
 }

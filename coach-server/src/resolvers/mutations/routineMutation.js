@@ -1,8 +1,12 @@
 const controller = require('../../controller/itemController');
 const { routineInclude } = require('../../properties/routineProperties');
+const { configureRepeatTrans } = require('./time/repeatMutation');
+const { configureTimePairTrans } = require('./time/timePairMutation');
 
 async function addRoutine(parent, args, context, info) {
     let data = controller.initData(args.routine);
+
+    console.log("Add routine");
 
     let routine = await context.prisma.routine.create({
         data,
@@ -18,11 +22,19 @@ async function updateRoutine(parent, args, context, info) {
     let id = args.routine.id;
     let data = controller.initData(args.routine);
 
-    let routine = await context.prisma.routine.update({
+    let transaction = []
+    await configureRepeatTrans(data, transaction, context);
+    await configureTimePairTrans(data, transaction, context);
+
+    let routine = context.prisma.routine.update({
         where: { id },
         data,
         include: routineInclude
     });
+    transaction.push(routine);
+
+    let result = await context.prisma.$transaction(transaction);
+    routine = result.pop();
 
     context.pubsub.publish("ROUTINE_UPDATED", { routineUpdated: routine });
     
@@ -72,34 +84,34 @@ async function createRoutineIterations(parent, { routine }, context, info, repea
             let routine_repeat_new = routine_repeats_new[i];
 
             let idRoutine = routine_repeat_new.routine.id;
-            delete routine_repeat_new.routine
-            delete routine_repeat_new.repeat
+            delete routine_repeat_new.routine;
+            delete routine_repeat_new.repeat;
 
-            let newone = await context.prisma.routine_Repeat.create({
+            await context.prisma.routine_Repeat.create({
                 data: {
                     ...routine_repeat_new,
                     idRoutine,
                     idRepeat: _repeat.id
                 },
             })
-
-    console.log("hello")
+            // console.log("hello")
         }
-
-    console.log("hello")
+        // console.log("hello")
 
         // Update routine_repeat
         let routine_repeats_updated = _repeat.routine_repeats.filter(_routine_repeat => _routine_repeat.isUpdated);
         for (let i = 0; i < routine_repeats_updated.length; i++) {
             let routine_repeat_updated = routine_repeats_updated[i];
             
-            let idRoutine = routine_repeats_updated.routine.id;
-            delete routine_repeats_updated.routine
-            delete routine_repeats_updated.repeat
-            let newone = await context.prisma.routine_Repeat.update({
+            let idRoutine = routine_repeat_updated.routine.id;
+            delete routine_repeat_updated.routine;
+            delete routine_repeat_updated.repeat;
+            delete routine_repeat_updated.isUpdated;
+
+            await context.prisma.routine_Repeat.update({
                 where: { id: routine_repeat_updated.id, },
                 data: {
-                    ...routine_repeats_updated,
+                    ...routine_repeat_updated,
                     idRoutine,
                     idRepeat: _repeat.id
                 },
@@ -108,7 +120,7 @@ async function createRoutineIterations(parent, { routine }, context, info, repea
 
             console.log("hello")
             // Map new iterations to repeat
-            let repeat_out = await context.prisma.repeat.update({
+            await context.prisma.repeat.update({
                 where: { id: repeat.id },
                 data: {
                     routineIterations: {
@@ -138,7 +150,7 @@ async function createRoutineIterations(parent, { routine }, context, info, repea
 }
 
 async function mapTodoIterations(parent, routineTodo_Iteration, context, info) {
-    console.log("")
+    // console.log("")
     try {
         
         routineTodo_Iteration = await context.prisma.routineTodo_Iteration.create({
@@ -153,10 +165,10 @@ async function mapTodoIterations(parent, routineTodo_Iteration, context, info) {
         })
     }
     catch (error) {
-        console.log(error);
+        // console.log(error);
         return;
     }
-    console.log("")
+    // console.log("")
     
     return routineTodo_Iteration;
 }

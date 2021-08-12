@@ -166,6 +166,18 @@ mutation addTodo($todo: TodoInput!) {
         id
         index
       }
+      routines { 
+        id
+      }
+      routine_repeats {
+        id
+        lastIterationDateTime
+        isEventVisible
+        routine {
+          id
+          text
+        }
+      }
     }
     iterations {
       id

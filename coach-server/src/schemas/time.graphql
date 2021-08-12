@@ -88,6 +88,13 @@ type Repeat {
   goal_repeats: [Goal_Repeat]
   todo_repeats: [Todo_Repeat]
   routine_repeats: [Routine_Repeat]
+  routines: [Routine]
+
+  routineRepeat: Repeat
+  todoRepeats: [Repeat]
+
+  todoIterations: [Iteration]
+  routineIterations: [Iteration]
 }
 
 input RepeatInput {
@@ -104,6 +111,13 @@ input RepeatInput {
   goal_repeats: [Goal_RepeatInput]
   todo_repeats: [Todo_RepeatInput]
   routine_repeats: [Routine_RepeatInput]
+  routines: [RoutineInput]
+
+  routineRepeat: RepeatInput
+  todoRepeats: [RepeatInput]
+
+  todoIterations: [IterationInput]
+  routineIterations: [IterationInput]
 
   isUpdated: Boolean
   isConnected: Boolean
@@ -133,9 +147,9 @@ type Goal_Repeat {
 input Goal_RepeatInput {
   id: Int
   lastIterationDateTime: String
-  isEventVisible: Boolean!
-  goal: GoalInput!
-  repeat: RepeatInput!
+  isEventVisible: Boolean
+  goal: GoalInput
+  repeat: RepeatInput
 }
 
 type Todo_Repeat {
@@ -149,9 +163,9 @@ type Todo_Repeat {
 input Todo_RepeatInput {
   id: Int
   lastIterationDateTime: String
-  isEventVisible: Boolean!
-  todo: TodoInput!
-  repeat: RepeatInput!
+  isEventVisible: Boolean
+  todo: TodoInput
+  repeat: RepeatInput
 }
 
 type Routine_Repeat {
@@ -165,7 +179,12 @@ type Routine_Repeat {
 input Routine_RepeatInput {
   id: Int
   lastIterationDateTime: String
-  isEventVisible: Boolean!
-  routine: RoutineInput!
-  repeat: RepeatInput!
+  isEventVisible: Boolean
+  routine: RoutineInput
+  repeat: RepeatInput
+}
+
+type RepetitiveItems {
+  todos: [Todo]
+  routines: [Routine]
 }

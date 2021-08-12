@@ -60,12 +60,22 @@ function fixIterationDateFormat(iteration) {
 }
 
 function fixRoutineTodoIterationDateFormat(iteration) {
-    iteration.routineIteration.startAt = moment(iteration.routineIteration.startAt).format();
-    iteration.routineIteration.endAt = moment(iteration.routineIteration.endAt).format();
-    iteration.todoIterations.forEach(todoIteration => {
-        todoIteration.startAt = moment(todoIteration.startAt).format();
-        todoIteration.endAt = moment(todoIteration.endAt).format();
-    })
+    if (iteration.routineIteration) {
+        if (iteration.routineIteration.startAt)
+            iteration.routineIteration.startAt = moment(iteration.routineIteration.startAt).format();
+
+        if (iteration.routineIteration.endAt)
+            iteration.routineIteration.endAt = moment(iteration.routineIteration.endAt).format();
+    }
+
+    if (iteration.todoIterations) {
+        iteration.todoIterations.forEach(todoIteration => {
+            if (todoIteration.startAt)
+                todoIteration.startAt = moment(todoIteration.startAt).format();
+            if (todoIteration.endAt)
+                todoIteration.endAt = moment(todoIteration.endAt).format();
+        })
+    }
 }
 
 module.exports = initMiddleware;

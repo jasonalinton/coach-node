@@ -1,6 +1,6 @@
 <template>
-    <div class="row g-0">
-        <div class="col">
+    <div class="row g-0 h-100">
+        <div class="col h-100">
             <!-- Header -->
             <ItemPanelHeader :title="'todos'" :sort="sort" :selectedDate="selectedDate" @onSortChange="onSortChange"></ItemPanelHeader>
             <TodoPanelByMetric v-if="sort.by=='Metric'" :selectedDate="selectedDate"></TodoPanelByMetric>

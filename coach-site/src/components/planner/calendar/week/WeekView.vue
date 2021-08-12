@@ -36,7 +36,8 @@ import { addDay } from "../../../../../utility";
 export default {
     name: 'WeekView',
     props: {
-        dayCount: Number
+        dayCount: Number,
+        selectedDate: Date,
     },
     data: function() {
         return {
@@ -82,38 +83,33 @@ export default {
             this.width = this.$refs.weekView.clientWidth;
         });
     },
-    computed: {
-        weekWidth() { return this.$refs.weekView.clientWidth },
-    },
     methods: {
         initTimeline,
         iterationsToDays,
         rescheduleIteration,
         toNextDay,
         attemptIteration,
-        markAttempted
+        markAttempted,
+        refresh
     },
     watch: {
-        dayCount() { 
-            this.initTimeline();
-            this.dayModels = this.iterationsToDays();
-        }
+        dayCount() { this.refresh(); },
+        selectedDate() { this.refresh();  }
     }
 }
 
 function initTimeline() {
     this.days = [];
 
-    let today = new Date(new Date().toLocaleDateString());
-    today = date.addDays(today, -2);
+    let indexDate = date.addDays(this.selectedDate, -2);
     for (let i = 0; i < this.dayCount; i++) {
-        this.days.push(today);
-        today = date.addDays(today, 1);
+        this.days.push(indexDate);
+        indexDate = date.addDays(indexDate, 1);
     }
 }
 
 function iterationsToDays() {
-    let today = new Date(new Date().toLocaleDateString());
+    let indexDate = new Date(this.selectedDate.toJSON());
 
     let days = [];
     this.days.forEach(_day => {
@@ -131,11 +127,11 @@ function iterationsToDays() {
             dow: date.format(_day, "ddd"),
             date: date.format(_day, "D"),
         };
-        if (_day.getTime() < today.getTime()) {
+        if (_day.getTime() < indexDate.getTime()) {
             day.pointInTime = "past";
-        } else if (_day.getTime() == today.getTime()) {
+        } else if (_day.getTime() == indexDate.getTime()) {
             day.pointInTime = "present";
-        } else if (_day.getTime() > today.getTime()) {
+        } else if (_day.getTime() > indexDate.getTime()) {
             day.pointInTime = "future";
         }
         days.push(day);
@@ -153,6 +149,11 @@ function toNextDay(iteration) {
 function markAttempted(iteration) {
     // let attemptedAt = (this.selected)
     this.attemptIteration(iteration.id, new Date(iteration.startAt), this.$apollo);
+}
+
+function refresh() {
+    this.initTimeline();
+    this.dayModels = this.iterationsToDays();
 }
 </script>
 
@@ -228,6 +229,10 @@ function markAttempted(iteration) {
 .task { 
     background-color: #F4501F;
     color: white;
+    transition-property: color;
+    transition-duration: 0.15s;
+    transition-timing-function: ease-in-out;
+    transition-delay: 0s;
     font-weight: 600;
     max-height: 20px;
     border-radius: 3px;
@@ -242,7 +247,11 @@ function markAttempted(iteration) {
 }
 
 .task.incomplete:hover {
-    color: rgba(255, 255, 255, .25);
+    color: rgba(255, 255, 255, .38);
+    transition-property: color;
+    transition-duration: 0.15s;
+    transition-timing-function: ease-in-out;
+    transition-delay: 0s;
 }
 
 .task.complete { 

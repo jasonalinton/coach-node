@@ -1,10 +1,10 @@
 <template>
     <div class="d-flex flex-column">
         <div class="d-flex flex-row justify-content-between">
-            <label class="control-label" for="description">{{ endpoint }}</label>
-            <MomentSelector :moment="moment" :endpoint="endpoint" @addTime="addTime" @removeTime="removeTime"></MomentSelector>
+            <label class="control-label" for="description">{{ (title) ? title : endpoint }}</label>
+            <MomentSelector :moment="moment" :endpoint="endpoint" :type="type" @addTime="addTime" @removeTime="removeTime"></MomentSelector>
         </div>
-        <TimeInput v-if="time" :time="time" :momentID="time.moment.id" @setTime="setTime"></TimeInput>
+        <TimeInput v-if="time" :time="time" :momentID="time.moment.id"></TimeInput>
         <!-- Recommended -->
         <!-- <div class="form-check mt-2">
             <input id="flexCheckDefault" class="form-check-input" type="checkbox" value="" v-model="time.isRecommended">
@@ -21,8 +21,10 @@ export default {
     name: 'TimeControl',
     components: { MomentSelector, TimeInput },
     props: {
+        title: String,
         time: Object,
-        endpoint: String
+        endpoint: String,
+        type: String
     },
     data: function () {
         return {
@@ -30,14 +32,11 @@ export default {
         }
     },
     methods: {
-        addTime(moment) {
-            this.$emit('addTime', moment, this.endpoint)
+        addTime: function(moment) {
+            this.$emit('addTime', moment, this.endpoint, this.type)
         },
-        removeTime() {
+        removeTime: function() {
             this.$emit('removeTime', this.time)
-        },
-        setTime(dateTime) {
-            this.$emit('setTime', dateTime, this.endpoint)
         },
     },
     watch: {

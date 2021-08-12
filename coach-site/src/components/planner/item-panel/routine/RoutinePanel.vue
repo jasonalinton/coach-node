@@ -1,9 +1,9 @@
 <template>
-    <div class="row g-0">
-        <div class="col">
+    <div class="row g-0 h-100">
+        <div class="col h-100">
             <!-- Header -->
             <ItemPanelHeader :title="'routine'" :sort="sort" @onSortChange="onSortChange"></ItemPanelHeader>
-            <RoutinePanelByCustom v-if="sort.by=='Custom'" :selectedDate="selectedDate"> </RoutinePanelByCustom>
+            <RoutinePanelByCustom v-if="sort.by=='Ordered'" :selectedDate="selectedDate"> </RoutinePanelByCustom>
         </div>
     </div>
 </template>
@@ -16,7 +16,7 @@ var sortItems = [
     { id: 1, text: "Metric" },
     { id: 2, text: "Date" },
     { id: 3, text: "Repetition" },
-    { id: 4, text: "Custom" },
+    { id: 4, text: "Ordered" },
 ];
 
 export default {
@@ -28,7 +28,7 @@ export default {
     data: function () {
         return {
             sort: {
-                by: 'Custom',
+                by: 'Ordered',
                 items: sortItems
             },
         }

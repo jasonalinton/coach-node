@@ -10,6 +10,10 @@ function removeItem(item, itemList) {
     }
 }
 
+function JSONDate(datetime) {
+    return moment(datetime).format();
+}
+
 function today() {
     return moment().hour(0).minute(0).second(0).millisecond(0).toDate();
 }
@@ -41,5 +45,6 @@ module.exports = {
     firstDayOfWeek,
     lastDayOfWeek,
     firstDayOfMonth,
-    lastDayOfMonth
+    lastDayOfMonth,
+    JSONDate
 }

@@ -44,6 +44,7 @@ async function createTimeUpdateTransactions(time, context, transaction) {
     })
 
     delete time.id;
+    delete time.isUpdated;
 
     let props = [
         { id: 'idEndpoint', name: 'endpoint' },
@@ -117,6 +118,7 @@ async function createRepeatTransaction(repeat, context, transaction) {
 
     delete repeat.id;
     delete repeat.isUpdated;
+    delete repeat.routine_repeats;
 
     transaction.push(context.prisma.repeat.update({
         where: { id: existingRepeat.id },

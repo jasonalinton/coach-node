@@ -1,5 +1,6 @@
 const { removeItem } = require('../../../utility');
 const { getTodoRepeat, getRoutineRepeat } = require('../../resolvers/mutations/time/repeatMutation');
+const { routines } = require('../../resolvers/queries/routineQuery');
 
 function configureRepeats(data) {
     let create = createRepeats(data);
@@ -39,10 +40,14 @@ function createRepeats(data) {
         configureType(repeat, 'timeframe');
         configureType(repeat, 'type');
         
-        configureDayIndicies(repeat)
+        configureDayIndicies(repeat);
+
+        configureMapObject(repeat, 'routineRepeat');
         
         delete repeat.id;
         delete repeat.isUpdated;
+        delete repeat.routine_repeats;
+        delete repeat.routines
     })
     return newRepeats;
 }
@@ -111,6 +116,8 @@ function configureTime(data, prop) {
         configureType(time, 'moment');
         configureType(time, 'flexibility');
         configureType(time, 'type');
+
+        delete time.isUpdated;
     }
 }
 

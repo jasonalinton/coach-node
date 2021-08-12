@@ -43,15 +43,23 @@ async function todoIterations(parent, args, context, info) {
                     }
                 },
                 {
-                    todoRepeat: {
-                        isNot: {
-                            routineIterations: {
-                                some: {}
+                    OR: [
+                        {
+                            todoRepeat: {
+                                isNot: {
+                                    routineIterations: {
+                                        some: {}
+                                    },
+                                },
+                                is: { routineRepeat: null }
                             }
+                        },
+                        {
+                            todoRepeat: null
                         }
-                    }
+                    ]
                 }
-            ]
+            ],
         },
         include: {
             todos: {

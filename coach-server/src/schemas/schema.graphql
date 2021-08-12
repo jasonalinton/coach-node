@@ -14,6 +14,8 @@ type Query {
   routines: [Routine!]!
   repetitiveRoutines: [Routine!]!
   routineIterations: [RoutineTodo_Iteration]!
+
+  repeat(id: Int): Repeat!
 }
 
 type Mutation {
@@ -34,8 +36,7 @@ type Mutation {
   toggleCompletion(iteration: IterationInput!): Iteration
   rescheduleIteration(id: Int!, startAt: String!): Iteration
   attemptIteration(id: Int!, attemptedAt: String!): Iteration
-  deleteIteration(id: Int!): Iteration
-  refreshRepetitive: [Todo!]!
+  refreshRepetitive: RepetitiveItems!
   getTodoRepeat(idTodo: Int, idRepeat: Int): Todo_Repeat
 
   # Routine
@@ -48,6 +49,11 @@ type Mutation {
 
   # Type
   getTypes(parentType: String!): [Type!]!
+
+  # Event
+  iterations: [Iteration]
+  deleteIteration(id: Int!): Iteration
+  deleteIterations(from: String, after: String): Int!
 }
 
 type Subscription {

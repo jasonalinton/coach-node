@@ -47,7 +47,7 @@
 </template>
 
 <script>
-import { removeItem, toDateString, toTimeString, toDateTimeString } from '../../../../utility'
+import { removeItem, toDateString, toTimeString, toDateTimeString, today } from '../../../../utility'
 import TimeControl from './TimeControl.vue';
 import moment from 'moment';
 
@@ -114,7 +114,7 @@ function constructTimePair() {
     }
 }
 
-function constructTime(moment, endpoint, datetime = new Date(new Date().setSeconds(0))) {
+function constructTime(moment, endpoint, datetime = today()) {
     return {
         id: --this.newTimeID,
         type: { id: this.getTimeTypeID("Scheduled") },

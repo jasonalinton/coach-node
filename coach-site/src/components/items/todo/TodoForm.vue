@@ -54,7 +54,7 @@
                 </div>
             </template>
         </ApolloQuery>
-        <RepeatControl class="mt-2" :repeats="item.repeats" @addRepeat="addRepeat" @updateRepeat="updateRepeat" @replaceRepeat="replaceRepeat"></RepeatControl>
+        <RepeatControl class="mt-2" :repeats="item.repeats" @addRepeat="addRepeat" @updateRepeat="updateRepeat"></RepeatControl>
         <TimePairControl class="mt-2" :timePairs="item.timePairs" @addTimePair="addTimePair" @updateTimePair="updateTimePair"></TimePairControl>
         <div class="d-flex flew-row justify-content-between mt-4">
             <!-- Toggle Panel - Checkbox -->
@@ -115,7 +115,6 @@ export default {
         getUnmappedIDs,
         addRepeat,
         updateRepeat,
-        replaceRepeat,
         addTimePair,
         updateTimePair
     },
@@ -190,34 +189,9 @@ function addRepeat(repeat) {
 }
 
 function updateRepeat(repeat) {
-    if (this.config.itemType.toLowerCase() == "todo" && repeat.routines && repeat.routines.length > 0) {
-        this.replaceRepeat(repeat);
-    } else {
-        var success = replaceItem(clone(repeat), this.item.repeats);
-        if (!success)
-            alert("Repeat no longer exists");
-    }
-}
-
-function replaceRepeat(repeat) {
-    repeat.routineRepeat = { id: repeat.id };
-    let clonedRepeat = clone(repeat);
-    replaceItem(clonedRepeat, this.item.repeats);
-    delete clonedRepeat.id;
-
-    if (clonedRepeat.startRepeat) {
-        delete clonedRepeat.startRepeat.id;
-    }
-    if (clonedRepeat.endRepeat) {
-        delete clonedRepeat.endRepeat.id;
-    }
-    if (clonedRepeat.startItration) {
-        delete clonedRepeat.startItration.id;
-    }
-    if (clonedRepeat.endItereation) {
-        delete clonedRepeat.endItereation.id;
-    }
-
+    var success = replaceItem(clone(repeat), this.item.repeats);
+    if (!success)
+        alert("Repeat no longer exists");
 }
 
 function addTimePair(timePair) {
@@ -283,6 +257,18 @@ function refreshForm() {
 
 function close() {
     this.$emit('closeForm', this.togglePanel);
+}
+
+function mapRoutine(routine) {
+    routine = clone(routine);
+
+    routine.isNewMap = true;
+    this.item.routines.push(routine);
+
+    routine.repeats.forEach(repeat => {
+        let clonedRepeat = clone(repeat);
+        this.item.repeats.push(clonedRepeat);
+    })
 }
 </script>
 

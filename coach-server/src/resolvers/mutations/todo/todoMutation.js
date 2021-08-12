@@ -12,7 +12,7 @@ async function addTodo(parent, args, context, info) {
         include: todoInclude
     });
 
-    console.log("")
+    // console.log("")
 
     todo = await configureIteration(todo, context);
 
@@ -43,7 +43,7 @@ async function updateTodo(parent, args, context, info) {
 
     todo = await configureIteration(todo, context);
     
-    updateSubscriptions(todo, sub)
+    updateSubscriptions(todo, context)
     
     return todo;
 }
@@ -75,6 +75,9 @@ async function createTodoIterations(parent, { todo }, context, info, repeat) {
                 ..._iteration,
                 todos: {
                     connect: [{ id: todo.id }]
+                },
+                todoRepeat: {
+                    connect: { id: repeat.id }
                 }
             }
         });
@@ -95,7 +98,7 @@ async function createTodoIterations(parent, { todo }, context, info, repeat) {
             delete todo_repeat_new.todo
             delete todo_repeat_new.repeat
 
-            let newone = await context.prisma.todo_Repeat.create({
+            await context.prisma.todo_Repeat.create({
                 data: {
                     ...todo_repeat_new,
                     idTodo,
@@ -109,29 +112,20 @@ async function createTodoIterations(parent, { todo }, context, info, repeat) {
         for (let i = 0; i < todo_repeats_updated.length; i++) {
             let todo_repeat_updated = todo_repeats_updated[i];
             
-            let idTodo = todo_repeats_updated.todo.id;
-            delete todo_repeats_updated.todo
-            delete todo_repeats_updated.repeat
-            let newone = await context.prisma.todo_Repeat.update({
+            let idTodo = todo_repeat_updated.todo.id;
+            delete todo_repeat_updated.todo;
+            delete todo_repeat_updated.repeat;
+            delete todo_repeat_updated.isUpdated;
+            
+            await context.prisma.todo_Repeat.update({
                 where: { id: todo_repeat_updated.id, },
                 data: {
-                    ...todo_repeats_updated,
+                    ...todo_repeat_updated,
                     idTodo,
                     idRepeat: _repeat.id
                 },
             })
         }
-
-        // Map new iterations to repeat
-        let repeat_out = await context.prisma.repeat.update({
-            where: { id: repeat.id },
-            data: {
-                todoIterations: {
-                    connect: iterations.map(_iteration => { return { id: _iteration.id } })
-                }
-            },
-            include: { iterations: true }
-        })
     }
 
     // Get updated todo

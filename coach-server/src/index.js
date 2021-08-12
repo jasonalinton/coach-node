@@ -13,12 +13,14 @@ const MetricQuery = require('./resolvers/queries/metricQuery');
 const GoalQuery = require('./resolvers/queries/goalQuery');
 const TodoQuery = require('./resolvers/queries/todoQuery');
 const RoutineQuery = require('./resolvers/queries/routineQuery');
+const RepeatQuery = require('./resolvers/queries/time/repeatQuery');
 
 const MetricMutation = require('./resolvers/mutations/metricMutation');
 const GoalMutation = require('./resolvers/mutations/goalMutation');
 const TodoMutation = require('./resolvers/mutations/todo/todoMutation');
 const TodoIterationMutation = require('./resolvers/mutations/todo/todoIterationMutation');
 const RoutineMutation = require('./resolvers/mutations/routineMutation');
+const IterationMutation = require('./resolvers/mutations/event/iterationMutation');
 
 const MetricSubscription = require('./resolvers/subscriptions/metricSubscription');
 const GoalSubscription = require('./resolvers/subscriptions/goalSubscription');
@@ -30,14 +32,16 @@ const Query = {
     ...MetricQuery,
     ...GoalQuery,
     ...TodoQuery,
-    ...RoutineQuery
+    ...RoutineQuery,
+    ...RepeatQuery,
 }
 const Mutation = {
   ...MetricMutation,
   ...GoalMutation,
   ...TodoMutation,
   ...TodoIterationMutation,
-  ...RoutineMutation
+  ...RoutineMutation,
+  ...IterationMutation
 }
 const Subscription = {
     ...MetricSubscription,

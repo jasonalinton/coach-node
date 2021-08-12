@@ -1,5 +1,5 @@
 const moment = require('moment');
-const { today, concatDate, firstDayOfWeek, lastDayOfWeek, firstDayOfMonth, lastDayOfMonth } = require('../../../utility');
+const { today, concatDate, firstDayOfWeek, lastDayOfWeek, firstDayOfMonth, lastDayOfMonth, JSONDate } = require('../../../utility');
 const { repetitiveTodos } = require('../../resolvers/queries/todoQuery');
 const { repetitiveRoutines } = require('../../resolvers/queries/routineQuery');
 const { getLastIterationDateTime, setLastIterationDateTime, isEventVisible } = require('../time/repeatController');
@@ -18,64 +18,39 @@ async function refreshRepetitiveEvents(indexDate, indexEnd, timeframe = repetiti
     const todos = await refreshRepetitiveTodos(indexDate, indexEnd, timeframe = repetitions.month, context);
     const routines = await refreshRepetitiveRoutines(indexDate, indexEnd, timeframe = repetitions.month, context);
 
-    let routine_iterations = routines.map(routine => routine.iterations);
-    
-    routine_iterations = routine_iterations.flat();
+    mapRoutineIterationsToTodoIterations(routines, context);
 
-    let routineTodo_Iterations = [];
-    routine_iterations.forEach(iteration => {
-        let todo_iterations = iteration.routineRepeat.todoIterations.filter(_iteration => moment(_iteration.startAt).format() == iteration.startAt);
-        
-        let ids = todo_iterations.map(todo_iteration => { return { id: todo_iteration.id } });
-
-        let routineTodo_Iteration = {
-            idRoutineIteration: iteration.id,
-            hasTodoEvent: false,
-            todoIterations: {
-                connect: [ ...ids ]
-            }
-        }
-        routineTodo_Iterations.push(routineTodo_Iteration);
-    })
-
-    let routineTodo_Iterations_updated = []
-    for (let i = 0; i < routineTodo_Iterations.length; i++) {
-        let routineTodo_Iteration_updated = routineTodo_Iterations[i];
-    console.log("")
-        routineTodo_Iteration_updated = await mapTodoIterations(null, routineTodo_Iteration_updated, context);
-    console.log("")
-        routineTodo_Iterations_updated.push(routineTodo_Iteration_updated);
-    }
-    console.log("")
+    return { todos, routines };
 }
 
 async function refreshRepetitiveTodos(indexDate, indexEnd, timeframe = repetitions.month, context) {
     const todos = await repetitiveTodos(null, null, context, true);
     let todos_updated = [];
-    console.log("")
+    // console.log("Got repetitive todos")
     for (let i = 0; i < todos.length; i++) {
         let todo = todos[i];
         const todoModel_Updated = await createRepetitiveEvents(todo, 'todo', indexDate, indexEnd, timeframe, context);
+        // console.log("Created repetitive events for todo");
         todos_updated.push(todoModel_Updated);
     };
-    console.log("")
+    // console.log("Created repetitive events for todos")
 
     return todos_updated;
 }
 
 async function refreshRepetitiveRoutines(indexDate, indexEnd, timeframe = repetitions.month, context) {
-    console.log("")
+    // console.log("Refresh repetitive routines");
     const routines = await repetitiveRoutines(null, null, context, true);
-    
-    console.log("")
+
+    // console.log("Got repetitive routines");
     let routines_updated = [];
     for (let i = 0; i < routines.length; i++) {
         let routine = routines[i];
         const routine_updated = await createRepetitiveEvents(routine, 'routine', indexDate, indexEnd, timeframe, context);
-        console.log("")
+        // console.log("Created repetitive events for routine");
         routines_updated.push(routine_updated);
     };
-    console.log("")
+    // console.log("Created repetitive events for routines");
 
     return routines_updated;
 }
@@ -104,20 +79,9 @@ async function createRepetitiveEvents(item, itemType, indexDate = null, indexEnd
 
 async function createRepetition(repeat, item, itemType, indexDate = null, indexEnd = null, timeframe = repetitions.monthly.id, context) {
     let lastIterationDateTime = await getLastIterationDateTime(repeat, itemType, item.id, context);
-    if (indexDate > indexEnd ||
-        repeat.startRepeat == null ||
-        new Date(repeat.startRepeat.dateTime) > indexDate ||
-        (repeat.endRepeat != null && new Date(repeat.endRepeat.dateTime) <= indexDate) ||
-        (lastIterationDateTime && lastIterationDateTime >= indexDate ))
-    {
-        if (lastIterationDateTime && lastIterationDateTime >= indexDate && lastIterationDateTime < indexEnd) {
-            indexDate = moment(lastIterationDateTime).add(1, 'day').toDate();
-        } else {
-            console.log("Skipping repetition creation for " + itemType);
-            item.iterations = [];
-            return item;
-        }
-    }
+    let props = { repeat, item, itemType, indexDate, indexEnd, context };
+    let isValid = validateDates(lastIterationDateTime, props);
+    if (!isValid) return item;
 
     // Daily
     if (repeat.timeframe.id == repetitions.daily.id) {
@@ -264,6 +228,75 @@ function createMonthlyRepetitions(item, itemType, indexDate, indexEnd, repeat) {
         }
         indexDate = moment(indexDate).add(repeat.interval, 'month').toDate();
     }
+}
+
+function validateDates(lastIterationDateTime, props) {
+    lastIterationDateTime = (lastIterationDateTime)? lastIterationDateTime : today();
+
+    console.log(`Last iteration datetime was ${JSONDate(lastIterationDateTime)}`);
+
+    let errorMes = `Skipping repetition creation for ${props.itemType}.`
+    if (props.indexDate > props.indexEnd) {
+        console.log(`${errorMes} IndexDate is after than indexEnd`);
+        return false;
+    } else if (props.repeat.startRepeat == null) {
+        console.log(`${errorMes} Repeat start is null`);
+        return false;
+    } else if (props.repeat.endRepeat != null && new Date(props.repeat.endRepeat.dateTime) <= props.indexDate) {
+        console.log(`${errorMes} Repeat end is before indexDate`);
+        return false;
+    } 
+    // else if (lastIterationDateTime) {
+    //     console.log(`${errorMes}`);
+    //     props.item.iterations = [];
+    // }
+    
+    if (lastIterationDateTime >= props.indexDate && lastIterationDateTime < props.indexEnd) {
+        props.indexDate = moment(lastIterationDateTime).add(1, 'day').toDate();
+    }
+
+    if (new Date(props.repeat.startRepeat.dateTime) > props.indexDate) {
+        props.indexDate = new Date(props.repeat.startRepeat.dateTime);
+    }
+
+    return true
+}
+
+async function mapRoutineIterationsToTodoIterations(routines, context) {
+    let routine_iterations = routines.map(routine => routine.iterations);
+    
+    routine_iterations = routine_iterations.flat();
+
+    let routineTodo_Iterations = [];
+    routine_iterations.forEach(iteration => {
+        let todo_iterations = iteration.routineRepeat.todoIterations.filter(_iteration => moment(_iteration.startAt).format() == iteration.startAt);
+        let ids = todo_iterations.map(todo_iteration => { return { id: todo_iteration.id } });
+
+        let todoIterations = iteration.routineRepeat.todoRepeats.map(tr => tr.todoIterations).flat();
+        todoIterations.forEach(_iteration => {
+            if (moment(_iteration.startAt).format() == iteration.startAt)
+                ids.push({ id: _iteration.id }) 
+        });
+
+        let routineTodo_Iteration = {
+            idRoutineIteration: iteration.id,
+            hasTodoEvent: false,
+            todoIterations: {
+                connect: [ ...ids ]
+            }
+        }
+        routineTodo_Iterations.push(routineTodo_Iteration);
+    })
+
+    let routineTodo_Iterations_updated = []
+    for (let i = 0; i < routineTodo_Iterations.length; i++) {
+        let routineTodo_Iteration_updated = routineTodo_Iterations[i];
+        // console.log("")
+        routineTodo_Iteration_updated = await mapTodoIterations(null, routineTodo_Iteration_updated, context);
+        // console.log("")
+        routineTodo_Iterations_updated.push(routineTodo_Iteration_updated);
+    }
+        // console.log("")
 }
 
 module.exports = {

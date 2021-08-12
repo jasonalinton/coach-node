@@ -21,9 +21,7 @@ const iterationInclude = {
                 }
             }
         },
-        routineRepeat: {
-            include: { todoIterations: true }
-        }
+        routineRepeat: select_repeat
     }
 }
 

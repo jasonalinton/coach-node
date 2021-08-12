@@ -92,7 +92,7 @@ function refreshForm() {
 
     .item .gutter {
         /* background-color: rgba(220, 220, 220, .5); */
-        border-left: 1px solid rgba(220, 220, 220, .5);
+        border-left: 1px solid rgba(220, 220, 220, 1);
         
         background-color: transparent;
         background-repeat: no-repeat;

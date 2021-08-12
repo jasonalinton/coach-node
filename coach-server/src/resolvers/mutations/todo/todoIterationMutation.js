@@ -1,8 +1,6 @@
 const { todoInclude, todoIterationIncude } = require('../../../properties/todoProperties');
 const { deleteTodo } = require('./todoMutation');
 const { refreshRepetitiveEvents } = require('../../../controller/planner/plannerController');
-const { repeat } = require('../../../properties/time/repeatProperties');
-const { prisma } = require('@prisma/client');
 const moment = require('moment');
 
 /* Create default task with only title and recommended start time */
@@ -12,7 +10,7 @@ async function createDefaultTask(parent, { iteration }, context, info) {
         where: { text: 'Scheduled' }
     });
 
-    console.log("");
+    // console.log("");
 
     let startTime = await context.prisma.time.create({
         data: {
@@ -24,7 +22,7 @@ async function createDefaultTask(parent, { iteration }, context, info) {
         }
     })
 
-    console.log("");
+    // console.log("");
     
     let todo = await context.prisma.todo.create({
         data: {
@@ -47,6 +45,8 @@ async function createDefaultTask(parent, { iteration }, context, info) {
         },
         include: todoInclude
     });
+
+    // console.log("");
 
     iteration = await context.prisma.iteration.findFirst({
         where: { id: todo.iterations[0].id },

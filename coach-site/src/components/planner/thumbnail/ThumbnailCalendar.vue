@@ -199,10 +199,6 @@ function previous() {
     user-select: none;
 }
 
-.pill.previous-month, .pill.next-month {
-    color: rgba(0, 0, 0, .6);
-}
-
 .day {
     color: rgba(0, 0, 0, .87);
 }
@@ -210,7 +206,7 @@ function previous() {
 .day:not(:hover) {
     color: rgba(0, 0, 0, .87);
     transition-property: background-color;
-    transition-duration: 0.15s;
+    transition-duration: .25s;
     transition-timing-function: ease-in-out;
     transition-delay: 0s;
 }
@@ -233,8 +229,19 @@ function previous() {
     background-color: #8AB4F8;
 }
 
+.day.selected:not(.hover) {
+    transition-property: background-color;
+    transition-duration: .25s;
+    transition-timing-function: ease-in-out;
+    transition-delay: 0s;
+}
+
 .day.selected.present {
     background-color: #0366E9;
+}
+
+.pill.previous-month, .pill.next-month {
+    color: rgba(0, 0, 0, .6);
 }
 
 button.today {

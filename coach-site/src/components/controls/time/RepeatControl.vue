@@ -43,37 +43,21 @@
         <!-- Repeat Times -->
         <div class="d-flex flex-column">
           <div class="d-flex flex-column mt-2">
-            <span class="align-self-start">Repeat Start</span>
-            <TimeControl class="mt-2" label="Repeat Start" :time="activeRepeat.startRepeat" endpoint="Start" @setTime="setRepeatTime"></TimeControl>
+            <TimeControl class="mt-2" label="Repeat Start" :time="activeRepeat.startRepeat" title="Repeat Start" endpoint="Start"></TimeControl>
           </div>
-          <div class="d-flex flex-column mt-1">
-            <div class="d-flex flex-row justify-content-between">
-              <span>Repeat End</span>
-              <i v-if="!activeRepeat.endRepeat" class="fas fa-plus btn btn-sm" @click="addEndRepeat()"></i>
-              <i v-if="activeRepeat.endRepeat" class="fas fa-minus btn btn-sm" @click="removeEndRepeat()"></i>
-            </div>
-            <TimeControl v-if="activeRepeat.endRepeat" class="mt-2" label="Repeat End" :time="activeRepeat.endRepeat"></TimeControl>
+          <div class="d-flex flex-column mt-2">
+            <TimeControl class="mt-2" label="Repeat End" :time="activeRepeat.endRepeat" title="Repeat End" endpoint="End" type="repeat" @addTime="addTime"></TimeControl>
           </div>
         </div>
         <!-- Iteration -->
         <div class="d-flex flex-column">
           <!-- Start -->
           <div class="d-flex flex-column mt-2">
-            <div class="d-flex flex-row justify-content-between">
-              <span>Iteration Start</span>
-              <i v-if="!activeRepeat.startIteration" class="fas fa-plus btn btn-sm" @click="addIterationStart()"></i>
-              <i v-if="activeRepeat.startIteration" class="fas fa-minus btn btn-sm" @click="removeIterationStart()"></i>
-            </div>
-            <TimeControl v-if="activeRepeat.startIteration" class="mt-2" label="Iteration Start" :time="activeRepeat.startIteration"></TimeControl>
+            <TimeControl class="mt-2" label="Iteration Start" :time="activeRepeat.startIteration" title="Iteration Start" type="iteration" endpoint="Start" @addTime="addTime"></TimeControl>
           </div>
           <!-- End -->
           <div class="d-flex flex-column mt-2">
-            <div class="d-flex flex-row justify-content-between">
-              <span>Iteration End</span>
-              <i v-if="!activeRepeat.endIteration" class="fas fa-plus btn btn-sm" @click="addIterationEnd()"></i>
-              <i v-if="activeRepeat.endIteration" class="fas fa-minus btn btn-sm" @click="removeIterationEnd()"></i>
-            </div>
-            <TimeControl v-if="activeRepeat.endIteration" class="mt-2" label="Iteration End" :time="activeRepeat.endIteration"></TimeControl>
+            <TimeControl class="mt-2" label="Iteration End" :time="activeRepeat.endIteration" title="Iteration End" type="iteration" endpoint="End" @addTime="addTime"></TimeControl>
           </div>
         </div>
         <!-- End - Iteration -->
@@ -92,7 +76,7 @@
       </div>
       <!-- Repeat List -->
       <div class="list-group" v-for="repeat in repeats" v-bind:key="repeat.id">
-        <div class="list-group-item list-group-item-light list-group-item-action d-flex flew-row justify-content-between">
+        <div class="list-group-item list-group-item-light list-group-item-action d-flex flew-row justify-content-between" @click="editRepeat(repeat)">
           <div>
             <div class="d-flex flex-row">
               <span class="me-2">Every</span>
@@ -105,8 +89,7 @@
             </div>
           </div>
           <div class="d-flex align-center">
-            <i v-if="!activeRepeat" class="fas fa-pen btn-sm" @click="editRepeat(repeat)" :style="{'font-size': '11px', 'padding': '5px 2px'}"></i>
-            <i class="fas fa-times btn-sm" @click="removeRepeat(repeat)"></i>
+            <i class="remove fas fa-times btn-sm" @click.stop="removeRepeat(repeat)"></i>
           </div>
         </div>
       </div>
@@ -115,7 +98,7 @@
 
 <script>
 import TimeControl from '../time/TimeControl.vue'
-import { today } from '../../../../utility'
+import { today, clone } from '../../../../utility'
 
 let timeTypes = [
   { id: 80, text: "Scheduled", isActive: true },
@@ -178,6 +161,7 @@ export default {
       flexibilityTypes,
       endpointTypes,
       momentTypes,
+      console: console
     }
   },
   computed: {
@@ -209,23 +193,11 @@ export default {
       var timeframe = this.timeframes.find(timeframe => timeframe.id == self.activeRepeat.timeframe.id);
       return timeframe.text;
     },
-    // isRecommended: function() {
-    //   if (repeat.type.id == this.getTimeTypeID("Recommended"))
-    //     return true
-    //   else
-    //     return false
-    // }
   },
   watch: {
     repeats(value) {
       console.log(value)
     }
-    // isRecommended(value) {
-    //   if (value == true)
-    //     this.activeRepeat.type.id = this.getTimeTypeID("Recommended");
-    //   else if (value == false)
-    //     this.activeRepeat.type.id = this.getTimeTypeID("Scheduled");
-    // }
   },
   methods: {
     constructRepeat: function () {
@@ -253,26 +225,10 @@ export default {
         dayIndecies: []
       };
     },
-    // constructTime: function (dateTimeString, endpoint, moment) {
-    //   var idMoment;
-    //   if (moment == "date")
-    //     idMoment = 87;
-    //   else if (moment == "time")
-    //     idMoment = 88;
-    //   else
-    //     idMoment = 89;
-
-    //   return { 
-    //     id: --this.newTimeID,
-    //     dateTime: new Date(dateTimeString),
-    //     dateTimeString: dateString(dateTimeString),
-    //     type: { id: this.activeRepeat.type.id },
-    //     endpoint: { id: (endpoint == "start") ? 84 : 85 },
-    //     moment: { id: idMoment },
-    //     flexibility: { id: 25 },
-    //   };
-    // },
     constructTime,
+    addRepeatTime,
+    addIterationTime,
+    addTime,
     setRepeatTime,
     setIterationTime,
     getEndpointTypeID,
@@ -312,17 +268,6 @@ export default {
       else
         tempRepeat.isRecommended = false;
 
-      // Init temp field, dateTimeString
-      // if (tempRepeat.startRepeat) {
-      //   tempRepeat.startRepeat.dateTimeString = dateString(tempRepeat.startRepeat.dateTime);
-      // }
-      // if (tempRepeat.endRepeat) {
-      //   tempRepeat.endRepeat.dateTimeString = dateString(tempRepeat.endRepeat.dateTime);
-      // }
-      // if (repeat.startIteration)
-      
-      // if (repeat.endIteration)
-
       let indecies = [];
       tempRepeat.dayIndecies.forEach(dayIndex => indecies.push(dayIndex.index));
       tempRepeat.dayIndecies = indecies;
@@ -348,10 +293,6 @@ export default {
       if (repeat.endRepeat) {
         repeat.endRepeat.dateTime = new Date(repeat.endRepeat.dateTime);
       }
-      // if (repeat.startIteration)
-      //   repeat.startIteration.dateTime = new Date(repeat.startIteration.dateTimeString);
-      // if (repeat.endIteration)
-      //   repeat.endIteration.dateTime = new Date(repeat.endIteration.dateTimeString);
 
       let indecies = [];
       repeat.dayIndecies.forEach(index => {
@@ -369,6 +310,7 @@ export default {
 
       repeat.interval = parseInt(repeat.interval);
       repeat.frequency = parseInt(repeat.frequency);
+
 
       if (this.activeRepeat.isUpdated) {
         this.$emit('updateRepeat', repeat);
@@ -399,15 +341,47 @@ export default {
   }
 }
 
-function constructTime(moment, endpoint, datetime = new Date(new Date().setSeconds(0))) {
+function constructTime(moment, endpoint, datetime = today()) {
     return {
         id: --this.newTimeID,
         type: { id: this.getTimeTypeID("Scheduled") },
         endpoint: { id: this.getEndpointTypeID(endpoint) },
-        moment: moment,
+        moment: clone(moment),
         flexibility: { id: this.getFlexibilityTypeID("Elastic") },
         dateTime: datetime.toJSON(),
         isRecommended: false,
+    }
+}
+
+function addTime(moment, endpoint, type) {
+    if (type == "repeat") {
+      if (endpoint.toLowerCase() == "start") {
+          this.activeRepeat['startRepeat'] = this.constructTime(moment, "Start")
+      }else if (endpoint.toLowerCase() == "end") {
+          this.activeRepeat['endRepeat'] = this.constructTime(moment, "End")
+      }
+    } else if (type == "iteration") {
+      if (endpoint.toLowerCase() == "start") {
+          this.activeRepeat['startIteration'] = this.constructTime(moment, "Start")
+      }else if (endpoint.toLowerCase() == "end") {
+          this.activeRepeat['endIteration'] = this.constructTime(moment, "End")
+      }
+    }
+}
+
+function addRepeatTime(moment, endpoint) {
+    if (endpoint.toLowerCase() == "start") {
+        this.activeRepeat['startRepeat'] = this.constructTime(moment, "Start")
+    }else if (endpoint.toLowerCase() == "end") {
+        this.activeRepeat['endRepeat'] = this.constructTime(moment, "End")
+    }
+}
+
+function addIterationTime(moment, endpoint) {
+    if (endpoint.toLowerCase() == "start") {
+        this.activeRepeat['startIteration'] = this.constructTime(moment, "Start")
+    }else if (endpoint.toLowerCase() == "end") {
+        this.activeRepeat['endIteration'] = this.constructTime(moment, "End")
     }
 }
 
@@ -471,4 +445,11 @@ h2 {
     visibility: visible;
 }
 
+i.remove {
+    visibility: hidden;
+}
+
+.list-group-item:hover i.remove {
+    visibility: visible;
+}
 </style>
