@@ -31,7 +31,7 @@
                     </div>
                     <!-- Quick Add Item -->
                     <div class="d-flex justify-content-between mt-1">
-                        <button class="add-btn my-auto" type="button" @click="addItem(newGoal, todo.Goals)">
+                        <button class="add-btn my-auto" type="button" @click="addItem(newItem[prop.prop], item[prop.prop])">
                             <img src="/icon/button/add.png" width="10" height="10"/>Add
                         </button>
                         <input class="add textbox" type="text" 

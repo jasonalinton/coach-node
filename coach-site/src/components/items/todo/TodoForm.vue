@@ -31,7 +31,7 @@
                     </div>
                     <!-- Quick Add Item -->
                     <div class="d-flex justify-content-between mt-1">
-                        <button class="add-btn my-auto" type="button" @click="addItem(newGoal, todo.Goals)">
+                        <button class="add-btn my-auto" type="button" @click="addItem(newItem[prop.prop], item[prop.prop])">
                             <img src="/icon/button/add.png" width="10" height="10"/>Add
                         </button>
                         <input class="add textbox" type="text" 
@@ -74,14 +74,14 @@
 </template>
 
 <script>
-import SelectItem from "../controls/SelectItem.vue"
-import { replaceItem, removeItem, clone } from '../../../utility'
-import RepeatControl from '../controls/time/RepeatControl.vue'
-import TimePairControl from '../controls/time/TimePairControl.vue'
+import SelectItem from "../../controls/SelectItem.vue"
+import { replaceItem, removeItem, clone } from '../../../../utility'
+import RepeatControl from '../../controls/time/RepeatControl.vue'
+import TimePairControl from '../../controls/time/TimePairControl.vue'
 
 export default {
     components: { SelectItem, RepeatControl, TimePairControl },
-    name: "ItemForm",
+    name: "TodoForm",
     props: {
         config: Object,
         item: Object
@@ -259,17 +259,17 @@ function close() {
     this.$emit('closeForm', this.togglePanel);
 }
 
-function mapRoutine(routine) {
-    routine = clone(routine);
+// function mapRoutine(routine) {
+//     routine = clone(routine);
 
-    routine.isNewMap = true;
-    this.item.routines.push(routine);
+//     routine.isNewMap = true;
+//     this.item.routines.push(routine);
 
-    routine.repeats.forEach(repeat => {
-        let clonedRepeat = clone(repeat);
-        this.item.repeats.push(clonedRepeat);
-    })
-}
+//     routine.repeats.forEach(repeat => {
+//         let clonedRepeat = clone(repeat);
+//         this.item.repeats.push(clonedRepeat);
+//     })
+// }
 </script>
 
 <style scoped>

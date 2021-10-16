@@ -1,10 +1,10 @@
 import {
-    addTodo, updateTodo, deleteTodo,
-    onTodoAdded, onTodoUpdated, onTodoDeleted
+    addTodo, updateTodo, deleteTodo
 } from '../../resolvers/todo-resolvers'
 
 let config = {
     itemType: "todo",
+    itemName: "Todo", // Capitalized version of item type
     props: [
         {
             id: 1,
@@ -122,30 +122,7 @@ let config = {
         name: "todos",
         document: require('../../graphql/query/todo/QueryTodos.gql'),
         variables: {},
-    },
-    subscriptions: [
-        {
-            name: 'todoAdded',
-            object: {
-                query: require('../../graphql/subscription/todo/TodoAdded.gql'),
-                result({ data }) { onTodoAdded(this.$apollo.getClient().cache, data.todoAdded) },
-            }
-        },
-        {
-            name: 'todoUpdated',
-            object: {
-                query: require('../../graphql/subscription/todo/TodoUpdated.gql'),
-                result({ data }) { onTodoUpdated(this.$apollo.getClient().cache, data.todoUpdated) },
-            }
-        },
-        {
-            name: 'todoDeleted',
-            object: {
-                query: require('../../graphql/subscription/todo/TodoDeleted.gql'),
-                result({ data }) { onTodoDeleted(this.$apollo.getClient().cache, data.todoDeleted) },
-            }
-        }
-    ]
+    }
 }
 
 export default config;

@@ -7,7 +7,6 @@ class ItemConfigModel {
         this.itemType = config.itemType;
         this.props = config.props;
         this.query = config.query;
-        this.subscriptions = config.subscriptions;
         this.#itemModel = config.itemModel;
 
         if (config.addItem)

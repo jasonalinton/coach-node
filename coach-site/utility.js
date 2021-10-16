@@ -33,6 +33,13 @@ export function replaceItem(item, itemList) {
     }
 }
 
+// Ten bucks says this causes a probalem in the future JL: 7/4/21
+export function replaceProperties(newObject, oldObject) {
+    for (let prop in newObject) {
+        oldObject[prop] = newObject[prop];
+    }
+}
+
 export function unmapItem(item, removedItem, property) {
     if (item.unmappedIDs) {
         if (item.unmappedIDs[property]) {

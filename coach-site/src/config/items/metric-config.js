@@ -1,4 +1,4 @@
-import { updateMetric, onMetricUpdated } from '../../resolvers/metric-resolvers'
+import { updateMetric } from '../../resolvers/metric-resolvers'
 
 let config = {
     itemType: "metric",
@@ -72,16 +72,7 @@ let config = {
         name: "metrics",
         document: require('../../graphql/query/QueryMetrics.gql'),
         variables: {},
-    },
-    subscriptions: [
-        {
-            name: 'metricUpdated',
-            object: {
-                query: require('../../graphql/subscription/metric/MetricUpdated.gql'),
-                result({ data }) { onMetricUpdated(this.$apollo.getClient().cache, data.metricUpdated) },
-            }
-        }
-    ]
+    }
 }
 
 export default config;

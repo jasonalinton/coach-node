@@ -1,6 +1,5 @@
 import {
-    addRoutine, updateRoutine, deleteRoutine,
-    onRoutineAdded, onRoutineUpdated, onRoutineDeleted
+    addRoutine, updateRoutine, deleteRoutine
 } from '../../resolvers/routine-resolvers'
 
 let config = {
@@ -111,30 +110,7 @@ let config = {
         name: "routines",
         document: require('../../graphql/query/routine/QueryRoutines.gql'),
         variables: {},
-    },
-    subscriptions: [
-        {
-            name: 'routineAdded',
-            object: {
-                query: require('../../graphql/subscription/routine/RoutineAdded.gql'),
-                result({ data }) { onRoutineAdded(this.$apollo.getClient().cache, data.routineAdded) },
-            }
-        },
-        {
-            name: 'routineUpdated',
-            object: {
-                query: require('../../graphql/subscription/routine/RoutineUpdated.gql'),
-                result({ data }) { onRoutineUpdated(this.$apollo.getClient().cache, data.routineUpdated) },
-            }
-        },
-        {
-            name: 'routineDeleted',
-            object: {
-                query: require('../../graphql/subscription/routine/RoutineDeleted.gql'),
-                result({ data }) { onRoutineDeleted(this.$apollo.getClient().cache, data.routineDeleted) },
-            }
-        }
-    ]
+    }
 }
 
 export default config;

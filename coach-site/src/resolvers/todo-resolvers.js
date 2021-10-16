@@ -1,8 +1,3 @@
-import METRICS from '../graphql/query/QueryMetrics.gql'
-import TODOS from '../graphql/query/todo/QueryTodos.gql'
-import GOALS from '../graphql/query/QueryGoals.gql'
-import ROUTINES from '../graphql/query/routine/QueryRoutines.gql'
-
 import ADD_TODO from '../graphql/mutation/todo/AddTodo.gql'
 import DELETE_TODO from '../graphql/mutation/todo/DeleteTodo.gql'
 import UPDATE_TODO from '../graphql/mutation/todo/UpdateTodo.gql'
@@ -12,12 +7,6 @@ import TOGGLE_COMPLETION from '../graphql/mutation/todo/ToggleCompletion.gql'
 import RESCHEDULE_ITERATION from '../graphql/mutation/todo/RescheduleIteration.gql'
 import ATTEMPT_ITERATION from '../graphql/mutation/todo/AttemptIteration.gql'
 import DELETE_ITERATION from '../graphql/mutation/todo/DeleteIteration.gql'
-
-import {
-    addItemToCache, addPropertyToCache,
-    updateItemInCache, updatePropertyInCache,
-    deleteItemInCache, deletePropertyInCache
-} from './resolve'
 
 export function addTodo(todo, apollo) {
     apollo.mutate({
@@ -85,31 +74,4 @@ export function deleteIteration(id, apollo) {
         mutation: DELETE_ITERATION,
         variables: { id },
     });
-}
-
-export function onTodoAdded(cache, addedTodo) {
-    addItemToCache(cache, TODOS, 'todos', addedTodo);
-    // addPropertyToCache(cache, TODOS, 'parents', 'todos', addedTodo);
-    // addPropertyToCache(cache, TODOS, 'children', 'todos', addedTodo);
-    addPropertyToCache(cache, METRICS, 'metrics', 'todos', addedTodo);
-    addPropertyToCache(cache, GOALS, 'goals', 'todos', addedTodo);
-    addPropertyToCache(cache, ROUTINES, 'routines', 'todos', addedTodo);
-}
-
-export function onTodoUpdated(cache, updatedTodo) {
-    updateItemInCache(cache, TODOS, 'todos', updatedTodo);
-    // updatePropertyInCache(cache, TODOS, 'parents', 'todos', updatedTodo);
-    // updatePropertyInCache(cache, TODOS, 'children', 'todos', updatedTodo);
-    updatePropertyInCache(cache, METRICS, 'metrics', 'todos', updatedTodo);
-    updatePropertyInCache(cache, GOALS, 'goals', 'todos', updatedTodo);
-    updatePropertyInCache(cache, ROUTINES, 'routines', 'todos', updatedTodo);
-}
-
-export function onTodoDeleted(cache, deletedTodo) {
-    deleteItemInCache(cache, TODOS, 'todos', deletedTodo);
-    // deletePropertyInCache(cache, TODOS, 'parents', 'todos', deletedTodo);
-    // deletePropertyInCache(cache, TODOS, 'children', 'todos', deletedTodo);
-    deletePropertyInCache(cache, METRICS, 'metrics', 'todos', deletedTodo);
-    deletePropertyInCache(cache, GOALS, 'goals', 'todos', deletedTodo);
-    deletePropertyInCache(cache, ROUTINES, 'routines', 'todos', deletedTodo);
 }

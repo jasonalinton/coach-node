@@ -1,3 +1,10 @@
+type Items {
+  metrics: [Metric!]
+  goals: [Goal!]
+  todos: [Todo!]
+  routines: [Routine!]
+}
+
 type Type {
   id: Int
   text: String!

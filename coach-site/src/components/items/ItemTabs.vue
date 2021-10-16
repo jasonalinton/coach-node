@@ -13,36 +13,36 @@
             </div>
         </nav>
         <ItemTab v-show="selectedTab == 'metric'" 
-        id="nav-metric" class="tab-pane fade" 
-        :class="[{ active: selectedTab == 'metric', show: selectedTab == 'metric' }]"
-        :config="metricConfig"
-        role="tabpanel" aria-labelledby="item-metric-tab"></ItemTab>
+                  id="nav-metric" class="tab-pane fade" 
+                  :class="[{ active: selectedTab == 'metric', show: selectedTab == 'metric' }]"
+                  :config="metricConfig"
+                  role="tabpanel" aria-labelledby="item-metric-tab"></ItemTab>
         <ItemTab v-show="selectedTab == 'goal'" 
-        id="nav-goal" class="tab-pane fade" 
-        :class="[{ active: selectedTab == 'goal', show: selectedTab == 'goal' }]"
-        :config="goalConfig"
-        role="tabpanel" aria-labelledby="item-goal-tab"></ItemTab>
-        <ItemTab v-show="selectedTab == 'todo'" 
-        id="nav-todo" class="tab-pane fade" 
-        :class="[{ active: selectedTab == 'todo', show: selectedTab == 'todo' }]" 
-        :config="todoConfig"
-        role="tabpanel" aria-labelledby="item-todo-tab"></ItemTab>
+                  id="nav-goal" class="tab-pane fade" 
+                  :class="[{ active: selectedTab == 'goal', show: selectedTab == 'goal' }]"
+                  :config="goalConfig"
+                  role="tabpanel" aria-labelledby="item-goal-tab"></ItemTab>
+        <ItemTab v-show="selectedTab == 'todo'"
+                  id="nav-todo" class="tab-pane fade" 
+                  :class="[{ active: selectedTab == 'todo', show: selectedTab == 'todo' }]" 
+                  :config="todoConfig"
+                  role="tabpanel" aria-labelledby="item-todo-tab">
+        </ItemTab>
         <ItemTab v-show="selectedTab == 'routine'" 
-        id="nav-routine" class="tab-pane fade" 
-        :class="[{ active: selectedTab == 'routine', show: selectedTab == 'routine' }]"
-        :config="routineConfig"
-        role="tabpanel" aria-labelledby="item-routine-tab"></ItemTab>
+                  id="nav-routine" class="tab-pane fade" 
+                  :class="[{ active: selectedTab == 'routine', show: selectedTab == 'routine' }]"
+                  :config="routineConfig"
+                  role="tabpanel" aria-labelledby="item-routine-tab"></ItemTab>
     </div>
 </template>
 
 <script>
-import ItemTab from './ItemTab.vue'
-
 import MetricConfig from '../../config/items/metric-config'
 import GoalConfig from '../../config/items/goal-config'
 import TodoConfig from '../../config/items/todo-config'
 import RoutineConfig from '../../config/items/routine-config'
 import ItemConfigModel from '../../config/items/item-config'
+import ItemTab from './ItemTab.vue'
 
 export default {
   name: 'ItemTabs',

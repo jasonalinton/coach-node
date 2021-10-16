@@ -13,11 +13,11 @@
         <div class="grid-body" ref="gridBody">
             <Planner 
                 v-if="navbar.selectedPage == 'planner'" 
-                :selectedPage="navbar.selectedPage"
-                :dayCount="navbar.week.dayCount"
-                :selectedView="navbar.selectedView"
-                :selectedDate="selectedDate"
-                @dateChange="dateChange">
+                    :selectedPage="navbar.selectedPage"
+                    :dayCount="navbar.week.dayCount"
+                    :selectedView="navbar.selectedView"
+                    :selectedDate="selectedDate"
+                    @dateChange="dateChange">
             </Planner>
             <ItemTabs v-if="navbar.selectedPage == 'items'"></ItemTabs>
         </div>

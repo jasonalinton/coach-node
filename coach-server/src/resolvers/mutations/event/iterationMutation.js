@@ -1,10 +1,11 @@
 async function deleteIterations(parent, { after, from }, context, info) {
-    let where;
+    let date;
     if (after)
-        where = { startAt: { gt: new Date(after) } }
+        date = new Date(after);
     else if (from)
-        where = { startAt: { gte: new Date(from) } };
+        date = new Date(from);
 
+    let where = { startAt: { gte: date } };
 
     let iterations = await context.prisma.iteration.findMany({
         where,
@@ -18,6 +19,12 @@ async function deleteIterations(parent, { after, from }, context, info) {
         where: rtWhere,
     });
     console.log(`About to delete ${routineTodoIterations.length} routineTodoIterations`);
+
+    // let goalRepeatPayload = context.prisma.todo_Repeat.updateMany({
+    //     data: {
+    //         lastIterationDateTime: 
+    //     }
+    // })
 
     let rtPayload = await context.prisma.routineTodo_Iteration.deleteMany({
         where: rtWhere,

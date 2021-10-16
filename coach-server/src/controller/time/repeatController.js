@@ -226,6 +226,22 @@ async function getLastIterationDateTime(repeat, itemType, itemID, context) {
     return (item_repeat) ? item_repeat.lastIterationDateTime : null;
 }
 
+async function getLastIterationDateTime2(repeat, itemType, itemID, context) {
+    let item_repeat;
+
+    try {
+        if (itemType == 'todo') {
+            item_repeat = await getTodoRepeat(null, { idTodo: itemID, idRepeat: repeat.id }, context);
+        } else if (itemType == 'routine') {
+            item_repeat = await getRoutineRepeat(null, { idRoutine: itemID, idRepeat: repeat.id }, context);
+        }
+    } catch (error) {
+        console.log(error)
+    }
+    
+    return (item_repeat) ? item_repeat.lastIterationDateTime : null;
+}
+
 function setLastIterationDateTime(repeat, itemType, itemID, dateTime) {
     let item_repeat = repeat[`${itemType}_repeats`].find(_item_repeat => _item_repeat[itemType].id == itemID);
     if (item_repeat) {

@@ -25,6 +25,13 @@
                                 {{ columnData(column, item) }}
                             </div>
                         </td>
+                        <td>
+                            <div class="d-flex justufy-content-center">
+                                <button class="delete-btn btn btn-secondary btn-sm float-end" type="button" @click.prevent.stop="onDeleteItem(item)">
+                                    <i class="far fa-trash-alt"></i>
+                                </button>
+                            </div>
+                        </td>
                     </tr>
                 </tbody>
             </table>
@@ -33,11 +40,11 @@
 </template>
 
 <script>
-import { listToString, replaceItem } from '../../../../utility';
-import { updatePropertyInCache2,  } from '../../../resolvers/resolve.js'
+import { listToString, replaceItem, removeItem } from '../../../../utility';
+import { addPropertyToCache2, updatePropertyInCache2, deletePropertyInCache2 } from '../../../resolvers/resolve.js'
 
 export default {
-    name: 'MetricTable',
+    name: 'TodoTable',
     props: {
         config: Object,
         selectedItem: Object
@@ -54,7 +61,7 @@ export default {
             query: require('../../../graphql/query/QueryItems.gql'),
             loadingKey: 'loadingQueriesCount',
             update(data) { 
-                return data.items.metrics;
+                return data.items.todos;
             },
             error: function(error) {
                 this.errorMessage = 'Error occurred while loading query';
@@ -63,10 +70,26 @@ export default {
             },
             subscribeToMore: [
                 {
-                    document: require('../../../graphql/subscription/metric/MetricUpdated.gql'),
-                    updateQuery: (previousResult, { subscriptionData: { data: { metricUpdated }} }) => {
-                        replaceItem(metricUpdated, previousResult.items.todos);
-                        updatePropertyInCache2(metricUpdated, 'metrics', ['goals', 'todos', 'routines'], previousResult);
+                    document: require('../../../graphql/subscription/todo/TodoAdded.gql'),
+                    updateQuery: (previousResult, { subscriptionData: { data: { todoAdded }} }) => {
+                        previousResult.items.todos.splice(0, 0, todoAdded);
+                        addPropertyToCache2(todoAdded, 'todos', ['metrics', 'goals', 'routines'], previousResult);
+                        return previousResult;
+                    },
+                },
+                {
+                    document: require('../../../graphql/subscription/todo/TodoUpdated.gql'),
+                    updateQuery: (previousResult, { subscriptionData: { data: { todoUpdated }} }) => {
+                        replaceItem(todoUpdated, previousResult.items.todos);
+                        updatePropertyInCache2(todoUpdated, 'todos', ['metrics', 'goals', 'routines'], previousResult);
+                        return previousResult;
+                    },
+                },
+                {
+                    document: require('../../../graphql/subscription/todo/TodoDeleted.gql'),
+                    updateQuery: (previousResult, { subscriptionData: { data: { todoDeleted }} }) => {
+                        removeItem(todoDeleted, previousResult.items.todos);
+                        deletePropertyInCache2(todoDeleted, 'todos', ['metrics', 'goals', 'routines'], previousResult);
                         return previousResult;
                     },
                 },
@@ -82,7 +105,9 @@ export default {
     },
     methods: {
         columnData,
-        listToString
+        listToString,
+        onAddItem,
+        onDeleteItem
     }
 }
 
@@ -92,6 +117,16 @@ function columnData(column, item) {
     } else {
         return item[column.prop];
     }
+}
+
+function onAddItem() {
+    let item = this.config.newItem();
+    this.$emit('itemSelected', item)
+}
+
+function onDeleteItem(item) {
+    this.$emit('closeForm');
+    this.config.deleteItem(item, this.$apollo);
 }
 </script>
 
@@ -163,13 +198,7 @@ td {
 .table tbody tr.selected {
     background-color: rgb(239, 246, 252);
     color: rgb(0, 90, 158);
-    /* background-color: rgba(3, 155, 229, .1); */
-    /* color: rgb(3, 155, 229); */
 }
-
-/* .table tbody tr:nth-of-type(2n+1) {
-    background-color:#F5F5F5;
-} */
 
 .add-btn {
     width: 30px;

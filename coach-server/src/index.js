@@ -9,6 +9,7 @@ const { typeDefs } = require('./schemas/typeDefs');
 // TODO: Dynamically load modules
 // https://stackoverflow.com/questions/10914751/loading-node-js-modules-dynamically-based-on-route
 
+const ItemQuery = require('./resolvers/queries/itemQuery');
 const MetricQuery = require('./resolvers/queries/metricQuery');
 const GoalQuery = require('./resolvers/queries/goalQuery');
 const TodoQuery = require('./resolvers/queries/todoQuery');
@@ -29,6 +30,7 @@ const RoutineSubscription = require('./resolvers/subscriptions/routineSubscripti
 const PlannerSubscription = require('./resolvers/subscriptions/plannerSubscription');
 
 const Query = {
+    ...ItemQuery,
     ...MetricQuery,
     ...GoalQuery,
     ...TodoQuery,

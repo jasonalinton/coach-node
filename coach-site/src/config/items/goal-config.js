@@ -1,6 +1,5 @@
 import {
-    addGoal, updateGoal, deleteGoal,
-    onGoalAdded, onGoalUpdated, onGoalDeleted
+    addGoal, updateGoal, deleteGoal
 } from '../../resolvers/goal-resolvers'
 
 let config = {
@@ -107,30 +106,7 @@ let config = {
         name: "goals",
         document: require('../../graphql/query/QueryGoals.gql'),
         variables: {},
-    },
-    subscriptions: [
-        {
-            name: 'goalAdded',
-            object: {
-                query: require('../../graphql/subscription/goal/GoalAdded.gql'),
-                result({ data }) { onGoalAdded(this.$apollo.getClient().cache, data.goalAdded) },
-            }
-        },
-        {
-            name: 'goalUpdated',
-            object: {
-                query: require('../../graphql/subscription/goal/GoalUpdated.gql'),
-                result({ data }) { onGoalUpdated(this.$apollo.getClient().cache, data.goalUpdated) },
-            }
-        },
-        {
-            name: 'goalDeleted',
-            object: {
-                query: require('../../graphql/subscription/goal/GoalDeleted.gql'),
-                result({ data }) { onGoalDeleted(this.$apollo.getClient().cache, data.goalDeleted) },
-            }
-        }
-    ]
+    }
 }
 
 export default config;

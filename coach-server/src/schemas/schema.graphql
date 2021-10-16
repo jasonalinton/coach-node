@@ -1,4 +1,7 @@
 type Query {
+  # Items
+  items(getMetrics: Boolean = true, getGoals: Boolean = true, getTodos: Boolean = true, getRoutines: Boolean = true): Items!
+
   # Metric
   metrics: [Metric!]!
 

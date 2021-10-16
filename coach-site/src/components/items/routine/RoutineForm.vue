@@ -81,7 +81,7 @@ import TimePairControl from '../../controls/time/TimePairControl.vue'
 
 export default {
     components: { SelectItem, RepeatControl, TimePairControl },
-    name: "GoalForm",
+    name: "RoutineForm",
     props: {
         config: Object,
         item: Object
@@ -107,6 +107,8 @@ export default {
         initNewItems,
         addItem,
         save,
+        configureRoutine,
+        configureTodo,
         close,
         refreshForm,
         removeItem,
@@ -208,6 +210,12 @@ function save(item) {
 
     item.unmappedIDs = this.getUnmappedIDs();
 
+    if (this.config.itemType == 'todo') {
+        this.configureTodo(item);
+    } else if (this.config.itemType == 'routine') {
+        this.configureRoutine(item);
+    }
+
     if (!item.id) {
         this.config.addItem(item, this.$apollo);
     } else {
@@ -221,6 +229,28 @@ function save(item) {
     }
 }
 
+function configureRoutine(item) {
+    item.todos.forEach(todo => {
+        item.repeats.forEach(repeat => {
+            let cloned = clone(repeat);
+            cloned.isConnected = true;
+            if (!todo.repeats) todo.repeats = [];
+            todo.repeats.push(cloned);
+        })
+    })
+}
+
+function configureTodo(item) {
+    item.routines.forEach(routine => {
+        if (!routine.repeats) return;
+        routine.repeats.forEach(repeat => {
+            let cloned = clone(repeat);
+            cloned.isConnected = true;
+            item.repeats.push(cloned);
+        })
+    })
+}
+
 function refreshForm() {
     this.$emit('refreshForm');
 }
@@ -228,6 +258,18 @@ function refreshForm() {
 function close() {
     this.$emit('closeForm', this.togglePanel);
 }
+
+// function mapRoutine(routine) {
+//     routine = clone(routine);
+
+//     routine.isNewMap = true;
+//     this.item.routines.push(routine);
+
+//     routine.repeats.forEach(repeat => {
+//         let clonedRepeat = clone(repeat);
+//         this.item.repeats.push(clonedRepeat);
+//     })
+// }
 </script>
 
 <style scoped>

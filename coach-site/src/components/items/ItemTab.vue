@@ -1,38 +1,41 @@
 <template>
     <div class="item row g-0" tabindex="0" v-on:keyup.esc="closeForm">
         <div :class="{ split: selectedItem }">
-            <ItemTable 
-                :id="`${config.itemType}-table`"
-                    :config="config"
-                    @itemSelected="itemSelected"
-                    :selectedItem="selectedItem"
-                    @closeForm="closeForm"/>
-            <ItemForm 
-                v-if="selectedItem"
-                :id="`${config.itemType}-form`"
-                    :config="config"
-                    :item="selectedItem"
-                    @refreshForm="refreshForm"
-                    @closeForm="closeForm"></ItemForm>
+            <component :is="`${config.name}Table`"
+                       :id="`${config.itemType}-table`"
+                       :config="config"
+                       :selectedItem="selectedItem"
+                       @itemSelected="itemSelected"
+                       @closeForm="closeForm"></component>
+            <component :is="`${config.name}Form`" v-if="selectedItem"
+                       :id="`${config.itemType}-form`"
+                       :config="config"
+                       :item="selectedItem"
+                       @refreshForm="refreshForm"
+                       @closeForm="closeForm"></component>
         </div>
     </div>
 </template>
 
 <script>
-import ItemForm from './ItemForm.vue'
-import ItemTable from './ItemTable.vue'
-
 import Split from 'split.js'
+import MetricTable from './metric/MetricTable.vue';
+import MetricForm from './metric/MetricForm.vue';
+import GoalTable from './goal/GoalTable.vue';
+import GoalForm from './goal/GoalForm.vue';
+import TodoTable from './todo/TodoTable.vue';
+import TodoForm from './todo/TodoForm.vue';
+import RoutineTable from './routine/RoutineTable.vue';
+import RoutineForm from './routine/RoutineForm.vue';
 
 export default {
-    components: { ItemTable, ItemForm },
+    components: { TodoTable, TodoForm, GoalTable, GoalForm, RoutineTable, RoutineForm, MetricTable, MetricForm },
     name: 'ItemTab',
     props: {
-        config: Object
+        config: Object,
     },
     data: function() {
         return {
-            items: null,
             selectedItem: null,
             split: null,
         }
