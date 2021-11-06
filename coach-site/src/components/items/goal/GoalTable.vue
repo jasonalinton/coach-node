@@ -41,7 +41,7 @@
 
 <script>
 import { listToString, replaceItem, removeItem } from '../../../../utility';
-import { addPropertyToCache2, updatePropertyInCache2, deletePropertyInCache2 } from '../../../resolvers/resolve.js'
+import { addPropertyToCache, updatePropertyInCache, deletePropertyInCache } from '../../../resolvers/resolve.js'
 
 export default {
     name: 'GoalTable',
@@ -73,7 +73,7 @@ export default {
                     document: require('../../../graphql/subscription/goal/GoalAdded.gql'),
                     updateQuery: (previousResult, { subscriptionData: { data: { goalAdded }} }) => {
                         previousResult.items.todos.splice(0, 0, goalAdded);
-                        addPropertyToCache2(goalAdded, 'goals', ['metrics', 'todos', 'routines'], previousResult);
+                        addPropertyToCache(goalAdded, 'goals', ['metrics', 'todos', 'routines'], previousResult);
                         return previousResult;
                     },
                 },
@@ -81,7 +81,7 @@ export default {
                     document: require('../../../graphql/subscription/goal/GoalUpdated.gql'),
                     updateQuery: (previousResult, { subscriptionData: { data: { goalUpdated }} }) => {
                         replaceItem(goalUpdated, previousResult.items.todos);
-                        updatePropertyInCache2(goalUpdated, 'goals', ['metrics', 'todos', 'routines'], previousResult);
+                        updatePropertyInCache(goalUpdated, 'goals', ['metrics', 'todos', 'routines'], previousResult);
                         return previousResult;
                     },
                 },
@@ -89,7 +89,7 @@ export default {
                     document: require('../../../graphql/subscription/goal/GoalDeleted.gql'),
                     updateQuery: (previousResult, { subscriptionData: { data: { goalDeleted }} }) => {
                         removeItem(goalDeleted, previousResult.items.todos);
-                        deletePropertyInCache2(goalDeleted, 'goals', ['metrics', 'todos', 'routines'], previousResult);
+                        deletePropertyInCache(goalDeleted, 'goals', ['metrics', 'todos', 'routines'], previousResult);
                         return previousResult;
                     },
                 },

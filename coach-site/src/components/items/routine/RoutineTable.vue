@@ -41,7 +41,7 @@
 
 <script>
 import { listToString, replaceItem, removeItem } from '../../../../utility';
-import { addPropertyToCache2, updatePropertyInCache2, deletePropertyInCache2 } from '../../../resolvers/resolve.js'
+import { addPropertyToCache, updatePropertyInCache, deletePropertyInCache } from '../../../resolvers/resolve.js'
 
 export default {
     name: 'RoutineTable',
@@ -73,7 +73,7 @@ export default {
                     document: require('../../../graphql/subscription/routine/RoutineAdded.gql'),
                     updateQuery: (previousResult, { subscriptionData: { data: { routineAdded }} }) => {
                         previousResult.items.routines.splice(0, 0, routineAdded);
-                        addPropertyToCache2(routineAdded, 'routines', ['metrics', 'goals', 'todos'], previousResult);
+                        addPropertyToCache(routineAdded, 'routines', ['metrics', 'goals', 'todos'], previousResult);
                         return previousResult;
                     },
                 },
@@ -81,7 +81,7 @@ export default {
                     document: require('../../../graphql/subscription/routine/RoutineUpdated.gql'),
                     updateQuery: (previousResult, { subscriptionData: { data: { routineUpdated }} }) => {
                         replaceItem(routineUpdated, previousResult.items.routines);
-                        updatePropertyInCache2(routineUpdated, 'routines', ['metrics', 'goals', 'todos'], previousResult);
+                        updatePropertyInCache(routineUpdated, 'routines', ['metrics', 'goals', 'todos'], previousResult);
                         return previousResult;
                     },
                 },
@@ -89,7 +89,7 @@ export default {
                     document: require('../../../graphql/subscription/routine/RoutineDeleted.gql'),
                     updateQuery: (previousResult, { subscriptionData: { data: { routineDeleted }} }) => {
                         removeItem(routineDeleted, previousResult.items.routines);
-                        deletePropertyInCache2(routineDeleted, 'routines', ['metrics', 'goals', 'todos'], previousResult);
+                        deletePropertyInCache(routineDeleted, 'routines', ['metrics', 'goals', 'todos'], previousResult);
                         return previousResult;
                     },
                 },

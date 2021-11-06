@@ -34,7 +34,7 @@
 
 <script>
 import { listToString, replaceItem } from '../../../../utility';
-import { updatePropertyInCache2,  } from '../../../resolvers/resolve.js'
+import { updatePropertyInCache,  } from '../../../resolvers/resolve.js'
 
 export default {
     name: 'MetricTable',
@@ -66,7 +66,7 @@ export default {
                     document: require('../../../graphql/subscription/metric/MetricUpdated.gql'),
                     updateQuery: (previousResult, { subscriptionData: { data: { metricUpdated }} }) => {
                         replaceItem(metricUpdated, previousResult.items.todos);
-                        updatePropertyInCache2(metricUpdated, 'metrics', ['goals', 'todos', 'routines'], previousResult);
+                        updatePropertyInCache(metricUpdated, 'metrics', ['goals', 'todos', 'routines'], previousResult);
                         return previousResult;
                     },
                 },
