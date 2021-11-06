@@ -76,7 +76,7 @@ async function createIterations(todo, context) {
             
             iterations.push(iteration);
         })
-
+        
         todo = await context.prisma.todo.update({
             where: { id: todo.id },
             data: {

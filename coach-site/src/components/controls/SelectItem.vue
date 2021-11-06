@@ -25,6 +25,7 @@ export default {
               let selected = this.items.filter(item => value.includes(item.id));
               this.selectedItems.splice(0, this.selectedItems.length);
               this.selectedItems.push(...selected);
+              this.$emit('setSelected', selected);
           }
       }
   }

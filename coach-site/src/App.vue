@@ -122,6 +122,7 @@ body {
     /* gap: 20px; */
     grid-template-rows: 64px auto;
     grid-template-columns: 272px auto 352px;
+    /* grid-template-columns: 272px auto 5px; */
 }
 
 .nav-bar {

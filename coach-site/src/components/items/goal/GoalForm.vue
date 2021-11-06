@@ -20,9 +20,42 @@
                       v-model="item.description"
                       v-on:keyup.enter="save(item)" />
         </div>
+        <!-- Metrics -->
+        <ApolloQuery :query="require('../../../graphql/query/QueryMetrics.gql')">
+            <template slot-scope="{ result: { error, data }, isLoading }">
+                <div class="mapped-item form-group mt-1">
+                    <div class="header d-flex justify-content-between align-items-center align-middle">
+                        <a class="item-select btn btn-sm btn-link" type="button" data-bs-toggle="collapse" :data-bs-target="`.metrics.collapse`" aria-controls="offcanvas-items">Metrics</a>
+                    </div>
+                    <!-- Quick Add Item -->
+                    <div class="d-flex justify-content-between mt-1">
+                        <button class="add-btn my-auto" type="button" @click="addItem(newItem.metrics, item.metrics)">
+                            <img src="/icon/button/add.png" width="10" height="10"/>Add
+                        </button>
+                        <input class="add textbox" type="text" 
+                            v-model="newItem.metrics.text"
+                            v-on:keyup.enter="addItem(newItem.metrics, item.metrics)"
+                            :style="{'width': 'calc(100% - 55px)'}"/>
+                    </div>
+                    <div :class="`metrics collapse mt-1`">
+                        <div v-if="isLoading">Loading...</div>
+                        <div v-else-if="error">An error occurred</div>
+                        <SelectItem v-else-if="data" :items="data.metrics" :selectedItems="item.metrics" @setSelected="metrics = $event"></SelectItem>
+                        <div v-else class="no-result apollo">No result :(</div>
+                    </div>
+                    <div :class="`list-group metrics collapse show mt-1`">
+                        <a v-for="_item in metrics" v-bind:key="_item.id" href="#" 
+                           class="list-group-item list-group-item-light list-group-item-action d-flex justify-content-between align-items-center">
+                            {{ _item.text }}
+                            <img class="delete-button" src="/icon/button/delete.png" width="10" height="10" @click="removeItem(_item, item.metrics)"/>
+                        </a>
+                    </div>
+                </div>
+            </template>
+        </ApolloQuery>
         <!-- Mapped Items -->
         <ApolloQuery 
-            v-for="prop in itemProps" :key="prop.id"
+            v-for="prop in itemProps.filter(itemProp => itemProp.id != 6)" :key="prop.id"
             :query="prop.optionsQuery">
             <template slot-scope="{ result: { error, data }, isLoading }">
                 <div class="mapped-item form-group mt-1">
@@ -92,6 +125,40 @@ export default {
             togglePanel: false,
             newItem: {},
             itemProps: this.config.props.filter(prop => prop.isItem)
+        }
+    },
+    computed: {
+        metricsIDs() {
+            return this.item.metrics.map(_metricOrig => _metricOrig.id);
+        },
+        allGoals() {
+            return this.$apollo.getClient().cache.readQuery({ query: require('../../../graphql/query/QueryItems.gql') })
+                .items.goals;
+        },
+        metrics: {
+            get() {
+                let _metrics = [...this.item.metrics];
+                
+                ['parents', 'children'].forEach(_prop => {
+                    this.item[_prop].forEach(parent => {
+                        let _parent = this.allGoals.find(_goal => _goal.id == parent.id);
+                        _parent.metrics.forEach(_metric => {
+                            if (!_metrics.map(__ => __.id).includes(_metric.id)) {
+                                _metrics.push({
+                                    __typename: _metric.__typename,
+                                    id: _metric.id,
+                                    text: _metric.text,
+                                    isNewMap: true,
+                                })
+                            }
+                        })
+                    })
+                })
+                return _metrics;
+            },
+            set(value) {
+                this.item.metrics = value;
+            }
         }
     },
     created: function() {

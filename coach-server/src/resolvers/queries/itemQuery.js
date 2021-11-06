@@ -6,6 +6,8 @@ const { routineInclude } = require('../../properties/routineProperties');
 async function items(parent, args, context, info) {
     let items = {};
 
+    console.log();
+
     if (args.getMetrics) {
         items.metrics = await context.prisma.metric.findMany({
             include: metricInclude,
