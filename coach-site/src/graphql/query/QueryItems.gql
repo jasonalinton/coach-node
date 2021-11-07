@@ -1,4 +1,4 @@
-query Query($getMetrics: Boolean, $getGoals: Boolean, $getTodos: Boolean, $getRoutines: Boolean) {
+query items($getMetrics: Boolean, $getGoals: Boolean, $getTodos: Boolean, $getRoutines: Boolean) {
     items(getMetrics: $getMetrics, getGoals: $getGoals, getTodos: $getTodos, getRoutines: $getRoutines) {
         metrics {
             id

@@ -1,7 +1,7 @@
 <template>
     <div class="month d-flex flex-column d-flex flex-column" ref="monthView">
         <div v-for="(week, weekIndex) in weeks" :key="weekIndex" class="week d-flex flex-row" :class="{ first: weekIndex == 0 }">
-            <div v-for="(day, dayIndex) in week.days" :key="dayIndex" class="day flex-fill" :class="day.pointInTime">
+            <div v-for="(day, dayIndex) in week.days" :key="dayIndex" class="day d-flex flex-column flex-fill" :class="day.pointInTime">
                 <!-- Head -->
                 <div class="head d-flex flex-column">
                     <!-- Date Label -->
@@ -10,12 +10,9 @@
                         <div class="date-icon">{{ day.day }}</div><!-- Date -->
                     </div>
                 </div>
-                <div class="task-list d-flex flex-column" :style="{ 'min-height': `${weeks[weekIndex].maxTasks * 22}px` }">
-                    <div v-for="(task, taskIndex) in day.tasks" :key="taskIndex" class="task d-flex flex-fill" :class="{ complete: task.completedAt }">
-                        <img :src="`/icon/task-icon-${(task.completedAt)?'black':'white'}.png`" width="14" height="14"/>
-                        <div>{{ task.text }}</div>
-                    </div>
-                </div>
+                <TaskList :date="day.date"
+                          :taskList="day.tasks">
+                </TaskList>
             </div>
         </div>
     </div>
@@ -25,9 +22,11 @@
 import date from "date-and-time";
 import moment from "moment";
 import { firstDayOfMonth, sunday, today } from "../../../../../utility";
+import TaskList from '../TaskList.vue';
 
 export default {
     name: 'MonthView',
+    components: { TaskList },
     props: {
         selectedDate: Date
     },
@@ -38,7 +37,8 @@ export default {
             weekModels: [],
             moment,
             date,
-            today: today()
+            today: today(),
+            maxTasks: 6,
         }
     },
     beforeMount: function() {
@@ -56,15 +56,17 @@ export default {
                 this.iterations = iterations;
                 this.iterationsToDays();
                 return iterations
-            }
+            },
         },
     },
     computed: {
-        dayWidth() { return this.$refs.monthView.clientWidth / 7  }
+        dayWidth() { return this.$refs.monthView.clientWidth / 7  },
+        dayHeight() { return this.$refs.monthView.clientHeight  }
     },
     methods: {
         initTimeline,
         iterationsToDays,
+        getMaxTasks,
     },
     mounted: function() {
         // An error gets thrown if pollInterval is set with the query
@@ -114,7 +116,6 @@ function initTimeline() {
 }
 
 function iterationsToDays() {
-
     for (let i = 0; i < this.weeks.length; i++) {
         let week = this.weeks[i];
         week.days.forEach(day => {
@@ -126,12 +127,16 @@ function iterationsToDays() {
                 return start == dateString || (!iteration.startAt && iteration.endAt && end == dateString);
             });
 
-            day.tasks= iterations;
-            
-            week.maxTasks = (iterations.length > this.maxTasks) ? iterations.length : this.maxTasks;
+            day.tasks = iterations;
         });
     }
     return this.weeks;
+}
+
+function getMaxTasks(_this, iterations, week) {
+    return (iterations.length > _this.maxTasks) 
+                ? (week.maxTasks && week.maxTasks > iterations.length) ? week.maxTasks : iterations.length 
+                : (week.maxTasks && week.maxTasks > _this.maxTasks) ? week.maxTasks : _this.maxTasks;
 }
 </script>
 
@@ -203,36 +208,6 @@ function iterationsToDays() {
 
 .future .date-icon {
     color: #565656;
-}
-
-.task { 
-    background-color: #F4501F;
-    color: white;
-    font-weight: 600;
-    max-height: 20px;
-    border-radius: 3px;
-    margin-bottom: 2px;
-    padding: 2px 8px 4px 8px;
-    line-height: 14px;
-    font-size: 12px;
-    user-select: none;
-    font-family: SF Pro Display, 'Roboto', sans-serif;
-}
-
-.task img {
-    padding: 4px 4px 2px 0px;
-}
-
-.task.complete { 
-    background-color: rgb(252, 203, 188);
-    text-decoration: line-through;
-    color: rgba(32,33,36,0.38);
-    font-weight: 500;
-}
-
-.task div { 
-    overflow: hidden;
-    white-space: nowrap;
 }
 
 </style>

@@ -65,6 +65,7 @@ model Todo {
   todo_repeats    Todo_Repeat[]
 
   iterations      Iteration[]
+  iterations2      Iteration[] @relation(name: "todo_iteration")
 }
 
 model Routine {
@@ -88,6 +89,7 @@ model Routine {
   routine_repeats  Routine_Repeat[]
 
   iterations      Iteration[]
+  iterations2      Iteration[] @relation(name: "routine_iteration")
 }
 
 model Type {
@@ -296,13 +298,20 @@ model Iteration {
   isRecommended    Boolean   @default(false)
   idGoogleTask     Int?
   idGoogleTaskList Int?
+  idTodo           Int?
+  idRoutine        Int?
   idRepeat         Int?
   idTodoRepeat     Int?
   idRoutineRepeat  Int?
   idRoutineIteration Int?
-  createdAt        DateTime  @default(now()) @db.Timestamptz(6)
-  updatedAt        DateTime  @default(now()) @updatedAt @db.Timestamptz(6)
+  createdAt          DateTime  @default(now()) @db.Timestamptz(6)
+  updatedAt          DateTime  @default(now()) @updatedAt @db.Timestamptz(6)
 
+  todo              Todo?      @relation(fields: [idTodo], references: [id], name: "todo_iteration")
+  routine           Routine?   @relation(fields: [idRoutine], references: [id], name: "routine_iteration")
+
+  // // todos & routines need to be deleted
+  // // iteration can not be to multiple items
   todos            Todo[]
   routines         Routine[]
 

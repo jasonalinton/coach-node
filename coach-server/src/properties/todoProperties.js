@@ -17,9 +17,20 @@ const todoIterationIncude = {
                     id: true,
                     text: true
                 }
-            }
+            },
+            // timePairs: {
+            //     select: {
+
+            //     }
+            // }
         }
-    }
+    },
+    repeat: {
+        include: {
+            routineIterations: true
+        }
+    },
+    todoRepeat: true
 }
 
 const todoInclude = {

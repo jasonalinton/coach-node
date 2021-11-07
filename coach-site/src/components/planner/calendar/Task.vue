@@ -1,5 +1,6 @@
 <template>
-    <div class="task d-flex" :class="{ complete: task.attemptedAt, incomplete: !task.attemptedAt }">
+    <div class="task d-flex" :class="{ complete: task.attemptedAt, incomplete: !task.attemptedAt }"
+         draggable @dragstart="onDragStart($event)" @dragend="onDragEnd($event)">
         <img class="check" :src="`/icon/task-icon-${(task.attemptedAt)?'black':'white'}.png`" width="14" height="14"/>
         <div>{{ task.text }}</div>
         <img class="next button" :src="`/icon/next-${(task.attemptedAt)?'dark':'lite'}.png`" 
@@ -16,20 +17,17 @@ import { rescheduleIteration, attemptIteration } from "../../../resolvers/todo-r
 import { addDay } from "../../../../utility";
 
 export default {
-    name: 'TaskView',
+    name: 'Task',
     props: {
         task: Object
-    },
-    data: function() {
-        return {
-
-        }
     },
     methods: {
         rescheduleIteration,
         toNextDay,
         attemptIteration,
         markAttempted,
+        onDragStart,
+        onDragEnd
     },
 }
 
@@ -39,8 +37,19 @@ function toNextDay(iteration) {
 }
 
 function markAttempted(iteration) {
-    // let attemptedAt = (this.selected)
     this.attemptIteration(iteration.id, new Date(iteration.startAt), this.$apollo);
+}
+
+function onDragStart(ev) {
+    console.log("Drag Started")
+    ev.target.classList.add("drag");
+    ev.dataTransfer.dropEffect = 'move'
+    ev.dataTransfer.effectAllowed = 'move'
+    ev.dataTransfer.setData("text", `${this.task.id}`)
+}
+
+function onDragEnd(ev) {
+    ev.target.classList.remove("drag");
 }
 </script>
 
@@ -84,6 +93,7 @@ function markAttempted(iteration) {
 .task .check {
     color: white;
     padding: 4px 4px 2px 0px;
+    pointer-events: none;
 }
 
 .task div { 

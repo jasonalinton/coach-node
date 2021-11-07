@@ -15,5 +15,8 @@ subscription iterationUpdated {
         text
       }
     }
+    todoRepeat {
+      id
+    }
   }
 }

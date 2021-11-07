@@ -67,14 +67,14 @@ export default {
 
         let selectedView_Store = localStorage.getItem(`selected-planner-view`);
         if (selectedView_Store) {
-            this.selectedView = selectedView_Store;
+            this.navbar.selectedView = selectedView_Store;
         } else {
             localStorage.setItem(`selected-planner-view`, this.selectedView);
         }
 
         let dayCount_Store = localStorage.getItem(`week-view-day-count`);
         if (dayCount_Store) {
-            this.dayCount = Number(dayCount_Store);
+            this.navbar.week.dayCount = Number(dayCount_Store);
         } else {
             localStorage.setItem(`week-view-day-count`, this.dayCount);
         }

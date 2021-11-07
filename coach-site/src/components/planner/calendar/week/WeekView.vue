@@ -8,12 +8,12 @@
                 <!-- Date Label -->
                 <div class="date-label d-flex flex-column justify-content-between">
                     <div class="dow">{{ day.dow }}</div> <!-- Day of Week -->
-                    <div class="date-icon">{{ day.date }}</div><!-- Date -->
+                    <div class="date-icon">{{ day.day }}</div><!-- Date -->
                 </div>
-                <div class="task-list d-flex flex-column" :style="{ 'min-height': `${maxTasks * 22}px` }">
-                    <Task v-for="(task, index) in day.tasks" :key="index" :task="task"></Task>
-                    
-                </div>
+                <TaskList :date="day.date"
+                          :taskList="day.tasks"
+                          :minHeight="maxTasks * 22">
+                </TaskList>
             </div>
         </div>
     </div>
@@ -21,11 +21,11 @@
 
 <script>
 import date from "date-and-time";
-import Task from "../Task.vue";
+import TaskList from "../TaskList.vue";
 
 export default {
     name: 'WeekView',
-    components: { Task },
+    components: { TaskList },
     props: {
         dayCount: Number,
         selectedDate: Date,
@@ -69,11 +69,11 @@ export default {
             }
         },
     },
-    created: function() {
-        window.addEventListener("resize", () => {
-            this.width = this.$refs.weekView.clientWidth;
-        });
-    },
+    // created: function() {
+    //     // window.addEventListener("resize", () => {
+    //     //     this.width = this.$refs.weekView.clientWidth;
+    //     // });
+    // },
     methods: {
         initTimeline,
         iterationsToDays,
@@ -112,7 +112,8 @@ function iterationsToDays() {
             tasks: iterations,
             text: date.format(_day, "ddd D"),
             dow: date.format(_day, "ddd"),
-            date: date.format(_day, "D"),
+            day: date.format(_day, "D"),
+            date: new Date(_day.getTime())
         };
         if (_day.getTime() < indexDate.getTime()) {
             day.pointInTime = "past";
