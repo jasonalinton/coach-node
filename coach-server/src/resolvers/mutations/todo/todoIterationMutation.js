@@ -59,6 +59,8 @@ async function createDefaultTask(parent, { iteration }, context, info) {
     return todo;
 }
 
+// TODO: You might want to change this name. 
+// Technically it's just setting the value. Not necessarily toggling
 async function toggleCompletion(parent, { iteration }, context, info) {
     iteration = await context.prisma.iteration.update({
         where: { id: iteration.id },

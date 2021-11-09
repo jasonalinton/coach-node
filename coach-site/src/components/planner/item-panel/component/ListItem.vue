@@ -1,10 +1,12 @@
 <template>
     <div> 
         <div class="iteration d-flex flex-row justify-content-between align-items-center" :class="[{ complete: checked}]">
-            <ItemCheckbox class="checkbox" :checked="checked" 
-                @onChecked="markComplete" 
-                @onUnchecked="markIncomplete"
-                @onDelete="onDelete"></ItemCheckbox>
+            <ItemCheckbox class="checkbox" 
+                          :checked="checked" 
+                            @onChecked="markComplete" 
+                            @onUnchecked="markIncomplete"
+                            @onDelete="onDelete">
+            </ItemCheckbox>
             <span class="flex-fill">{{ iteration.text }}</span>
             <div class="button-group d-flex flex-column justify-content-between">
                 <!-- <img class="icon-button" src='/icon/add-button.png' width="16" height="16"/> -->
