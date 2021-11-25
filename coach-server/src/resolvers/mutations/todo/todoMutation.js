@@ -84,6 +84,8 @@ async function createTodoIterations(parent, { todo }, context, info, repeat) {
         iterations.push(iteration);
     }
 
+    // THIS SHOULD BE MOVED TO ITS OWN FUNCTION
+    // Update or set lastIterationDateTime in Todo_Repeat.
     // Upsert todo_repeats
     let repeats_updated = todo.repeats.filter(_repeat => _repeat.isUpdated);
     for (let i = 0; i < repeats_updated.length; i++) {

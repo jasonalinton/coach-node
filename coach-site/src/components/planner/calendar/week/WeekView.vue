@@ -1,19 +1,43 @@
 <template>
-    <!-- <div class="week-view" ref="weekView" :style="{ 'grid-template-columns': `${grid}`} "> -->
-    <div class="week-view" ref="weekView" :style="{ 'min-width': `${64 * dayCount}px` } ">
-        <div v-for="(day, index) in dayModels" :key="index" class="day-view flex-fill" :class="day.pointInTime"  :style="{ 'min-width': `${width / dayCount}px`, 'max-width': `${width / dayCount}px` }">
-        <!-- <div v-for="(day, index) in dayModels" :key="index" class="day-view flex-fill" :class="day.pointInTime" > -->
-            <!-- Head -->
-            <div class="head d-flex flex-column">
-                <!-- Date Label -->
-                <div class="date-label d-flex flex-column justify-content-between">
-                    <div class="dow">{{ day.dow }}</div> <!-- Day of Week -->
-                    <div class="date-icon">{{ day.day }}</div><!-- Date -->
+    <div class="d-flex h-100">
+        <!-- <div class="week-view" ref="weekView" :style="{ 'grid-template-columns': `${grid}`} "> -->
+        <div class="week-view d-flex flex-column h-100 w-100" ref="weekView" :style="{ 'min-width': `${64 * dayCount}px` } ">
+            <div class="header d-flex" :style="{ 'padding-left': `${hour.labelWidth}px` }">
+                <div v-for="(day, index) in dayModels" :key="index"  
+                    class="head day-view d-flex flex-column flex-grow-1 h-100"
+                    :class="day.pointInTime" :style="{ 'flex-basis': 0 }">
+                    <!-- :class="day.pointInTime" :style="{ 'min-width': `${width / dayCount}px`, 'max-width': `${width / dayCount}px` }"> -->
+                    <!-- Date Label -->
+                    <div class="date-label d-flex flex-column justify-content-between">
+                        <div class="dow">{{ day.dow }}</div> <!-- Day of Week -->
+                        <div class="date-icon">{{ day.day }}</div><!-- Date -->
+                    </div>
+                    <TaskList :date="day.date"
+                            :taskList="day.tasks"
+                            :minHeight="maxTasks * 22">
+                    </TaskList>
                 </div>
-                <TaskList :date="day.date"
-                          :taskList="day.tasks"
-                          :minHeight="maxTasks * 22">
-                </TaskList>
+            </div>
+            <div class="body d-flex h-100 overflow-scroll">
+                <div class="hour-labels overflow-scroll" :style="{ 'min-width': `${hour.labelWidth}px`, 'height': 'fit-content' }" ref="hourLabels">
+                    <div v-for="(h, index) in hour.hours" :key="index"
+                        :style="{ 'min-height': `${hour.blockHeight}px` }">
+                        <div v-if="index != 0">
+                            <p class="hour-label">{{ h.twelveHourString }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="hour-blocks d-flex w-100 overflow-scroll" 
+                     ref="hourBlocks"
+                     :style="{ 'height': 'fit-content' }"
+                       @scroll="onScroll">
+                    <HourBlocks v-for="(day, index) in dayModels" :key="index"
+                            class="day-view flex-grow-1"
+                            :style="{ 'flex-basis': 0 }"
+                            :blockHeight="hour.blockHeight">
+                            <!-- :style="{ 'min-width': `${width / dayCount}px`, 'max-width': `${width / dayCount}px`, 'flex-basis': 0 }" -->
+                    </HourBlocks>
+                </div>
             </div>
         </div>
     </div>
@@ -22,10 +46,12 @@
 <script>
 import date from "date-and-time";
 import TaskList from "../TaskList.vue";
+import HourBlocks from '../event/HourBlocks.vue';
+import { getHoursObjectArray } from "../../../../../utility/plannerUtility"
 
 export default {
     name: 'WeekView',
-    components: { TaskList },
+    components: { TaskList, HourBlocks },
     props: {
         dayCount: Number,
         selectedDate: Date,
@@ -40,6 +66,11 @@ export default {
             maxTasks: 0,
             width: 0,
             grid: "",
+            hour: {
+                hours: [],
+                labelWidth: 50,
+                blockHeight: 48
+            }
         }
     },
     beforeMount: function() {
@@ -52,6 +83,7 @@ export default {
         this.dayCount.forEach
         this.grid = grid;
         this.initTimeline();
+        this.initHours();
     },
     apollo: {
         iterations: {
@@ -75,14 +107,21 @@ export default {
     //     // });
     // },
     methods: {
+        initHours,
         initTimeline,
         iterationsToDays,
-        refresh
+        refresh,
+        getHoursObjectArray,
+        onScroll
     },
     watch: {
         dayCount() { this.refresh(); },
         selectedDate() { this.refresh();  }
     }
+}
+
+function initHours() {
+    this.hour.hours = this.getHoursObjectArray();
 }
 
 function initTimeline() {
@@ -133,13 +172,17 @@ function refresh() {
     this.initTimeline();
     this.dayModels = this.iterationsToDays();
 }
+
+function onScroll() {
+    this.$refs.hourLabels.scrollTop = this.$refs.hourBlocks.scrollTop;
+}
 </script>
 
 <style scoped>
 .week-view {
-    overflow-x: scroll;
+    /* overflow-x: scroll; */
     /* width: 100%; */
-    height: 100%;
+    /* height: 100%; */
     display: grid;
     grid-template-columns: auto auto auto auto auto auto auto;
 }
@@ -147,7 +190,7 @@ function refresh() {
 .day-view {
     /* min-width: 64px; */
     /* height: calc(100vh - 64px); */
-    height: 100%;
+    /* height: 100%; */
     min-width: calc(100% / 7);
     border-left: 1px solid #D8D8D8;
     font-family: SF Pro Display;
@@ -202,5 +245,22 @@ function refresh() {
 
 .future .date-icon {
     color: #565656;
+}
+
+.hour-labels::-webkit-scrollbar {
+    display: none;
+}
+
+.hour-labels {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+    font-size: 10px;
+}
+
+.hour-label {
+    line-height: 10px;
+    position: relative;
+    top: -5px;
+    color: #70757A;
 }
 </style>

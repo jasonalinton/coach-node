@@ -1,12 +1,12 @@
 <template>
-    <div class="planner row g-0">
-        <div id="left-and-body" class="col">
-            <div class="left-wrapper row g-0">
-                <div class="col d-flex flex-row">
+    <div class="planner row g-0 h-100">
+        <div id="left-and-body" class="col h-100">
+            <div class="left-wrapper row h-100 g-0">
+                <div class="col d-flex flex-row h-100">
                     <div class="left" :class="{open: showLeft}">
                         <LeftPanel @dateChange="dateChange"></LeftPanel>
                     </div>
-                    <div class="body">
+                    <div class="body overflow-clip h-100">
                         <WeekView v-if="selectedView=='weekView'" :dayCount="dayCount" :selectedDate="selectedDate"></WeekView>
                         <MonthView v-if="selectedView=='monthView'" :today="today" :selectedDate="selectedDate"></MonthView>
                     </div>
@@ -88,12 +88,10 @@ function dateChange(date) {
 
 <style scoped>
 .planner {
-    height: 100%;
     width: 100%;
 }
 
 #left-and-body {
-    /* height: 100vh; */
     overflow-y: hidden;
 }
 
@@ -113,6 +111,5 @@ function dateChange(date) {
 
 .body {
     width: 100%;
-    overflow: scroll;
 }
 </style>
