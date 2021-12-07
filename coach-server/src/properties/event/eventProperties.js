@@ -4,6 +4,5 @@ const eventInclude = {
 }
 
 module.exports = {
-    todoInclude,
-    todoIterationIncude
+    eventInclude,
 }
