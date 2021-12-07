@@ -1,12 +1,10 @@
 <template>
     <div class="d-flex h-100">
-        <!-- <div class="week-view" ref="weekView" :style="{ 'grid-template-columns': `${grid}`} "> -->
         <div class="week-view d-flex flex-column h-100 w-100" ref="weekView" :style="{ 'min-width': `${64 * dayCount}px` } ">
             <div class="header d-flex" :style="{ 'padding-left': `${hour.labelWidth}px` }">
                 <div v-for="(day, index) in dayModels" :key="index"  
                     class="head day-view d-flex flex-column flex-grow-1 h-100"
                     :class="day.pointInTime" :style="{ 'flex-basis': 0 }">
-                    <!-- :class="day.pointInTime" :style="{ 'min-width': `${width / dayCount}px`, 'max-width': `${width / dayCount}px` }"> -->
                     <!-- Date Label -->
                     <div class="date-label d-flex flex-column justify-content-between">
                         <div class="dow">{{ day.dow }}</div> <!-- Day of Week -->
@@ -32,10 +30,9 @@
                      :style="{ 'height': 'fit-content' }"
                        @scroll="onScroll">
                     <HourBlocks v-for="(day, index) in dayModels" :key="index"
-                            class="day-view flex-grow-1"
-                            :style="{ 'flex-basis': 0 }"
-                            :blockHeight="hour.blockHeight">
-                            <!-- :style="{ 'min-width': `${width / dayCount}px`, 'max-width': `${width / dayCount}px`, 'flex-basis': 0 }" -->
+                                class="day-view flex-grow-1"
+                                :style="{ 'flex-basis': 0 }"
+                                :blockHeight="hour.blockHeight">
                     </HourBlocks>
                 </div>
             </div>
@@ -174,23 +171,19 @@ function refresh() {
 }
 
 function onScroll() {
-    this.$refs.hourLabels.scrollTop = this.$refs.hourBlocks.scrollTop;
+    // console.log(this.$refs.hourBlocks.scrollTop);
+    // console.log("this.$refs.hourBlocks.scrollTop");
+    // this.$refs.hourLabels.scrollTop = this.$refs.hourBlocks.scrollTop;
 }
 </script>
 
 <style scoped>
 .week-view {
-    /* overflow-x: scroll; */
-    /* width: 100%; */
-    /* height: 100%; */
     display: grid;
     grid-template-columns: auto auto auto auto auto auto auto;
 }
 
 .day-view {
-    /* min-width: 64px; */
-    /* height: calc(100vh - 64px); */
-    /* height: 100%; */
     min-width: calc(100% / 7);
     border-left: 1px solid #D8D8D8;
     font-family: SF Pro Display;

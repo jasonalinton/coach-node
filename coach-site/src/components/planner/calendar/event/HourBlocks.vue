@@ -1,7 +1,11 @@
 <template>
     <div class="d-flex flex-column">
         <div v-for="(hour, index) in hours" :key="index" class="text-start">
-            <HourBlock :hour="hour" :blockHeight="blockHeight"></HourBlock>
+            <HourBlock v-if="index != 8" :hour="hour" 
+                       :blockHeight="blockHeight"></HourBlock>
+            <HourBlock v-if="index == 8" :hour="hour" 
+                       :blockHeight="blockHeight"
+                       :events="events"></HourBlock>
         </div>
     </div>
 </template>
@@ -22,7 +26,12 @@ export default {
     data: function() {
         return {
             hours: [],
-           
+            events: [
+                { 
+                    startAt: "2021-11-25T00:05:00-05:00",
+                    endAt: "2021-11-25T00:30:00-05:00",
+                    }
+            ]
         }
     },
     methods: {

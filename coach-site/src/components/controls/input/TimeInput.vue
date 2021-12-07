@@ -75,7 +75,7 @@ function onChange(value) {
         this.time.dateTime = value + "T00:00:00" + this.timezoneOffset;
     } else if (this.type == "Time") {
         let dateString = this.toDateString(new Date().toJSON());
-        this.time.dateTime = dateString + "T" + value + this.timezoneOffset;
+        this.time.dateTime = `${dateString}T${value}:00${this.timezoneOffset}`;
     } else if (this.type == "DateTime") {
         let valueArray = value.split(" ");
         this.time.dateTime = `${valueArray[0]}T${valueArray[1]}:00${this.timezoneOffset}`;

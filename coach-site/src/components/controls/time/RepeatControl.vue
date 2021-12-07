@@ -286,14 +286,6 @@ export default {
         repeat.type = { id: this.getTimeTypeID("Scheduled") };
       delete repeat.isRecommended;
 
-      // Set datetime
-      if (repeat.startRepeat) {
-        repeat.startRepeat.dateTime = new Date(repeat.startRepeat.dateTime);
-      }
-      if (repeat.endRepeat) {
-        repeat.endRepeat.dateTime = new Date(repeat.endRepeat.dateTime);
-      }
-
       let indecies = [];
       repeat.dayIndecies.forEach(index => {
         indecies.push({ index })
@@ -302,11 +294,11 @@ export default {
 
       // Set Type ID's
       if (repeat.endRepeat)
-        repeat.endRepeat.idType = repeat.idType;
+        repeat.endRepeat.type.id = repeat.type.id;
       if (repeat.startIteration)
-        repeat.startIteration.idType = repeat.idType;
+        repeat.startIteration.type.id = repeat.type.id;
       if (repeat.endIteration)
-        repeat.endIteration.idType = repeat.idType;
+        repeat.endIteration.type.id = repeat.type.id;
 
       repeat.interval = parseInt(repeat.interval);
       repeat.frequency = parseInt(repeat.frequency);
@@ -349,7 +341,6 @@ function constructTime(moment, endpoint, datetime = today()) {
         moment: clone(moment),
         flexibility: { id: this.getFlexibilityTypeID("Elastic") },
         dateTime: datetime.toJSON(),
-        isRecommended: false,
     }
 }
 

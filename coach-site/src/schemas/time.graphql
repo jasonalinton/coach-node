@@ -78,22 +78,40 @@ type Repeat {
   goal_repeats: [Goal_Repeat]
   todo_repeats: [Todo_Repeat]
   routine_repeats: [Routine_Repeat]
+  routines: [Routine]
+
+  routineRepeat: Repeat
+  todoRepeats: [Repeat]
+
+  todoIterations: [Iteration]
+  routineIterations: [Iteration]
 }
 
 input RepeatInput {
   id: Int
-  type: TypeInput!
-  timeframe: TypeInput!
+  type: TypeInput
+  timeframe: TypeInput
   startRepeat: TimeInput
   endRepeat: TimeInput
   startIteration: TimeInput
   endIteration: TimeInput
-  interval: Int!
-  frequency: Int!
+  interval: Int
+  frequency: Int
   dayIndecies: [Repeat_DayIndexInput]
   goal_repeats: [Goal_RepeatInput]
   todo_repeats: [Todo_RepeatInput]
   routine_repeats: [Routine_RepeatInput]
+  routines: [RoutineInput]
+
+  routineRepeat: RepeatInput
+  todoRepeats: [RepeatInput]
+
+  todoIterations: [IterationInput]
+  routineIterations: [IterationInput]
+
+  isUpdated: Boolean
+  isConnected: Boolean
+  unmappedIDs: unmappedIDs
 }
 
 type Repeat_DayIndex {

@@ -1,5 +1,3 @@
-const { configureTime, configureMapObject, configureRepeats } = require('../../../controller/time/repeatController');
-
 async function configureRepeatTrans(data, transaction = [], context) {
     if (data.repeats && data.repeats.update) {
         for (let i = 0; i < data.repeats.update.length; i++) {
@@ -20,12 +18,17 @@ async function updateRepeat(context, repeat, useTransaction = false) {
     let times = ['startRepeat', 'endRepeat', 'startIteration', 'endIteration'];
     for (let i = 0; i < times.length; i++) {
         let time = repeat[times[i]];
-        if (time) {
-            if (time.id > 0 && time.isUpdated) {
-                await createTimeUpdateTransactions(time, context, transaction);
-            } else {
-                await createTimeCreateTransactions(repeat, times[i], context, transaction);
+        if (time && time.isUpdated) {
+            try {
+                if (time.id > 0) {
+                    await createTimeUpdateTransactions(time, context, transaction);
+                } else if (time.id < 0) {
+                    await createTimeCreateTransactions(repeat, times[i], context, transaction);
+                }
+            } catch (err) {
+                console.log(err)
             }
+            
         }
         delete repeat[times[i]];
     }
@@ -119,6 +122,7 @@ async function createRepeatTransaction(repeat, context, transaction) {
     delete repeat.id;
     delete repeat.isUpdated;
     delete repeat.routine_repeats;
+    delete repeat.routines;
 
     transaction.push(context.prisma.repeat.update({
         where: { id: existingRepeat.id },
@@ -175,6 +179,50 @@ async function getTodoRepeat(parent, { idTodo, idRepeat }, context, info) {
     })
     
     return todo_repeat;
+}
+
+function configureTime(data, prop) {
+    let time = data[prop];
+    if (time) {
+        configureType(time, 'endpoint');
+        configureType(time, 'moment');
+        configureType(time, 'flexibility');
+        configureType(time, 'type');
+
+        delete time.isUpdated;
+    }
+}
+
+function configureType(data, prop) {
+    if (data[prop]) {
+        data[prop] = {
+            connect: { id: data[prop].id }
+        }
+    } else {
+        delete data[prop];
+    }
+}
+
+function configureMapObject(data, prop) {
+    let object = data[prop];
+    if (object) {
+        let create = undefined;
+        let connect = undefined;
+
+        if (object.id && object.id > 0) {
+            connect = { id: object.id };
+        } else {
+            delete object.id;
+            create = object;
+        }
+        
+        object = {};
+        if (connect) object.connect = connect;
+        if (create) object.create = create;
+        data[prop] = object;
+    } else {
+        delete data[prop];
+    }
 }
 
 module.exports = {

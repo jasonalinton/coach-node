@@ -57,10 +57,10 @@ async function refreshRepetitiveRoutines(indexDate, indexEnd, timeframe = repeti
 
 async function createRepetitiveEvents(item, itemType, indexDate = null, indexEnd = null, timeframe = repetitions.monthly.id, context) {
     indexDate = (indexDate) ? indexDate : today();
-    indexEnd = (indexEnd) ? indexEnd : moment(indexDate).add(1, 'month').toDate();
+    indexEnd = (indexEnd) ? indexEnd : moment(indexDate).add(2, 'month').toDate();
 
     if (timeframe == repetitions.monthly.id)
-        indexEnd = (indexEnd) ? indexEnd : moment(indexDate).add(1, 'month').toDate();
+        indexEnd = (indexEnd) ? indexEnd : moment(indexDate).add(2, 'month').toDate();
     else if (timeframe == repetitions.triAnnually.id)
         indexEnd = (indexEnd) ? indexEnd : moment(indexDate).add(4, 'month').toDate();
     else if (timeframe == repetitions.yearly.id)
@@ -127,6 +127,7 @@ function createDailyRepetitions(item, itemType, indexDate, indexEnd, repeat) {
                 // else if (item.estimatedTime)
                 //     _event.endAt = concatDate(iteration.endAt, new Date(())
 
+                if (!iteration.events) iteration.events = [];
                 iteration.events.push(_event);
             }
             item.iterations.push(iteration);
