@@ -11,8 +11,8 @@
                         <div class="date-icon">{{ day.day }}</div><!-- Date -->
                     </div>
                     <TaskList :date="day.date"
-                            :taskList="day.tasks"
-                            :minHeight="maxTasks * 22">
+                              :taskList="day.tasks.filter(_task => !_task.isInEvent)"
+                              :minHeight="maxTasks * 22">
                     </TaskList>
                 </div>
             </div>
@@ -25,14 +25,16 @@
                         </div>
                     </div>
                 </div>
-                <div class="hour-blocks d-flex w-100 overflow-scroll" 
+                <div v-if="dayModels.length > 0" class="hour-blocks d-flex w-100 overflow-scroll" 
                      ref="hourBlocks"
                      :style="{ 'height': 'fit-content' }"
                        @scroll="onScroll">
                     <HourBlocks v-for="(day, index) in dayModels" :key="index"
                                 class="day-view flex-grow-1"
+                                :events="day.events"
                                 :style="{ 'flex-basis': 0 }"
-                                :blockHeight="hour.blockHeight">
+                                :blockHeight="hour.blockHeight"
+                                    @selectEvent="$emit('selectEvent', $event)">
                     </HourBlocks>
                 </div>
             </div>
@@ -44,6 +46,7 @@
 import date from "date-and-time";
 import TaskList from "../TaskList.vue";
 import HourBlocks from '../event/HourBlocks.vue';
+import { replaceItem, removeItem } from '../../../../../utility';
 import { getHoursObjectArray } from "../../../../../utility/plannerUtility"
 
 export default {
@@ -59,7 +62,6 @@ export default {
             days: [],
             dayModels: [],
             date,
-            iterations: [],
             maxTasks: 0,
             width: 0,
             grid: "",
@@ -67,9 +69,15 @@ export default {
                 hours: [],
                 labelWidth: 50,
                 blockHeight: 48
-            }
+            },
+            events: [],
+            iterations: []
         }
     },
+    // computed: {
+    //     events() { return this.eventsAndIterations.events },
+    //     iterations() { return this.eventsAndIterations.iterations }
+    // },
     beforeMount: function() {
     },
     mounted: function() {
@@ -83,31 +91,51 @@ export default {
         this.initHours();
     },
     apollo: {
-        iterations: {
-            query() { return require('../../../../graphql/query/todo/QueryTodoIterations.gql')},
+        eventsAndIterations: {
+            query() { return require('../../../../graphql/query/planner/QueryEventsAndIterations.gql')},
             error: function(error) {
-                this.errorMessage = 'Error occurred while loading query'
+                this.errorMessage = 'Error occurred while loading event query'
                 console.log(this.errorMessage, error);
             },
-            update(data) { 
-                console.log(this.$refs.weekView.clientWidth)
-                let iterations = data.todoIterations;
-                this.iterations = iterations;
+            update(data) {
+                // this.eventsAndIterations = data.eventsAndIterations;
+                this.iterations = data.eventsAndIterations.iterations;
+                this.events = data.eventsAndIterations.events;
                 this.dayModels = this.iterationsToDays();
-                return iterations
-            }
+                return data.eventsAndIterations
+            },
+            // subscribeToMore: [
+            //     {
+            //         document: require('../../../../graphql/subscription/todo/IterationAdded.gql'),
+            //         updateQuery: (previousResult, { subscriptionData: { data: { iterationAdded }} }) => {
+            //             previousResult.eventsAndIterations.iterations.splice(0, 0, iterationAdded);
+            //             return previousResult;
+            //         },
+            //     },
+            //     // {
+            //     //     document: require('../../../../graphql/subscription/todo/IterationUpdated.gql'),
+            //     //     updateQuery: (previousResult, { subscriptionData: { data: { iterationUpdated }} }) => {
+            //     //         replaceItem(iterationUpdated, previousResult.eventsAndIterations.iterations);
+            //     //         return previousResult;
+            //     //     },
+            //     // },
+            //     {
+            //         document: require('../../../../graphql/subscription/todo/IterationDeleted.gql'),
+            //         updateQuery: (previousResult, { subscriptionData: { data: { iterationDeleted }} }) => {
+            //             removeItem(iterationDeleted, previousResult.eventsAndIterations.iterations);
+            //             return previousResult;
+            //         },
+            //     },
+            // ]
         },
     },
-    // created: function() {
-    //     // window.addEventListener("resize", () => {
-    //     //     this.width = this.$refs.weekView.clientWidth;
-    //     // });
-    // },
     methods: {
         initHours,
         initTimeline,
         iterationsToDays,
         refresh,
+        replaceItem,
+        removeItem,
         getHoursObjectArray,
         onScroll
     },
@@ -124,7 +152,7 @@ function initHours() {
 function initTimeline() {
     this.days = [];
 
-    let indexDate = date.addDays(this.selectedDate, -2);
+    let indexDate = new Date(this.selectedDate);
     for (let i = 0; i < this.dayCount; i++) {
         this.days.push(indexDate);
         indexDate = date.addDays(indexDate, 1);
@@ -133,19 +161,33 @@ function initTimeline() {
 
 function iterationsToDays() {
     let indexDate = new Date(this.selectedDate.toJSON());
+    let self = this;
 
     let days = [];
     this.days.forEach(_day => {
         const dateString = new Date(_day.toJSON()).toDateString();
 
-        let iterations = this.iterations.filter(iteration => {
+        let iterations = self.iterations.filter(iteration => {
              const start = new Date(iteration.startAt).toDateString();
              const end = new Date(iteration.endAt).toDateString();
             return start == dateString || (!iteration.startAt && iteration.endAt && end == dateString);
         });
 
+        let events = self.events.filter(_event => {
+             const start = new Date(_event.startAt).toDateString();
+            return start == dateString;
+        });
+
+        let tasksWithEventsIDs = events.map(_event => _event.iterations).flat()
+                                       .map(_task => _task.id);
+        iterations.forEach(_task => {
+            if (tasksWithEventsIDs.includes(_task.id))
+                _task.isInEvent = true;
+        })
+
         let day = { 
             tasks: iterations,
+            events: events,
             text: date.format(_day, "ddd D"),
             dow: date.format(_day, "ddd"),
             day: date.format(_day, "D"),

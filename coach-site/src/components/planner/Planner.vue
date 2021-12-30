@@ -7,7 +7,10 @@
                         <LeftPanel @dateChange="dateChange"></LeftPanel>
                     </div>
                     <div class="body overflow-clip h-100">
-                        <WeekView v-if="selectedView=='weekView'" :dayCount="dayCount" :selectedDate="selectedDate"></WeekView>
+                        <WeekView v-if="selectedView=='weekView'" 
+                                  :dayCount="dayCount" 
+                                  :selectedDate="selectedDate" 
+                                    @selectEvent="$emit('selectEvent', $event)"></WeekView>
                         <MonthView v-if="selectedView=='monthView'" :today="today" :selectedDate="selectedDate"></MonthView>
                     </div>
                 </div>
@@ -42,6 +45,18 @@ export default {
     mounted: function() {
 
     },
+    // apollo: {
+    //     events: {
+    //         query() { return require('../../graphql/query/planner/QueryEvents.gql')},
+    //         error: function(error) {
+    //             this.errorMessage = 'Error occurred while loading event query'
+    //             console.log(this.errorMessage, error);
+    //         },
+    //         update(data) {
+    //             return data.events;
+    //         }
+    //     },
+    // },
     created: function() {
 
     },

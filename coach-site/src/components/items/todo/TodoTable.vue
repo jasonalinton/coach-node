@@ -114,6 +114,9 @@ export default {
 function columnData(column, item) {
     if (column.type == 'objects') {
         return listToString(item[column.prop], 'text');
+    } else if (column.type == 'length') {
+        let lenth = item[column.prop].length;
+        return (lenth > 0) ? lenth : '';
     } else {
         return item[column.prop];
     }

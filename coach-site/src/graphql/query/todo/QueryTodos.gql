@@ -178,6 +178,11 @@ query todos {
           text
         }
       }
+      todo_repeats {
+        id
+        lastIterationDateTime
+        isEventVisible
+      }
     }
     iterations {
       id

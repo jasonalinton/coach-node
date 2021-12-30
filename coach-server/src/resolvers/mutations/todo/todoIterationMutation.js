@@ -1,4 +1,5 @@
 const { todoInclude, todoIterationIncude } = require('../../../properties/todoProperties');
+const { eventInclude } = require('../../../properties/event/eventProperties');
 const { deleteTodo } = require('./todoMutation');
 const { refreshRepetitiveEvents } = require('../../../controller/planner/plannerController');
 const moment = require('moment');
@@ -10,7 +11,7 @@ async function createDefaultTask(parent, { iteration }, context, info) {
         where: { text: 'Scheduled' }
     });
 
-    // console.log("");
+     console.log("Create default task");
 
     let startTime = await context.prisma.time.create({
         data: {
@@ -21,9 +22,14 @@ async function createDefaultTask(parent, { iteration }, context, info) {
             dateTime: iteration.startAt
         }
     })
-
-    // console.log("");
     
+    let connectedEvents = []
+    if (iteration.events) {
+        iteration.events.forEach(_event => connectedEvents.push({ id: _event.id }));
+    }
+    
+    console.log("Connect events");
+
     let todo = await context.prisma.todo.create({
         data: {
             text: iteration.text,
@@ -39,14 +45,15 @@ async function createDefaultTask(parent, { iteration }, context, info) {
                     startAt: iteration.startAt,
                     attemptedAt: iteration.attemptedAt,
                     completedAt: iteration.completedAt,
-                    isRecommended: (iteration.isRecommended) ? iteration.isRecommended : false
+                    isRecommended: (iteration.isRecommended) ? iteration.isRecommended : false,
+                    events: { connect: connectedEvents }
                 }
             }
         },
         include: todoInclude
     });
 
-    // console.log("");
+    // console.log("Created default task");
 
     iteration = await context.prisma.iteration.findFirst({
         where: { id: todo.iterations[0].id },
@@ -55,13 +62,26 @@ async function createDefaultTask(parent, { iteration }, context, info) {
 
     context.pubsub.publish("TODO_ADDED", { todoAdded: todo });
     context.pubsub.publish("ITERATION_ADDED", { iterationAdded: iteration });
-    
+
+    if (connectedEvents.length > 0) {
+        let eventIDs = connectedEvents.map(_event => _event.id);
+        let _events = await context.prisma.event.findMany({
+            where: { id: { in: eventIDs } },
+            include: eventInclude
+        })
+
+        console.log("Created default task");
+        _events.forEach(_event => {
+            context.pubsub.publish("EVENT_UPDATED", { eventUpdated: _event });
+        })
+    }
     return todo;
 }
 
 // TODO: You might want to change this name. 
 // Technically it's just setting the value. Not necessarily toggling
 async function toggleCompletion(parent, { iteration }, context, info) {
+    console.log("Toggle completion");
     iteration = await context.prisma.iteration.update({
         where: { id: iteration.id },
         data: {

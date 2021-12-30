@@ -1,22 +1,25 @@
 <template>
-    <div class="hour-block" :style="{ 'height': `${blockHeight}px`, 'overflow': 'hidden'}">
-        <div v-for="(_event, index) in events" :key="index"
-             class="event"
-             :style="{ 'margin-top': marginTop(_event), 'height': `${duration(_event)}px`}">
-
-        </div>
+    <div class="hour-block position-relative" :style="{ 'height': `${blockHeight}px` }">
+        <Event v-for="(_event, index) in events" :key="index"
+               :_event="_event"
+               :minuteHeight="minuteHeight"
+               :zIndex="zIndex"
+                @selectEvent="$emit('selectEvent', $event)">
+        </Event>
     </div>
 </template>
 
 <script>
-import { getDurationInMinutes } from "../../../../../utility/timeUtility"
+import Event from './Event.vue'
 
 export default {
+    components: { Event },
     name: "HourBlock",
     props: {
         hour: Object,
         blockHeight: Number,
-        events: Array
+        events: Array,
+        zIndex: Number
     },
     computed: {
         minuteHeight() {
@@ -24,27 +27,13 @@ export default {
         },
     },
     methods: {
-        marginTop,
-        duration(_event) {
-            return getDurationInMinutes(new Date(_event.startAt), new Date(_event.endAt));
-        }
+        
     }
-}
-
-function marginTop(_event) {
-    let datetime = new Date(_event.startAt)
-    let min = datetime.getMinutes();
-    let marginTop = this.minuteHeight * min;
-    return marginTop;
 }
 </script>
 
 <style scoped>
 .hour-block {
     border-bottom: solid 1px #DCDCDC;
-}
-
-.event {
-    border: 1px black solid;
 }
 </style>

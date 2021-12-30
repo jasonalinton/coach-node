@@ -1,11 +1,12 @@
 <template>
-    <div class="d-flex flex-column">
+    <div v-if="events" class="d-flex flex-column">
         <div v-for="(hour, index) in hours" :key="index" class="text-start">
-            <HourBlock v-if="index != 8" :hour="hour" 
-                       :blockHeight="blockHeight"></HourBlock>
-            <HourBlock v-if="index == 8" :hour="hour" 
+            <HourBlock :hour="hour" 
                        :blockHeight="blockHeight"
-                       :events="events"></HourBlock>
+                       :events="getEventsForHour(hour)"
+                       :zIndex="index * 100"
+                        @selectEvent="$emit('selectEvent', $event)">
+            </HourBlock>
         </div>
     </div>
 </template>
@@ -13,11 +14,13 @@
 <script>
 import HourBlock from "./HourBlock.vue"
 import { getHoursObjectArray } from "../../../../../utility/plannerUtility"
+import { getHour } from '../../../../../utility/timeUtility';
 
 export default {
     name: "HourBlocks",
     components: { HourBlock },
     props: {
+        events: Array,
         blockHeight: Number,
     },
     created: function() {
@@ -26,22 +29,26 @@ export default {
     data: function() {
         return {
             hours: [],
-            events: [
-                { 
-                    startAt: "2021-11-25T00:05:00-05:00",
-                    endAt: "2021-11-25T00:30:00-05:00",
-                    }
-            ]
         }
     },
     methods: {
         initHours,
         getHoursObjectArray,
+        getEventsForHour,
     }
 }
 
 function initHours() {
     this.hours = this.getHoursObjectArray();
+}
+
+function getEventsForHour(hourObject) {
+    let events = this.events.filter(_event => {
+        let hour = getHour(_event.startAt);
+        return hourObject.military == hour;
+    });
+
+    return events;
 }
 </script>
 

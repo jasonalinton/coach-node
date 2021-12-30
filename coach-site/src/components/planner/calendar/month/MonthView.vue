@@ -21,7 +21,7 @@
 <script>
 import date from "date-and-time";
 import moment from "moment";
-import { firstDayOfMonth, sunday, today } from "../../../../../utility";
+import { firstDayOfMonth, sunday, today } from "../../../../../utility/timeUtility";
 import TaskList from '../TaskList.vue';
 
 export default {

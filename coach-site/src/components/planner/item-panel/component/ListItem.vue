@@ -66,7 +66,7 @@ function onDelete() {
 <style scoped>
 .iteration {
     background-color: white;
-    max-height: 40px;
+    /* max-height: 40px; */
     user-select: none;
 }
 
@@ -122,7 +122,8 @@ function onDelete() {
 }
 
 .iteration span {
-    height: 14px;
-    line-height: 15px;
+    /* height: 14px;
+    line-height: 15px; */
+    line-height: 22px;
 }
 </style>

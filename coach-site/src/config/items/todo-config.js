@@ -32,6 +32,14 @@ let config = {
         },
         {
             id: 4,
+            name: 'Repeats',
+            prop: 'repeats',
+            queryField: 'repeats',
+            type: 'length',
+            isColumn: true,
+        },
+        {
+            id: 5,
             name: 'Parents',
             prop: 'parents',
             queryField: 'todos',
@@ -42,7 +50,7 @@ let config = {
             icon: '/icon/parent-icon.png',
         },
         {
-            id: 5,
+            id: 6,
             name: 'Children',
             prop: 'children',
             queryField: 'todos',
@@ -53,7 +61,7 @@ let config = {
             icon: '/icon/child-icon.png',
         },
         {
-            id: 6,
+            id: 7,
             name: 'Metrics',
             prop: 'metrics',
             queryField: 'metrics',
@@ -63,7 +71,7 @@ let config = {
             optionsQuery: require('../../graphql/query/QueryMetrics.gql'),
         },
         {
-            id: 7,
+            id: 8,
             name: 'Goals',
             prop: 'goals',
             queryField: 'goals',
@@ -74,7 +82,7 @@ let config = {
             icon: '/icon/goal-icon.png',
         },
         {
-            id: 8,
+            id: 9,
             name: 'Routines',
             prop: 'routines',
             queryField: 'routines',
@@ -85,7 +93,7 @@ let config = {
             icon: '/icon/routine-icon.png',
         },
         {
-            id: 9,
+            id: 10,
             name: 'Repeats',
             prop: 'repeats',
             queryField: 'repeats',
@@ -94,7 +102,7 @@ let config = {
             isColumn: false,
         },
         {
-            id: 10,
+            id: 11,
             name: 'TimePairs',
             prop: 'timePairs',
             queryField: 'timePairs',

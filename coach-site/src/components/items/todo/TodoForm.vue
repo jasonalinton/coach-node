@@ -234,6 +234,7 @@ function configureRoutine(item) {
         item.repeats.forEach(repeat => {
             let cloned = clone(repeat);
             cloned.isConnected = true;
+            cloned.isEventVisible = false;
             if (!todo.repeats) todo.repeats = [];
             todo.repeats.push(cloned);
         })
@@ -246,6 +247,7 @@ function configureTodo(item) {
         routine.repeats.forEach(repeat => {
             let cloned = clone(repeat);
             cloned.isConnected = true;
+            cloned.isEventVisible = false;
             item.repeats.push(cloned);
         })
     })

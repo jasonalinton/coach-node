@@ -1,0 +1,63 @@
+query eventsAndIterations {
+  eventsAndIterations {
+    events {
+      id
+      text
+      startAt
+      endAt
+      isAllDay
+      isRecommended
+      type {
+        id
+        text
+      }
+      iterations {
+        id
+        text
+        startAt
+        endAt
+        attemptedAt
+        completedAt
+        routineIteration {
+          id
+          todoIterations {
+            id
+            text
+            startAt
+            endAt
+            attemptedAt
+            completedAt
+          }
+        }
+      }
+    }
+    iterations {
+        id
+        text
+        startAt
+        endAt
+        attemptedAt
+        completedAt
+        isRecommended
+        todos {
+          id
+          text
+          metrics {
+            id
+            text
+          }
+        }
+        routineIteration {
+          id
+          todoIterations {
+            id
+            text
+            startAt
+            endAt
+            attemptedAt
+            completedAt
+          }
+        }
+      }
+  }
+}

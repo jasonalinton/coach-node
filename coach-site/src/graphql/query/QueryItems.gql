@@ -365,6 +365,11 @@ query items($getMetrics: Boolean, $getGoals: Boolean, $getTodos: Boolean, $getRo
                         text
                     }
                 }
+                todo_repeats {
+                    id
+                    lastIterationDateTime
+                    isEventVisible
+                }
             }
             iterations {
                 id

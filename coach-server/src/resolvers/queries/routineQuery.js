@@ -23,8 +23,10 @@ async function repetitiveRoutines(parent, args, context, info, ignoreRoutines = 
             todos: {
                 include: { iterations: true }
             },
-            iterations: true,
-            repeats: select_repeat
+            iterations: { 
+                include: { routineRepeat: select_repeat }
+            },
+            repeats: select_repeat,
         },
         orderBy: { id: 'desc'}
     });

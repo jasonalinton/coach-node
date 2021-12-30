@@ -12,17 +12,19 @@
         </div>
         <div class="grid-body" ref="gridBody">
             <Planner 
-                v-if="navbar.selectedPage == 'planner'" 
+                v-show="navbar.selectedPage == 'planner'" 
                     :selectedPage="navbar.selectedPage"
                     :dayCount="navbar.week.dayCount"
                     :selectedView="navbar.selectedView"
                     :selectedDate="selectedDate"
-                    @dateChange="dateChange">
+                    @dateChange="dateChange"
+                    @selectEvent="selectEvent">
             </Planner>
-            <ItemTabs v-if="navbar.selectedPage == 'items'"></ItemTabs>
+            <ItemTabs v-show="navbar.selectedPage == 'items'"></ItemTabs>
         </div>
         <div class="grid-right-panel">
-            <ItemPanel :selectedDate="selectedDate"></ItemPanel>
+            <ItemPanel :selectedDate="selectedDate"
+                       :selectPanel="itemsPage.selectPanel"></ItemPanel>
         </div>
     </div>
 </template>
@@ -52,7 +54,7 @@ export default {
                 selectedPage: 'planner',
             },
             itemsPage: {
-                selectedTab: "metric",
+                selectPanel: undefined,
             },
             selectedDate: today()
         };
@@ -84,6 +86,7 @@ export default {
         viewChange,
         showPage,
         dateChange,
+        selectEvent,
     },
     watch: {
         'navbar.selectedPage'(value) { localStorage.setItem(`selected-page`, value); },
@@ -107,6 +110,13 @@ function showPage(page) {
 function dateChange(date) {
     this.selectedDate = date;
 }
+
+function selectEvent(_event) {
+    this.itemsPage.selectPanel = {
+        panel: 'event',
+        props: { _event }
+    }
+}
 </script>
 
 
@@ -117,6 +127,9 @@ body {
 
 .grid-container {
     height: 100vh;
+    /* This is supposed to prevent the viewport height being too large on mobile */
+    /* https://stackoverflow.com/questions/37112218/css3-100vh-not-constant-in-mobile-browser */
+    min-height: -webkit-fill-available;
     /* width: 100vw; */
     display: grid;
     /* gap: 20px; */
