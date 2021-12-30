@@ -1,5 +1,6 @@
 const controller = require('../../../controller/itemController');
 const { todoInclude } = require('../../../properties/todoProperties');
+const { eventInclude } = require('../../../properties/event/eventProperties');
 const { configureIteration } = require('../../../controller/todoController');
 const { configureRepeatTrans } = require('../time/repeatMutation');
 const { configureTimePairTrans } = require('../time/timePairMutation');
@@ -49,6 +50,17 @@ async function updateTodo(parent, args, context, info) {
 }
 
 async function deleteTodo(parent, args, context, info) {
+    todoInclude.iterations = {
+        include: {
+            events: {
+                include: {
+                    iterations: true,
+                    type: true
+                }
+            }
+        }
+    }
+
     console.log("");
     let todo = await context.prisma.todo.update({
         where: { id: args.id },
@@ -56,20 +68,73 @@ async function deleteTodo(parent, args, context, info) {
         include: todoInclude
     });
 
+    let eventsDelete = [];
+    let eventsUpdated = [];
+
+    todo.iterations.forEach(async _iteration => {
+        _iteration.events.forEach(_event => {
+            if (_event.iterations.length == 1 && _event.type.text.toLowerCase() == 'todo') {
+                eventsDelete.push(_event);
+            } else {
+                eventsUpdated.push(_event);
+            }
+        })
+
+        await context.prisma.iteration.delete({
+            where: { id: _iteration.id }
+        });
+    })
+
+    eventsDelete.forEach(async _event => {
+        await context.prisma.event.delete({
+            where: { id: _event.id }
+        });
+    })
+
     context.pubsub.publish("TODO_DELETED", { todoDeleted: todo });
     todo.iterations.forEach(iteration =>
         context.pubsub.publish("ITERATION_DELETED", { iterationDeleted: iteration }));
+    eventsDelete.forEach(_event =>
+        context.pubsub.publish("EVENT_DELETED", { eventDeleted: _event }));
+    eventsUpdated.forEach(async _event => {
+        let eventt = await context.prisma.event.findFirst({
+            where: { id: _event.id },
+            include: eventInclude
+        });
+        context.pubsub.publish("EVENT_UPDATED", { eventUpdated: eventt })
+    });
     
     return todo;
 }
 
 async function createTodoIterations(parent, { todo }, context, info, repeat) {
     let iterations = [];
+    let events = [];
 
     // Create iterations
     let iterations_new = todo.iterations.filter(_i => !_i.id);
     for (let i = 0; i < iterations_new.length; i++){
         let _iteration = iterations_new[i];
+        let _events = [];
+
+        // Create event to be mapped to iteration
+        // Note: Prisma doesn't allow to createMany with many-to-many relationships
+        if (_iteration.events) {
+            for (let j = 0; j < _iteration.events.length; j++) {
+                let _event = await context.prisma.event.create({
+                    data: {
+                        ..._iteration.events[j],
+                        type: {
+                            connect: { id: 125 }
+                        }
+                    }
+                });
+                _events.push({ id: _event.id });
+            }
+        }
+        
+        delete _iteration.events;
+
         let iteration = await context.prisma.iteration.create({
             data: {
                 ..._iteration,
@@ -78,9 +143,13 @@ async function createTodoIterations(parent, { todo }, context, info, repeat) {
                 },
                 todoRepeat: {
                     connect: { id: repeat.id }
+                },
+                events: {
+                    connect: _events
                 }
             }
         });
+        
         iterations.push(iteration);
     }
 
@@ -140,9 +209,18 @@ async function createTodoIterations(parent, { todo }, context, info, repeat) {
         include: todoInclude
     })
 
+    events = await context.prisma.event.findMany({
+        include: eventInclude,
+        orderBy: { id: 'desc'}
+    });
+
     iterations.forEach(_iteration => {
         context.pubsub.publish("ITERATION_ADDED", { iterationAdded: _iteration });
-    })
+    });
+
+    events.forEach(_event => {
+        context.pubsub.publish("EVENT_ADDED", { eventAdded: _event });
+    });
 
     context.pubsub.publish("TODO_UPDATED", { todoUpdated: todo_updated });
 

@@ -17,6 +17,10 @@ async function initDateFormatMiddleware(prisma) {
             if (Array.isArray(result)) result.forEach(_result => fixIterationDateFormat(_result));
             else if (result) fixIterationDateFormat(result);
         }
+        if (params.model == "Event") {
+            if (Array.isArray(result)) result.forEach(_result => fixEventDateFormat(_result));
+            else if (result) fixEventDateFormat(result);
+        }
         if (params.model == "RoutineTodo_Iteration") {
             if (Array.isArray(result)) result.forEach(_result => fixRoutineTodoIterationDateFormat(_result));
             else if (result) fixRoutineTodoIterationDateFormat(result);
@@ -50,6 +54,14 @@ function fixDateFormat(result) {
             })
         })
     }
+    if (result.events) {
+        result.events.forEach(_event => {
+            ['startAt', 'endAt'].forEach(timeProp => {
+                if (_event[timeProp])
+                _event[timeProp] = moment(_event[timeProp]).format();
+            })
+        })
+    }
 }
 
 function fixIterationDateFormat(iteration) {
@@ -57,6 +69,19 @@ function fixIterationDateFormat(iteration) {
         if (iteration[timeProp])
             iteration[timeProp] = moment(iteration[timeProp]).format();
     })
+}
+
+function fixEventDateFormat(_event) {
+    ['startAt', 'endAt'].forEach(timeProp => {
+        if (_event[timeProp])
+        _event[timeProp] = moment(_event[timeProp]).format();
+    })
+
+    if (_event.iterations) {
+        _event.iterations.forEach(_iteration => {
+            fixIterationDateFormat(_iteration)
+        })
+    }
 }
 
 function fixRoutineTodoIterationDateFormat(iteration) {

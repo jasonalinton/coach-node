@@ -46,6 +46,7 @@ function createRepeats(data) {
         
         delete repeat.id;
         delete repeat.isUpdated;
+        delete repeat.isEventVisible;
         delete repeat.routine_repeats;
         delete repeat.routines
     })
@@ -106,6 +107,10 @@ function connectRepeat(data, prop) {
     connected = list.map(repeat => {
         return { id: repeat.id };
     });
+
+    // THIS IS TEMPORARY AND WILL EVENTUALLY CAUSE PROBLEMS
+    createTodoRepeat(data);
+
     return connected;
 }
 
@@ -199,13 +204,17 @@ function configureDayIndicies(repeat) {
         delete repeat.dayIndecies;
 }
 
-function createItemRepeat(data) {
+function createTodoRepeat(data) {
     let item_repeats = [];
     data.repeats.forEach(repeat => {
         item_repeats.push({
-            isEventVisible: true,
-            repeat
+            isEventVisible: (!repeat.isEventVisible) ? false : repeat.isEventVisible,
+            repeat: {
+                connect: { id: repeat.id }
+            }
         })
+
+        delete repeat.isEventVisible;
     })
     data.todo_repeats = { create: item_repeats }        
 }

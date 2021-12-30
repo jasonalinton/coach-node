@@ -48,6 +48,7 @@ type Event {
   isAllDay: String
   isRecommended: String
 
+  type: Type
   iterations: [Iteration]
 }
 
@@ -59,6 +60,7 @@ input EventInput {
   isAllDay: String
   isRecommended: String
 
+  type: TypeInput
   iterations: [IterationInput]
 }
 

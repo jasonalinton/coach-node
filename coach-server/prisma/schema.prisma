@@ -111,6 +111,8 @@ model Type {
 
   repeats          Repeat[] @relation(name: "Repeat_Type")
   timeframeRepeats Repeat[] @relation(name: "Timeframe_RepeatType")
+
+  events           Event[] @relation(name: "Event_Type")
 }
 
 model Time {
@@ -343,8 +345,10 @@ model Event {
   isRecommended    Boolean   @default(false)
   isSynced         Boolean   @default(false)
   idGoogleEvent    Int?
+  idType           Int?
   createdAt        DateTime  @default(now()) @db.Timestamptz(6)
   updatedAt        DateTime  @default(now()) @updatedAt @db.Timestamptz(6)
 
+  type             Type?     @relation(fields: [idType], references: [id], name: "Event_Type")
   iterations       Iteration[]
 }

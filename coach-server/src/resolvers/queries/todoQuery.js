@@ -65,7 +65,7 @@ async function todoIterations(parent, args, context, info) {
         orderBy: { id: 'desc' }
     })
 
-    console.log("")
+    // console.log("")
     
     return iterations;
 }

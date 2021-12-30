@@ -19,6 +19,12 @@ type Query {
   routineIterations: [RoutineTodo_Iteration]!
 
   repeat(id: Int): Repeat!
+
+  # Planner
+  event(id: Int!): Event
+  iterations: [Iteration!]!
+  events: [Event!]!
+  eventsAndIterations: EventsAndIterations!
 }
 
 type Mutation {
@@ -72,14 +78,19 @@ type Subscription {
   todoAdded: Todo!
   todoUpdated: Todo!
   todoDeleted: Todo!
-  iterationAdded: Iteration!
-  iterationUpdated: Iteration!
-  iterationDeleted: Iteration!
 
   # Routine
   routineAdded: Routine!
   routineUpdated: Routine!
   routineDeleted: Routine!
+
+  # Planner
+  iterationAdded: Iteration!
+  iterationUpdated: Iteration!
+  iterationDeleted: Iteration!
+  eventAdded: Event!
+  eventUpdated: Event!
+  eventDeleted: Event!
 }
 
 input unmappedIDs {

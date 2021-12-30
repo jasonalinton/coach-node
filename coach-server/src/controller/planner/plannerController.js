@@ -116,8 +116,7 @@ function createDailyRepetitions(item, itemType, indexDate, indexEnd, repeat) {
             if (_isEventVisible && repeat.startIteration) {
                 let _event = {
                     text: item.text,
-                    startAt: moment(indexDate).hour(0).minute(0).second(0).millisecond(0).toDate(),
-                    isEventVisible: _isEventVisible
+                    startAt: moment(indexDate).hour(0).minute(0).second(0).millisecond(0).toDate()
                 }
 
                 _event.startAt = concatDate(new Date(_event.startAt), new Date(repeat.startIteration.dateTime));
@@ -161,8 +160,7 @@ function createWeeklyRepetitions(item, itemType, indexDate, indexEnd, repeat) {
                 if (_isEventVisible && repeat.startIteration) {
                     let _event = {
                         text: item.text,
-                        startAt: moment(indexDate).hour(0).minute(0).second(0).millisecond(0).toDate(),
-                        isEventVisible: _isEventVisible
+                        startAt: moment(indexDate).hour(0).minute(0).second(0).millisecond(0).toDate()
                     }
 
                     _event.startAt = concatDate(new Date(_event.startAt), new Date(repeat.startIteration.dateTime));
@@ -172,6 +170,7 @@ function createWeeklyRepetitions(item, itemType, indexDate, indexEnd, repeat) {
                     // else if (item.estimatedTime)
                     //     _event.endAt = concatDate(iteration.endAt, new Date(())
 
+                    if (!iteration.events) iteration.events = [];
                     iteration.events.push(_event);
                 }
             }
@@ -209,8 +208,7 @@ function createMonthlyRepetitions(item, itemType, indexDate, indexEnd, repeat) {
                 if (_isEventVisible && repeat.startIteration) {
                     let _event = {
                         text: item.text,
-                        startAt: moment(indexDate).hour(0).minute(0).second(0).millisecond(0).toDate(),
-                        isEventVisible: _isEventVisible
+                        startAt: moment(indexDate).hour(0).minute(0).second(0).millisecond(0).toDate()
                     }
 
                     _event.startAt = concatDate(new Date(_event.startAt), new Date(repeat.startIteration.dateTime));
@@ -220,6 +218,7 @@ function createMonthlyRepetitions(item, itemType, indexDate, indexEnd, repeat) {
                     // else if (item.estimatedTime)
                     //     _event.endAt = concatDate(iteration.endAt, new Date(())
 
+                    if (!iteration.events) iteration.events = [];
                     iteration.events.push(_event);
                 }
             }
@@ -236,7 +235,11 @@ function validateDates(lastIterationDateTime, props) {
 
     console.log(`Last iteration datetime was ${JSONDate(lastIterationDateTime)}`);
 
-    let errorMes = `Skipping repetition creation for ${props.itemType}.`
+    let errorMes = `Skipping repetition creation for ${props.itemType}-${props.item.text}.`
+    if (lastIterationDateTime >= props.indexEnd) {
+        console.log(`${errorMes} IndexEnd is before the last iteration datetime`);
+        return false;
+    } else 
     if (props.indexDate > props.indexEnd) {
         console.log(`${errorMes} IndexDate is after than indexEnd`);
         return false;

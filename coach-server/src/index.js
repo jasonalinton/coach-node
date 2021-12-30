@@ -14,6 +14,7 @@ const MetricQuery = require('./resolvers/queries/metricQuery');
 const GoalQuery = require('./resolvers/queries/goalQuery');
 const TodoQuery = require('./resolvers/queries/todoQuery');
 const RoutineQuery = require('./resolvers/queries/routineQuery');
+const PlannerQuery = require('./resolvers/queries/planner/plannerQuery');
 const RepeatQuery = require('./resolvers/queries/time/repeatQuery');
 
 const MetricMutation = require('./resolvers/mutations/metricMutation');
@@ -35,6 +36,7 @@ const Query = {
     ...GoalQuery,
     ...TodoQuery,
     ...RoutineQuery,
+    ...PlannerQuery,
     ...RepeatQuery,
 }
 const Mutation = {
@@ -62,7 +64,7 @@ const resolvers = {
 const prisma = new PrismaClient();
 const pubsub = new PubSub();
 
-const PORT = 4010;
+const PORT = 4013;
 
 const server = new ApolloServer({
   typeDefs,

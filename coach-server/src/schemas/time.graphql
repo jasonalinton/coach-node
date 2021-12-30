@@ -121,6 +121,7 @@ input RepeatInput {
 
   isUpdated: Boolean
   isConnected: Boolean
+  isEventVisible: Boolean
   unmappedIDs: unmappedIDs
 }
 

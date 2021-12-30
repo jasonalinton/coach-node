@@ -1,4 +1,5 @@
 const controller = require('../../controller/itemController');
+const { eventInclude } = require('../../properties/event/eventProperties');
 const { routineInclude } = require('../../properties/routineProperties');
 const { configureRepeatTrans } = require('./time/repeatMutation');
 const { configureTimePairTrans } = require('./time/timePairMutation');
@@ -55,23 +56,48 @@ async function deleteRoutine(parent, args, context, info) {
 
 async function createRoutineIterations(parent, { routine }, context, info, repeat) {
     let iterations = [];
+    let events = [];
 
     // Create iterations
     let iterations_new = routine.iterations.filter(_i => !_i.id);
     for (let i = 0; i < iterations_new.length; i++){
         let _iteration = iterations_new[i];
+        let _events = [];
+
+        // Create event to be mapped to iteration
+        // Note: Prisma doesn't allow to createMany with many-to-many relationships
+        if (_iteration.events) {
+            for (let j = 0; j < _iteration.events.length; j++) {
+                let _event = await context.prisma.event.create({
+                    data: {
+                        ..._iteration.events[j],
+                        type: {
+                            connect: { id: 127 }
+                        }
+                    }
+                });
+                _events.push({ id: _event.id });
+            }
+        }
+        
+        delete _iteration.events;
+
         let iteration = await context.prisma.iteration.create({
             data: {
                 ..._iteration,
                 routines: {
                     connect: [{ id: routine.id }]
+                },
+                routineRepeat: {
+                    connect: { id: repeat.id }
+                },
+                events: {
+                    connect: _events
                 }
             }
         });
         iterations.push(iteration);
     }
-
-    console.log("hello")
 
     // Upsert routine_repeats
     let repeats_updated = routine.repeats.filter(_repeat => _repeat.isUpdated);
@@ -94,9 +120,7 @@ async function createRoutineIterations(parent, { routine }, context, info, repea
                     idRepeat: _repeat.id
                 },
             })
-            // console.log("hello")
         }
-        // console.log("hello")
 
         // Update routine_repeat
         let routine_repeats_updated = _repeat.routine_repeats.filter(_routine_repeat => _routine_repeat.isUpdated);
@@ -117,18 +141,6 @@ async function createRoutineIterations(parent, { routine }, context, info, repea
                 },
             })
         }
-
-            console.log("hello")
-            // Map new iterations to repeat
-            await context.prisma.repeat.update({
-                where: { id: repeat.id },
-                data: {
-                    routineIterations: {
-                        connect: iterations.map(_iteration => { return { id: _iteration.id } })
-                    }
-                },
-                include: { iterations: true }
-            })
     }
     // Get updated routine
     routineInclude.iterations.where = {
@@ -140,9 +152,18 @@ async function createRoutineIterations(parent, { routine }, context, info, repea
         include: routineInclude
     })
 
+    events = await context.prisma.event.findMany({
+        include: eventInclude,
+        orderBy: { id: 'desc'}
+    });
+
     iterations.forEach(_iteration => {
         context.pubsub.publish("ITERATION_ADDED", { iterationAdded: _iteration });
     })
+
+    events.forEach(_event => {
+        context.pubsub.publish("EVENT_ADDED", { eventAdded: _event });
+    });
 
     context.pubsub.publish("ROUTINE_UPDATED", { routineUpdated: routine_updated });
 
