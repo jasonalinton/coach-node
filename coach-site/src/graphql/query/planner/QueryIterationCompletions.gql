@@ -1,0 +1,9 @@
+query IterationCompletions($start: String!, $end: String!) {
+  iterationCompletions(start: $start, end: $end) {
+    datetime
+    complete
+    pending
+    total
+    percentComplete
+  }
+}

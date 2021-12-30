@@ -25,6 +25,7 @@ type Query {
   iterations: [Iteration!]!
   events: [Event!]!
   eventsAndIterations: EventsAndIterations!
+  iterationCompletions(start: String!, end: String!): [IterationCompletion!]!
 }
 
 type Mutation {

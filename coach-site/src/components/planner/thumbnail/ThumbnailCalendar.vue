@@ -18,8 +18,10 @@
         </div>
         <!-- Days -->
         <div v-for="(week, weekIndex) in weeks" :key="weekIndex" class="week d-flex flex-row">
-            <div v-for="(day, dayIndex) in week.days" :key="dayIndex" class="day pill" :class="[day.pointInTime, (selectedDate == day.date) ? 'selected' : '']"  @click="selectDate(day.date)">
-                {{ day.day }}
+            <div v-for="(day, dayIndex) in week.days" :key="dayIndex" class="day pill d-flex flex-column position-relative" 
+                 :class="[day.pointInTime, (selectedDate == day.date) ? 'selected' : '', status(day.iterationCompletion)]"  @click="selectDate(day.date)">
+                <span>{{ day.day }}</span>
+                <span class="status position-absolute"></span>
             </div>
         </div>
     </div>
@@ -28,7 +30,8 @@
 <script>
 import date from "date-and-time";
 import moment from 'moment'
-import { month_long, year_long, addMonth, subtractMonth, firstDayOfMonth, sunday, today } from "../../../../utility";
+import { month_long, year_long, addMonth, subtractMonth, firstDayOfMonth, today } from "../../../../utility";
+import { addDay, sunday } from "../../../../utility/timeUtility";
 import IconButton from '../../controls/button/IconButton.vue';
 
 const daysOfWeek = [
@@ -66,7 +69,52 @@ export default {
         this.initCalendar();
     },
     computed: {
-        firstSunday() { return moment(this.date).weekday(0); }
+        firstSunday() { 
+            let _firstDayOfMonth = firstDayOfMonth(this.firstDay);
+            return sunday(_firstDayOfMonth);
+        },
+        lastSaturday() { return addDay(this.firstSunday, this.rows * 7 - 1); }
+    },
+    apollo: {
+        iterationCompletions: {
+            query() { return require('../../../graphql/query/planner/QueryIterationCompletions.gql')},
+            variables() {
+                return {
+                    start: this.firstSunday,
+                    end: this.lastSaturday
+                }
+            },
+            error: function(error) {
+                this.errorMessage = 'Error occurred while loading query'
+                console.log(this.errorMessage, error);
+            },
+            update(data) { 
+                return data.iterationCompletions
+            },
+            // subscribeToMore: [
+            //     {
+            //         document: require('../../../../graphql/subscription/todo/IterationAdded.gql'),
+            //         updateQuery: (previousResult, { subscriptionData: { data: { iterationAdded }} }) => {
+            //             previousResult.todoIterations.splice(0, 0, iterationAdded);
+            //             return previousResult;
+            //         },
+            //     },
+            //     {
+            //         document: require('../../../../graphql/subscription/todo/IterationUpdated.gql'),
+            //         updateQuery: (previousResult, { subscriptionData: { data: { iterationUpdated }} }) => {
+            //             replaceItem(iterationUpdated, previousResult.todoIterations);
+            //             return previousResult;
+            //         },
+            //     },
+            //     {
+            //         document: require('../../../../graphql/subscription/todo/IterationDeleted.gql'),
+            //         updateQuery: (previousResult, { subscriptionData: { data: { iterationDeleted }} }) => {
+            //             removeItem(iterationDeleted, previousResult.todoIterations);
+            //             return previousResult;
+            //         },
+            //     },
+            // ]
+        },
     },
     methods: {
         initCalendar,
@@ -80,25 +128,29 @@ export default {
         addMonth,
         subtractMonth,
         selectDate,
+        status(iterationCompletion) {
+            if ((new Date(iterationCompletion.datetime).getTime() > today().getTime()))
+                return 'pending'
+            else if (iterationCompletion.percentComplete >= 90)
+                return 'success';
+            else if (iterationCompletion.percentComplete >= 50 && iterationCompletion.percentComplete < 90)
+                return 'close';
+            else if (iterationCompletion.percentComplete < 50)
+                return 'fail';
+            else
+                return '';
+        }
     },
+    watch: {
+        iterationCompletions(value) {
+            let days = this.weeks.map(_week => _week.days).flat();
+
+            days.forEach(_day => {
+                _day.iterationCompletion = value.find(_value => (new Date(_value.datetime)).toLocaleString() == _day.date);
+            })
+        }
+    }
 }
-
-
-    // // let today2 = Date.today();
-    // console.log(moment([2007, 0, 29]).fromNow());
-    // console.log(moment().date(1).hour(0).minute(0).second(0).millisecond(0).toLocaleString());
-    // console.log(moment().day(24).toLocaleString());
-
-// function initCalendar() {
-//     this.days = [];
-
-//     let date = this.firstSunday;
-//     for (let i = 0; i < this.rows * 7; i++) {
-//         this.days.push(date.date());
-//         date.add(1, 'day');
-//     }
-    
-// }
 
 function initCalendar() {
     this.days = [];
@@ -118,7 +170,10 @@ function initCalendar() {
                 dow: this.date_and_time.format(date, "ddd"),
                 day: date.getDate(),
                 date: new Date(date.getTime()).toLocaleString(),
-                tasks: []
+                tasks: [],
+                iterationCompletion: {
+                    status: 'pending'
+                }
             };
 
             if (moment(date).month() < moment(this.date).month()) {
@@ -238,6 +293,26 @@ function previous() {
 
 .day.selected.present {
     background-color: #0366E9;
+}
+
+.day span.status {
+    width: 4px;
+    height: 4px;
+    top: 18px;
+    left: 10px;
+    border-radius: 2px;
+}
+
+.day.success span.status {
+    background-color: green;
+}
+
+.day.close span.status {
+    background-color: orange;
+}
+
+.day.fail span.status {
+    background-color: red;
 }
 
 .pill.previous-month, .pill.next-month {

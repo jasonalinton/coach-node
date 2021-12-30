@@ -1,6 +1,22 @@
 import moment from "moment";
 import date from 'date-and-time';
 
+export function currency(number) {
+    return new Intl.NumberFormat([ ], { style: 'currency', currency: 'USD', currencyDisplay: 'narrowSymbol' }).format(number);
+}
+
+export function percent(number, decimalPlaces = 0) {
+    return new Intl.NumberFormat([ ], { style: 'percent', minimumFractionDigits: decimalPlaces }).format(number);
+}
+
+export function sortDesc(array, prop) {
+    return array.sort((a, b) => b[prop] - a[prop]);
+}
+
+export function sortAsc(array, prop) {
+    return array.sort((a, b) => a[prop] - b[prop]);
+}
+
 export function listToString(objectArray, property) {
     let string = "";
     let index = 0;
@@ -111,10 +127,6 @@ export function firstDayOfMonth(dateTime) {
 
 export function lastDayOfMonth(dateTime) {
     return moment(dateTime).endOf('month').toDate();
-}
-
-export function sunday(dateTime) {
-    return moment(dateTime).weekday(0).toDate();
 }
 
 export function year(dateTime = new Date()) {

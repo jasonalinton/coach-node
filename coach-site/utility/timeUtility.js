@@ -15,6 +15,17 @@ export function toTimeString(dateTimeJSON) {
     return `${timeArray[0]}:${timeArray[1]}`;
 }
 
+export function toShortWeekdayString(dateTimeJSON) {
+    let datetime = new Date(dateTimeJSON);
+    return date.format(datetime, 'ddd, MMM D')
+}
+
+/* Get hour portion of date */
+export function getHour(dateTimeJSON) {
+    let date = new Date(dateTimeJSON);
+    return date.getHours();
+}
+
 export function toDateTimeString(dateTimeJSON) {
     let dateTimeArray = dateTimeJSON.split("T");
 
@@ -54,6 +65,10 @@ export function lastDayOfMonth(dateTime) {
 
 export function sunday(dateTime) {
     return moment(dateTime).weekday(0).toDate();
+}
+
+export function saturday(dateTime) {
+    return moment(dateTime).weekday(6).toDate();
 }
 
 export function year(dateTime = new Date()) {

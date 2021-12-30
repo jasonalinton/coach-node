@@ -64,6 +64,11 @@ input EventInput {
   iterations: [IterationInput]
 }
 
+type EventsAndIterations {
+  events: [Event]!
+  iterations: [Iteration]!
+}
+
 type RoutineTodo_Iteration {
   id: Int
   idRoutineIteration: Int
@@ -80,4 +85,12 @@ input RoutineTodo_IterationInput {
 
   routineIteration: IterationInput
   todoIterations: [IterationInput]
+}
+
+type IterationCompletion {
+  datetime: String!
+  complete: Int
+  pending: Int
+  total: Int
+  percentComplete: Int
 }
