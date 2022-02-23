@@ -59,10 +59,10 @@ export default {
     apollo: {
         items: {
             query: require('../../../graphql/query/QueryItems.gql'),
-            loadingKey: 'loadingQueriesCount',
             update(data) { 
                 return data.items.goals;
             },
+            loadingKey: 'loadingQueriesCount',
             error: function(error) {
                 this.errorMessage = 'Error occurred while loading query';
                 this.errorMessage = JSON.parse(JSON.stringify(error))

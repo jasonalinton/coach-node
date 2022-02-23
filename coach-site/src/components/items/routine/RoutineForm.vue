@@ -108,7 +108,6 @@ export default {
         addItem,
         save,
         configureRoutine,
-        configureTodo,
         close,
         refreshForm,
         removeItem,
@@ -210,11 +209,7 @@ function save(item) {
 
     item.unmappedIDs = this.getUnmappedIDs();
 
-    if (this.config.itemType == 'todo') {
-        this.configureTodo(item);
-    } else if (this.config.itemType == 'routine') {
-        this.configureRoutine(item);
-    }
+    this.configureRoutine(item);
 
     if (!item.id) {
         this.config.addItem(item, this.$apollo);
@@ -236,17 +231,6 @@ function configureRoutine(item) {
             cloned.isConnected = true;
             if (!todo.repeats) todo.repeats = [];
             todo.repeats.push(cloned);
-        })
-    })
-}
-
-function configureTodo(item) {
-    item.routines.forEach(routine => {
-        if (!routine.repeats) return;
-        routine.repeats.forEach(repeat => {
-            let cloned = clone(repeat);
-            cloned.isConnected = true;
-            item.repeats.push(cloned);
         })
     })
 }

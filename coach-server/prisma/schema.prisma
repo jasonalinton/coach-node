@@ -64,8 +64,7 @@ model Todo {
   repeats         Repeat[]
   todo_repeats    Todo_Repeat[]
 
-  iterations      Iteration[]
-  iterations2      Iteration[] @relation(name: "todo_iteration")
+  iterations      Iteration[] @relation(name: "todo_iteration")
 }
 
 model Routine {
@@ -88,8 +87,7 @@ model Routine {
   repeats        Repeat[]
   routine_repeats  Routine_Repeat[]
 
-  iterations      Iteration[]
-  iterations2      Iteration[] @relation(name: "routine_iteration")
+  iterations      Iteration[] @relation(name: "routine_iteration")
 }
 
 model Type {
@@ -312,11 +310,6 @@ model Iteration {
   todo              Todo?      @relation(fields: [idTodo], references: [id], name: "todo_iteration")
   routine           Routine?   @relation(fields: [idRoutine], references: [id], name: "routine_iteration")
 
-  // // todos & routines need to be deleted
-  // // iteration can not be to multiple items
-  todos            Todo[]
-  routines         Routine[]
-
   repeat          Repeat?    @relation(fields: [idRepeat], references: [id], name: "repeat_iteration")
   todoRepeat      Repeat?    @relation(fields: [idTodoRepeat], references: [id], name: "repeat_todoIteration")
   routineRepeat   Repeat?    @relation(fields: [idRoutineRepeat], references: [id], name: "repeat_routineIteration")
@@ -333,6 +326,7 @@ model RoutineTodo_Iteration {
   hasTodoEvent       Boolean @default(false)
 
   routineIteration   Iteration @relation(fields: [idRoutineIteration], references: [id], name: "RoutineIteraion")
+  // Change this to todoRoutineIteration or routineIterationForTodo to clear things up
   todoIterations     Iteration[]
 }
 

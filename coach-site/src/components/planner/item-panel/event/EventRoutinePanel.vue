@@ -27,6 +27,7 @@
                 </li>
                 <li v-for="(iteration, index) in iterations.pending" v-bind:key="iteration.id" :style="{ 'z-index': -index }">
                     <ListItem :iteration="iteration" @markComplete="toggleCompletion(iteration, $apollo)" @onDelete="deleteIteration(iteration.id, $apollo)"></ListItem>
+                    <!-- <ListItem :iteration="iteration" @markComplete="markComplete" @onDelete="removeIteration"></ListItem> -->
                 </li>
             </ul>
             <!-- Complete  -->
@@ -34,7 +35,8 @@
                 <div class="header">Completed ({{ iterations.complete.length }})</div>
                 <ul v-if="iterations.complete" class="item-list">
                     <li v-for="(iteration, index) in iterations.complete" v-bind:key="index" :style="{ 'z-index': -index }">
-                        <ListItem class="complete" :iteration="iteration" @markIncomplete="toggleCompletion(iteration, $apollo)" @onDelete="deleteIteration(iteration.id, $apollo)"></ListItem>
+                            <ListItem class="complete" :iteration="iteration" @markIncomplete="toggleCompletion(iteration, $apollo)" @onDelete="deleteIteration(iteration.id, $apollo)"></ListItem>
+                        <!-- <ListItem class="complete" :iteration="iteration" @markIncomplete="markIncomplete" @onDelete="removeIteration"></ListItem> -->
                     </li>
                 </ul>
             </div>
@@ -89,21 +91,23 @@ export default {
                     document: require('../../../../graphql/subscription/planner/EventAdded.gql'),
                     updateQuery: (previousResult, { subscriptionData: { data: { eventAdded }} }) => {
                         if (previousResult.event.id == eventAdded.id)
-                            return eventAdded;
+                            return previousResult;
                     },
                 },
                 {
                     document: require('../../../../graphql/subscription/planner/EventUpdated.gql'),
                     updateQuery: (previousResult, { subscriptionData: { data: { eventUpdated }} }) => {
                         if (previousResult.event.id == eventUpdated.id)
-                            return eventUpdated;
+                            return previousResult;
                     },
                 },
                 {
                     document: require('../../../../graphql/subscription/planner/EventDeleted.gql'),
                     updateQuery: (previousResult, { subscriptionData: { data: { eventDeleted }} }) => {
-                        if (previousResult.event.id == eventDeleted.id)
-                            return null;
+                        if (previousResult.event.id == eventDeleted.id) {
+                            previousResult.event = null
+                            return previousResult;
+                        }
                     },
                 },
                 {
@@ -141,11 +145,14 @@ export default {
         addTask,
         cancelAddTask,
         markNewTaskComplete,
+        markComplete,
+        markIncomplete,
         createDefaultTask,
         toggleCompletion,
         deleteIteration,
         replaceItem,
         removeItem,
+        removeIteration,
         today,
         toShortWeekdayString,
         refreshIterations,
@@ -207,10 +214,25 @@ function markNewTaskComplete(iteration) {
     }
 }
 
+function markComplete(iteration) {
+    replaceItem(iteration, this.iterations.pending);
+    this.toggleCompletion(iteration, this.$apollo);
+}
+
+function markIncomplete(iteration) {
+    replaceItem(iteration, this.iterations.complete);
+    this.toggleCompletion(iteration, this.$apollo);
+}
+
+function removeIteration(iteration) {
+    let list = (iteration.attemptedAt) ? this.iterations.complete : this.iterations.pending;
+    removeItem(iteration, list);
+    this.deleteIteration(iteration.id, this.$apollo);
+}
+
 function refreshIterations(_event) {
         let complete = [];
         let pending = [];
-
 
         complete = complete.concat(_event.iterations.filter(iteration => iteration.routineIteration == null && iteration.attemptedAt));
         pending = pending.concat(_event.iterations.filter(iteration => iteration.routineIteration == null && !iteration.attemptedAt));
@@ -220,7 +242,6 @@ function refreshIterations(_event) {
         let todoIterations = routineIterations.map(iteration => iteration.todoIterations).flat();
         complete = complete.concat(todoIterations.filter(iteration => iteration.attemptedAt));
         pending = pending.concat(todoIterations.filter(iteration => !iteration.attemptedAt));
-
 
         this.iterations.complete = sortDesc(complete, 'id');
         this.iterations.pending = sortDesc(pending, 'id');

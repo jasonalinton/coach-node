@@ -17,6 +17,22 @@ subscription eventUpdated {
         endAt
         attemptedAt
         completedAt
+        todos {
+            id
+            text
+            metrics {
+                id
+                text
+            }
+            goals {
+                id
+                text
+            }
+            routines {
+                id
+                text
+            }
+        }
         routineIteration {
           id
           todoIterations {

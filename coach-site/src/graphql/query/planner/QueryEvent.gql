@@ -17,6 +17,22 @@ query event($id: Int!) {
         endAt
         attemptedAt
         completedAt
+        todo {
+            id
+            text
+            metrics {
+                id
+                text
+            }
+            goals {
+                id
+                text
+            }
+            routines {
+                id
+                text
+            }
+        }
         routineIteration {
           id
           todoIterations {
@@ -26,8 +42,22 @@ query event($id: Int!) {
             endAt
             attemptedAt
             completedAt
+            todo {
+                id
+                text
+                metrics {
+                    id
+                    text
+                }
+                goals {
+                    id
+                    text
+                }
+            }
+            idRoutineIteration
           }
         }
+        idRoutineIteration
       }
     }
 }

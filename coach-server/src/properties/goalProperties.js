@@ -13,8 +13,8 @@ const goalInclude = {
     children: where_isDeleted_false,
     todos: where_isDeleted_false,
     routines: where_isDeleted_false,
-    // repeats: select_repeat,
-    // timePairs: select_timePair,
+    repeats: select_repeat,
+    timePairs: select_timePair,
 }
 
 module.exports = {

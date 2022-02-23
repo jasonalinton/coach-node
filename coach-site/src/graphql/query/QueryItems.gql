@@ -190,6 +190,7 @@ query items($getMetrics: Boolean, $getGoals: Boolean, $getTodos: Boolean, $getRo
             id
             text
             description
+            isGroup
             parents {
                 id
                 text
@@ -264,48 +265,48 @@ query items($getMetrics: Boolean, $getGoals: Boolean, $getTodos: Boolean, $getRo
                 text
                 }
                 timeframe {
-                id
-                text
+                    id
+                    text
                 }
                 startRepeat {
-                id
-                type {
                     id
-                    text
-                }
-                endpoint {
-                    id
-                    text
-                }
-                moment {
-                    id
-                    text
-                }
-                flexibility {
-                    id
-                    text
-                }
-                dateTime
+                    type {
+                        id
+                        text
+                    }
+                    endpoint {
+                        id
+                        text
+                    }
+                    moment {
+                        id
+                        text
+                    }
+                    flexibility {
+                        id
+                        text
+                    }
+                    dateTime
                 }
                 endRepeat {
-                id
-                type {
                     id
-                    text
-                }
-                endpoint {
-                    id
-                    text
-                }
-                moment {
-                    id
-                    text
-                }
-                flexibility {
-                    id
-                    text
-                }
-                dateTime
+                    type {
+                        id
+                        text
+                    }
+                    endpoint {
+                        id
+                        text
+                    }
+                    moment {
+                        id
+                        text
+                    }
+                    flexibility {
+                        id
+                        text
+                    }
+                    dateTime
                 }
                 startIteration {
                     id

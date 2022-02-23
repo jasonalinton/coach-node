@@ -66,7 +66,7 @@ async function routineIterations(parent, args, context, info) {
         include: {
             routineIteration: true,
             todoIterations: {
-                include: { todos: true },
+                include: { todo: true },
                 orderBy: { id: 'desc'}
             }
         },

@@ -1,23 +1,13 @@
-subscription eventDeleted {
-    eventDeleted {
-      id
-      text
-      startAt
-      endAt
-      isAllDay
-      isRecommended
-      type {
-        id
-        text
-      }
-      iterations {
+query iterations($type: String, $start: String, $end: String, ) {
+    iterations(type: $type, start: $start, end: $end) {
         id
         text
         startAt
         endAt
         attemptedAt
         completedAt
-        todos {
+        isRecommended
+        todo {
             id
             text
             metrics {
@@ -34,16 +24,17 @@ subscription eventDeleted {
             }
         }
         routineIteration {
-          id
-          todoIterations {
             id
-            text
-            startAt
-            endAt
-            attemptedAt
-            completedAt
-          }
+            todoIterations {
+                id
+                text
+                startAt
+                endAt
+                attemptedAt
+                completedAt
+            }
+            idRoutineIteration
         }
-      }
+        idRoutineIteration
     }
 }

@@ -2,11 +2,11 @@ const { removeItem } = require('../../../utility');
 const { getTodoRepeat, getRoutineRepeat } = require('../../resolvers/mutations/time/repeatMutation');
 const { routines } = require('../../resolvers/queries/routineQuery');
 
-function configureRepeats(data) {
-    let create = createRepeats(data);
-    let updates = updateRepeat(data, 'repeats');
+function configureRepeats(data, type = "") {
+    let create = createRepeats(data, type);
+    let updates = updateRepeat(data, type);
     let disconnect = disconnectObjet(data, 'repeats');
-    let connect = connectRepeat(data, 'repeats');
+    // let connect = connectRepeat(data, 'repeats', type);
 
     data.repeats = {};
     if (create.length > 0)
@@ -15,15 +15,15 @@ function configureRepeats(data) {
         data.repeats.update = updates;
     if (disconnect.length > 0)
         data.repeats.disconnect = disconnect;
-    if (connect.length > 0)
-        data.repeats.connect = connect;
+    // if (connect.length > 0)
+    //     data.repeats.connect = connect;
 
     if (!data.repeats.create && !data.repeats.update && !data.repeats.disconnect && !data.repeats.connect)
         delete data.repeats;
 }
 
-function createRepeats(data) {
-    let newRepeats = data.repeats.filter(repeat => !repeat.id || repeat.id < 0);
+function createRepeats(data, type = "") {
+    let newRepeats = data.repeats.filter(repeat => (!repeat.id || repeat.id < 0) || repeat.isConnected);
     newRepeats.forEach(repeat => {
         configureTime(repeat, 'startRepeat');
         configureMapObject(repeat, 'startRepeat');
@@ -43,6 +43,9 @@ function createRepeats(data) {
         configureDayIndicies(repeat);
 
         configureMapObject(repeat, 'routineRepeat');
+
+        if (type == "todo")
+            createTodoRepeats(data, repeat)
         
         delete repeat.id;
         delete repeat.isUpdated;
@@ -53,7 +56,14 @@ function createRepeats(data) {
     return newRepeats;
 }
 
-function updateRepeat(data) {
+function updateRepeat(data, type) {
+    // Todo_repeats currently can't be updated
+    if (type == "todo" )
+        data.repeats.forEach(_repeat => {
+            if (_repeat.isUpdated)
+                delete _repeat.todo_repeats
+        })
+
     return data.repeats.filter(_repeat => (_repeat.id && _repeat.id > 0) && _repeat.isUpdated);
 }
 
@@ -101,15 +111,16 @@ function disconnectObjet(data, prop) {
     return disconnect;
 }
 
-function connectRepeat(data, prop) {
+function connectRepeat(data, prop, type) {
     let connected = [];
     let list = data[prop].filter(repeat => repeat.isConnected);
     connected = list.map(repeat => {
         return { id: repeat.id };
     });
 
-    // THIS IS TEMPORARY AND WILL EVENTUALLY CAUSE PROBLEMS
-    createTodoRepeat(data);
+    // // THIS IS TEMPORARY AND WILL EVENTUALLY CAUSE PROBLEMS
+    // if (type == "todo")
+    //     createTodoRepeats(data);
 
     return connected;
 }
@@ -204,20 +215,51 @@ function configureDayIndicies(repeat) {
         delete repeat.dayIndecies;
 }
 
-function createTodoRepeat(data) {
-    let item_repeats = [];
+function createTodoRepeats(data) {
     data.repeats.forEach(repeat => {
-        item_repeats.push({
-            isEventVisible: (!repeat.isEventVisible) ? false : repeat.isEventVisible,
-            repeat: {
+        repeat.todo_repeats = {
+            create: {
+                isEventVisible: (!repeat.isEventVisible) ? false : repeat.isEventVisible,
+                todo: {
+                    connect: { id: data.id }
+                }
+            }
+        }
+        if (repeat.isConnected) {
+            repeat.routineRepeat = {
                 connect: { id: repeat.id }
             }
-        })
+            delete repeat.isConnected;
+        }
 
         delete repeat.isEventVisible;
-    })
-    data.todo_repeats = { create: item_repeats }        
+    })       
 }
+
+// function createTodoRepeats(data) {
+//     let item_repeats = [];
+//     data.repeats.forEach(repeat => {
+//         repeat.todo_repeats = {
+//             create: {
+//                 isEventVisible: (!repeat.isEventVisible) ? false : repeat.isEventVisible,
+//                 todo: {
+//                     connect: { id: data.id }
+//                 }
+//             }
+//         }
+         
+
+//         // item_repeats.push({
+//         //     isEventVisible: (!repeat.isEventVisible) ? false : repeat.isEventVisible,
+//         //     todo: {
+//         //         connect: { id: data.id }
+//         //     }
+//         // })
+
+//         delete repeat.isEventVisible;
+//     })
+//     data.todo_repeats = { create: item_repeats }        
+// }
 
 async function getLastIterationDateTime(repeat, itemType, itemID, context) {
     let item_repeat;

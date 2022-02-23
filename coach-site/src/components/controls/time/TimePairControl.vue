@@ -252,6 +252,16 @@ function dateTimeString(time) {
     border-bottom: 1px solid rgba(220, 220, 220, .5);
 }
 
+.add-btn {
+    width: 50px;
+    height: 28px;
+    line-height: 28px;
+    padding-left: 5px;
+    border: none;
+    font-size: 12px;
+    background-color: transparent;
+}
+
 .mapped-item:hover .header a, .mapped-item:focus .header a {
     color: #005A9E;
 }

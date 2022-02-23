@@ -8,12 +8,32 @@ subscription iterationAdded {
     completedAt
     isRecommended
     todos {
-      id
-      text
-      metrics {
         id
         text
+        metrics {
+            id
+            text
+        }
+        goals {
+            id
+            text
+        }
+        routines {
+            id
+            text
+        }
+    }
+    routineIteration {
+      id
+      todoIterations {
+        id
+        text
+        startAt
+        endAt
+        attemptedAt
+        completedAt
       }
+      idRoutineIteration
     }
     todoRepeat {
       id

@@ -23,7 +23,7 @@ export default {
     props: {
         title: String,
         sort: Object,
-
+        nextPages: Array
     },
     data: function () {
         return {

@@ -20,9 +20,42 @@
                       v-model="item.description"
                       v-on:keyup.enter="save(item)" />
         </div>
+        <!-- Metrics -->
+        <ApolloQuery :query="require('../../../graphql/query/QueryMetrics.gql')">
+            <template slot-scope="{ result: { error, data }, isLoading }">
+                <div class="mapped-item form-group mt-1">
+                    <div class="header d-flex justify-content-between align-items-center align-middle">
+                        <a class="item-select btn btn-sm btn-link" type="button" data-bs-toggle="collapse" :data-bs-target="`.metrics.collapse`" aria-controls="offcanvas-items">Metrics</a>
+                    </div>
+                    <!-- Quick Add Item -->
+                    <div class="d-flex justify-content-between mt-1">
+                        <button class="add-btn my-auto" type="button" @click="addItem(newItem.metrics, item.metrics)">
+                            <img src="/icon/button/add.png" width="10" height="10"/>Add
+                        </button>
+                        <input class="add textbox" type="text" 
+                            v-model="newItem.metrics.text"
+                            v-on:keyup.enter="addItem(newItem.metrics, item.metrics)"
+                            :style="{'width': 'calc(100% - 55px)'}"/>
+                    </div>
+                    <div :class="`metrics collapse mt-1`">
+                        <div v-if="isLoading">Loading...</div>
+                        <div v-else-if="error">An error occurred</div>
+                        <SelectItem v-else-if="data" :items="data.metrics" :selectedItems="item.metrics" @setSelected="metrics = $event"></SelectItem>
+                        <div v-else class="no-result apollo">No result :(</div>
+                    </div>
+                    <div :class="`list-group metrics collapse show mt-1`">
+                        <a v-for="_item in metrics" v-bind:key="_item.id" href="#" 
+                           class="list-group-item list-group-item-light list-group-item-action d-flex justify-content-between align-items-center">
+                            {{ _item.text }}
+                            <img class="delete-button" src="/icon/button/delete.png" width="10" height="10" @click="removeItem(_item, item.metrics)"/>
+                        </a>
+                    </div>
+                </div>
+            </template>
+        </ApolloQuery>
         <!-- Mapped Items -->
         <ApolloQuery 
-            v-for="prop in itemProps" :key="prop.id"
+            v-for="prop in itemProps.filter(itemProp => itemProp.prop != 'metrics')" :key="prop.id"
             :query="prop.optionsQuery">
             <template slot-scope="{ result: { error, data }, isLoading }">
                 <div class="mapped-item form-group mt-1">
@@ -56,6 +89,15 @@
         </ApolloQuery>
         <RepeatControl class="mt-2" :repeats="item.repeats" @addRepeat="addRepeat" @updateRepeat="updateRepeat"></RepeatControl>
         <TimePairControl class="mt-2" :timePairs="item.timePairs" @addTimePair="addTimePair" @updateTimePair="updateTimePair"></TimePairControl>
+        <div class="d-flex flew-row justify-content-between mt-4">
+            <!-- Is Group -->
+            <div class="form-check">
+                <input :id="`todo-${item.id}-is-group`" class="form-check-input" type="checkbox" v-model="item.isGroup" >
+                <label class="form-check-label" :for="`todo-${item.id}-is-group`">
+                    Is Group
+                </label>
+            </div>
+        </div>
         <div class="d-flex flew-row justify-content-between mt-4">
             <!-- Toggle Panel - Checkbox -->
             <div class="form-check">
@@ -94,6 +136,53 @@ export default {
             itemProps: this.config.props.filter(prop => prop.isItem)
         }
     },
+    computed: {
+        allTodos() {
+            return this.$apollo.getClient().cache.readQuery({ query: require('../../../graphql/query/QueryItems.gql') })
+                .items.todos;
+        },
+        allGoals() {
+            return this.$apollo.getClient().cache.readQuery({ query: require('../../../graphql/query/QueryItems.gql') })
+                .items.goals;
+        },
+        metrics: {
+            /*
+                Currently, this automatically maps metrics based on the goals and parent todos the item is mapped to
+                PROBLEM: If you unmap the item the metric will still be mapped to it, whether it's supposed to or not
+                SOLUTION: Initially, don't actually create mapping, just show the metrics of mapped items. 
+                          Then use a button (or something) to create the actual mapping
+            */
+            get() {
+                // let _metrics = [...this.item.metrics];
+                
+                ['parents', 'children', 'goals'].forEach(_prop => {
+                    this.item[_prop].forEach(_item => {
+                        let _relative;
+                        if (_prop == 'parents' || _prop == 'children')
+                            _relative = this.allTodos.find(_todo => _todo.id == _item.id);
+                        if (_prop == 'goals')
+                            _relative = this.allGoals.find(_goal => _goal.id == _item.id);
+
+
+                        _relative.metrics.forEach(_metric => {
+                            if (!this.item.metrics.map(__ => __.id).includes(_metric.id)) {
+                                this.item.metrics.push({
+                                    __typename: _metric.__typename,
+                                    id: _metric.id,
+                                    text: _metric.text,
+                                    // isNewMap: true,
+                                })
+                            }
+                        })
+                    })
+                })
+                return this.item.metrics;
+            },
+            set(value) {
+                this.item.metrics = value;
+            }
+        }
+    },
     created: function() {
         this.originalItem = clone(this.item);
         this.initToggle();
@@ -107,7 +196,6 @@ export default {
         initNewItems,
         addItem,
         save,
-        configureRoutine,
         configureTodo,
         close,
         refreshForm,
@@ -210,11 +298,7 @@ function save(item) {
 
     item.unmappedIDs = this.getUnmappedIDs();
 
-    if (this.config.itemType == 'todo') {
-        this.configureTodo(item);
-    } else if (this.config.itemType == 'routine') {
-        this.configureRoutine(item);
-    }
+    this.configureTodo(item);
 
     if (!item.id) {
         this.config.addItem(item, this.$apollo);
@@ -229,29 +313,60 @@ function save(item) {
     }
 }
 
-function configureRoutine(item) {
-    item.todos.forEach(todo => {
-        item.repeats.forEach(repeat => {
-            let cloned = clone(repeat);
-            cloned.isConnected = true;
-            cloned.isEventVisible = false;
-            if (!todo.repeats) todo.repeats = [];
-            todo.repeats.push(cloned);
-        })
-    })
-}
+// function configureTodo(item) {
+//     item.routines.forEach(routine => {
+//         if (!routine.repeats) return;
+//         routine.repeats.forEach(repeat => {
+//             let cloned = clone(repeat);
+//             cloned.isConnected = true;
+//             cloned.isEventVisible = false;
+//             item.repeats.push(cloned);
+//         })
+//     })
+// }
 
 function configureTodo(item) {
     item.routines.forEach(routine => {
         if (!routine.repeats) return;
         routine.repeats.forEach(repeat => {
-            let cloned = clone(repeat);
-            cloned.isConnected = true;
-            cloned.isEventVisible = false;
-            item.repeats.push(cloned);
+            if (item.repeats.length == 0) {
+                let cloned = clone(repeat);
+
+                // delete cloned.id;
+                cloned.isConnected = true;
+
+                // Remove ID so new objects are created
+                if (cloned.startRepeat)
+                    delete cloned.startRepeat.id;
+                if (cloned.endRepeat)
+                    delete cloned.endRepeat.id;
+                if (cloned.startIteration)
+                    delete cloned.startIteration.id;
+                if (cloned.endIteration)
+                    delete cloned.endIteration.id;
+
+                cloned.isEventVisible = false;
+                item.repeats.push(cloned);
+            }
         })
     })
 }
+
+// function configureTodo(item) {
+//     item.routines.forEach(routine => {
+//         if (!routine.repeats) return;
+//         routine.repeats.forEach(repeat => {
+//             let exists = item.repeats.includes(_rep => _rep.id == repeat.id);
+//             if (!exists) {
+//                 let cloned = clone(repeat);
+//                 cloned.id = -1
+//                 cloned.routineRepeat = { id: repeat.id };
+//                 cloned.isEventVisible = false;
+//                 item.repeats.push(cloned);
+//             }
+//         })
+//     })
+// }
 
 function refreshForm() {
     this.$emit('refreshForm');

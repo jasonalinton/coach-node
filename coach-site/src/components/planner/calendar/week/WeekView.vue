@@ -11,8 +11,8 @@
                         <div class="date-icon">{{ day.day }}</div><!-- Date -->
                     </div>
                     <TaskList :date="day.date"
-                              :taskList="day.tasks.filter(_task => !_task.isInEvent)"
-                              :minHeight="maxTasks * 22">
+                              :taskList="day.tasks.filter(_task => !_task.isInEvent)">
+                              <!-- :minHeight="maxTasks * 22"> -->
                     </TaskList>
                 </div>
             </div>
@@ -48,6 +48,7 @@ import TaskList from "../TaskList.vue";
 import HourBlocks from '../event/HourBlocks.vue';
 import { replaceItem, removeItem } from '../../../../../utility';
 import { getHoursObjectArray } from "../../../../../utility/plannerUtility"
+import { firstDayOfWeek } from '../../../../../utility/timeUtility';
 
 export default {
     name: 'WeekView',
@@ -104,29 +105,29 @@ export default {
                 this.dayModels = this.iterationsToDays();
                 return data.eventsAndIterations
             },
-            // subscribeToMore: [
-            //     {
-            //         document: require('../../../../graphql/subscription/todo/IterationAdded.gql'),
-            //         updateQuery: (previousResult, { subscriptionData: { data: { iterationAdded }} }) => {
-            //             previousResult.eventsAndIterations.iterations.splice(0, 0, iterationAdded);
-            //             return previousResult;
-            //         },
-            //     },
-            //     // {
-            //     //     document: require('../../../../graphql/subscription/todo/IterationUpdated.gql'),
-            //     //     updateQuery: (previousResult, { subscriptionData: { data: { iterationUpdated }} }) => {
-            //     //         replaceItem(iterationUpdated, previousResult.eventsAndIterations.iterations);
-            //     //         return previousResult;
-            //     //     },
-            //     // },
-            //     {
-            //         document: require('../../../../graphql/subscription/todo/IterationDeleted.gql'),
-            //         updateQuery: (previousResult, { subscriptionData: { data: { iterationDeleted }} }) => {
-            //             removeItem(iterationDeleted, previousResult.eventsAndIterations.iterations);
-            //             return previousResult;
-            //         },
-            //     },
-            // ]
+            subscribeToMore: [
+                {
+                    document: require('../../../../graphql/subscription/todo/IterationAdded.gql'),
+                    updateQuery: (previousResult, { subscriptionData: { data: { iterationAdded }} }) => {
+                        previousResult.eventsAndIterations.iterations.splice(0, 0, iterationAdded);
+                        return previousResult;
+                    },
+                },
+                {
+                    document: require('../../../../graphql/subscription/todo/IterationUpdated.gql'),
+                    updateQuery: (previousResult, { subscriptionData: { data: { iterationUpdated }} }) => {
+                        replaceItem(iterationUpdated, previousResult.eventsAndIterations.iterations);
+                        return previousResult;
+                    },
+                },
+                {
+                    document: require('../../../../graphql/subscription/todo/IterationDeleted.gql'),
+                    updateQuery: (previousResult, { subscriptionData: { data: { iterationDeleted }} }) => {
+                        removeItem(iterationDeleted, previousResult.eventsAndIterations.iterations);
+                        return previousResult;
+                    },
+                },
+            ]
         },
     },
     methods: {
@@ -153,6 +154,11 @@ function initTimeline() {
     this.days = [];
 
     let indexDate = new Date(this.selectedDate);
+
+    if (this.dayCount == 7) {
+        indexDate = firstDayOfWeek(this.selectedDate)
+    }
+
     for (let i = 0; i < this.dayCount; i++) {
         this.days.push(indexDate);
         indexDate = date.addDays(indexDate, 1);
@@ -178,8 +184,20 @@ function iterationsToDays() {
             return start == dateString;
         });
 
-        let tasksWithEventsIDs = events.map(_event => _event.iterations).flat()
-                                       .map(_task => _task.id);
+        let iterations1 = events.map(_event => _event.iterations).flat();
+        let todoIterations = iterations1.filter(_iteration => _iteration.routineIteration == null);
+        let routineIterations = iterations1.filter(_iteration => _iteration.routineIteration != null);
+        let iterations3 = routineIterations.map(_iteration => _iteration.routineIteration.todoIterations).flat();
+
+        iterations3 = todoIterations.concat(iterations3);
+
+        let tasksWithEventsIDs = iterations3.map(_task => _task.id);
+
+        // console.log(todoIterations.length)
+        // console.log(iterations3.length)
+
+        // let tasksWithEventsIDs = events.map(_event => _event.iterations).flat()
+        //                                .map(_task => _task.id);
         iterations.forEach(_task => {
             if (tasksWithEventsIDs.includes(_task.id))
                 _task.isInEvent = true;
@@ -202,7 +220,8 @@ function iterationsToDays() {
         }
         days.push(day);
 
-        this.maxTasks = (iterations.length > this.maxTasks) ? iterations.length : this.maxTasks;
+        // this.maxTasks = (iterations.length > this.maxTasks) ? iterations.length : this.maxTasks;
+        this.maxTasks = 5;
     });
     return days;
 }

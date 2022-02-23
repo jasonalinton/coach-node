@@ -138,7 +138,7 @@ async function attemptIteration(parent, { id, attemptedAt }, context, info) {
         text: iteration_orig.text,
         startAt: moment(iteration_orig.startAt).add(1, 'day').toDate(),
         isRecommended: (iteration_orig.isRecommended) ? iteration.isRecommended : false,
-        todos: { connect: { id: iteration_orig.todos[0].id } }
+        todo: { connect: { id: iteration_orig.todo.id } }
     }
     
     if (iteration_orig.repeat)
@@ -170,7 +170,7 @@ async function deleteIteration(parent, { id }, context, info) {
     let iteration = await context.prisma.iteration.findFirst({
         where: { id: id },
         include: {
-            todos: {
+            todo: {
                 select: {
                     id: true,
                     text: true,
@@ -182,8 +182,8 @@ async function deleteIteration(parent, { id }, context, info) {
     });
 
     console.log("Check if iteration has siblings")
-    if (iteration.todos[0].iterations.length == 1 && iteration.todos[0].children.length == 0) {
-        await deleteTodo(parent, iteration.todos[0], context, info)
+    if (iteration.todo.iterations.length == 1 && iteration.todo.children.length == 0) {
+        await deleteTodo(parent, iteration.todo, context, info)
     } else {
         iteration = await context.prisma.iteration.delete({
             where: { id: iteration.id }

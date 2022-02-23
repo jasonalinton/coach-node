@@ -1,11 +1,40 @@
 mutation attemptIteration($id: Int!, $attemptedAt: String!) {
   attemptIteration(id: $id, attemptedAt: $attemptedAt) {
-    id
-    text
-    startAt
-    endAt
-    attemptedAt
-    completedAt
-    isRecommended
-  }
+        id
+        text
+        startAt
+        endAt
+        attemptedAt
+        completedAt
+        isRecommended
+        todo {
+            id
+            text
+            metrics {
+                id
+                text
+            }
+            goals {
+                id
+                text
+            }
+            routines {
+                id
+                text
+            }
+        }
+        routineIteration {
+            id
+            todoIterations {
+                id
+                text
+                startAt
+                endAt
+                attemptedAt
+                completedAt
+            }
+            idRoutineIteration
+        }
+        idRoutineIteration
+    }
 }

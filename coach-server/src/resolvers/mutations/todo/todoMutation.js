@@ -6,27 +6,49 @@ const { configureRepeatTrans } = require('../time/repeatMutation');
 const { configureTimePairTrans } = require('../time/timePairMutation');
 
 async function addTodo(parent, args, context, info) {
-    let data = controller.initData(args.todo);
+    let data = controller.initData(args.todo, "todo");
+
+    console.log("");
+
+    let repeats = [];
+    if (data.repeats && data.repeats.create)
+        repeats = data.repeats.create;
+    delete data.repeats;
 
     let todo = await context.prisma.todo.create({
         data,
         include: todoInclude
     });
 
-    // console.log("")
+    console.log("");
+
+    repeats.forEach(async _repeat => {
+        _repeat.todo_repeats.create.todo.connect.id = todo.id;
+        _repeat.todos = { connect: { id: todo.id }};
+        await context.prisma.repeat.create({
+            data: _repeat
+        })
+    })
+
+    todo = await context.prisma.todo.findFirst({
+        where: { id: todo.id },
+        include: todoInclude
+    });
+
+    console.log("");
 
     todo = await configureIteration(todo, context);
 
     context.pubsub.publish("TODO_ADDED", { todoAdded: todo });
-    todo.iterations.forEach(iteration =>
-        context.pubsub.publish("ITERATION_ADDED", { iterationAdded: iteration }));
+    // todo.iterations.forEach(iteration =>
+    //     context.pubsub.publish("ITERATION_ADDED", { iterationAdded: iteration }));
     
     return todo;
 }
 
 async function updateTodo(parent, args, context, info) {
     let id = args.todo.id;
-    let data = controller.initData(args.todo);
+    let data = controller.initData(args.todo, "todo");
 
     let transaction = []
     await configureRepeatTrans(data, transaction, context);
@@ -61,7 +83,7 @@ async function deleteTodo(parent, args, context, info) {
         }
     }
 
-    console.log("");
+    // console.log("");
     let todo = await context.prisma.todo.update({
         where: { id: args.id },
         data: { isDeleted: true },
@@ -135,11 +157,13 @@ async function createTodoIterations(parent, { todo }, context, info, repeat) {
         
         delete _iteration.events;
 
+        console.log(``)
+
         let iteration = await context.prisma.iteration.create({
             data: {
                 ..._iteration,
-                todos: {
-                    connect: [{ id: todo.id }]
+                todo: {
+                    connect: { id: todo.id }
                 },
                 todoRepeat: {
                     connect: { id: repeat.id }
@@ -214,23 +238,23 @@ async function createTodoIterations(parent, { todo }, context, info, repeat) {
         orderBy: { id: 'desc'}
     });
 
-    iterations.forEach(_iteration => {
-        context.pubsub.publish("ITERATION_ADDED", { iterationAdded: _iteration });
-    });
+    // iterations.forEach(_iteration => {
+    //     context.pubsub.publish("ITERATION_ADDED", { iterationAdded: _iteration });
+    // });
 
-    events.forEach(_event => {
-        context.pubsub.publish("EVENT_ADDED", { eventAdded: _event });
-    });
+    // events.forEach(_event => {
+    //     context.pubsub.publish("EVENT_ADDED", { eventAdded: _event });
+    // });
 
-    context.pubsub.publish("TODO_UPDATED", { todoUpdated: todo_updated });
+    // context.pubsub.publish("TODO_UPDATED", { todoUpdated: todo_updated });
 
     return todo_updated;
 }
 
 function updateSubscriptions(todo, context) {
     context.pubsub.publish("TODO_UPDATED", { todoUpdated: todo });
-    todo.iterations.forEach(iteration =>
-        context.pubsub.publish("ITERATION_UPDATED", { iterationUpdated: iteration }));
+    // todo.iterations.forEach(iteration =>
+    //     context.pubsub.publish("ITERATION_UPDATED", { iterationUpdated: iteration }));
 }
 
 module.exports = {

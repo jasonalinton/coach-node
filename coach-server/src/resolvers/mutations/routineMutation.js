@@ -82,11 +82,13 @@ async function createRoutineIterations(parent, { routine }, context, info, repea
         
         delete _iteration.events;
 
+        console.log(``)
+
         let iteration = await context.prisma.iteration.create({
             data: {
                 ..._iteration,
-                routines: {
-                    connect: [{ id: routine.id }]
+                routine: {
+                    connect: { id: routine.id }
                 },
                 routineRepeat: {
                     connect: { id: repeat.id }
@@ -157,15 +159,15 @@ async function createRoutineIterations(parent, { routine }, context, info, repea
         orderBy: { id: 'desc'}
     });
 
-    iterations.forEach(_iteration => {
-        context.pubsub.publish("ITERATION_ADDED", { iterationAdded: _iteration });
-    })
+    // iterations.forEach(_iteration => {
+    //     context.pubsub.publish("ITERATION_ADDED", { iterationAdded: _iteration });
+    // })
 
-    events.forEach(_event => {
-        context.pubsub.publish("EVENT_ADDED", { eventAdded: _event });
-    });
+    // events.forEach(_event => {
+    //     context.pubsub.publish("EVENT_ADDED", { eventAdded: _event });
+    // });
 
-    context.pubsub.publish("ROUTINE_UPDATED", { routineUpdated: routine_updated });
+    // context.pubsub.publish("ROUTINE_UPDATED", { routineUpdated: routine_updated });
 
     return routine_updated;
 }

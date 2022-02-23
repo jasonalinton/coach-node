@@ -79,17 +79,19 @@ async function createRepetitiveEvents(item, itemType, indexDate = null, indexEnd
 
 async function createRepetition(repeat, item, itemType, indexDate = null, indexEnd = null, timeframe = repetitions.monthly.id, context) {
     let lastIterationDateTime = await getLastIterationDateTime(repeat, itemType, item.id, context);
-    let props = { repeat, item, itemType, indexDate, indexEnd, context };
+    let props = { repeat, item, itemType, indexDate, indexEnd, lastIterationDateTime, context };
     let isValid = validateDates(lastIterationDateTime, props);
+    console.log();
     if (!isValid) return item;
+
 
     // Daily
     if (repeat.timeframe.id == repetitions.daily.id) {
-        createDailyRepetitions(item, itemType, indexDate, indexEnd, repeat);
+        createDailyRepetitions(props);
     } else if (repeat.timeframe.id == repetitions.weekly.id) {
-        createWeeklyRepetitions(item, itemType, indexDate, indexEnd, repeat);
+        createWeeklyRepetitions(props);
     } else if (repeat.timeframe.id == repetitions.monthly.id) {
-        createMonthlyRepetitions(item, itemType, indexDate, indexEnd, repeat);
+        createMonthlyRepetitions(props);
     }
     setLastIterationDateTime(repeat, itemType, item.id, indexEnd);
 
@@ -100,7 +102,7 @@ async function createRepetition(repeat, item, itemType, indexDate = null, indexE
     }
 }
 
-function createDailyRepetitions(item, itemType, indexDate, indexEnd, repeat) {
+function createDailyRepetitions({item, itemType, indexDate, indexEnd, repeat}) {
     while (indexDate <= indexEnd) {
         /* Create iteration for day */
         for (let i = 0; i < repeat.frequency; i++) {
@@ -135,13 +137,13 @@ function createDailyRepetitions(item, itemType, indexDate, indexEnd, repeat) {
     }
 }
 
-function createWeeklyRepetitions(item, itemType, indexDate, indexEnd, repeat) {
+function createWeeklyRepetitions({item, itemType, indexDate, indexEnd, repeat, context, lastIterationDateTime}) {
     indexDate = firstDayOfWeek(indexDate);
 
     while (indexDate <= indexEnd) {
         /* Create iteration for week */
         for (let i = 0; i < repeat.frequency; i++) {
-            if (indexDate <= getLastIterationDateTime(repeat, itemType, item.id))
+            if (indexDate <= getLastIterationDateTime(repeat, itemType, item.id, context))
                 return;
             
             const iteration = {
@@ -152,7 +154,8 @@ function createWeeklyRepetitions(item, itemType, indexDate, indexEnd, repeat) {
             };
 
             if (i < repeat.dayIndecies.length) {
-                iteration.startAt = moment(iteration.startAt).day(repeat.dayIndecies[i].index).toDate();
+                iteration.startAt = moment(iteration.startAt).day(repeat.dayIndecies[i].index - 1).toDate();
+                if (iteration.startAt.getTime() < (new Date(lastIterationDateTime)).getTime()) continue;
                 iteration.endAt = iteration.startAt;
 
                 /* Create event */
@@ -163,7 +166,7 @@ function createWeeklyRepetitions(item, itemType, indexDate, indexEnd, repeat) {
                         startAt: moment(indexDate).hour(0).minute(0).second(0).millisecond(0).toDate()
                     }
 
-                    _event.startAt = concatDate(new Date(_event.startAt), new Date(repeat.startIteration.dateTime));
+                    _event.startAt = concatDate(iteration.startAt, new Date(repeat.startIteration.dateTime));
 
                     if (repeat.endIteration)
                         _event.endAt = concatDate(iteration.endAt, new Date(repeat.endIteration.dateTime))
@@ -182,13 +185,13 @@ function createWeeklyRepetitions(item, itemType, indexDate, indexEnd, repeat) {
     }
 }
 
-function createMonthlyRepetitions(item, itemType, indexDate, indexEnd, repeat) {
+function createMonthlyRepetitions({item, itemType, indexDate, indexEnd, repeat, context}) {
     indexDate = firstDayOfMonth(indexDate);
 
     while (indexDate <= indexEnd) {
         /* Create iteration for month */
         for (let i = 0; i < repeat.frequency; i++) {
-            if (indexDate <= getLastIterationDateTime(repeat, itemType, item.id))
+            if (indexDate <= getLastIterationDateTime(repeat, itemType, item.id, context))
                 return;
             
             const iteration = {
@@ -211,7 +214,7 @@ function createMonthlyRepetitions(item, itemType, indexDate, indexEnd, repeat) {
                         startAt: moment(indexDate).hour(0).minute(0).second(0).millisecond(0).toDate()
                     }
 
-                    _event.startAt = concatDate(new Date(_event.startAt), new Date(repeat.startIteration.dateTime));
+                    _event.startAt = concatDate(iteration.startAt, new Date(repeat.startIteration.dateTime));
 
                     if (repeat.endIteration)
                         _event.endAt = concatDate(iteration.endAt, new Date(repeat.endIteration.dateTime))
@@ -273,9 +276,11 @@ async function mapRoutineIterationsToTodoIterations(routines, context) {
 
     let routineTodo_Iterations = [];
     routine_iterations.forEach(iteration => {
+        /* ID's of todo iterations mapped to same repeat as routine */
         let todo_iterations = iteration.routineRepeat.todoIterations.filter(_iteration => moment(_iteration.startAt).format() == iteration.startAt);
         let ids = todo_iterations.map(todo_iteration => { return { id: todo_iteration.id } });
 
+        /* ID's of todo iterations that have custom repeat */
         let todoIterations = iteration.routineRepeat.todoRepeats.map(tr => tr.todoIterations).flat();
         todoIterations.forEach(_iteration => {
             if (moment(_iteration.startAt).format() == iteration.startAt)
@@ -290,6 +295,7 @@ async function mapRoutineIterationsToTodoIterations(routines, context) {
             }
         }
         routineTodo_Iterations.push(routineTodo_Iteration);
+        
     })
 
     let routineTodo_Iterations_updated = []

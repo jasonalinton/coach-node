@@ -4,18 +4,40 @@ const routineTodoIterationIncude = {
     include: {
         routineIteration: true,
         todoIterations: {
-            include: { todos: true },
+            include: { 
+                todo: {
+                    include: {
+                        metrics: true,
+                        goals: true,
+                        parents: true,
+                        children: true
+                    }
+                },
+                routineIteration: { select: { id: true } }
+            },
             orderBy: { id: 'desc'}
         }
     }
 };
 
 const iterationIncude = {
-    todos: {
+    todo: {
         select: {
             id: true,
             text: true,
             metrics: {
+                select: {
+                    id: true,
+                    text: true
+                }
+            },
+            goals: {
+                select: {
+                    id: true,
+                    text: true
+                }
+            },
+            routines: {
                 select: {
                     id: true,
                     text: true
@@ -28,6 +50,7 @@ const iterationIncude = {
             // }
         }
     },
+    routine: true,
     repeat: {
         include: {
             routineIterations: true

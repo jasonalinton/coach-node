@@ -55,7 +55,7 @@
         </ApolloQuery>
         <!-- Mapped Items -->
         <ApolloQuery 
-            v-for="prop in itemProps.filter(itemProp => itemProp.id != 6)" :key="prop.id"
+            v-for="prop in itemProps.filter(itemProp => itemProp.prop != 'metrics')" :key="prop.id"
             :query="prop.optionsQuery">
             <template slot-scope="{ result: { error, data }, isLoading }">
                 <div class="mapped-item form-group mt-1">
@@ -128,33 +128,36 @@ export default {
         }
     },
     computed: {
-        metricsIDs() {
-            return this.item.metrics.map(_metricOrig => _metricOrig.id);
-        },
         allGoals() {
             return this.$apollo.getClient().cache.readQuery({ query: require('../../../graphql/query/QueryItems.gql') })
                 .items.goals;
         },
         metrics: {
+            /*
+                Currently, this automatically maps metrics based on the parent goals the item is mapped to
+                PROBLEM: If you unmap the item the metric will still be mapped to it, whether it's supposed to or not
+                SOLUTION: Initially, don't actually create mapping, just show the metrics of mapped items. 
+                          Then use a button (or something) to create the actual mapping
+            */
             get() {
-                let _metrics = [...this.item.metrics];
+                // let _metrics = [...this.item.metrics];
                 
                 ['parents', 'children'].forEach(_prop => {
                     this.item[_prop].forEach(parent => {
                         let _parent = this.allGoals.find(_goal => _goal.id == parent.id);
                         _parent.metrics.forEach(_metric => {
-                            if (!_metrics.map(__ => __.id).includes(_metric.id)) {
-                                _metrics.push({
+                            if (!this.item.metrics.map(__ => __.id).includes(_metric.id)) {
+                                this.item.metrics.push({
                                     __typename: _metric.__typename,
                                     id: _metric.id,
                                     text: _metric.text,
-                                    isNewMap: true,
+                                    // isNewMap: true,
                                 })
                             }
                         })
                     })
                 })
-                return _metrics;
+                return this.item.metrics;
             },
             set(value) {
                 this.item.metrics = value;

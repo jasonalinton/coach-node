@@ -9,7 +9,7 @@ const where_isDeleted_false = {
 
 const iterationInclude = {
     include: {
-        todos: {
+        todo: {
             select: {
                 id: true,
                 text: true,

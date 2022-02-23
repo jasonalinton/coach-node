@@ -1,12 +1,14 @@
 const { configureRepeats } = require('./time/repeatController');
 const { configureTimePairs } = require('./time/timePairController');
 
-function initData(data = {}) {
-    if (data.id || data.id >= 0) delete data.id; // Remove unnecessary ID
-
-    if (data.repeats && data.repeats.length > 0) configureRepeats(data);
+function initData(data = {}, type = "") {
+    
+    if ((data.repeats && data.repeats.length > 0) || (data.unmappedIDs && data.unmappedIDs.repeats && data.unmappedIDs.repeats.length > 0 )) 
+    configureRepeats(data, type);
     else delete data.repeats;
-
+    
+    if (data.id || data.id >= 0) delete data.id; // Remove unnecessary ID
+    
     if (data.timePairs && data.timePairs.length > 0) configureTimePairs(data);
     else delete data.timePairs;
 

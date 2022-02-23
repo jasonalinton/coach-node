@@ -2,7 +2,7 @@ type Todo {
   id: Int!
   text: String!
   description: String
-  isGroup: Int
+  isGroup: Boolean
   isDeleted: Int
   parents: [Todo]
   children: [Todo]
@@ -19,7 +19,7 @@ input TodoInput {
   id: Int
   text: String
   description: String
-  isGroup: Int
+  isGroup: Boolean
   # isDeleted:   Int
   parents: [TodoInput]
   children: [TodoInput]

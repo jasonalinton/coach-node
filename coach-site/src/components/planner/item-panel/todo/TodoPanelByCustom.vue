@@ -1,40 +1,51 @@
 <template>
     <div class="custom d-flex flex-column flex-grow-1">
+        <TimeframeRadio :timeframe="timeframe" @timeframeSelected="timeframe=$event"></TimeframeRadio>
         <!-- Toolbar -->
         <div class="toolbar d-flex flex-row justify-content-between align-items-center">
             <AddTaskButton @click="addNewTask"></AddTaskButton>
-            <IconButton src="/icon/goal-icon.png" :width="32" :height="32"></IconButton>
+            <IconButton src="/icon/goal-icon.png" :width="32" :height="32" @click="show(showGoals)"></IconButton>
         </div>
         <!-- Body -->
-        <div class="d-flex flex-column flex-grow-1 justify-content-between">
-            <!-- Pending -->
-            <ul v-if="todos.pending" class="item-list pending">
-                <li v-if="todos.new">
-                    <!-- New Task -->
-                    <div class="new-task d-flex flex-row align-items-center">
-                        <ItemCheckbox :width="40" :height="40" @onChecked="markNewTaskComplete(todos.new)"></ItemCheckbox>
-                        <input id="newTask" ref="newTask" class="form-control form-control-sm" type="text" 
-                               v-model="todos.new.text"
-                               v-on:keyup.enter="addTask(todos.new)"
-                               v-on:keyup.esc="cancelAddTask()"
-                               autofocus/>
-                    </div>
-                </li>
-                <li v-for="(iteration, index) in todos.pending" v-bind:key="iteration.id" :style="{ 'z-index': -index }">
-                    <ListItem :iteration="iteration" @markComplete="markComplete" @onDelete="removeIteration"></ListItem>
-                </li>
-            </ul>
-            <!-- Complete  -->
-            <div class="complete d-flex flex-column">
-                <div class="header">Completed ({{ todos.complete.length }})</div>
-                <ul v-if="todos.complete" class="item-list">
-                    <li v-for="(iteration, index) in todos.complete" v-bind:key="index" :style="{ 'z-index': -index }">
-                        <ListItem class="complete" :iteration="iteration" @markIncomplete="markIncomplete" @onDelete="removeIteration"></ListItem>
+        <div class="d-flex flex-column flex-grow-1 justify-content-start">
+            <!-- Goals -->
+            <div v-if="goals && showGoals" class="complete d-flex flex-column">
+                <div class="header">Goals ({{ goals.length }})</div>
+                <ul class="item-list">
+                    <li v-for="(goal, index) in goals" v-bind:key="index" :style="{ 'z-index': -index }">
+                        {{ goal.text }}
                     </li>
                 </ul>
             </div>
+            <div class="d-flex flex-column flex-grow-1 justify-content-between">
+                <!-- Pending -->
+                <ul v-if="pending" class="item-list pending">
+                    <li v-if="todos.new">
+                        <!-- New Task -->
+                        <div class="new-task d-flex flex-row align-items-center">
+                            <ItemCheckbox :width="40" :height="40" @onChecked="markNewTaskComplete(todos.new)"></ItemCheckbox>
+                            <input id="newTask" ref="newTask" class="form-control form-control-sm" type="text" 
+                                v-model="todos.new.text"
+                                v-on:keyup.enter="addTask(todos.new)"
+                                v-on:keyup.esc="cancelAddTask()"
+                                autofocus/>
+                        </div>
+                    </li>
+                    <li v-for="(iteration, index) in pending" v-bind:key="iteration.id" :style="{ 'z-index': -index }">
+                        <ListItem :iteration="iteration" @markComplete="toggleCompletion(iteration, $apollo)" @onDelete="deleteIteration(iteration.id, $apollo)"></ListItem>
+                    </li>
+                </ul>
+                <!-- Complete  -->
+                <div class="complete d-flex flex-column">
+                    <div class="header">Completed ({{ complete.length }})</div>
+                    <ul v-if="complete" class="item-list">
+                        <li v-for="(iteration, index) in complete" v-bind:key="index" :style="{ 'z-index': -index }">
+                            <ListItem class="complete" :iteration="iteration" @markIncomplete="toggleCompletion(iteration, $apollo)" @onDelete="deleteIteration(iteration.id, $apollo)"></ListItem>
+                        </li>
+                    </ul>
+                </div>
+            </div>
         </div>
-
     </div>
 </template>
 
@@ -43,12 +54,14 @@ import IconButton from '../../../controls/button/IconButton.vue'
 import AddTaskButton from '../component/AddTaskButton.vue'
 import ItemCheckbox from '../component/ItemCheckbox.vue';
 import ListItem from '../component/ListItem.vue'
-import { replaceItem, removeItem, today } from '../../../../../utility';
+import { replaceItem, removeItem, today, sortAsc } from '../../../../../utility';
 import { createDefaultTask, toggleCompletion, deleteIteration } from '../../../../resolvers/todo-resolvers';
+import TimeframeRadio from '../component/TimeframeRadio.vue';
+import { firstDayOfWeek, lastDayOfWeek, firstDayOfMonth, lastDayOfMonth } from '../../../../../utility/timeUtility';
 
 export default {
     name: 'TodoPanelByCustom',
-    components: { AddTaskButton, IconButton, ListItem, ItemCheckbox, },
+    components: { AddTaskButton, IconButton, ListItem, ItemCheckbox, TimeframeRadio, },
     props: {
         selectedDate: Date
     },
@@ -59,49 +72,82 @@ export default {
                 pending: [],
                 new: null
             },
+            iterations: [],
             newItemID: -1,
             today: today(),
-            allIterations: []
+            allIterations: [],
+            timeframe: 'day',
+            showGoals: false,
+            showRoutineTasks: false
+        }
+    },
+    computed: {
+        start() { 
+            if (this.timeframe == 'day')
+                return this.selectedDate;
+            else if (this.timeframe == 'week')
+                return firstDayOfWeek(this.selectedDate);
+            else if (this.timeframe == 'month')
+                return firstDayOfMonth(this.selectedDate);
+            else
+                return null
+        },
+        end() { 
+            if (this.timeframe == 'day')
+                return this.selectedDate;
+            else if (this.timeframe == 'week')
+                return lastDayOfWeek(this.selectedDate);
+            else if (this.timeframe == 'month')
+                return lastDayOfMonth(this.selectedDate);
+            else
+                return null
+        },
+        complete() { return (this.iterations) ? this.iterations.filter(iteration => iteration.attemptedAt) : [] },
+        pending() { return (this.iterations) ? this.iterations.filter(iteration => !iteration.attemptedAt) : [] },
+        goals() {
+            let goals = this.iterations.map(_it => _it.todo).map(_todo => _todo.goals).flat();
+            return goals;
         }
     },
     apollo: {
         iterations: {
-            query() { return require('../../../../graphql/query/todo/QueryTodoIterations.gql')},
+            query() { return require('../../../../graphql/query/planner/QueryIterations.gql')},
+            variables() {
+                return {
+                    type: 'todo',
+                    start: this.start,
+                    end: this.end
+                }
+            },
             error: function(error) {
                 this.errorMessage = 'Error occurred while loading query'
                 console.log(this.errorMessage, error);
             },
             update(data) { 
-                let self = this;
-                this.allIterations = data.todoIterations;
-                let iterations = data.todoIterations.filter(ti => {
-                    // Ignore repeat iterations that don't start on current day
-                    return !(ti.todoRepeat && ti.startAt != self.selectedDate.toJSON()) &&
-                           new Date(ti.startAt) <= self.selectedDate
-                });
-                this.todos.complete = iterations.filter(iteration => iteration.attemptedAt);
-                this.todos.pending = iterations.filter(iteration => !iteration.attemptedAt);
-                return iterations
+                let iterations = data.iterations;
+                if (!this.showRoutineTasks)
+                    iterations = data.iterations.filter(_iteration => _iteration.idRoutineIteration == null )
+                return sortAsc(iterations, 'startAt');
             },
             subscribeToMore: [
                 {
                     document: require('../../../../graphql/subscription/todo/IterationAdded.gql'),
                     updateQuery: (previousResult, { subscriptionData: { data: { iterationAdded }} }) => {
-                        previousResult.todoIterations.splice(0, 0, iterationAdded);
+                        previousResult.iterations.splice(0, 0, iterationAdded);
                         return previousResult;
                     },
                 },
-                {
-                    document: require('../../../../graphql/subscription/todo/IterationUpdated.gql'),
-                    updateQuery: (previousResult, { subscriptionData: { data: { iterationUpdated }} }) => {
-                        replaceItem(iterationUpdated, previousResult.todoIterations);
-                        return previousResult;
-                    },
-                },
+                // {
+                //     document: require('../../../../graphql/subscription/todo/IterationUpdated.gql'),
+                //     updateQuery: (previousResult, { subscriptionData: { data: { iterationUpdated }} }) => {
+                //         replaceItem(iterationUpdated, previousResult.iterations);
+                //         return previousResult;
+                //     },
+                // },
                 {
                     document: require('../../../../graphql/subscription/todo/IterationDeleted.gql'),
                     updateQuery: (previousResult, { subscriptionData: { data: { iterationDeleted }} }) => {
-                        removeItem(iterationDeleted, previousResult.todoIterations);
+                        removeItem(iterationDeleted, previousResult.iterations);
                         return previousResult;
                     },
                 },
@@ -121,27 +167,16 @@ export default {
         addTask,
         cancelAddTask,
         markNewTaskComplete,
-        markComplete,
-        markIncomplete,
         createDefaultTask,
         toggleCompletion,
-        removeIteration,
         deleteIteration,
         replaceItem,
-        removeItem
-    },
-    watch: {
-        selectedDate(value) {
-            let iterations = this.allIterations.filter(ti => {
-                // Ignore repeat iterations that don't start on current day
-                return !(ti.todoRepeat && ti.startAt != value.toJSON()) &&
-                           new Date(ti.startAt) <= value
-            });
-            this.todos.complete = iterations.filter(iteration => iteration.attemptedAt);
-            this.todos.pending = iterations.filter(iteration => !iteration.attemptedAt);
-            this.iterations;
+        removeItem,
+        show(value) {
+            this.showGoals = (value) ? false : true;
+            console.log(this.goals);
         }
-    }
+    },
 }
 
 function initIteration() {
@@ -185,18 +220,6 @@ function markNewTaskComplete(iteration) {
 
         this.createDefaultTask(iteration, this.$apollo);
     }
-}
-
-function markComplete(iteration) {
-    this.toggleCompletion(iteration, this.$apollo);
-}
-
-function markIncomplete(iteration) {
-    this.toggleCompletion(iteration, this.$apollo);
-}
-
-function removeIteration(iteration) {
-    this.deleteIteration(iteration.id, this.$apollo);
 }
 </script>
 

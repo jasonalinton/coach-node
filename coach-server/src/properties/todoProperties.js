@@ -7,12 +7,44 @@ const where_isDeleted_false = {
     }
 }
 
+const routineTodoIterationIncude = {
+    include: {
+        routineIteration: true,
+        todoIterations: {
+            include: { 
+                todo: {
+                    include: {
+                        metrics: true,
+                        goals: true,
+                        // parents: true,
+                        // children: true
+                    }
+                },
+                routineIteration: { select: { id: true } }
+            },
+            orderBy: { id: 'desc'}
+        }
+    }
+};
+
 const todoIterationIncude = {
-    todos: {
+    todo: {
         select: {
             id: true,
             text: true,
             metrics: {
+                select: {
+                    id: true,
+                    text: true
+                }
+            },
+            goals: {
+                select: {
+                    id: true,
+                    text: true
+                }
+            },
+            routines: {
                 select: {
                     id: true,
                     text: true
@@ -30,7 +62,9 @@ const todoIterationIncude = {
             routineIterations: true
         }
     },
-    todoRepeat: true
+    todoRepeat: true,
+    routineRepeat: select_repeat,
+    routineIteration: routineTodoIterationIncude
 }
 
 const todoInclude = {

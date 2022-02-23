@@ -18,6 +18,22 @@ query eventsAndIterations {
         endAt
         attemptedAt
         completedAt
+        todo {
+            id
+            text
+            metrics {
+                id
+                text
+            }
+            goals {
+                id
+                text
+            }
+            routines {
+                id
+                text
+            }
+        }
         routineIteration {
           id
           todoIterations {
@@ -28,7 +44,9 @@ query eventsAndIterations {
             attemptedAt
             completedAt
           }
+          idRoutineIteration
         }
+        idRoutineIteration
       }
     }
     iterations {
@@ -39,12 +57,20 @@ query eventsAndIterations {
         attemptedAt
         completedAt
         isRecommended
-        todos {
+        todo {
           id
           text
           metrics {
-            id
-            text
+              id
+              text
+          }
+          goals {
+              id
+              text
+          }
+          routines {
+              id
+              text
           }
         }
         routineIteration {
@@ -57,7 +83,9 @@ query eventsAndIterations {
             attemptedAt
             completedAt
           }
+          idRoutineIteration
         }
+        idRoutineIteration
       }
   }
 }

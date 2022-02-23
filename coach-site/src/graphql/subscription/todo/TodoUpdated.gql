@@ -3,6 +3,7 @@ subscription todoUpdated {
     id
     text
     description
+    isGroup
     parents {
       id
       text

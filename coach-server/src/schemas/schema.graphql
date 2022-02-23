@@ -22,7 +22,8 @@ type Query {
 
   # Planner
   event(id: Int!): Event
-  iterations: [Iteration!]!
+  # iterations: [Iteration!]!
+  iterations(type: String, start: String, end: String): [Iteration!]!
   events: [Event!]!
   eventsAndIterations: EventsAndIterations!
   iterationCompletions(start: String!, end: String!): [IterationCompletion!]!

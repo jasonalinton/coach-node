@@ -28,7 +28,7 @@
           <!-- <label class="me-2" :style="{'width':'90px', 'padding-right':'10px'}">frequency</label> -->
           <div class="d-flex flex-row">
             <input class="form-control form-control-sm me-2" type="number" min="1" v-model="activeRepeat.frequency"
-                    :style="{'width': '55px'}" required/>
+                    :style="{'width': '55px'}" required />
             <span class="me-2">times a</span>
             <span>{{ timeframe }}</span>
           </div>
@@ -61,6 +61,13 @@
           </div>
         </div>
         <!-- End - Iteration -->
+        <!-- Is Event Visible -->
+        <div class="form-check">
+          <input class="form-check-input mt-1" type="checkbox" value="" id="isEventVisible" v-model="activeRepeat.isEventVisible">
+          <label class="form-check-label float-start" for="isEventVisible">
+            Is Event Visible
+          </label>
+        </div>
         <!-- Recommended -->
         <div class="form-check">
           <input class="form-check-input mt-1" type="checkbox" value="" id="flexCheckDefault" v-model="activeRepeat.isRecommended">
@@ -197,6 +204,10 @@ export default {
   watch: {
     repeats(value) {
       console.log(value)
+    },
+    'activeRepeat.dayIndecies'(value) {
+      if (value && value.length > 0)
+        this.activeRepeat.frequency = value.length;
     }
   },
   methods: {

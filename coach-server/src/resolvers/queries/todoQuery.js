@@ -36,11 +36,7 @@ async function todoIterations(parent, args, context, info) {
         where: {
             AND: [
                 {
-                    todos: {
-                        some: {
-                            isDeleted: false
-                        },
-                    }
+                    todo: { isDeleted: false }
                 },
                 {
                     OR: [
@@ -75,11 +71,7 @@ async function routineIterations(parent, args, context, info) {
         where: {
             AND: [
                 {
-                    todos: {
-                        some: {
-                            isDeleted: false
-                        },
-                    }
+                    todo: { isDeleted: false }
                 },
                 {
                     todoRepeat: {

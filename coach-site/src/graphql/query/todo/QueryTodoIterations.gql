@@ -7,7 +7,7 @@ query todoIterations{
     attemptedAt
     completedAt
     isRecommended
-    todos {
+    todo {
       id
       text
       metrics {
