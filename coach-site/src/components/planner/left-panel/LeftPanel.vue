@@ -1,15 +1,18 @@
 <template>
     <div class="left-panel d-flex flex-column mt-1">
-        <ThumbnailCalendar class="mt-3" :firstDay="firstDay" @dateChange="dateChange"></ThumbnailCalendar>
+        <!-- <ThumbnailPanel class="mt-3" :firstDay="firstDay" :initialDate="firstDay" @dateChange="dateChange"></ThumbnailPanel> -->
+        <ThumbnailCalendar class="mt-3" :firstDay="firstDay" :initialDate="firstDay" @dateChange="dateChange"></ThumbnailCalendar>
     </div>
 </template>
 
 <script>
+// import ThumbnailPanel from '../thumbnail/ThumbnailPanel.vue'
 import ThumbnailCalendar from '../thumbnail/ThumbnailCalendar.vue'
 import moment from 'moment';
 
 export default {
     name: 'LeftPanel',
+    // components: { ThumbnailPanel },
     components: { ThumbnailCalendar },
     data: function() {
         return {

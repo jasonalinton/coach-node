@@ -30,8 +30,8 @@
 <script>
 import date from "date-and-time";
 import moment from 'moment'
-import { month_long, year_long, addMonth, subtractMonth, firstDayOfMonth, today } from "../../../../utility";
-import { addDay, sunday } from "../../../../utility/timeUtility";
+import { month_long, year_long, addMonth, subtractMonth, today } from "../../../../utility";
+import { addDay, firstDayOfMonth, getDurationInDays, lastDayOfMonth, lastDayOfWeek, sunday } from "../../../../utility/timeUtility";
 import IconButton from '../../controls/button/IconButton.vue';
 
 const daysOfWeek = [
@@ -48,20 +48,24 @@ export default {
     components: { IconButton },
     name: 'ThumbnailCalendar',
     props: {
+        initialDate: Date,
+        activeDate: Date,
         firstDay: Date
     },
     data: function() {
         return {
-            rows: 6,
+            // rows: 6,
             weeks: [],
             days: [],
             month: "",
             year: 3000,
             daysOfWeek,
             date: null,
+            date1: new Date(this.initialDate),
             date_and_time: date,
             today: today(),
             selectedDate: today().toLocaleString(),
+            count: 1
         }
     },
     created: function() {
@@ -69,19 +73,34 @@ export default {
         this.initCalendar();
     },
     computed: {
+        firstDate() {
+            let date = firstDayOfMonth(this.date1);
+            return sunday(date);
+        },
+        lastDate() {
+            let date = addMonth(this.date1, this.count - 1);
+            date = lastDayOfMonth(date);
+            return lastDayOfWeek(date);
+
+            // return lastDayOfWeek(lastDayOfMonth(addMonth(this.date1, this.count - 1)));
+        },
         firstSunday() { 
             let _firstDayOfMonth = firstDayOfMonth(this.firstDay);
             return sunday(_firstDayOfMonth);
         },
-        lastSaturday() { return addDay(this.firstSunday, this.rows * 7 - 1); }
+        lastSaturday() { return addDay(this.firstSunday, this.rows * 7 - 1); },
+        rows() { 
+            let dayCount = getDurationInDays(this.firstDate, this.lastDate);
+            return dayCount / 7;
+        }
     },
     apollo: {
         iterationCompletions: {
             query() { return require('../../../graphql/query/planner/QueryIterationCompletions.gql')},
             variables() {
                 return {
-                    start: this.firstSunday,
-                    end: this.lastSaturday
+                    start: this.firstDate,
+                    end: this.lastDate
                 }
             },
             error: function(error) {
@@ -155,14 +174,11 @@ export default {
 function initCalendar() {
     this.days = [];
 
-    let _firstDayOfMonth = firstDayOfMonth(this.date);
-    let _firstSunday = sunday(_firstDayOfMonth);
-
     this.month = this.month_long(this.date);
     this.year = this.year_long(this.date);
     
     this.weeks = [];
-    let date = _firstSunday;
+    let date = this.firstDate;
     for (let i = 0; i < this.rows; i++) {
         let week = { days: [] };
         for (let j = 0; j < 7; j++) {
@@ -191,8 +207,13 @@ function initCalendar() {
     }
 }
 
+// function refreshCalendar(date) {
+//     this.date = date;
+//     this.initCalendar();
+// }
+
 function refreshCalendar(date) {
-    this.date = date;
+    this.date1 = date;
     this.initCalendar();
 }
 
@@ -202,7 +223,7 @@ function selectDate(date) {
 }
 
 function next() {
-    this.refreshCalendar(this.addMonth(this.date));
+    this.refreshCalendar(this.addMonth(this.date1));
 }
 
 function goToday() {
@@ -211,8 +232,12 @@ function goToday() {
     this.$emit('dateChange', this.today);
 }
 
+// function previous() {
+//     this.refreshCalendar(this.subtractMonth(this.date));
+// }
+
 function previous() {
-    this.refreshCalendar(this.subtractMonth(this.date));
+    this.refreshCalendar(this.subtractMonth(this.date1));
 }
 </script>
 
