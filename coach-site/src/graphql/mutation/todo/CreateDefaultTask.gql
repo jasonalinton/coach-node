@@ -216,6 +216,9 @@ mutation createDefaultTask($iteration: IterationInput!) {
             idRoutineIteration
         }
         idRoutineIteration
+        events {
+            id
+        }
     }
   }
 }

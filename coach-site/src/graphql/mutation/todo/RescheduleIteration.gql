@@ -36,5 +36,8 @@ mutation rescheduleIteration($id: Int!, $startAt: String!) {
             idRoutineIteration
         }
         idRoutineIteration
+        events {
+            id
+        }
     }
 }

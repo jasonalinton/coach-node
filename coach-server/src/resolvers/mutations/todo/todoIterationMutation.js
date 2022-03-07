@@ -63,6 +63,7 @@ async function createDefaultTask(parent, { iteration }, context, info) {
     context.pubsub.publish("TODO_ADDED", { todoAdded: todo });
     context.pubsub.publish("ITERATION_ADDED", { iterationAdded: iteration });
 
+    /* Iterations can automatically be created into events */
     if (connectedEvents.length > 0) {
         let eventIDs = connectedEvents.map(_event => _event.id);
         let _events = await context.prisma.event.findMany({
@@ -98,6 +99,42 @@ async function toggleCompletion(parent, { iteration }, context, info) {
 
 async function rescheduleIteration(parent, { id, startAt }, context, info) {
     console.log(`Reschedule iteration`);
+    
+    let iteration = await context.prisma.iteration.update({
+        where: { id },
+        data: { startAt },
+        include: todoIterationIncude
+    });
+
+    context.pubsub.publish("ITERATION_UPDATED", { iterationUpdated: iteration });
+
+    return iteration;
+}
+
+async function rescheduleIterationFromParent(parent, { id, startAt, parentType, parentID }, context, info) {
+    console.log(`Reschedule iteration`);
+
+    let transactions = [];
+
+    if (parentType && parentType == 'routineEvent') {
+        let iteration = await context.prisma.iteration.findFirst({
+            where: { id },
+            include: todoIterationIncude
+        });
+
+        let event = context.prisma.event.update({
+            data: { iterations: { disconnect: [{ id: parentID }] } },
+            where: { id: parentID },
+            include: eventInclude
+        });
+        transactions.push(event);
+
+        let routineTodoIteration = context.prisma.routineTodo_Iteration.update({
+            data: { todoIterations: { disconnect: id } },
+            where: { idRoutineIteration: iteration.idRoutineIteration }
+        });
+        transactions.push(routineTodoIteration);
+    }
     
     let iteration = await context.prisma.iteration.update({
         where: { id },

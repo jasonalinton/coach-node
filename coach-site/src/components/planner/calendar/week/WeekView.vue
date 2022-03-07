@@ -11,8 +11,8 @@
                         <div class="date-icon">{{ day.day }}</div><!-- Date -->
                     </div>
                     <TaskList :date="day.date"
-                              :taskList="day.tasks.filter(_task => !_task.isInEvent)">
-                              <!-- :minHeight="maxTasks * 22"> -->
+                             :taskList="taskList(day)">
+                              <!--  :minHeight="maxTasks * 22"> -->
                     </TaskList>
                 </div>
             </div>
@@ -110,16 +110,16 @@ export default {
                     document: require('../../../../graphql/subscription/todo/IterationAdded.gql'),
                     updateQuery: (previousResult, { subscriptionData: { data: { iterationAdded }} }) => {
                         previousResult.eventsAndIterations.iterations.splice(0, 0, iterationAdded);
-                        return previousResult;
+                        return { eventsAndIterations: previousResult.eventsAndIterations };
                     },
                 },
-                {
-                    document: require('../../../../graphql/subscription/todo/IterationUpdated.gql'),
-                    updateQuery: (previousResult, { subscriptionData: { data: { iterationUpdated }} }) => {
-                        replaceItem(iterationUpdated, previousResult.eventsAndIterations.iterations);
-                        return previousResult;
-                    },
-                },
+                // {
+                //     document: require('../../../../graphql/subscription/todo/IterationUpdated.gql'),
+                //     updateQuery: (previousResult, { subscriptionData: { data: { iterationUpdated }} }) => {
+                //         replaceItem(iterationUpdated, previousResult.eventsAndIterations.iterations);
+                //         return { eventsAndIterations: previousResult.eventsAndIterations };
+                //     },
+                // },
                 {
                     document: require('../../../../graphql/subscription/todo/IterationDeleted.gql'),
                     updateQuery: (previousResult, { subscriptionData: { data: { iterationDeleted }} }) => {
@@ -138,7 +138,11 @@ export default {
         replaceItem,
         removeItem,
         getHoursObjectArray,
-        onScroll
+        onScroll,
+        taskList(day) {
+            return day.tasks.filter(_task => !_task.isInEvent);
+            // return day.tasks.filter(_task => _task.events && _task.events.length == 0);
+        }
     },
     watch: {
         dayCount() { this.refresh(); },
@@ -201,6 +205,8 @@ function iterationsToDays() {
         iterations.forEach(_task => {
             if (tasksWithEventsIDs.includes(_task.id))
                 _task.isInEvent = true;
+            else
+                _task.isInEvent = false;
         })
 
         let day = { 

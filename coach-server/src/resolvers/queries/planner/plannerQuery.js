@@ -17,7 +17,7 @@ async function iterations(parent, { type, start, end }, context, info) {
     if (type == 'routne' || type == 'all') {
         OR.push(
             {
-                routine: { sDeleted: false }
+                routine: { isDeleted: false }
             }
         )
     }
@@ -293,18 +293,21 @@ async function eventsAndIterations(parent, args, context, info) {
                 },
                 {
                     OR: [
+                        // {
+                        //     todoRepeat: {
+                        //         isNot: {
+                        //             routineIterations: {
+                        //                 some: {}
+                        //             },
+                        //         },
+                        //         is: { routineRepeat: null }
+                        //     }
+                        // },
+                        // {
+                        //     todoRepeat: null
+                        // }
                         {
-                            todoRepeat: {
-                                isNot: {
-                                    routineIterations: {
-                                        some: {}
-                                    },
-                                },
-                                is: { routineRepeat: null }
-                            }
-                        },
-                        {
-                            todoRepeat: null
+                            routineIteration: null
                         }
                     ]
                 }

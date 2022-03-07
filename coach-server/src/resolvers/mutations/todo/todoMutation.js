@@ -1,6 +1,6 @@
 const controller = require('../../../controller/itemController');
 const { todoInclude } = require('../../../properties/todoProperties');
-const { eventInclude } = require('../../../properties/event/eventProperties');
+const { eventInclude, iterationIncude } = require('../../../properties/event/eventProperties');
 const { configureIteration } = require('../../../controller/todoController');
 const { configureRepeatTrans } = require('../time/repeatMutation');
 const { configureTimePairTrans } = require('../time/timePairMutation');
@@ -257,9 +257,75 @@ function updateSubscriptions(todo, context) {
     //     context.pubsub.publish("ITERATION_UPDATED", { iterationUpdated: iteration }));
 }
 
+async function scheduleTodo(parent, { idTodo, startAt, endAt }, context, info) {
+    let todo = await context.prisma.todo.findFirst({
+        where: { id: idTodo }
+    })
+
+    let iteration = await context.prisma.iteration.create({
+        data: {
+            text: todo.text,
+            startAt,
+            endAt,
+            todo: { connect: { id: idTodo } }
+        },
+        include: iterationIncude
+    });
+
+    todo = context.prisma.todo.findFirst({
+        where: { id: idTodo },
+        include: todoInclude
+    });
+
+    context.pubsub.publish("ITERATION_ADDED", { iterationAdded: iteration });
+    context.pubsub.publish("TODO_UPDATED", { todoUpdated: todo });
+
+    return { todo, iteration }
+}
+
+
+async function mapTodoToEvent(parent, { idTodo, idEvent }, context, info) {
+    let todo = await context.prisma.todo.findFirst({
+        where: { id: idTodo }
+    });
+
+    let event = await context.prisma.event.findFirst({
+        where: { id: idEvent }
+    });
+
+    let iteration = await context.prisma.iteration.create({
+        data: {
+            text: todo.text,
+            startAt: event.startAt,
+            endAt: event.endAt,
+            todo: { connect: { id: idTodo } },
+            events: { connect: [{id: idEvent }] }
+        },
+        include: iterationIncude
+    });
+
+    event = context.prisma.event.findFirst({
+        where: { id: idEvent },
+        include: eventInclude
+    });
+
+    todo = context.prisma.todo.findFirst({
+        where: { id: idTodo },
+        include: todoInclude
+    });
+
+    context.pubsub.publish("ITERATION_ADDED", { iterationAdded: iteration });
+    context.pubsub.publish("TODO_UPDATED", { todoUpdated: todo });
+    context.pubsub.publish("EVENT_UPDATED", { eventUpdated: event });
+
+    return { todo, iteration, event }
+}
+
 module.exports = {
     addTodo,
     updateTodo,
     deleteTodo,
-    createTodoIterations
+    createTodoIterations,
+    scheduleTodo,
+    mapTodoToEvent
 }

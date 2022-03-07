@@ -36,5 +36,8 @@ mutation attemptIteration($id: Int!, $attemptedAt: String!) {
             idRoutineIteration
         }
         idRoutineIteration
+        events {
+            id
+        }
     }
 }

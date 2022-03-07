@@ -49,6 +49,8 @@ type Mutation {
   attemptIteration(id: Int!, attemptedAt: String!): Iteration
   refreshRepetitive: RepetitiveItems!
   getTodoRepeat(idTodo: Int, idRepeat: Int): Todo_Repeat
+  scheduleTodo(idTodo: Int!, startAt: String!, endAt: String): TodoAndIteration!
+  mapTodoToEvent(idTodo: Int!, idEvent: Int!): TodoAndEventAndIteration!
 
   # Routine
   addRoutine(routine: RoutineInput!): Routine!
@@ -63,6 +65,8 @@ type Mutation {
 
   # Event
   iterations: [Iteration]
+  mapIterationToEvent(iterationID: Int!, eventID: Int!): EventAndIteration!
+  unmapTaskFromRoutineEvent(iterationID: Int!, eventID: Int!, startAt: String, endAt: String, newEventID: Int): EventAndIteration!
   deleteIteration(id: Int!): Iteration
   deleteIterations(from: String, after: String): Int!
 }

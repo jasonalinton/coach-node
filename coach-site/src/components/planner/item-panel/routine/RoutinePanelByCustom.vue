@@ -102,10 +102,12 @@ export default {
                 {
                     document: require('../../../../graphql/subscription/todo/IterationAdded.gql'),
                     updateQuery: function(previousResult, { subscriptionData: { data: { iterationAdded }} }) {
-                        let routineIterations = this.getRoutineIterations(previousResult.routineIterations, this.selectedDate);
-                        if (routineIterations[0]) {
-                            let todoIterations = routineIterations[0].todoIterations;
-                            todoIterations.splice(0, 0, iterationAdded);
+                        if (iterationAdded.routineIteration) {
+                            let routineIterations = this.getRoutineIterations(previousResult.routineIterations, this.selectedDate);
+                            if (routineIterations[0]) {
+                                let todoIterations = routineIterations[0].todoIterations;
+                                todoIterations.splice(0, 0, iterationAdded);
+                            }
                         }
                         return previousResult;
                     },

@@ -26,7 +26,7 @@
                     </div>
                 </li>
                 <li v-for="(iteration, index) in iterations.pending" v-bind:key="iteration.id" :style="{ 'z-index': -index }">
-                    <ListItem :iteration="iteration" @markComplete="toggleCompletion(iteration, $apollo)" @onDelete="deleteIteration(iteration.id, $apollo)"></ListItem>
+                    <ListItem :iteration="iteration" :parent="_event" :parentType="'routineEvent'" @markComplete="toggleCompletion(iteration, $apollo)" @onDelete="deleteIteration(iteration.id, $apollo)"></ListItem>
                     <!-- <ListItem :iteration="iteration" @markComplete="markComplete" @onDelete="removeIteration"></ListItem> -->
                 </li>
             </ul>
@@ -91,14 +91,14 @@ export default {
                     document: require('../../../../graphql/subscription/planner/EventAdded.gql'),
                     updateQuery: (previousResult, { subscriptionData: { data: { eventAdded }} }) => {
                         if (previousResult.event.id == eventAdded.id)
-                            return previousResult;
+                        return { event: previousResult.event };
                     },
                 },
                 {
                     document: require('../../../../graphql/subscription/planner/EventUpdated.gql'),
                     updateQuery: (previousResult, { subscriptionData: { data: { eventUpdated }} }) => {
                         if (previousResult.event.id == eventUpdated.id)
-                            return previousResult;
+                        return { event: previousResult.event };
                     },
                 },
                 {
@@ -106,7 +106,7 @@ export default {
                     updateQuery: (previousResult, { subscriptionData: { data: { eventDeleted }} }) => {
                         if (previousResult.event.id == eventDeleted.id) {
                             previousResult.event = null
-                            return previousResult;
+                        return { event: previousResult.event };
                         }
                     },
                 },
@@ -120,7 +120,7 @@ export default {
                             }
                         })
                         // this.refreshIterations(previousResult.event);
-                        return previousResult.event;
+                        return { event: previousResult.event };
                     },
                 },
                 {
@@ -133,7 +133,7 @@ export default {
                             }
                         })
                         // this.refreshIterations(previousResult.event);
-                        return previousResult.event;
+                        return { event: previousResult.event };
                     },
                 },
             ]

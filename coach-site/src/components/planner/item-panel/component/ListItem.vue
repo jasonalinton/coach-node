@@ -1,6 +1,7 @@
 <template>
     <div> 
-        <div class="iteration d-flex flex-row justify-content-between align-items-center" :class="[{ complete: checked}]">
+        <div class="iteration d-flex flex-row justify-content-between align-items-center" :class="[{ complete: checked}]"
+             draggable @dragstart="onDragStart($event)" @dragend="onDragEnd($event)">
             <ItemCheckbox class="checkbox" 
                           :checked="checked" 
                             @onChecked="markComplete" 
@@ -19,13 +20,26 @@
 
 <script>
 import ItemCheckbox from './ItemCheckbox.vue';
+
+/* 
+Parent Types
+    defaultEvent
+    routineEvent
+    metric
+    goal
+    todo
+    routine
+*/
+
 export default {
     name: 'ListItem',
     components: { 
         ItemCheckbox
     },
     props: {
-        iteration: Object
+        iteration: Object,
+        parent: Object,
+        parentType: String
     },
     computed: {
         checked() {
@@ -39,7 +53,9 @@ export default {
     methods: {
         markComplete,
         markIncomplete,
-        onDelete
+        onDelete,
+        onDragStart,
+        onDragEnd
     }
 }
 
@@ -60,6 +76,26 @@ function markIncomplete() {
 
 function onDelete() {
     this.$emit('onDelete', this.iteration);
+}
+
+function onDragStart(ev) {
+    let data = {
+        id: this.iteration.id,
+        type: (this.parentType == "goal") ? "todo" : "task",
+        parentType: this.parentType,
+        parentID: this.parent.id
+    };
+    data = JSON.stringify(data);
+
+    console.log("Drag Started");
+    ev.target.classList.add("drag");
+    ev.dataTransfer.dropEffect = 'move';
+    ev.dataTransfer.effectAllowed = 'move';
+    ev.dataTransfer.setData("text", data);
+}
+
+function onDragEnd(ev) {
+    ev.target.classList.remove("drag");
 }
 </script>
 

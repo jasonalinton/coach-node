@@ -17,7 +17,7 @@ query routineIterations {
       text
       startAt
       endAt
-      todos {
+      todo {
         id
         text
       }

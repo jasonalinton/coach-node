@@ -36,5 +36,8 @@ query iterations($type: String, $start: String, $end: String, ) {
             idRoutineIteration
         }
         idRoutineIteration
+        events {
+            id
+        }
     }
 }

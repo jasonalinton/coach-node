@@ -1,0 +1,20 @@
+mutation mapTodoToEvent($idTodo: Int!, $idEvent: Int!,) {
+  mapTodoToEvent(idTodo: $idTodo, idEvent: $idEvent) {
+      todo {
+          id,
+          text
+      },
+      iteration {
+          id
+          text
+          startAt
+          endAt
+      },
+      event {
+          id
+          text
+          startAt
+          endAt
+      },
+  }
+}

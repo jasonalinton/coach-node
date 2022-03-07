@@ -1,0 +1,14 @@
+mutation scheduleTodo($idTodo: Int!, $startAt: String!, $endAt: String) {
+  scheduleTodo(idTodo: $idTodo, startAt: $startAt, endAt: $endAt) {
+      todo {
+          id,
+          text
+      },
+      iteration {
+          id
+          text
+          startAt
+          endAt
+      }
+  }
+}

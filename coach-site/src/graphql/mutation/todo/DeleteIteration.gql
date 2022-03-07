@@ -36,5 +36,8 @@ mutation deleteIteration($id: Int!) {
             idRoutineIteration
         }
         idRoutineIteration
+        events {
+            id
+        }
     }
 }

@@ -7,7 +7,7 @@ subscription iterationUpdated {
     attemptedAt
     completedAt
     isRecommended
-    todos {
+    todo {
         id
         text
         metrics {
@@ -37,6 +37,10 @@ subscription iterationUpdated {
     }
     todoRepeat {
       id
+    }
+    idRoutineIteration
+    events {
+        id
     }
   }
 }

@@ -9,7 +9,7 @@
         <!-- Body -->
         <div class="d-flex flex-column flex-grow-1 justify-content-start">
             <!-- Goals -->
-            <div v-if="goals && showGoals" class="complete d-flex flex-column">
+            <div v-if="showGoals" class="complete d-flex flex-column">
                 <div class="header">Goals ({{ goals.length }})</div>
                 <ul class="item-list">
                     <li v-for="(goal, index) in goals" v-bind:key="index" :style="{ 'z-index': -index }">
@@ -127,14 +127,15 @@ export default {
                 let iterations = data.iterations;
                 if (!this.showRoutineTasks)
                     iterations = data.iterations.filter(_iteration => _iteration.idRoutineIteration == null )
-                return sortAsc(iterations, 'startAt');
+                iterations = sortAsc(iterations, 'startAt');
+                return iterations;
             },
             subscribeToMore: [
                 {
                     document: require('../../../../graphql/subscription/todo/IterationAdded.gql'),
                     updateQuery: (previousResult, { subscriptionData: { data: { iterationAdded }} }) => {
                         previousResult.iterations.splice(0, 0, iterationAdded);
-                        return previousResult;
+                        return { iterations: previousResult.iterations };
                     },
                 },
                 // {

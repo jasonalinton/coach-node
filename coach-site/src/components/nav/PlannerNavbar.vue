@@ -13,11 +13,11 @@
                 </div>
             </div>
             <div v-if="selectedPage == 'planner'" class="d-flex flex-row me-5">
-                <select v-if="view == 1" v-model="dayCountt">
-                    <option v-for="weekView in weekViews" :key="weekView.id" :value="weekView.id">{{ weekView.text }}</option>
-                </select>
                 <select v-model="view">
                     <option v-for="_view in views" :key="_view.id" :value="_view.id">{{ _view.text }}</option>
+                </select>
+                <select v-if="view == 1" v-model="dayCountt">
+                    <option v-for="weekView in weekViews" :key="weekView.id" :value="weekView.id">{{ weekView.text }}</option>
                 </select>
             </div>
         </div>

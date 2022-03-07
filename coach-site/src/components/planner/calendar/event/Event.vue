@@ -2,7 +2,8 @@
     <div class="event position-relative d-flex w-100"
          :class="[size, flexDirection, successStatus]"
          :style="{ 'top': `${top}px`, 'height': `${height}px`, 'z-index': 1}"
-            @click="$emit('selectEvent', _event)">
+            @click="$emit('selectEvent', _event)"
+            @drop="onDrop($event)" @dragover.prevent @dragenter.prevent>
          <div class="title">
             {{ _event.text }}
             <span v-if="size == 'sm' || size == 'md'">,</span>
@@ -16,6 +17,7 @@
 <script>
 import { getDurationInMinutes, toTimeString } from '../../../../../utility/timeUtility';
 import { sortDesc } from '../../../../../utility';
+import { mapIterationToEvent, unmapTaskFromRoutineEvent, mapTodoToEvent } from '../../../../resolvers/planner-resolvers'
 
 export default {
     name: "Event",
@@ -88,6 +90,30 @@ export default {
     methods: {
         getDurationInMinutes,
         toTimeString,
+        onDrop,
+        mapIterationToEvent,
+        unmapTaskFromRoutineEvent,
+        mapTodoToEvent
+    }
+}
+
+function onDrop(ev) {
+    ev.preventDefault();
+    
+    let data = ev.dataTransfer.getData("text");
+    data = JSON.parse(data);
+
+    if (data.type && data.type == "task") {
+        /* If routine event, first unmap task from event and routine iteration */
+        if (data.parentType && data.parentType == "routineEvent") {
+            this.unmapTaskFromRoutineEvent(data.id, data.parentID, this._event.startAt, this._event.endAt, this._event.id, this.$apollo);
+        } else {
+            this.mapIterationToEvent(data.id, this._event.id, this.$apollo);
+        }
+    } else if (data.type && data.type == "todo") {
+        if (data.parentType && data.parentType == "goal") {
+            this.mapTodoToEvent(data.id, this._event.id, this.$apollo);
+        } 
     }
 }
 </script>

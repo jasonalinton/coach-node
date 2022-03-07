@@ -19,7 +19,7 @@
                                 <div class="goal-item">{{ goal.text }}</div>
                                 <ul>
                                     <li v-for="todo in goal.todos" :key="todo.id" class="todo">
-                                        <ListItem :iteration="todo"></ListItem>
+                                        <ListItem :iteration="todo" :parentType="'goal'" :parent="goal"></ListItem>
                                     </li>
                                 </ul>
                             </div>

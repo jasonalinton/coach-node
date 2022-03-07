@@ -81,11 +81,17 @@ function deleteTask() {
 }
 
 function onDragStart(ev) {
-    console.log("Drag Started")
+    let data = {
+        type: "task",
+        id: this.task.id
+    };
+    data = JSON.stringify(data);
+
+    console.log("Drag Started");
     ev.target.classList.add("drag");
-    ev.dataTransfer.dropEffect = 'move'
-    ev.dataTransfer.effectAllowed = 'move'
-    ev.dataTransfer.setData("text", `${this.task.id}`)
+    ev.dataTransfer.dropEffect = 'move';
+    ev.dataTransfer.effectAllowed = 'move';
+    ev.dataTransfer.setData("text", data);
 }
 
 function onDragEnd(ev) {

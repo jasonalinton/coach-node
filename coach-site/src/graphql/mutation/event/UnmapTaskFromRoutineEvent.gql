@@ -1,6 +1,6 @@
-query eventsAndIterations {
-  eventsAndIterations {
-    events {
+mutation unmapTaskFromRoutineEvent($iterationID: Int!, $eventID: Int!, $startAt: String, $endAt: String, $newEventID: Int) {
+  unmapTaskFromRoutineEvent(iterationID: $iterationID, eventID: $eventID, startAt: $startAt, endAt: $endAt, newEventID: $newEventID) {
+    event {
       id
       text
       startAt
@@ -49,46 +49,5 @@ query eventsAndIterations {
         idRoutineIteration
       }
     }
-    iterations {
-        id
-        text
-        startAt
-        endAt
-        attemptedAt
-        completedAt
-        isRecommended
-        todo {
-          id
-          text
-          metrics {
-              id
-              text
-          }
-          goals {
-              id
-              text
-          }
-          routines {
-              id
-              text
-          }
-        }
-        routineIteration {
-          id
-          todoIterations {
-            id
-            text
-            startAt
-            endAt
-            attemptedAt
-            completedAt
-          }
-          idRoutineIteration
-        }
-        idRoutineIteration
-        events {
-            id
-        }
-      }
   }
 }

@@ -74,6 +74,22 @@ input EventInput {
   iterations: [IterationInput]
 }
 
+type TodoAndIteration {
+  todo: Todo!
+  iteration: Iteration!
+}
+
+type TodoAndEventAndIteration {
+  todo: Todo!
+  event: Event!
+  iteration: Iteration!
+}
+
+type EventAndIteration {
+  event: Event!
+  iteration: Iteration!
+}
+
 type EventsAndIterations {
   events: [Event]!
   iterations: [Iteration]!

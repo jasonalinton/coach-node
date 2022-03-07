@@ -1,3 +1,36 @@
+async function iterations(parent, args, context, info) {
+    let iterations = await context.prisma.iteration.findMany({
+        include: {
+            todos: {
+                select: {
+                    id: true,
+                    text: true,
+                    metrics: {
+                        select: {
+                            id: true,
+                            text: true
+                        }
+                    },
+                    // timePairs: {
+                    //     select: {
+
+                    //     }
+                    // }
+                }
+            },
+            repeat: {
+                include: {
+                    routineIterations: true
+                }
+            },
+            todoRepeat: true
+        },
+        orderBy: { id: 'desc' }
+    });
+    
+    return iterations;
+}
+
 async function deleteIterations(parent, { after, from }, context, info) {
     let date;
     if (after)
@@ -38,39 +71,6 @@ async function deleteIterations(parent, { after, from }, context, info) {
         context.pubsub.publish("ITERATION_DELETED", { iterationDeleted: iteration }));
     
     return iPayload.count;
-}
-
-async function iterations(parent, args, context, info) {
-    let iterations = await context.prisma.iteration.findMany({
-        include: {
-            todos: {
-                select: {
-                    id: true,
-                    text: true,
-                    metrics: {
-                        select: {
-                            id: true,
-                            text: true
-                        }
-                    },
-                    // timePairs: {
-                    //     select: {
-
-                    //     }
-                    // }
-                }
-            },
-            repeat: {
-                include: {
-                    routineIterations: true
-                }
-            },
-            todoRepeat: true
-        },
-        orderBy: { id: 'desc' }
-    });
-    
-    return iterations;
 }
 
 module.exports = {

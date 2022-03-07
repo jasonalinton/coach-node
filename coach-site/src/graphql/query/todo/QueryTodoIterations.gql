@@ -18,5 +18,8 @@ query todoIterations{
     todoRepeat {
       id
     }
+    events {
+        id
+    }
   }
 }
