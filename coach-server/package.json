@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon src/index --exec babel-node -e js",
+    "start": "nodemon src/index",
     "test": "echo \"Error: no test specified\" && exit 1",
     "migrate": "npx prisma migrate dev",
     "generate": "npx prisma generate"
@@ -13,7 +13,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@prisma/client": "^2.25.0",
+    "@prisma/client": "^3.10.0",
     "apollo-server": "^2.25.1",
     "express": "^4.17.1",
     "graphql": "^15.5.1",
@@ -26,6 +26,6 @@
     "babel-cli": "^6.26.0",
     "babel-preset-env": "^1.7.0",
     "babel-preset-stage-0": "^6.24.1",
-    "prisma": "^2.25.0"
+    "prisma": "^3.10.0"
   }
 }

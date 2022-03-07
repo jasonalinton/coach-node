@@ -58,7 +58,10 @@ const iterationIncude = {
     },
     todoRepeat: true,
     routineRepeat: select_repeat,
-    routineIteration: routineTodoIterationIncude
+    routineIteration: routineTodoIterationIncude,
+    events: { 
+        select: { id: true }
+    }
 }
 
 const eventInclude = {

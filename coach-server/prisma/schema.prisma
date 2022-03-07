@@ -23,24 +23,27 @@ model Metric {
 }
 
 model Goal {
-  id              Int       @id @default(autoincrement())
-  text            String
-  description     String?
-  isDeleted       Boolean   @default(false)
-  dateTimeDeleted DateTime? @db.Timestamptz(6)
-  createdAt       DateTime  @default(now()) @db.Timestamptz(6)
-  updatedAt       DateTime  @default(now()) @updatedAt @db.Timestamptz(6)
+  id               Int       @id @default(autoincrement())
+  text             String
+  description      String?
+  // position         Int?
+  isDeleted        Boolean   @default(false)
+  dateTimeDeleted  DateTime? @db.Timestamptz(6)
+  createdAt        DateTime  @default(now()) @db.Timestamptz(6)
+  updatedAt        DateTime  @default(now()) @updatedAt @db.Timestamptz(6)
 
-  parents  Goal[] @relation("GoalFamily")
-  children Goal[] @relation("GoalFamily")
+  reasons          Blurb[]
 
-  metrics  Metric[]
-  todos    Todo[]
-  routines Routine[]
+  parents          Goal[] @relation("GoalFamily")
+  children         Goal[] @relation("GoalFamily")
 
-  timePairs Goal_TimePair[]
-  repeats   Repeat[]
-  goal_repeats   Goal_Repeat[]
+  metrics          Metric[]
+  todos            Todo[]
+  routines         Routine[]
+
+  timePairs        Goal_TimePair[]
+  repeats          Repeat[]
+  goal_repeats     Goal_Repeat[]
 }
 
 model Todo {
@@ -345,4 +348,13 @@ model Event {
 
   type             Type?     @relation(fields: [idType], references: [id], name: "Event_Type")
   iterations       Iteration[]
+}
+
+model Blurb {
+  id               Int       @id @default(autoincrement())
+  text             String    
+  createdAt        DateTime  @default(now()) @db.Timestamptz(6)
+  updatedAt        DateTime  @default(now()) @updatedAt @db.Timestamptz(6)
+
+  goals            Goal[]
 }

@@ -1,5 +1,9 @@
 const moment = require('moment');
 
+function clone(item) {
+    return JSON.parse(JSON.stringify(item));
+}
+
 function percent(number, decimalPlaces = 0) {
     return new Intl.NumberFormat([ ], { style: 'percent', minimumFractionDigits: decimalPlaces }).format(number);
 }
@@ -59,6 +63,7 @@ function lastDayOfMonth(dateTime) {
 }
 
 module.exports = {
+    clone,
     percent,
     removeItem,
     today,

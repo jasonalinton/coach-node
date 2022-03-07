@@ -1,7 +1,7 @@
 const { Property, dataType } = require('../../model/objectModel');
-const { configureObject, getNewObjects, configureMapObject, getProps, isUpdated } = require('../objectController');
-const { mapType } = require('../type/typeController');
-const { configureTime } = require('./timeController');
+const { configureObject, getNewObjects, configureMapObject, getProps, isUpdated } = require('../universal/objectService');
+const { mapType } = require('../universal/typeService');
+const { configureTime } = require('../time/timeService');
 
 let objectType = 'timePair';
 
