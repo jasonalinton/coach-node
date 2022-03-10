@@ -1,7 +1,7 @@
 <template>
     <div class="left-panel d-flex flex-column mt-1">
         <!-- <ThumbnailPanel class="mt-3" :firstDay="firstDay" :initialDate="firstDay" @dateChange="dateChange"></ThumbnailPanel> -->
-        <ThumbnailCalendar class="mt-3" :firstDay="firstDay" :initialDate="firstDay" @dateChange="dateChange"></ThumbnailCalendar>
+        <ThumbnailCalendar class="mt-3" :initialDate="firstDay" @dateChange="dateChange"></ThumbnailCalendar>
     </div>
 </template>
 
@@ -9,6 +9,7 @@
 // import ThumbnailPanel from '../thumbnail/ThumbnailPanel.vue'
 import ThumbnailCalendar from '../thumbnail/ThumbnailCalendar.vue'
 import moment from 'moment';
+import { addMonth } from '../../../../utility/timeUtility';
 
 export default {
     name: 'LeftPanel',
@@ -16,7 +17,7 @@ export default {
     components: { ThumbnailCalendar },
     data: function() {
         return {
-            firstDay: moment().date(1).hour(0).minute(0).second(0).millisecond(0).toDate()
+            firstDay: addMonth(moment().date(1).hour(0).minute(0).second(0).millisecond(0).toDate(), -2)
             // firstDay: moment().startOf().toDate()
         }
     },
