@@ -1,6 +1,11 @@
 type Query {
   # Items
-  items(getMetrics: Boolean = true, getGoals: Boolean = true, getTodos: Boolean = true, getRoutines: Boolean = true): Items!
+  items(
+    getMetrics: Boolean = true
+    getGoals: Boolean = true
+    getTodos: Boolean = true
+    getRoutines: Boolean = true
+  ): Items!
 
   # Metric
   metrics: [Metric!]!
@@ -21,12 +26,14 @@ type Query {
   repeat(id: Int): Repeat!
 
   # Planner
-  event(id: Int!): Event
   # iterations: [Iteration!]!
-  iterations(type: String, start: String, end: String): [Iteration!]!
-  events: [Event!]!
+  iterations(type: String, startAt: String, endAt: String): [Iteration!]!
   eventsAndIterations: EventsAndIterations!
   iterationCompletions(start: String!, end: String!): [IterationCompletion!]!
+
+  #Event
+  event(id: Int!): Event
+  events(startAt: String, endAt: String): [Event!]!
 }
 
 type Mutation {
@@ -44,13 +51,14 @@ type Mutation {
   deleteTodo(id: Int!): Todo!
   createTodoIterations(todo: TodoInput!): Todo
   createDefaultTask(iteration: IterationInput!): Todo
-  toggleCompletion(iteration: IterationInput!): Iteration
+  toggleCompletion(idIteration: Int!, attemptedAt: String, completedAt: String): Iteration
   rescheduleIteration(id: Int!, startAt: String!): Iteration
-  attemptIteration(id: Int!, attemptedAt: String!): Iteration
-  refreshRepetitive: RepetitiveItems!
   getTodoRepeat(idTodo: Int, idRepeat: Int): Todo_Repeat
   scheduleTodo(idTodo: Int!, startAt: String!, endAt: String): TodoAndIteration!
   mapTodoToEvent(idTodo: Int!, idEvent: Int!): TodoAndEventAndIteration!
+  attemptIteration(id: Int!, attemptedAt: String!): Iteration
+  refreshRepetitiveItems: RepetitiveItems!
+  refreshRepetitiveTodo(idTodo: Int!): Todo!
 
   # Routine
   addRoutine(routine: RoutineInput!): Routine!
@@ -58,15 +66,25 @@ type Mutation {
   deleteRoutine(id: Int!): Routine!
   createRoutineIterations(routine: RoutineInput!): Routine
   getRoutineRepeat(idRoutine: Int, idRepeat: Int): Routine_Repeat
-  mapTodoIterations(routineTodo_Iteration: RoutineTodo_IterationInput): RoutineTodo_Iteration!
+  mapTodoIterations(
+    routineTodo_Iteration: RoutineTodo_IterationInput
+  ): RoutineTodo_Iteration!
+  refreshRepetitiveRoutine(idRoutine: Int!): Routine!
 
   # Type
   getTypes(parentType: String!): [Type!]!
 
   # Event
-  iterations: [Iteration]
+  addEvent(text: String!, startAt: String!, endAt: String!): Event!
+  iterations(startAt: String, endAt: String): [Iteration]
   mapIterationToEvent(iterationID: Int!, eventID: Int!): EventAndIteration!
-  unmapTaskFromRoutineEvent(iterationID: Int!, eventID: Int!, startAt: String, endAt: String, newEventID: Int): EventAndIteration!
+  unmapTaskFromRoutineEvent(
+    iterationID: Int!
+    eventID: Int!
+    startAt: String
+    endAt: String
+    newEventID: Int
+  ): EventAndIteration!
   deleteIteration(id: Int!): Iteration
   deleteIterations(from: String, after: String): Int!
 }
@@ -91,12 +109,12 @@ type Subscription {
   routineDeleted: Routine!
 
   # Planner
-  iterationAdded: Iteration!
-  iterationUpdated: Iteration!
-  iterationDeleted: Iteration!
-  eventAdded: Event!
-  eventUpdated: Event!
-  eventDeleted: Event!
+  iterationAdded(startAt: String, endAt: String): Iteration!
+  iterationUpdated(startAt: String, endAt: String): Iteration!
+  iterationDeleted(startAt: String, endAt: String): Iteration!
+  eventAdded(startAt: String, endAt: String): Event!
+  eventUpdated(startAt: String, endAt: String): Event!
+  eventDeleted(startAt: String, endAt: String): Event!
 }
 
 input unmappedIDs {

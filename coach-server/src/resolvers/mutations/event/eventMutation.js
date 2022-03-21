@@ -1,5 +1,18 @@
-const { eventInclude, iterationIncude } = require("../../../properties/event/eventProperties")
-const { todoInclude } = require("../../../properties/todoProperties")
+const { eventInclude, iterationIncude } = require("../../../properties/event/eventProperties");
+const { todoInclude } = require("../../../properties/todoProperties");
+const { routineInclude } = require("../../../properties/routineProperties");
+const plannerController = require('../../../controller/planner/plannerController');
+
+async function addEvent(parent, { text, startAt, endAt }, context, info) {
+    let event = await context.prisma.event.create({
+        data: { text, startAt, endAt },
+        include: eventInclude
+    });
+
+    context.pubsub.publish("EVENT_ADDED", { eventAdded: event });
+
+    return event;
+}
 
 async function mapIterationToEvent(parent, { iterationID, eventID }, context, info) {
     let event = await context.prisma.event.update({
@@ -22,7 +35,7 @@ async function mapIterationToEvent(parent, { iterationID, eventID }, context, in
         include: eventInclude
     });
 
-    context.pubsub.publish("EVENT_UPDATED", { eventUpdated: event });
+    
     context.pubsub.publish("ITERATION_UPDATED", { iterationUpdated: iteration });
 
     return { event, iteration };
@@ -94,7 +107,34 @@ async function unmapTaskFromRoutineEvent(parent, { iterationID, eventID, startAt
     return { event: event_old, iteration };
 }
 
+async function refreshRepetitiveTodo(parent, { idTodo }, context, info) {
+    let todo = await context.prisma.todo.findFirst({
+        where: { id: idTodo },
+        include: todoInclude
+    });
+
+    todo.repeats = todo.repeats.filter(_repeat => _repeat.routineRepeat == null && 
+                                                 (_repeat.routine_repeats && _repeat.routine_repeats.length == 0));
+
+    return await plannerController.createRepetitiveEvents(todo, 'todo', null, null, null, context);
+}
+
+async function refreshRepetitiveRoutine(parent, { idRoutine }, context, info) {
+    let include = { ...routineInclude };
+    include.todos = { include: todoInclude };
+    
+    let routine = await context.prisma.routine.findFirst({
+        where: { id: idRoutine },
+        include
+    });
+
+    plannerController.refreshRepetitiveRoutine(routine, null, null, null, context)
+}
+
 module.exports = {
+    addEvent,
     mapIterationToEvent,
     unmapTaskFromRoutineEvent,
+    refreshRepetitiveTodo,
+    refreshRepetitiveRoutine
 }

@@ -1,5 +1,5 @@
-subscription eventAdded {
-    eventAdded {
+subscription eventAdded($startAt: String, $endAt: String) {
+    eventAdded(startAt: $startAt, endAt: $endAt) {
       id
       text
       startAt
@@ -42,7 +42,18 @@ subscription eventAdded {
             endAt
             attemptedAt
             completedAt
+            events {
+              id
+              startAt
+              endAt
+            }
+            idRoutineIteration
           }
+        }
+        events {
+          id
+          startAt
+          endAt
         }
       }
     }

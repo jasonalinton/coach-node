@@ -15,6 +15,7 @@ const GoalQuery = require('./resolvers/queries/goalQuery');
 const TodoQuery = require('./resolvers/queries/todoQuery');
 const RoutineQuery = require('./resolvers/queries/routineQuery');
 const PlannerQuery = require('./resolvers/queries/planner/plannerQuery');
+const EventQuery = require('./resolvers/queries/planner/eventQuery');
 const RepeatQuery = require('./resolvers/queries/time/repeatQuery');
 
 const MetricMutation = require('./resolvers/mutations/metricMutation');
@@ -38,6 +39,7 @@ const Query = {
     ...TodoQuery,
     ...RoutineQuery,
     ...PlannerQuery,
+    ...EventQuery,
     ...RepeatQuery,
 }
 const Mutation = {

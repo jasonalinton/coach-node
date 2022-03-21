@@ -100,7 +100,7 @@ export default {
             },
             subscribeToMore: [
                 {
-                    document: require('../../../../graphql/subscription/todo/IterationAdded.gql'),
+                    document: require('../../../../graphql/subscription/planner/IterationAdded.gql'),
                     updateQuery: function(previousResult, { subscriptionData: { data: { iterationAdded }} }) {
                         if (iterationAdded.routineIteration) {
                             let routineIterations = this.getRoutineIterations(previousResult.routineIterations, this.selectedDate);
@@ -113,7 +113,7 @@ export default {
                     },
                 },
                 {
-                    document: require('../../../../graphql/subscription/todo/IterationUpdated.gql'),
+                    document: require('../../../../graphql/subscription/planner/IterationUpdated.gql'),
                     updateQuery: function(previousResult, { subscriptionData: { data: { iterationUpdated }} }) {
                         let routineIterations = this.getRoutineIterations(previousResult.routineIterations, this.selectedDate);
                         if (routineIterations[0]) {
@@ -124,7 +124,7 @@ export default {
                     },
                 },
                 {
-                    document: require('../../../../graphql/subscription/todo/IterationDeleted.gql'),
+                    document: require('../../../../graphql/subscription/planner/IterationDeleted.gql'),
                     updateQuery: function(previousResult, { subscriptionData: { data: { iterationDeleted }} }) {
                         let routineIterations = this.getRoutineIterations(previousResult.routineIterations, this.selectedDate);
                         if (routineIterations[0]) {
@@ -157,12 +157,6 @@ export default {
             }
         },
     },
-    // computed: {
-    //     pendingCount() { return (this.iterations.pending) ? this.iterations.pending.length : 0},
-    //     completeCount() { return (this.iterations.complete) ? this.iterations.complete.length : 0 },
-    //     totalCount() { return this.pendingCount + this.completeCount },
-    //     percentComplete() { return Percent(this.completeCount, this.totalCount); },
-    // },
     methods: {
         initIteration,
         getRoutineIterations,

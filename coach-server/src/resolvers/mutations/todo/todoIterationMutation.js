@@ -1,5 +1,5 @@
-const { todoInclude, todoIterationIncude } = require('../../../properties/todoProperties');
-const { eventInclude } = require('../../../properties/event/eventProperties');
+const { todoInclude } = require('../../../properties/todoProperties');
+const { eventInclude, iterationIncude } = require('../../../properties/event/eventProperties');
 const { deleteTodo } = require('./todoMutation');
 const { refreshRepetitiveEvents } = require('../../../controller/planner/plannerController');
 const moment = require('moment');
@@ -57,7 +57,7 @@ async function createDefaultTask(parent, { iteration }, context, info) {
 
     iteration = await context.prisma.iteration.findFirst({
         where: { id: todo.iterations[0].id },
-        include: todoIterationIncude
+        include: iterationIncude
     })
 
     context.pubsub.publish("TODO_ADDED", { todoAdded: todo });
@@ -81,15 +81,15 @@ async function createDefaultTask(parent, { iteration }, context, info) {
 
 // TODO: You might want to change this name. 
 // Technically it's just setting the value. Not necessarily toggling
-async function toggleCompletion(parent, { iteration }, context, info) {
+async function toggleCompletion(parent, { idIteration, attemptedAt, completedAt }, context, info) {
     console.log("Toggle completion");
+    let data = { attemptedAt };
+    if (completedAt) data.completedAt = completedAt;
+
     iteration = await context.prisma.iteration.update({
-        where: { id: iteration.id },
-        data: {
-            attemptedAt: iteration.attemptedAt,
-            completedAt: iteration.completedAt
-        },
-        include: todoIterationIncude
+        where: { id: idIteration },
+        data,
+        include: iterationIncude
     });
 
     context.pubsub.publish("ITERATION_UPDATED", { iterationUpdated: iteration });
@@ -103,7 +103,7 @@ async function rescheduleIteration(parent, { id, startAt }, context, info) {
     let iteration = await context.prisma.iteration.update({
         where: { id },
         data: { startAt },
-        include: todoIterationIncude
+        include: iterationIncude
     });
 
     context.pubsub.publish("ITERATION_UPDATED", { iterationUpdated: iteration });
@@ -114,7 +114,7 @@ async function rescheduleIteration(parent, { id, startAt }, context, info) {
 async function attemptIteration(parent, { id, attemptedAt }, context, info) {
     console.log(`Attempt iteration`);
 
-    let include = { ...todoIterationIncude };
+    let include = { ...iterationIncude };
     include.repeat = { select: { id: true } }
     include.todoRepeat = { select: { id: true } }
     include.routineRepeat = { select: { id: true } }
@@ -130,7 +130,7 @@ async function attemptIteration(parent, { id, attemptedAt }, context, info) {
             text: `[Attempted] ${iteration_orig.text}`,
             attemptedAt
         },
-        include: todoIterationIncude
+        include: iterationIncude
     });
 
     console.log(`updated iteration`);
@@ -151,7 +151,7 @@ async function attemptIteration(parent, { id, attemptedAt }, context, info) {
     
     let iteration_new = context.prisma.iteration.create({
         data,
-        include: todoIterationIncude
+        include: iterationIncude
     });
 
     let result = await context.prisma.$transaction([iteration_updated, iteration_new]);
@@ -197,7 +197,7 @@ async function deleteIteration(parent, { id }, context, info) {
     return iteration;
 }
 
-async function refreshRepetitive(parent, args, context, info) {
+async function refreshRepetitiveItems(parent, args, context, info) {
     return await refreshRepetitiveEvents(null, null, null, context)
 }
 
@@ -207,5 +207,5 @@ module.exports = {
     rescheduleIteration,
     attemptIteration,
     deleteIteration,
-    refreshRepetitive,
+    refreshRepetitiveItems,
 }

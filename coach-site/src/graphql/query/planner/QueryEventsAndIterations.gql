@@ -43,8 +43,18 @@ query eventsAndIterations {
             endAt
             attemptedAt
             completedAt
+            events {
+              id
+              startAt
+              endAt
+            }
           }
           idRoutineIteration
+        }
+        events {
+          id
+          startAt
+          endAt
         }
         idRoutineIteration
       }
@@ -82,12 +92,19 @@ query eventsAndIterations {
             endAt
             attemptedAt
             completedAt
+            events {
+              id
+              startAt
+              endAt
+            }
           }
           idRoutineIteration
         }
         idRoutineIteration
         events {
             id
+            startAt
+            endAt
         }
       }
   }

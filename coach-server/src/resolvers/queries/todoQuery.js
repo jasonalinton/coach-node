@@ -11,13 +11,19 @@ async function todos(parent, args, context, info) {
     return todos;
 }
 
+/* Get todos with repeats (where the repeat is not mapped to a routine) */
 async function repetitiveTodos(parent, args, context, info) {
     let todos = await context.prisma.todo.findMany({
         where: {
             isDeleted: false,
             repeats: {
                 some: {
-                    // routines: { none: {} }
+                    routineRepeat: null
+                },
+                none: {
+                    routine_repeats: {
+                        some: {}
+                    }
                 }
             }
         },

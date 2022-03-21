@@ -1,43 +1,50 @@
-query iterations($type: String, $start: String, $end: String, ) {
-    iterations(type: $type, start: $start, end: $end) {
+query iterations($type: String, $startAt: String, $endAt: String) {
+  iterations(type: $type, startAt: $startAt, endAt: $endAt) {
+    id
+    text
+    startAt
+    endAt
+    attemptedAt
+    completedAt
+    isRecommended
+    todo {
+      id
+      text
+      metrics {
+        id
+        text
+      }
+      goals {
+        id
+        text
+      }
+      routines {
+        id
+        text
+      }
+    }
+    routineIteration {
+      id
+      todoIterations {
         id
         text
         startAt
         endAt
         attemptedAt
         completedAt
-        isRecommended
-        todo {
-            id
-            text
-            metrics {
-                id
-                text
-            }
-            goals {
-                id
-                text
-            }
-            routines {
-                id
-                text
-            }
-        }
-        routineIteration {
-            id
-            todoIterations {
-                id
-                text
-                startAt
-                endAt
-                attemptedAt
-                completedAt
-            }
-            idRoutineIteration
-        }
-        idRoutineIteration
         events {
-            id
-        }
+          id
+          startAt
+          endAt
+        } 
+      }
+      idRoutineIteration
     }
+    idRoutineIteration
+    events {
+      id
+      startAt
+      endAt
+    }
+  }
 }

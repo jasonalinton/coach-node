@@ -115,8 +115,8 @@ export default {
             variables() {
                 return {
                     type: 'todo',
-                    start: this.start,
-                    end: this.end
+                    startAt: this.start,
+                    endAt: this.end
                 }
             },
             error: function(error) {
@@ -132,21 +132,14 @@ export default {
             },
             subscribeToMore: [
                 {
-                    document: require('../../../../graphql/subscription/todo/IterationAdded.gql'),
+                    document: require('../../../../graphql/subscription/planner/IterationAdded.gql'),
                     updateQuery: (previousResult, { subscriptionData: { data: { iterationAdded }} }) => {
                         previousResult.iterations.splice(0, 0, iterationAdded);
                         return { iterations: previousResult.iterations };
                     },
                 },
-                // {
-                //     document: require('../../../../graphql/subscription/todo/IterationUpdated.gql'),
-                //     updateQuery: (previousResult, { subscriptionData: { data: { iterationUpdated }} }) => {
-                //         replaceItem(iterationUpdated, previousResult.iterations);
-                //         return previousResult;
-                //     },
-                // },
                 {
-                    document: require('../../../../graphql/subscription/todo/IterationDeleted.gql'),
+                    document: require('../../../../graphql/subscription/planner/IterationDeleted.gql'),
                     updateQuery: (previousResult, { subscriptionData: { data: { iterationDeleted }} }) => {
                         removeItem(iterationDeleted, previousResult.iterations);
                         return previousResult;

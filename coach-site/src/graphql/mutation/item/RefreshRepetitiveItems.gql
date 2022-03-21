@@ -1,0 +1,10 @@
+mutation refreshRepetitiveItems {
+  refreshRepetitiveItems {
+    todos {
+      id
+    }
+    routines {
+      id
+    }
+  }
+}

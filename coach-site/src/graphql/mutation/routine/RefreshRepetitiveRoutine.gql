@@ -1,0 +1,5 @@
+mutation refreshRepetitiveRoutine($idRoutine: Int!) {
+  refreshRepetitiveRoutine(idRoutine: $idRoutine) {
+    id
+  }
+}

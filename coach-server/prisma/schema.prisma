@@ -319,7 +319,11 @@ model Iteration {
 
   events           Event[]
 
+  // RoutineTodo_Iteration for routine iterations
+  // If you're looking for the RoutineTodo_iteration for a routine task/iteration use this mapping property
   routineIteration RoutineTodo_Iteration? @relation("RoutineIteraion")
+  // RoutineTodo_Iteration for todo iterations
+  // If you're looking for the RoutineTodo_iteration for a todo task/iteration use this mapping property
   todoIteration    RoutineTodo_Iteration? @relation(fields: [idRoutineIteration], references: [id])
 }
 

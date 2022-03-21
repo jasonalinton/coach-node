@@ -69,6 +69,21 @@ function fixIterationDateFormat(iteration) {
         if (iteration[timeProp])
             iteration[timeProp] = moment(iteration[timeProp]).format();
     })
+
+    if (iteration.events) {
+        iteration.events.forEach(_event => {
+            ['startAt', 'endAt'].forEach(timeProp => {
+                if (_event[timeProp])
+                _event[timeProp] = moment(_event[timeProp]).format();
+            })
+        })
+    }
+
+    if (iteration.routineIteration && iteration.routineIteration.todoIterations) {
+        iteration.routineIteration.todoIterations.forEach(_iteration => {
+            fixIterationDateFormat(_iteration)
+        })
+    }
 }
 
 function fixEventDateFormat(_event) {

@@ -4,75 +4,55 @@ const { routineInclude,  } = require('../../../properties/routineProperties');
 const { startOfDay, endOfDay, addDay } = require('../../../../utility');
 const moment = require('moment');
 
-async function iterations(parent, { type, start, end }, context, info) {
-    console.log("")
-    let OR = [];
-    if (type == 'todo' || type == 'all') {
-        OR.push(
-            {
-                todo: { isDeleted: false }
-            }
-        )
-    } 
-    if (type == 'routne' || type == 'all') {
-        OR.push(
-            {
-                routine: { isDeleted: false }
-            }
-        )
-    }
-
-    let AND = [];
-    if (start) {
-        AND.push({ 
-            startAt: { gte: new Date(start) }
-        })
-    }
-    if (end) {
-        AND.push({ 
-            startAt: { lte: new Date(end) }
-        })
-    }
-
-    console.log("")
-
-    let iterations = await context.prisma.iteration.findMany({
-        where: {
-            OR,
-            AND
-        },
+async function mapRoutineEventsToIterations(context) {
+    let iterations1 = await context.prisma.iteration.findMany({
         include: iterationIncude,
         orderBy: { id: 'desc' }
     })
 
-    console.log("Queried iterations")
+    // iterations1.forEach(_iter => {
+    for (let j = 0; j < iterations1.length; j++) {
+        let _iter = iterations1[j];
+        if (_iter.events.length > 1) {
+            console.log(`${_iter.text}-${_iter.id} - ${_iter.startAt}`)
+            // console.log(_iter)
+            console.log("MUTIPLE EVENTS!");
+        }
+
+        if (_iter.routineIteration && _iter.events.length > 0) {
+            let eventID = _iter.events[0].id;
+            // _iter.routineIteration.todoIterations.forEach(async _todoIter => {
+            for (let i = 0; i < _iter.routineIteration.todoIterations.length; i++) {
+                let _todoIter = _iter.routineIteration.todoIterations[i];
+                let iteration = await context.prisma.iteration.update({
+                    data: {
+                        events: { connect: {id: eventID}}
+                    },
+                    where: { id: _todoIter.id },
+                    include: iterationIncude
+                })
+                console.log(iteration.events.length);
+
+            }
+        }
+    }
+}
+
+async function iterations(parent, { type, startAt, endAt }, context, info) {
+    let AND = [];
+    if (type == 'todo' || type == 'all') AND.push({ todo: { isDeleted: false } })
+    if (type == 'routne' || type == 'all') AND.push({ routine: { isDeleted: false } })
+
+    if (startAt) AND.push({ startAt: { gte: startAt } })
+    if (endAt) AND.push({ startAt: { lte: endAt } })
+
+    let iterations = await context.prisma.iteration.findMany({
+        where: { AND },
+        include: iterationIncude,
+        orderBy: { id: 'desc' }
+    })
     
     return iterations;
-}
-
-async function events(parent, args, context, info) {
-    let events = await context.prisma.event.findMany({
-        include: eventInclude,
-        orderBy: { id: 'desc'}
-    });
-    
-    return events;
-}
-
-async function event(parent, args, context, info) {
-    console.log(`Query event, id = ${args.id}`)
-
-
-
-
-    let event = await context.prisma.event.findFirst({
-        include: eventInclude,
-        where: { id: args.id }
-    });
-
-    console.log(`Query event, id = ${args.id}`)
-    
-    return event;
 }
 
 async function updateTodoMappings(context) {
@@ -398,8 +378,6 @@ async function iterationCompletions(parent, args, context, info) {
 module.exports = {
     iterations,
     // iterations2,
-    events,
-    event,
     eventsAndIterations,
     iterationCompletions
 }

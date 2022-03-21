@@ -1,63 +1,73 @@
-query events {
-    events {
+query events($startAt: String, $endAt: String) {
+  events(startAt: $startAt, endAt: $endAt) {
+    id
+    text
+    startAt
+    endAt
+    isAllDay
+    isRecommended
+    type {
+      id
+      text
+    }
+    iterations {
       id
       text
       startAt
       endAt
-      isAllDay
-      isRecommended
-      type {
+      attemptedAt
+      completedAt
+      todo {
         id
         text
+        metrics {
+          id
+          text
+        }
+        goals {
+          id
+          text
+        }
+        routines {
+          id
+          text
+        }
       }
-      iterations {
+      routineIteration {
         id
-        text
-        startAt
-        endAt
-        attemptedAt
-        completedAt
-        todo {
+        todoIterations {
+          id
+          text
+          startAt
+          endAt
+          attemptedAt
+          completedAt
+          todo {
             id
             text
             metrics {
-                id
-                text
+              id
+              text
             }
             goals {
-                id
-                text
+              id
+              text
             }
-            routines {
-                id
-                text
-            }
-        }
-        routineIteration {
-          id
-          todoIterations {
+          }
+          events {
             id
-            text
             startAt
             endAt
-            attemptedAt
-            completedAt
-            todo {
-                id
-                text
-                metrics {
-                    id
-                    text
-                }
-                goals {
-                    id
-                    text
-                }
-            }
-            idRoutineIteration
           }
+          idRoutineIteration
         }
-        idRoutineIteration
       }
+      events {
+        id
+        startAt
+        endAt
+      }
+      idRoutineIteration
     }
+  }
 }

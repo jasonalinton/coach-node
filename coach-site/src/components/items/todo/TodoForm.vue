@@ -89,7 +89,7 @@
         </ApolloQuery>
         <RepeatControl class="mt-2" :repeats="item.repeats" @addRepeat="addRepeat" @updateRepeat="updateRepeat"></RepeatControl>
         <TimePairControl class="mt-2" :timePairs="item.timePairs" @addTimePair="addTimePair" @updateTimePair="updateTimePair"></TimePairControl>
-        <div class="d-flex flew-row justify-content-between mt-4">
+        <div class="d-flex flew-column justify-content-between mt-4">
             <!-- Is Group -->
             <div class="form-check">
                 <input :id="`todo-${item.id}-is-group`" class="form-check-input" type="checkbox" v-model="item.isGroup" >
@@ -97,8 +97,6 @@
                     Is Group
                 </label>
             </div>
-        </div>
-        <div class="d-flex flew-row justify-content-between mt-4">
             <!-- Toggle Panel - Checkbox -->
             <div class="form-check">
                 <input :id="`toggle-${config.itemType}-panel`" class="form-check-input" type="checkbox" v-model="togglePanel" >
@@ -106,6 +104,9 @@
                     Toggle
                 </label>
             </div>
+        </div>
+        <button class="btn btn-primary me-2" type="button" @click.prevent="refreshRepetitive()">Refresh Repetitive</button>
+        <div class="d-flex flew-row justify-content-between mt-4">
             <!-- Buttons -->
             <div class="form-group d-flex justify-content-end">
                 <button class="btn btn-primary me-2" type="button" @click.prevent="save(item)">Save</button>
@@ -120,6 +121,7 @@ import SelectItem from "../../controls/SelectItem.vue"
 import { replaceItem, removeItem, clone } from '../../../../utility'
 import RepeatControl from '../../controls/time/RepeatControl.vue'
 import TimePairControl from '../../controls/time/TimePairControl.vue'
+import { refreshRepetitiveTodo } from '../../../resolvers/todo-resolvers'
 
 export default {
     components: { SelectItem, RepeatControl, TimePairControl },
@@ -204,7 +206,8 @@ export default {
         addRepeat,
         updateRepeat,
         addTimePair,
-        updateTimePair
+        updateTimePair,
+        refreshRepetitive
     },
     watch: {
         togglePanel(value) {
@@ -313,18 +316,6 @@ function save(item) {
     }
 }
 
-// function configureTodo(item) {
-//     item.routines.forEach(routine => {
-//         if (!routine.repeats) return;
-//         routine.repeats.forEach(repeat => {
-//             let cloned = clone(repeat);
-//             cloned.isConnected = true;
-//             cloned.isEventVisible = false;
-//             item.repeats.push(cloned);
-//         })
-//     })
-// }
-
 function configureTodo(item) {
     item.routines.forEach(routine => {
         if (!routine.repeats) return;
@@ -352,22 +343,6 @@ function configureTodo(item) {
     })
 }
 
-// function configureTodo(item) {
-//     item.routines.forEach(routine => {
-//         if (!routine.repeats) return;
-//         routine.repeats.forEach(repeat => {
-//             let exists = item.repeats.includes(_rep => _rep.id == repeat.id);
-//             if (!exists) {
-//                 let cloned = clone(repeat);
-//                 cloned.id = -1
-//                 cloned.routineRepeat = { id: repeat.id };
-//                 cloned.isEventVisible = false;
-//                 item.repeats.push(cloned);
-//             }
-//         })
-//     })
-// }
-
 function refreshForm() {
     this.$emit('refreshForm');
 }
@@ -387,6 +362,10 @@ function close() {
 //         this.item.repeats.push(clonedRepeat);
 //     })
 // }
+
+function refreshRepetitive() {
+    refreshRepetitiveTodo(this.item.id, this.$apollo)
+}
 </script>
 
 <style scoped>

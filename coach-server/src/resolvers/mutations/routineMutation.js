@@ -173,25 +173,33 @@ async function createRoutineIterations(parent, { routine }, context, info, repea
 }
 
 async function mapTodoIterations(parent, routineTodo_Iteration, context, info) {
-    // console.log("")
     try {
-        
         routineTodo_Iteration = await context.prisma.routineTodo_Iteration.create({
             data: {
-                // idRoutineIteration: routineTodo_Iteration.idRoutineIteration,
                 hasTodoEvent: routineTodo_Iteration.hasTodoEvent,
                 todoIterations: routineTodo_Iteration.todoIterations,
-                routineIteration: {
-                    connect: { id: routineTodo_Iteration.idRoutineIteration }
-                }
+                routineIteration: { connect: { id: routineTodo_Iteration.idRoutineIteration } }
+            },
+            include: {
+                routineIteration: { include: { events: { select: { id: true }} } },
+                todoIterations: { select: { id: true }}
             }
         })
+
+        if (routineTodo_Iteration.routineIteration.events[0]) {
+            let eventID = routineTodo_Iteration.routineIteration.events[0].id;
+            routineTodo_Iteration.todoIterations.forEach(async _todoIteration => {
+                let iteration_updated = await context.prisma.iteration.update({
+                    data: { events: { connect: { id: eventID } } },
+                    where: { id: _todoIteration.id }
+                })
+            })
+        }
     }
     catch (error) {
         // console.log(error);
         return;
     }
-    // console.log("")
     
     return routineTodo_Iteration;
 }

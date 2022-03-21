@@ -109,7 +109,7 @@ export default {
                     },
                 },
                 {
-                    document: require('../../../../graphql/subscription/todo/IterationUpdated.gql'),
+                    document: require('../../../../graphql/subscription/planner/IterationUpdated.gql'),
                     updateQuery: (previousResult, { subscriptionData: { data: { iterationUpdated }} }) => {
                         replaceItem(iterationUpdated, previousResult.event.iterations);
                         previousResult.event.iterations.forEach(_iteration => {
@@ -117,12 +117,11 @@ export default {
                                 replaceItem(iterationUpdated, _iteration.routineIteration.todoIterations);
                             }
                         })
-                        // this.refreshIterations(previousResult.event);
                         return previousResult.event;
                     },
                 },
                 {
-                    document: require('../../../../graphql/subscription/todo/IterationDeleted.gql'),
+                    document: require('../../../../graphql/subscription/planner/IterationDeleted.gql'),
                     updateQuery: (previousResult, { subscriptionData: { data: { iterationDeleted }} }) => {
                         removeItem(iterationDeleted, previousResult.event.iterations);
                         previousResult.event.iterations.forEach(_iteration => {
@@ -130,7 +129,6 @@ export default {
                                 removeItem(iterationDeleted, _iteration.routineIteration.todoIterations);
                             }
                         })
-                        // this.refreshIterations(previousResult.event);
                         return previousResult.event;
                     },
                 },

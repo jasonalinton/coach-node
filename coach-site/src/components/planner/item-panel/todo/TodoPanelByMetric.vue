@@ -29,7 +29,7 @@ import IconButton from '../../../controls/button/IconButton.vue'
 import MetricSelector from '../component/MetricSelector.vue'
 import todoConfig from '../../../../config/items/todo-config';
 import ListItem from '../component/ListItem.vue';
-import { replaceItem, removeItem } from '../../../../../utility';
+import { removeItem } from '../../../../../utility';
 import { createDefaultTask, toggleCompletion, deleteIteration } from '../../../../resolvers/todo-resolvers';
 
 export default {
@@ -60,21 +60,14 @@ export default {
             },
             subscribeToMore: [
                 {
-                    document: require('../../../../graphql/subscription/todo/IterationAdded.gql'),
+                    document: require('../../../../graphql/subscription/planner/IterationAdded.gql'),
                     updateQuery: (previousResult, { subscriptionData: { data: { iterationAdded }} }) => {
                         previousResult.todoIterations.splice(0, 0, iterationAdded);
                         return previousResult;
                     },
                 },
                 {
-                    document: require('../../../../graphql/subscription/todo/IterationUpdated.gql'),
-                    updateQuery: (previousResult, { subscriptionData: { data: { iterationUpdated }} }) => {
-                        replaceItem(iterationUpdated, previousResult.todoIterations);
-                        return previousResult;
-                    },
-                },
-                {
-                    document: require('../../../../graphql/subscription/todo/IterationDeleted.gql'),
+                    document: require('../../../../graphql/subscription/planner/IterationDeleted.gql'),
                     updateQuery: (previousResult, { subscriptionData: { data: { iterationDeleted }} }) => {
                         removeItem(iterationDeleted, previousResult.todoIterations);
                         return previousResult;

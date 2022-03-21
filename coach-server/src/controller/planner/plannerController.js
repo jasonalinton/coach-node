@@ -18,41 +18,75 @@ async function refreshRepetitiveEvents(indexDate, indexEnd, timeframe = repetiti
     const todos = await refreshRepetitiveTodos(indexDate, indexEnd, timeframe = repetitions.month, context);
     const routines = await refreshRepetitiveRoutines(indexDate, indexEnd, timeframe = repetitions.month, context);
 
-    mapRoutineIterationsToTodoIterations(routines, context);
-
     return { todos, routines };
 }
 
 async function refreshRepetitiveTodos(indexDate, indexEnd, timeframe = repetitions.month, context) {
     const todos = await repetitiveTodos(null, null, context, true);
+
     let todos_updated = [];
-    // console.log("Got repetitive todos")
     for (let i = 0; i < todos.length; i++) {
         let todo = todos[i];
         const todoModel_Updated = await createRepetitiveEvents(todo, 'todo', indexDate, indexEnd, timeframe, context);
-        // console.log("Created repetitive events for todo");
         todos_updated.push(todoModel_Updated);
     };
-    // console.log("Created repetitive events for todos")
 
     return todos_updated;
 }
 
 async function refreshRepetitiveRoutines(indexDate, indexEnd, timeframe = repetitions.month, context) {
-    // console.log("Refresh repetitive routines");
     const routines = await repetitiveRoutines(null, null, context, true);
 
-    // console.log("Got repetitive routines");
     let routines_updated = [];
     for (let i = 0; i < routines.length; i++) {
         let routine = routines[i];
+
+        let repeatIDs_Routine = routine.repeats.map(_repeat => _repeat.id);
+
+        routine.todos.forEach(async _todo => {
+            /* Remove any todo repeats that are not shared by routine */
+            let repeats = [];
+            _todo.repeats.forEach(_repeat => {
+                /* This probably isn't a thing. I don't think todos share repeats with routines. They make clones instead */
+                if (repeatIDs_Routine.includes(_repeat.id))
+                    repeats.push(_repeat);
+                if (_repeat.routineRepeat && repeatIDs_Routine.includes(_repeat.routineRepeat.id))
+                    repeats.push(_repeat);
+            })
+            _todo.repeats = repeats;
+            await createRepetitiveEvents(_todo, 'todo', indexDate, indexEnd, timeframe, context);
+        })
+
         const routine_updated = await createRepetitiveEvents(routine, 'routine', indexDate, indexEnd, timeframe, context);
-        // console.log("Created repetitive events for routine");
         routines_updated.push(routine_updated);
     };
-    // console.log("Created repetitive events for routines");
+    
+    mapRoutineIterationsToTodoIterations(routines, context);
 
     return routines_updated;
+}
+
+async function refreshRepetitiveRoutine(routine, indexDate, indexEnd, timeframe = repetitions.month, context) {
+    let repeatIDs_Routine = routine.repeats.map(_repeat => _repeat.id);
+    routine.todos.forEach(async _todo => {
+        /* Remove any todo repeats that are not shared by routine */
+        let repeats = [];
+        _todo.repeats.forEach(_repeat => {
+            /* This probably isn't a thing. I don't think todos share repeats with routines. They make clones instead */
+            if (repeatIDs_Routine.includes(_repeat.id))
+                repeats.push(_repeat);
+            if (_repeat.routineRepeat && repeatIDs_Routine.includes(_repeat.routineRepeat.id))
+                repeats.push(_repeat);
+        })
+        _todo.repeats = repeats;
+        await createRepetitiveEvents(_todo, 'todo', indexDate, indexEnd, timeframe, context);
+    })
+
+    routine = await createRepetitiveEvents(routine, 'routine', indexDate, indexEnd, timeframe, context);
+    
+    mapRoutineIterationsToTodoIterations([routine], context);
+
+    return routine;
 }
 
 async function createRepetitiveEvents(item, itemType, indexDate = null, indexEnd = null, timeframe = repetitions.monthly.id, context) {
@@ -60,7 +94,7 @@ async function createRepetitiveEvents(item, itemType, indexDate = null, indexEnd
     indexEnd = (indexEnd) ? indexEnd : moment(indexDate).add(2, 'month').toDate();
 
     if (timeframe == repetitions.monthly.id)
-        indexEnd = (indexEnd) ? indexEnd : moment(indexDate).add(2, 'month').toDate();
+        indexEnd = (indexEnd) ? indexEnd : moment(indexDate).add(3, 'month').toDate();
     else if (timeframe == repetitions.triAnnually.id)
         indexEnd = (indexEnd) ? indexEnd : moment(indexDate).add(4, 'month').toDate();
     else if (timeframe == repetitions.yearly.id)
@@ -295,20 +329,26 @@ async function mapRoutineIterationsToTodoIterations(routines, context) {
             }
         }
         routineTodo_Iterations.push(routineTodo_Iteration);
+
+        // // Map todo iterations to the same event of the routine iteration
+        // if (iteration.events && iteration.events.length > 0) {
+        //     if (iteration.event.length > 1) {
+        //         console.log("ITERATION HAS MULTIPLE EVENTS!")
+        //     }
+        //     let event = iteration.events[0];
+        //     let iterations = [];
+            
+
+        // }
         
     })
 
-    let routineTodo_Iterations_updated = []
-    for (let i = 0; i < routineTodo_Iterations.length; i++) {
-        let routineTodo_Iteration_updated = routineTodo_Iterations[i];
-        // console.log("")
-        routineTodo_Iteration_updated = await mapTodoIterations(null, routineTodo_Iteration_updated, context);
-        // console.log("")
-        routineTodo_Iterations_updated.push(routineTodo_Iteration_updated);
-    }
-        // console.log("")
+    for (let i = 0; i < routineTodo_Iterations.length; i++)
+        await mapTodoIterations(null, routineTodo_Iterations[i], context);
 }
 
 module.exports = {
-    refreshRepetitiveEvents
+    refreshRepetitiveEvents,
+    createRepetitiveEvents,
+    refreshRepetitiveRoutine
 }

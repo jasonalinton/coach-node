@@ -1,5 +1,5 @@
-mutation toggleCompletion($iteration: IterationInput!) {
-  toggleCompletion(iteration: $iteration) {
+mutation toggleCompletion($idIteration: Int!, $attemptedAt: String, $completedAt: String) {
+  toggleCompletion(idIteration: $idIteration, attemptedAt: $attemptedAt, completedAt: $completedAt, ) {
         id
         text
         startAt

@@ -327,5 +327,5 @@ module.exports = {
     deleteTodo,
     createTodoIterations,
     scheduleTodo,
-    mapTodoToEvent
+    mapTodoToEvent,
 }

@@ -111,7 +111,7 @@ export default {
                     },
                 },
                 {
-                    document: require('../../../../graphql/subscription/todo/IterationUpdated.gql'),
+                    document: require('../../../../graphql/subscription/planner/IterationUpdated.gql'),
                     updateQuery: (previousResult, { subscriptionData: { data: { iterationUpdated }} }) => {
                         replaceItem(iterationUpdated, previousResult.event.iterations);
                         previousResult.event.iterations.forEach(_iteration => {
@@ -124,7 +124,7 @@ export default {
                     },
                 },
                 {
-                    document: require('../../../../graphql/subscription/todo/IterationDeleted.gql'),
+                    document: require('../../../../graphql/subscription/planner/IterationDeleted.gql'),
                     updateQuery: (previousResult, { subscriptionData: { data: { iterationDeleted }} }) => {
                         removeItem(iterationDeleted, previousResult.event.iterations);
                         previousResult.event.iterations.forEach(_iteration => {
@@ -236,12 +236,6 @@ function refreshIterations(_event) {
 
         complete = complete.concat(_event.iterations.filter(iteration => iteration.routineIteration == null && iteration.attemptedAt));
         pending = pending.concat(_event.iterations.filter(iteration => iteration.routineIteration == null && !iteration.attemptedAt));
-
-        let routineIterations = _event.iterations.filter(iteration => iteration.routineIteration != null).flat();
-        routineIterations = routineIterations.map(iteration => iteration.routineIteration);
-        let todoIterations = routineIterations.map(iteration => iteration.todoIterations).flat();
-        complete = complete.concat(todoIterations.filter(iteration => iteration.attemptedAt));
-        pending = pending.concat(todoIterations.filter(iteration => !iteration.attemptedAt));
 
         this.iterations.complete = sortDesc(complete, 'id');
         this.iterations.pending = sortDesc(pending, 'id');

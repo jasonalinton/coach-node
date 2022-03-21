@@ -7,99 +7,199 @@
         </div>
         <!-- Title/Text -->
         <div class="form-group mt-1">
-            <input id="title" class="textbox" type="text" ref="text"  placeholder="Title"
-                    v-model.lazy.trim="item.text" 
-                    v-on:keyup.enter="save(item)"
-                    spellcheck/>
+            <input
+                id="title"
+                class="textbox"
+                type="text"
+                ref="text"
+                placeholder="Title"
+                v-model.lazy.trim="item.text"
+                v-on:keyup.enter="save(item)"
+                spellcheck
+            />
         </div>
         <!-- Description -->
         <div class="form-group mt-1">
-            <textarea id="description" class="textarea" 
-                      type="text"
-                      placeholder="Description"
-                      v-model="item.description"
-                      v-on:keyup.enter="save(item)" />
+            <textarea
+                id="description"
+                class="textarea"
+                type="text"
+                placeholder="Description"
+                v-model="item.description"
+                v-on:keyup.enter="save(item)"
+            />
         </div>
         <!-- Mapped Items -->
-        <ApolloQuery 
-            v-for="prop in itemProps" :key="prop.id"
-            :query="prop.optionsQuery">
+        <ApolloQuery
+            v-for="prop in itemProps"
+            :key="prop.id"
+            :query="prop.optionsQuery"
+        >
             <template slot-scope="{ result: { error, data }, isLoading }">
                 <div class="mapped-item form-group mt-1">
-                    <div class="header d-flex justify-content-between align-items-center align-middle">
-                        <a class="item-select btn btn-sm btn-link" type="button" data-bs-toggle="collapse" :data-bs-target="`.${prop.prop}.collapse`" aria-controls="offcanvas-items">{{ prop.name }}</a>
+                    <div
+                        class="
+                            header
+                            d-flex
+                            justify-content-between
+                            align-items-center align-middle
+                        "
+                    >
+                        <a
+                            class="item-select btn btn-sm btn-link"
+                            type="button"
+                            data-bs-toggle="collapse"
+                            :data-bs-target="`.${prop.prop}.collapse`"
+                            aria-controls="offcanvas-items"
+                            >{{ prop.name }}</a
+                        >
                     </div>
                     <!-- Quick Add Item -->
                     <div class="d-flex justify-content-between mt-1">
-                        <button class="add-btn my-auto" type="button" @click="addItem(newItem[prop.prop], item[prop.prop])">
-                            <img src="/icon/button/add.png" width="10" height="10"/>Add
+                        <button
+                            class="add-btn my-auto"
+                            type="button"
+                            @click="
+                                addItem(newItem[prop.prop], item[prop.prop])
+                            "
+                        >
+                            <img
+                                src="/icon/button/add.png"
+                                width="10"
+                                height="10"
+                            />Add
                         </button>
-                        <input class="add textbox" type="text" 
+                        <input
+                            class="add textbox"
+                            type="text"
                             v-model="newItem[prop.prop].text"
-                            v-on:keyup.enter="addItem(newItem[prop.prop], item[prop.prop])"
-                            :style="{'width': 'calc(100% - 55px)'}"/>
+                            v-on:keyup.enter="
+                                addItem(newItem[prop.prop], item[prop.prop])
+                            "
+                            :style="{ width: 'calc(100% - 55px)' }"
+                        />
                     </div>
                     <div :class="`${prop.prop} collapse mt-1`">
                         <div v-if="isLoading">Loading...</div>
                         <div v-else-if="error">An error occurred</div>
-                        <SelectItem v-else-if="data" :items="data[prop.queryField]" :selectedItems="item[prop.prop]"></SelectItem>
+                        <SelectItem
+                            v-else-if="data"
+                            :items="data[prop.queryField]"
+                            :selectedItems="item[prop.prop]"
+                        ></SelectItem>
                         <div v-else class="no-result apollo">No result :(</div>
                     </div>
                     <div :class="`list-group ${prop.prop} collapse show mt-1`">
-                        <a href="#" class="list-group-item list-group-item-light list-group-item-action d-flex justify-content-between align-items-center" v-for="_item in item[prop.prop]" v-bind:key="_item.id">
+                        <a
+                            href="#"
+                            class="
+                                list-group-item
+                                list-group-item-light
+                                list-group-item-action
+                                d-flex
+                                justify-content-between
+                                align-items-center
+                            "
+                            v-for="_item in item[prop.prop]"
+                            v-bind:key="_item.id"
+                        >
                             {{ _item.text }}
-                            <img class="delete-button" src="/icon/button/delete.png" width="10" height="10" @click="removeItem(_item, item[prop.prop])"/>
+                            <img
+                                class="delete-button"
+                                src="/icon/button/delete.png"
+                                width="10"
+                                height="10"
+                                @click="removeItem(_item, item[prop.prop])"
+                            />
                         </a>
                     </div>
                 </div>
             </template>
         </ApolloQuery>
-        <RepeatControl class="mt-2" :repeats="item.repeats" @addRepeat="addRepeat" @updateRepeat="updateRepeat"></RepeatControl>
-        <TimePairControl class="mt-2" :timePairs="item.timePairs" @addTimePair="addTimePair" @updateTimePair="updateTimePair"></TimePairControl>
+        <RepeatControl
+            class="mt-2"
+            :repeats="item.repeats"
+            @addRepeat="addRepeat"
+            @updateRepeat="updateRepeat"
+        ></RepeatControl>
+        <TimePairControl
+            class="mt-2"
+            :timePairs="item.timePairs"
+            @addTimePair="addTimePair"
+            @updateTimePair="updateTimePair"
+        ></TimePairControl>
         <div class="d-flex flew-row justify-content-between mt-4">
             <!-- Toggle Panel - Checkbox -->
             <div class="form-check">
-                <input :id="`toggle-${config.itemType}-panel`" class="form-check-input" type="checkbox" v-model="togglePanel" >
-                <label class="form-check-label" :for="`toggle-${config.itemType}-panel`">
+                <input
+                    :id="`toggle-${config.itemType}-panel`"
+                    class="form-check-input"
+                    type="checkbox"
+                    v-model="togglePanel"
+                />
+                <label
+                    class="form-check-label"
+                    :for="`toggle-${config.itemType}-panel`"
+                >
                     Toggle
                 </label>
             </div>
+            <button
+                class="btn btn-primary me-2"
+                type="button"
+                @click.prevent="refreshRepetitive()"
+            >
+                Refresh Repetitive
+            </button>
             <!-- Buttons -->
             <div class="form-group d-flex justify-content-end">
-                <button class="btn btn-primary me-2" type="button" @click.prevent="save(item)">Save</button>
-                <button class="btn btn-warning" type="button" @click.prevent="close">Cancel</button>
+                <button
+                    class="btn btn-primary me-2"
+                    type="button"
+                    @click.prevent="save(item)"
+                >
+                    Save
+                </button>
+                <button
+                    class="btn btn-warning"
+                    type="button"
+                    @click.prevent="close"
+                >
+                    Cancel
+                </button>
             </div>
         </div>
     </form>
 </template>
 
 <script>
-import SelectItem from "../../controls/SelectItem.vue"
-import { replaceItem, removeItem, clone } from '../../../../utility'
-import RepeatControl from '../../controls/time/RepeatControl.vue'
-import TimePairControl from '../../controls/time/TimePairControl.vue'
+import SelectItem from "../../controls/SelectItem.vue";
+import { replaceItem, removeItem, clone } from "../../../../utility";
+import RepeatControl from "../../controls/time/RepeatControl.vue";
+import TimePairControl from "../../controls/time/TimePairControl.vue";
+import { refreshRepetitiveRoutine } from "../../../resolvers/routine-resolvers";
 
 export default {
     components: { SelectItem, RepeatControl, TimePairControl },
     name: "RoutineForm",
     props: {
         config: Object,
-        item: Object
+        item: Object,
     },
-    data: function() {
+    data: function () {
         return {
             originalItem: null,
             togglePanel: false,
             newItem: {},
-            itemProps: this.config.props.filter(prop => prop.isItem)
-        }
+            itemProps: this.config.props.filter((prop) => prop.isItem),
+        };
     },
-    created: function() {
+    created: function () {
         this.originalItem = clone(this.item);
         this.initToggle();
         this.initNewItems();
     },
-    mounted: function() {
+    mounted: function () {
         this.$refs.text.focus();
     },
     methods: {
@@ -115,7 +215,8 @@ export default {
         addRepeat,
         updateRepeat,
         addTimePair,
-        updateTimePair
+        updateTimePair,
+        refreshRepetitive,
     },
     watch: {
         togglePanel(value) {
@@ -123,26 +224,30 @@ export default {
         },
         item(value) {
             this.originalItem = clone(value);
-        }
-    }
-}
+        },
+    },
+};
 
 function initToggle() {
-    let togglePanel_Store = (localStorage.getItem(`${this.config.itemType}-toggle-panel`) === 'true');
+    let togglePanel_Store =
+        localStorage.getItem(`${this.config.itemType}-toggle-panel`) === "true";
     if (togglePanel_Store) {
         this.togglePanel = Boolean(togglePanel_Store);
     } else {
-        localStorage.setItem(`${this.config.itemType}-toggle-panel`, this.togglePanel);
+        localStorage.setItem(
+            `${this.config.itemType}-toggle-panel`,
+            this.togglePanel
+        );
         this.togglePanel = false;
     }
 }
 
 function initNewItems() {
     let _this = this;
-    this.itemProps.forEach(prop => {
-        _this.newItem[prop.prop] = { 
+    this.itemProps.forEach((prop) => {
+        _this.newItem[prop.prop] = {
             id: -1,
-            text: null 
+            text: null,
         };
     });
 }
@@ -151,9 +256,9 @@ function addItem(item, itemsList) {
     var text = item.text.trim();
     if (text != "") {
         var newItem = {
-          id: item.id--,
-          text
-        }
+            id: item.id--,
+            text,
+        };
         itemsList.push(newItem);
         item.text = "";
     }
@@ -161,24 +266,28 @@ function addItem(item, itemsList) {
 
 function getUnmappedIDs() {
     let unmappedIDs = {};
-    let properties = this.config.props.filter(prop => prop.type == 'objects');
+    let properties = this.config.props.filter((prop) => prop.type == "objects");
     let _this = this;
 
-    properties.forEach(prop => {
-        let updatedIDs = _this.item[prop.prop].map(item => { return item.id });
-        let originalIDs = _this.originalItem[prop.prop].map(item => { return item.id });
-        let unmapped = []
+    properties.forEach((prop) => {
+        let updatedIDs = _this.item[prop.prop].map((item) => {
+            return item.id;
+        });
+        let originalIDs = _this.originalItem[prop.prop].map((item) => {
+            return item.id;
+        });
+        let unmapped = [];
 
-        originalIDs.forEach(id => {
+        originalIDs.forEach((id) => {
             if (!updatedIDs.includes(id)) {
                 unmapped.push(id);
             }
-        })
+        });
 
         if (unmapped.length > 0) {
             unmappedIDs[prop.prop] = unmapped;
         }
-    })
+    });
 
     return unmappedIDs;
 }
@@ -189,8 +298,7 @@ function addRepeat(repeat) {
 
 function updateRepeat(repeat) {
     var success = replaceItem(clone(repeat), this.item.repeats);
-    if (!success)
-        alert("Repeat no longer exists");
+    if (!success) alert("Repeat no longer exists");
 }
 
 function addTimePair(timePair) {
@@ -199,8 +307,7 @@ function addTimePair(timePair) {
 
 function updateTimePair(timePair) {
     var success = replaceItem(clone(timePair), this.item.timePairs);
-    if (!success)
-        alert("TimePair no longer exists");
+    if (!success) alert("TimePair no longer exists");
 }
 
 function save(item) {
@@ -225,22 +332,22 @@ function save(item) {
 }
 
 function configureRoutine(item) {
-    item.todos.forEach(todo => {
-        item.repeats.forEach(repeat => {
+    item.todos.forEach((todo) => {
+        item.repeats.forEach((repeat) => {
             let cloned = clone(repeat);
             cloned.isConnected = true;
             if (!todo.repeats) todo.repeats = [];
             todo.repeats.push(cloned);
-        })
-    })
+        });
+    });
 }
 
 function refreshForm() {
-    this.$emit('refreshForm');
+    this.$emit("refreshForm");
 }
 
 function close() {
-    this.$emit('closeForm', this.togglePanel);
+    this.$emit("closeForm", this.togglePanel);
 }
 
 // function mapRoutine(routine) {
@@ -254,6 +361,10 @@ function close() {
 //         this.item.repeats.push(clonedRepeat);
 //     })
 // }
+
+function refreshRepetitive() {
+    refreshRepetitiveRoutine(this.item.id, this.$apollo);
+}
 </script>
 
 <style scoped>
@@ -272,7 +383,7 @@ form {
 }
 
 .mapped-item .header {
-    border-bottom: 1px solid rgba(220, 220, 220, .5);
+    border-bottom: 1px solid rgba(220, 220, 220, 0.5);
 }
 
 /* .mapped-item-header:hover {
@@ -280,8 +391,9 @@ form {
     border-color: #005A9E;
 } */
 
-.mapped-item:hover .header a, .mapped-item:focus .header a {
-    color: #005A9E;
+.mapped-item:hover .header a,
+.mapped-item:focus .header a {
+    color: #005a9e;
 }
 
 .mapped-item .header a {
@@ -294,7 +406,7 @@ form {
     font-size: 16px;
     margin-bottom: 0px;
     padding-left: 8px;
-    color: #343434
+    color: #343434;
 }
 
 .list-group-item {
@@ -308,7 +420,7 @@ form {
 }
 
 .list-group-item:hover {
-    background-color:#F5F5F5;
+    background-color: #f5f5f5;
 }
 
 .list-group-item:hover img {
@@ -318,7 +430,7 @@ form {
 .delete-button {
     margin: 4px 8px;
     visibility: hidden;
-    opacity: .8;
+    opacity: 0.8;
 }
 </style>
 
@@ -326,14 +438,15 @@ form {
 .control-label {
     font-size: 12px;
     padding: 2px 8px;
-    color: rgba(0, 0, 0, .55);
+    color: rgba(0, 0, 0, 0.55);
 }
 
 .textbox {
     height: 28px;
 }
 
-.textbox, .textarea {
+.textbox,
+.textarea {
     width: 100%;
     font-size: 14px;
     line-height: 14px;
@@ -347,15 +460,17 @@ form {
     padding: 8px;
 }
 
-.textbox:not(.accissible), .textarea:not(.accissible) {
+.textbox:not(.accissible),
+.textarea:not(.accissible) {
     outline-style: none;
     -webkit-appearance: none;
-    border: 1px solid rgba(0, 0, 0, .08);
+    border: 1px solid rgba(0, 0, 0, 0.08);
     resize: none;
 }
 
-.textbox:not(.accissible):focus, .textarea:not(.accissible):focus {
-    border: 1px solid #039BE5;
+.textbox:not(.accissible):focus,
+.textarea:not(.accissible):focus {
+    border: 1px solid #039be5;
     transition-property: border-color;
     transition-duration: 0.15s;
     transition-timing-function: ease-in-out;
@@ -363,9 +478,10 @@ form {
     resize: vertical;
 }
 
-.textbox:not(.accissible):hover:not(:focus), .textarea:not(.accissible):hover:not(:focus) {
+.textbox:not(.accissible):hover:not(:focus),
+.textarea:not(.accissible):hover:not(:focus) {
     /* border: 1px solid rgba(0, 0, 0, .08); */
-    border: 1px solid rgba(0, 0, 0, .2);
+    border: 1px solid rgba(0, 0, 0, 0.2);
     resize: vertical;
 }
 
@@ -380,7 +496,7 @@ form {
 }
 
 .add-btn:hover {
-    background-color: #DEECF9;
+    background-color: #deecf9;
 }
 
 .add-btn img {

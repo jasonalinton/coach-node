@@ -17,11 +17,15 @@ async function repetitiveRoutines(parent, args, context, info, ignoreRoutines = 
     let routines = await context.prisma.routine.findMany({
         where: {
             isDeleted: false,
-            repeats: { some: { } }
+            repeats: { some: { } },
         },
         include: {
             todos: {
-                include: { iterations: true }
+                include: { 
+                    iterations: true,
+                    repeats: select_repeat
+                },
+                where: { isDeleted: false }
             },
             iterations: { 
                 include: { routineRepeat: select_repeat }

@@ -29,6 +29,9 @@
                     <div :style="{ 'width': '12px', 'height': '40px', 'background-color': '#F4511E', 'margin-left': '3px', 'border-radius': '4px'}"></div></div>
                 </div>
             </div>
+            <div class="d-flex flex-column">
+                <img class="icon-button m-auto mb-0" src='/icon/refresh-icon.png' width="40" height="40" @click="refreshRepetitive"/>
+            </div>
         </div>
         <div class="col-auto h-100">
             <MetricPanel v-show="selectedPanel == 'metric'" :selectedDate="selectedDate" class="item-panel"/>
@@ -48,6 +51,7 @@ import TodoPanel from './todo/TodoPanel.vue'
 import RoutinePanel from './routine/RoutinePanel.vue'
 import TaskRoutinePanel from './TaskRoutinePanel.vue'
 import EventPanel from './event/EventPanel.vue'
+import { refreshRepetitiveItems } from '../../../resolvers/planner-resolvers'
 
 export default {
     name: 'ItemPanel',
@@ -70,6 +74,9 @@ export default {
             localStorage.setItem(`selected-item-panel`, this.selectedPanel);
         }
     },
+    methods: {
+        refreshRepetitive
+    },
     watch: {
         selectedPanel(value) {
             localStorage.setItem(`selected-item-panel`, value);
@@ -81,6 +88,10 @@ export default {
             }
         }
     }
+}
+
+function refreshRepetitive(){
+    refreshRepetitiveItems(this.$apollo);
 }
 </script>
 <style scoped>

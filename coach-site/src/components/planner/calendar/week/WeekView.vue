@@ -1,10 +1,15 @@
 <template>
     <div class="d-flex h-100">
-        <div class="week-view d-flex flex-column h-100 w-100" ref="weekView" :style="{ 'min-width': `${64 * dayCount}px` } ">
-            <div class="header d-flex" :style="{ 'padding-left': `${hour.labelWidth}px` }">
-                <div v-for="(day, index) in dayModels" :key="index"  
-                    class="head day-view d-flex flex-column flex-grow-1 h-100"
-                    :class="day.pointInTime" :style="{ 'flex-basis': 0 }">
+        <div class="week-view d-flex flex-column h-100 w-100"
+             ref="weekView"
+             :style="{ 'min-width': `${64 * dayCount}px` }">
+            <div class="header d-flex"
+                 :style="{ 'padding-left': `${hour.labelWidth}px` }">
+                <div v-for="(day, index) in dayModels"
+                     :key="index"
+                     class="head day-view d-flex flex-column flex-grow-1 h-100"
+                     :class="day.pointInTime"
+                     :style="{ 'flex-basis': 0 }">
                     <!-- Date Label -->
                     <div class="date-label d-flex flex-column justify-content-between">
                         <div class="dow">{{ day.dow }}</div> <!-- Day of Week -->
@@ -17,19 +22,23 @@
                 </div>
             </div>
             <div class="body d-flex h-100 overflow-scroll">
-                <div class="hour-labels overflow-scroll" :style="{ 'min-width': `${hour.labelWidth}px`, 'height': 'fit-content' }" ref="hourLabels">
-                    <div v-for="(h, index) in hour.hours" :key="index"
-                        :style="{ 'min-height': `${hour.blockHeight}px` }">
+                <div class="hour-labels overflow-scroll"
+                     :style="{ 'min-width': `${hour.labelWidth}px`, height: 'fit-content' }">
+                    <div v-for="(h, index) in hour.hours"
+                         :key="index"
+                         :style="{ 'min-height': `${hour.blockHeight}px` }">
                         <div v-if="index != 0">
                             <p class="hour-label">{{ h.twelveHourString }}</p>
                         </div>
                     </div>
                 </div>
-                <div v-if="dayModels.length > 0" class="hour-blocks d-flex w-100 overflow-scroll" 
+                <div v-if="dayModels.length > 0"
+                     class="hour-blocks d-flex w-100 overflow-scroll"
                      ref="hourBlocks"
-                     :style="{ 'height': 'fit-content' }"
-                       @scroll="onScroll">
-                    <HourBlocks v-for="(day, index) in dayModels" :key="index"
+                     :style="{ height: 'fit-content' }"
+                        @scroll="onScroll">
+                    <HourBlocks v-for="(day, index) in dayModels"
+                                :key="index"
                                 class="day-view flex-grow-1"
                                 :events="day.events"
                                 :style="{ 'flex-basis': 0 }"
@@ -45,19 +54,19 @@
 <script>
 import date from "date-and-time";
 import TaskList from "../TaskList.vue";
-import HourBlocks from '../event/HourBlocks.vue';
-import { replaceItem, removeItem } from '../../../../../utility';
-import { getHoursObjectArray } from "../../../../../utility/plannerUtility"
-import { firstDayOfWeek } from '../../../../../utility/timeUtility';
+import HourBlocks from "../event/HourBlocks.vue";
+import { replaceItem, removeItem } from "../../../../../utility";
+import { getHoursObjectArray } from "../../../../../utility/plannerUtility";
+import { firstDayOfWeek, firstDayOfMonth, lastDayOfMonth, addDay } from "../../../../../utility/timeUtility";
 
 export default {
-    name: 'WeekView',
+    name: "WeekView",
     components: { TaskList, HourBlocks },
     props: {
         dayCount: Number,
         selectedDate: Date,
     },
-    data: function() {
+    data: function () {
         return {
             padding: 60,
             days: [],
@@ -69,104 +78,178 @@ export default {
             hour: {
                 hours: [],
                 labelWidth: 50,
-                blockHeight: 48
+                blockHeight: 48,
             },
             events: [],
-            iterations: []
+            tasks: [],
+            firstDay: null,
+            lastDay: null
+        };
+    },
+    computed: {
+        queryVariables() {
+            return {
+                startAt: firstDayOfMonth(this.selectedDate),
+                endAt: lastDayOfMonth(addDay(this.selectedDate, this.dayCount)),
+            }
         }
     },
-    // computed: {
-    //     events() { return this.eventsAndIterations.events },
-    //     iterations() { return this.eventsAndIterations.iterations }
-    // },
-    beforeMount: function() {
-    },
-    mounted: function() {
-        this.width = this.$refs.weekView.clientWidth
-        let grid = "";
-        for (let i = 0; i < this.dayCount; i++)
-            grid += "fr "
-        this.dayCount.forEach
-        this.grid = grid;
+    beforeMount: function () {},
+    mounted: function () {
+        this.width = this.$refs.weekView.clientWidth;
         this.initTimeline();
         this.initHours();
     },
     apollo: {
-        eventsAndIterations: {
-            query() { return require('../../../../graphql/query/planner/QueryEventsAndIterations.gql')},
-            error: function(error) {
-                this.errorMessage = 'Error occurred while loading event query'
+        events: {
+            query() {
+                return require("../../../../graphql/query/planner/QueryEvents.gql");
+            },
+            variables() { return this.queryVariables },
+            error: function (error) {
+                this.errorMessage = "Error occurred while loading event query";
                 console.log(this.errorMessage, error);
             },
             update(data) {
-                // this.eventsAndIterations = data.eventsAndIterations;
-                this.iterations = data.eventsAndIterations.iterations;
-                this.events = data.eventsAndIterations.events;
-                this.dayModels = this.iterationsToDays();
-                return data.eventsAndIterations
+                this.dayModels.forEach((model) => {
+                    model.events.length = 0;
+                    let events = data.events.filter(
+                        (_event) =>
+                            model.dateString ==
+                            new Date(_event.startAt).toDateString()
+                    );
+                    model.events.push(...events);
+                });
+
+                return data.events;
             },
             subscribeToMore: [
                 {
-                    document: require('../../../../graphql/subscription/todo/IterationAdded.gql'),
-                    updateQuery: (previousResult, { subscriptionData: { data: { iterationAdded }} }) => {
-                        previousResult.eventsAndIterations.iterations.splice(0, 0, iterationAdded);
-                        return { eventsAndIterations: previousResult.eventsAndIterations };
+                    document: require('../../../../graphql/subscription/planner/EventAdded.gql'),
+                    variables() { return this.queryVariables },
+                    updateQuery: (previousResult, { subscriptionData: { data: { eventAdded }} }) => {
+                        previousResult.events.splice(0, 0, eventAdded);
+                        return { events: previousResult.events };
                     },
                 },
-                // {
-                //     document: require('../../../../graphql/subscription/todo/IterationUpdated.gql'),
-                //     updateQuery: (previousResult, { subscriptionData: { data: { iterationUpdated }} }) => {
-                //         replaceItem(iterationUpdated, previousResult.eventsAndIterations.iterations);
-                //         return { eventsAndIterations: previousResult.eventsAndIterations };
-                //     },
-                // },
                 {
-                    document: require('../../../../graphql/subscription/todo/IterationDeleted.gql'),
-                    updateQuery: (previousResult, { subscriptionData: { data: { iterationDeleted }} }) => {
-                        removeItem(iterationDeleted, previousResult.eventsAndIterations.iterations);
-                        return previousResult;
+                    document: require('../../../../graphql/subscription/planner/EventDeleted.gql'),
+                    variables() { return this.queryVariables },
+                    updateQuery: (previousResult, { subscriptionData: { data: { eventDeleted }} }) => {
+                        removeItem(eventDeleted, previousResult.events);
+                        return { events: previousResult.events };
                     },
                 },
-            ]
+            ],
+        },
+        tasks: {
+            query() {
+                return require("../../../../graphql/query/planner/QueryIterations.gql");
+            },
+            variables() { return this.queryVariables },
+            error: function (error) {
+                this.errorMessage = "Error occurred while loading event query";
+                console.log(this.errorMessage, error);
+            },
+            update(data) {
+                this.dayModels.forEach((model) => {
+                    model.tasks.length = 0;
+                    let tasks = data.iterations.filter(_task => model.dateString == new Date(_task.startAt).toDateString());
+                    tasks = tasks.filter(_task => _task.events.length == 0);
+                    model.tasks.push(...tasks);
+                });
+
+                return data.iterations;
+            },
+            subscribeToMore: [
+                {
+                    document: require('../../../../graphql/subscription/planner/IterationAdded.gql'),
+                    variables() { return this.queryVariables },
+                    updateQuery: (previousResult, { subscriptionData: { data: { iterationAdded }} }) => {
+                        previousResult.tasks.splice(0, 0, iterationAdded);
+                        return { tasks: previousResult.tasks };
+                    },
+                },
+                {
+                    document: require('../../../../graphql/subscription/planner/IterationDeleted.gql'),
+                    variables() { return this.queryVariables },
+                    updateQuery: (previousResult, { subscriptionData: { data: { iterationDeleted }} }) => {
+                        removeItem(iterationDeleted, previousResult.tasks);
+                        return { events: previousResult.tasks };
+                    },
+                },
+            ],
         },
     },
     methods: {
         initHours,
         initTimeline,
         iterationsToDays,
-        refresh,
+        newDay,
         replaceItem,
         removeItem,
         getHoursObjectArray,
         onScroll,
         taskList(day) {
-            return day.tasks.filter(_task => !_task.isInEvent);
-            // return day.tasks.filter(_task => _task.events && _task.events.length == 0);
-        }
+            return day.tasks.filter((_task) => !_task.isInEvent);
+        },
     },
     watch: {
-        dayCount() { this.refresh(); },
-        selectedDate() { this.refresh();  }
-    }
-}
+        dayCount() {
+            this.initTimeline();
+        },
+        selectedDate() {
+            this.initTimeline();
+        },
+    },
+};
 
 function initHours() {
     this.hour.hours = this.getHoursObjectArray();
 }
 
 function initTimeline() {
+    let indexDate =
+        this.dayCount == 7
+            ? firstDayOfWeek(this.selectedDate)
+            : new Date(this.selectedDate);
+
+    this.firstDay = new Date(indexDate);
     this.days = [];
-
-    let indexDate = new Date(this.selectedDate);
-
-    if (this.dayCount == 7) {
-        indexDate = firstDayOfWeek(this.selectedDate)
-    }
-
+    let dayModels = [];
     for (let i = 0; i < this.dayCount; i++) {
         this.days.push(indexDate);
-        indexDate = date.addDays(indexDate, 1);
+        dayModels.push(this.newDay(indexDate));
+        indexDate = addDay(indexDate, 1);
     }
+
+    this.lastDay = new Date(indexDate);
+    this.dayModels = dayModels;
+}
+
+function newDay(day) {
+    let tasks = this.tasks.filter(_task => day.toDateString() == new Date(_task.startAt).toDateString());
+    tasks = tasks.filter(_task => _task.events.length == 0);
+    let events = this.events.filter(_event => day.toDateString() == new Date(_event.startAt).toDateString());
+
+    let pointInTime = "";
+    if (day.getTime() < this.selectedDate.getTime()) {
+        pointInTime = "past";
+    } else if (day.getTime() == this.selectedDate.getTime()) {
+        pointInTime = "present";
+    } else if (day.getTime() > this.selectedDate.getTime()) {
+        pointInTime = "future";
+    }
+    
+    return {
+        dow: date.format(day, "ddd"),
+        day: date.format(day, "D"),
+        date: new Date(day.getTime()),
+        dateString: day.toDateString(),
+        tasks,
+        events,
+        pointInTime
+    };
 }
 
 function iterationsToDays() {
@@ -174,48 +257,30 @@ function iterationsToDays() {
     let self = this;
 
     let days = [];
-    this.days.forEach(_day => {
+    this.days.forEach((_day) => {
         const dateString = new Date(_day.toJSON()).toDateString();
 
-        let iterations = self.iterations.filter(iteration => {
-             const start = new Date(iteration.startAt).toDateString();
-             const end = new Date(iteration.endAt).toDateString();
-            return start == dateString || (!iteration.startAt && iteration.endAt && end == dateString);
+        let iterations = self.iterations.filter((iteration) => {
+            const start = new Date(iteration.startAt).toDateString();
+            const end = new Date(iteration.endAt).toDateString();
+            return (
+                start == dateString ||
+                (!iteration.startAt && iteration.endAt && end == dateString)
+            );
         });
 
-        let events = self.events.filter(_event => {
-             const start = new Date(_event.startAt).toDateString();
+        let events = self.events.filter((_event) => {
+            const start = new Date(_event.startAt).toDateString();
             return start == dateString;
         });
 
-        let iterations1 = events.map(_event => _event.iterations).flat();
-        let todoIterations = iterations1.filter(_iteration => _iteration.routineIteration == null);
-        let routineIterations = iterations1.filter(_iteration => _iteration.routineIteration != null);
-        let iterations3 = routineIterations.map(_iteration => _iteration.routineIteration.todoIterations).flat();
-
-        iterations3 = todoIterations.concat(iterations3);
-
-        let tasksWithEventsIDs = iterations3.map(_task => _task.id);
-
-        // console.log(todoIterations.length)
-        // console.log(iterations3.length)
-
-        // let tasksWithEventsIDs = events.map(_event => _event.iterations).flat()
-        //                                .map(_task => _task.id);
-        iterations.forEach(_task => {
-            if (tasksWithEventsIDs.includes(_task.id))
-                _task.isInEvent = true;
-            else
-                _task.isInEvent = false;
-        })
-
-        let day = { 
+        let day = {
             tasks: iterations,
             events: events,
             text: date.format(_day, "ddd D"),
             dow: date.format(_day, "ddd"),
             day: date.format(_day, "D"),
-            date: new Date(_day.getTime())
+            date: new Date(_day.getTime()),
         };
         if (_day.getTime() < indexDate.getTime()) {
             day.pointInTime = "past";
@@ -230,11 +295,6 @@ function iterationsToDays() {
         this.maxTasks = 5;
     });
     return days;
-}
-
-function refresh() {
-    this.initTimeline();
-    this.dayModels = this.iterationsToDays();
 }
 
 function onScroll() {
@@ -266,22 +326,23 @@ function onScroll() {
     font-size: 12px;
     font-weight: 500;
     margin: 0 auto 2px auto;
-    font-family: 'Roboto', sans-serif;
+    font-family: "Roboto", sans-serif;
 }
 
 .date-label {
     width: 48px;
     height: 64px;
     margin: 8px auto 4px auto;
-    font-family: SF Pro Rounded, 'Roboto', sans-serif;
+    font-family: SF Pro Rounded, "Roboto", sans-serif;
 }
 
-.past .dow, .future .dow {
+.past .dow,
+.future .dow {
     color: #747474;
 }
 
 .present .dow {
-    color: #1A73E8;
+    color: #1a73e8;
 }
 
 .date-icon {
@@ -300,7 +361,7 @@ function onScroll() {
 
 .present .date-icon {
     color: white;
-    background-color: #1A73E8;
+    background-color: #1a73e8;
 }
 
 .future .date-icon {
@@ -312,8 +373,8 @@ function onScroll() {
 }
 
 .hour-labels {
-    -ms-overflow-style: none;  /* IE and Edge */
-    scrollbar-width: none;  /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
     font-size: 10px;
 }
 
@@ -321,6 +382,6 @@ function onScroll() {
     line-height: 10px;
     position: relative;
     top: -5px;
-    color: #70757A;
+    color: #70757a;
 }
 </style>

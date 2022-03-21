@@ -13,7 +13,14 @@ const routineTodoIterationIncude = {
                         children: true
                     }
                 },
-                routineIteration: { select: { id: true } }
+                routineIteration: { select: { id: true } },
+                events: { 
+                    select: { 
+                        id: true,
+                        startAt: true,
+                        endAt: true
+                     }
+                },
             },
             orderBy: { id: 'desc'}
         }
@@ -60,7 +67,11 @@ const iterationIncude = {
     routineRepeat: select_repeat,
     routineIteration: routineTodoIterationIncude,
     events: { 
-        select: { id: true }
+        select: { 
+            id: true,
+            startAt: true,
+            endAt: true
+         }
     }
 }
 

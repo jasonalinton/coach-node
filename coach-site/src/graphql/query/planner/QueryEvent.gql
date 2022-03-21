@@ -54,8 +54,18 @@ query event($id: Int!) {
                     text
                 }
             }
+            events {
+              id
+              startAt
+              endAt
+            }
             idRoutineIteration
           }
+        }
+        events {
+          id
+          startAt
+          endAt
         }
         idRoutineIteration
       }

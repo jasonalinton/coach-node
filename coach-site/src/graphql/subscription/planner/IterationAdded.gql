@@ -32,12 +32,19 @@ subscription iterationAdded {
         endAt
         attemptedAt
         completedAt
+        events {
+          id
+          startAt
+          endAt
+        }
+        idRoutineIteration
       }
-      idRoutineIteration
     }
     idRoutineIteration
     events {
         id
+        startAt
+        endAt
     }
   }
 }
