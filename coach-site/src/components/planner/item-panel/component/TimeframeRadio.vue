@@ -1,13 +1,13 @@
 <template>
     <div class="btn-group" role="group" :aria-label="`moment`">
-        <input type="radio" class="btn-check" :id="'day'" v-model="picked" value="day" />
-        <label class="btn btn-outline-primary" :for="'day'">Day</label>
+        <input type="radio" class="btn-check" :id="`day-${container}`" v-model="picked" value="day" />
+        <label class="btn btn-outline-primary" :for="`day-${container}`">Day</label>
 
-        <input type="radio" class="btn-check" :id="'week'" v-model="picked" value="week" />
-        <label class="btn btn-outline-primary" :for="'week'">Week</label>
+        <input type="radio" class="btn-check" :id="`week-${container}`" v-model="picked" value="week" />
+        <label class="btn btn-outline-primary" :for="`week-${container}`">Week</label>
 
-        <input type="radio" class="btn-check" :id="'month'" v-model="picked" value="month" />
-        <label class="btn btn-outline-primary" :for="'month'">Month</label>
+        <input type="radio" class="btn-check" :id="`month-${container}`" v-model="picked" value="month" />
+        <label class="btn btn-outline-primary" :for="`month-${container}`">Month</label>
     </div>
 </template>
 
@@ -15,8 +15,14 @@
 export default {
     name: 'TimeframeRadio',
     props: {
-        timeframe: String
+        timeframe: String,
+        container: String
     },
+    // data: function() {
+    //     return {
+
+    //      }
+    // },
     computed: {
         picked: {
             get() { return this.timeframe },

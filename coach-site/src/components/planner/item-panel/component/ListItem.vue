@@ -1,8 +1,9 @@
 <template>
     <div> 
         <div class="iteration d-flex flex-row justify-content-between align-items-center" :class="[{ complete: checked}]"
+             :style="{ 'font-size': fontSize }"
              draggable @dragstart="onDragStart($event)" @dragend="onDragEnd($event)">
-            <ItemCheckbox class="checkbox" 
+            <ItemCheckbox class="checkbox align-self-start" 
                           :checked="checked" 
                             @onChecked="markComplete" 
                             @onUnchecked="markIncomplete"
@@ -31,6 +32,11 @@ Parent Types
     routine
 */
 
+/* Sizes
+    sm
+    md
+*/
+
 export default {
     name: 'ListItem',
     components: { 
@@ -39,7 +45,8 @@ export default {
     props: {
         iteration: Object,
         parent: Object,
-        parentType: String
+        parentType: String,
+        size: String,
     },
     computed: {
         checked() {
@@ -47,6 +54,15 @@ export default {
                 return true;
             } else {
                 return false
+            }
+        },
+        fontSize() {
+            if (this.size && this.size == "sm") {
+                return "14px";
+            } else if (this.size && this.size == "md") {
+                return "14px";
+            } else {
+                return "14px"
             }
         }
     },

@@ -12,6 +12,7 @@ type Query {
 
   # Goal
   goals: [Goal!]!
+  goalsByDate(startAt: String, endAt: String): [Goal!]!
 
   # Todo
   todos: [Todo!]!
@@ -52,7 +53,7 @@ type Mutation {
   createTodoIterations(todo: TodoInput!): Todo
   createDefaultTask(iteration: IterationInput!): Todo
   toggleCompletion(idIteration: Int!, attemptedAt: String, completedAt: String): Iteration
-  rescheduleIteration(id: Int!, startAt: String!): Iteration
+  rescheduleIteration(id: Int!, startAt: String!, endAt: String!): Iteration
   getTodoRepeat(idTodo: Int, idRepeat: Int): Todo_Repeat
   scheduleTodo(idTodo: Int!, startAt: String!, endAt: String): TodoAndIteration!
   mapTodoToEvent(idTodo: Int!, idEvent: Int!): TodoAndEventAndIteration!

@@ -34,7 +34,7 @@ let config = {
             type: 'objects',
             isItem: true,
             isColumn: true,
-            optionsQuery: require('../../graphql/query/QueryGoals.gql'),
+            optionsQuery: require('../../graphql/query/goal/QueryGoals.gql'),
             icon: '/icon/parent-icon.png',
         },
         {
@@ -45,7 +45,7 @@ let config = {
             type: 'objects',
             isItem: true,
             isColumn: true,
-            optionsQuery: require('../../graphql/query/QueryGoals.gql'),
+            optionsQuery: require('../../graphql/query/goal/QueryGoals.gql'),
             icon: '/icon/child-icon.png',
         },
         {
@@ -104,7 +104,7 @@ let config = {
     },
     query: {
         name: "goals",
-        document: require('../../graphql/query/QueryGoals.gql'),
+        document: require('../../graphql/query/goal/QueryGoals.gql'),
         variables: {},
     }
 }

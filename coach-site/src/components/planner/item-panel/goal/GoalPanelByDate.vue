@@ -1,13 +1,156 @@
 <template>
-    <h1>Date</h1>
+    <div class="row g-0">
+        <!-- Body -->
+        <div class="d-flex flex-column">
+            <div v-for="metric in metrics" :key="metric.id" class="d-flex flex-column" :class="metric.name">
+                <div v-show="metric.selected.selected">
+                    <div class="metric-header d-flex flex-row justify-content-between align-items-center" @click="metric.collapsed = !metric.collapsed">
+                        <h1>{{ metric.name }}</h1>
+                        <IconButton v-if="!metric.collapsed" class="caret" src="/icon/icon-expanded.png" :width="24" :height="24"></IconButton>
+                        <IconButton v-if="metric.collapsed" class="caret" src="/icon/icon-collapsed.png" :width="24" :height="24" ></IconButton>
+                    </div>
+                    <ul v-show="!metric.collapsed">
+                        <li v-for="goal in metric.goals" :key="goal.id" class="goal">
+                            <div class="d-flex flex-column">
+                                <div class="goal-item">{{ goal.text }}</div>
+                                <ul>
+                                    <li v-for="todo in goal.todos" :key="todo.id" class="todo">
+                                        <ListItem :iteration="todo" :parentType="'goal'" :parent="goal" :size="'sm'"></ListItem>
+                                    </li>
+                                </ul>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
 </template>
 
 <script>
+import IconButton from '../../../controls/button/IconButton.vue'
+import goalConfig from '../../../../config/items/goal-config';
+import ListItem from '../component/ListItem.vue';
+
 export default {
     name: 'GoalPanelByDate',
+    components: { IconButton, ListItem },
+    data: function() {
+        return {
+            config: goalConfig,
+            selectedMetrics: {
+                physical: { selected: true},
+                emotional: { selected: true},
+                mental: { selected: true},
+                social: { selected: true},
+                financial: { selected: true}
+            },
+            metrics: []
+        }
+    },
+    apollo: {
+        goals: {
+            query() { return this.config.query.document },
+            error: function(error) {
+                this.errorMessage = 'Error occurred while loading query'
+                console.log(this.errorMessage, error);
+            }
+        },
+    },
+    created: function() {
+    },
+    mounted: function() {
+        // An error gets thrown if pollInterval is set with the query
+        this.$apollo.queries.goals.setOptions({
+            fetchPolicy: 'cache-and-network',
+            pollInterval: 30000,
+        })
+    },
+    computed: {
+        
+    },
+    methods: {
+        
+    },
+    watch: {
+    }
 }
+
+
 </script>
 
-<style>
+<style scoped>
+.metric-selector-wrapper {
+    padding: 0 8px;
+}
+.metric-selector {
+    width: 264px;
+    margin-top: 12px;
+    margin-bottom: 16px;
+    padding-left: 12px;
+}
 
+h1 {
+    font-size: 14px;
+    font-weight: 500;
+    margin-left: 20px;
+    margin-bottom: 0px;
+    text-transform: capitalize;
+    user-select: none;
+}
+
+.physical h1{
+    color: #3B99FC;
+}
+
+.emotional h1{
+    color: #4C6EF5;
+}
+
+.mental h1{
+    color: #F4511E;
+}
+
+.social h1{
+    color: #FC3B3B;
+}
+
+.financial h1{
+    color: #1EBA31;
+}
+
+.metric-header {
+    height: 40px;
+}
+
+.caret {
+    margin-right: 20px;
+}
+
+ul {
+    list-style: none;
+    padding: 0px;
+    margin: 0px;
+    text-align: start;
+}
+
+li.goal { 
+    /* min-height: 32px; */
+    color: #565656;
+    vertical-align: middle;
+    padding: 2px 0px;
+    /* font-weight: 300; */
+}
+
+.goal-item {
+    padding:  4px 8px 4px 20px;
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 19px;
+}
+
+li.todo { 
+    padding-left: 12px;
+    font-weight: 300;
+}
 </style>

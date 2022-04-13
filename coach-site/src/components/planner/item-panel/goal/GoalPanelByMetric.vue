@@ -19,7 +19,7 @@
                                 <div class="goal-item">{{ goal.text }}</div>
                                 <ul>
                                     <li v-for="todo in goal.todos" :key="todo.id" class="todo">
-                                        <ListItem :iteration="todo" :parentType="'goal'" :parent="goal"></ListItem>
+                                        <ListItem :iteration="todo" :parentType="'goal'" :parent="goal" :size="'sm'"></ListItem>
                                     </li>
                                 </ul>
                             </div>
@@ -162,21 +162,22 @@ ul {
 }
 
 li.goal { 
-    min-height: 32px;
+    /* min-height: 32px; */
+    color: #565656;
     vertical-align: middle;
     padding: 2px 0px;
-    font-weight: 300;
+    /* font-weight: 300; */
 }
 
 .goal-item {
-    padding:  4px 0px 4px 20px;
+    padding:  4px 8px 4px 20px;
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 19px;
 }
-/* 
+
 li.todo { 
-    min-height: 26px;
-    vertical-align: middle;
-    font-size: 14px;
-    padding-top: 2px;
-    padding-left: 16px;
-} */
+    padding-left: 12px;
+    font-weight: 300;
+}
 </style>

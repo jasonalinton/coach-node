@@ -32,7 +32,7 @@ let config = {
             type: 'objects',
             isItem: true,
             isColumn: true,
-            optionsQuery: require('../../graphql/query/QueryGoals.gql'),
+            optionsQuery: require('../../graphql/query/goal/QueryGoals.gql'),
             icon: '/icon/goal-icon.png',
         },
         {

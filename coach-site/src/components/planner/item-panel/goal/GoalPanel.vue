@@ -5,12 +5,14 @@
             <ItemPanelHeader :title="title" :sort="sort" @onSortChange="onSortChange"></ItemPanelHeader>
             <GoalPanelByMetric v-show="sort.by=='Metric'"></GoalPanelByMetric>
             <GoalPanelByDate v-show="sort.by=='Date'"></GoalPanelByDate>
+            <GoalPanelByCustom v-show="sort.by=='Custom'" :selectedDate="selectedDate"></GoalPanelByCustom>
         </div>
     </div>
 </template>
 
 <script>
 import ItemPanelHeader from '../component/ItemPanelHeader.vue';
+import GoalPanelByCustom from './GoalPanelByCustom.vue';
 import GoalPanelByDate from './GoalPanelByDate.vue';
 import GoalPanelByMetric from './GoalPanelByMetric.vue';
 
@@ -23,7 +25,10 @@ var sortItems = [
 
 export default {
     name: 'GoalPanel',
-    components: { ItemPanelHeader, GoalPanelByMetric, GoalPanelByDate },
+    components: { ItemPanelHeader, GoalPanelByMetric, GoalPanelByDate, GoalPanelByCustom },
+    props: {
+        selectedDate: Date
+    },
     data: function () {
         return {
             title: 'Goals',
