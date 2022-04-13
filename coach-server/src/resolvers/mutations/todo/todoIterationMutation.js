@@ -22,6 +22,19 @@ async function createDefaultTask(parent, { iteration }, context, info) {
             dateTime: iteration.startAt
         }
     })
+
+    let endTime;
+    if (iteration.endAt) {
+        endTime = await context.prisma.time.create({
+            data: {
+                idType: 81,
+                idEndpoint: 84,
+                idMoment: 89,
+                idFlexibility: 25,
+                dateTime: iteration.endAt
+            }
+        })
+    }
     
     let connectedEvents = []
     if (iteration.events) {
@@ -36,13 +49,15 @@ async function createDefaultTask(parent, { iteration }, context, info) {
             timePairs: {
                 create: {
                     idTimeType: scheduledType.id,
-                    idStartTime: startTime.id
+                    idStartTime: startTime.id,
+                    idEndTime: (endTime) ? endTime.id : null
                 }
             },
             iterations: {
                 create: {
                     text: iteration.text,
                     startAt: iteration.startAt,
+                    endAt: (endTime) ? iteration.endAt : null,
                     attemptedAt: iteration.attemptedAt,
                     completedAt: iteration.completedAt,
                     isRecommended: (iteration.isRecommended) ? iteration.isRecommended : false,
@@ -97,12 +112,12 @@ async function toggleCompletion(parent, { idIteration, attemptedAt, completedAt 
     return iteration;
 }
 
-async function rescheduleIteration(parent, { id, startAt }, context, info) {
+async function rescheduleIteration(parent, { id, startAt, endAt }, context, info) {
     console.log(`Reschedule iteration`);
     
     let iteration = await context.prisma.iteration.update({
         where: { id },
-        data: { startAt },
+        data: { startAt, endAt },
         include: iterationIncude
     });
 

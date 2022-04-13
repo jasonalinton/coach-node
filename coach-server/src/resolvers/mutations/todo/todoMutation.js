@@ -171,7 +171,8 @@ async function createTodoIterations(parent, { todo }, context, info, repeat) {
                 events: {
                     connect: _events
                 }
-            }
+            },
+            include: { events: { include: eventInclude } }
         });
         
         iterations.push(iteration);
@@ -233,11 +234,10 @@ async function createTodoIterations(parent, { todo }, context, info, repeat) {
         include: todoInclude
     })
 
-    events = await context.prisma.event.findMany({
-        include: eventInclude,
-        orderBy: { id: 'desc'}
-    });
+    events = iterations.flatMap(_iteration => _iteration.events);
 
+    // THESE ARE COMMENTED OUT BECAUSE THEY DO TO MUCH PUBLISHING
+    // PUBLISHING SHOULD BE DONE IN BATCHES NOT INDIVIDUALLY!
     // iterations.forEach(_iteration => {
     //     context.pubsub.publish("ITERATION_ADDED", { iterationAdded: _iteration });
     // });

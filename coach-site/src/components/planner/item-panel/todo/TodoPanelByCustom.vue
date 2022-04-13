@@ -1,6 +1,6 @@
 <template>
     <div class="custom d-flex flex-column flex-grow-1">
-        <TimeframeRadio :timeframe="timeframe" @timeframeSelected="timeframe=$event"></TimeframeRadio>
+        <TimeframeRadio :timeframe="timeframe" @timeframeSelected="timeframe=$event" :container="'todoPanelCustom'"></TimeframeRadio>
         <!-- Toolbar -->
         <div class="toolbar d-flex flex-row justify-content-between align-items-center">
             <AddTaskButton @click="addNewTask"></AddTaskButton>
@@ -126,7 +126,7 @@ export default {
             update(data) { 
                 let iterations = data.iterations;
                 if (!this.showRoutineTasks)
-                    iterations = data.iterations.filter(_iteration => _iteration.idRoutineIteration == null )
+                    iterations = data.iterations.filter(_iteration => _iteration.events.length == 0 )
                 iterations = sortAsc(iterations, 'startAt');
                 return iterations;
             },
@@ -177,8 +177,8 @@ function initIteration() {
     return {
         id: this.newItemID--,
         text: '',
-        startAt: this.selectedDate,
-        endAt: null,
+        startAt: this.start,
+        endAt: this.end,
         attemptedAt: null,
         completedAt: null,
         isRecommended: false,

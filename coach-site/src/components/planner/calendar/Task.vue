@@ -54,7 +54,7 @@ export default {
 
 function toNextDay() {
     let nextDay = addDay(new Date(this.task.startAt));
-    this.rescheduleIteration(this.task.id, nextDay, this.$apollo);
+    this.rescheduleIteration(this.task.id, nextDay, nextDay, this.$apollo);
 }
 
 function markAttempted() {

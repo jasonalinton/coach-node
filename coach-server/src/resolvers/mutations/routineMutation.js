@@ -96,7 +96,8 @@ async function createRoutineIterations(parent, { routine }, context, info, repea
                 events: {
                     connect: _events
                 }
-            }
+            },
+            include: { events: { include: eventInclude } }
         });
         iterations.push(iteration);
     }
@@ -152,13 +153,12 @@ async function createRoutineIterations(parent, { routine }, context, info, repea
     let routine_updated = await context.prisma.routine.findFirst({
         where: { id: routine.id },
         include: routineInclude
-    })
-
-    events = await context.prisma.event.findMany({
-        include: eventInclude,
-        orderBy: { id: 'desc'}
     });
 
+    events = iterations.flatMap(_iteration => _iteration.events);
+
+    // THESE ARE COMMENTED OUT BECAUSE THEY DO TO MUCH PUBLISHING
+    // PUBLISHING SHOULD BE DONE IN BATCHES NOT INDIVIDUALLY!
     // iterations.forEach(_iteration => {
     //     context.pubsub.publish("ITERATION_ADDED", { iterationAdded: _iteration });
     // })

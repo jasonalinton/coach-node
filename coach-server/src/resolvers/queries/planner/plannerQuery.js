@@ -50,7 +50,7 @@ async function iterations(parent, { type, startAt, endAt }, context, info) {
         where: { AND },
         include: iterationIncude,
         orderBy: { id: 'desc' }
-    })
+    });
     
     return iterations;
 }

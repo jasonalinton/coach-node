@@ -50,7 +50,7 @@ function onDrop(ev) {
         if (data.parentType && data.parentType == "routineEvent") {
             this.unmapTaskFromRoutineEvent(data.id, data.parentID, new Date(this.day.date), null, null, this.$apollo);
         } else {
-            this.rescheduleIteration(data.id, new Date(this.day.date), this.$apollo);
+            this.rescheduleIteration(data.id, new Date(this.day.date), new Date(this.day.date), this.$apollo);
         }
 
 

@@ -30,6 +30,15 @@ async function initDateFormatMiddleware(prisma) {
 }
 
 function fixDateFormat(result) {
+    if (result.todos) {
+        result.todos.forEach(todo => {
+            if (todo.iterations) {
+                todo.iterations.forEach(iteration => {
+                    fixIterationDateFormat(iteration);
+                })
+            }
+        })
+    }
     if (result.repeats) {
         result.repeats.forEach(repeat => {
             ['startRepeat', 'endRepeat', 'startIteration', 'endIteration'].forEach(timeProp => {

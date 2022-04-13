@@ -57,7 +57,11 @@ const iterationIncude = {
             // }
         }
     },
-    routine: true,
+    routine: {
+        include: { 
+            goals: true
+        }
+    },
     repeat: {
         include: {
             routineIterations: true
@@ -66,6 +70,7 @@ const iterationIncude = {
     todoRepeat: true,
     routineRepeat: select_repeat,
     routineIteration: routineTodoIterationIncude,
+    todoIteration: routineTodoIterationIncude,
     events: { 
         select: { 
             id: true,

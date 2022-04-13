@@ -61,7 +61,7 @@ async function refreshRepetitiveRoutines(indexDate, indexEnd, timeframe = repeti
         routines_updated.push(routine_updated);
     };
     
-    mapRoutineIterationsToTodoIterations(routines, context);
+    mapRoutineIterationsToTodoIterations(routines_updated, context);
 
     return routines_updated;
 }
@@ -127,7 +127,7 @@ async function createRepetition(repeat, item, itemType, indexDate = null, indexE
     } else if (repeat.timeframe.id == repetitions.monthly.id) {
         createMonthlyRepetitions(props);
     }
-    setLastIterationDateTime(repeat, itemType, item.id, indexEnd);
+    setLastIterationDateTime(repeat, itemType, item.id, props.indexEnd);
 
     if (itemType == "todo") {
         return await createTodoIterations(null, { todo: item }, context, null, repeat);
@@ -269,6 +269,7 @@ function createMonthlyRepetitions({item, itemType, indexDate, indexEnd, repeat, 
 
 function validateDates(lastIterationDateTime, props) {
     lastIterationDateTime = (lastIterationDateTime)? lastIterationDateTime : today();
+    props.indexEnd = (props.repeat.endRepeat) ? new Date(props.repeat.endRepeat.dateTime) : props.indexEnd;
 
     console.log(`Last iteration datetime was ${JSONDate(lastIterationDateTime)}`);
 
@@ -310,6 +311,8 @@ async function mapRoutineIterationsToTodoIterations(routines, context) {
 
     let routineTodo_Iterations = [];
     routine_iterations.forEach(iteration => {
+        if (!iteration.routineRepeat || !iteration.routineRepeat.todoIterations) return;
+
         /* ID's of todo iterations mapped to same repeat as routine */
         let todo_iterations = iteration.routineRepeat.todoIterations.filter(_iteration => moment(_iteration.startAt).format() == iteration.startAt);
         let ids = todo_iterations.map(todo_iteration => { return { id: todo_iteration.id } });
@@ -329,17 +332,6 @@ async function mapRoutineIterationsToTodoIterations(routines, context) {
             }
         }
         routineTodo_Iterations.push(routineTodo_Iteration);
-
-        // // Map todo iterations to the same event of the routine iteration
-        // if (iteration.events && iteration.events.length > 0) {
-        //     if (iteration.event.length > 1) {
-        //         console.log("ITERATION HAS MULTIPLE EVENTS!")
-        //     }
-        //     let event = iteration.events[0];
-        //     let iterations = [];
-            
-
-        // }
         
     })
 

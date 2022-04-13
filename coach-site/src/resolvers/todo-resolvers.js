@@ -60,10 +60,10 @@ export function toggleCompletion(iteration, apollo) {
     });
 }
 
-export function rescheduleIteration(id, startAt, apollo) {
+export function rescheduleIteration(id, startAt, endAt, apollo) {
     apollo.mutate({
         mutation: RESCHEDULE_ITERATION,
-        variables: { id, startAt },
+        variables: { id, startAt, endAt },
     });
 }
 

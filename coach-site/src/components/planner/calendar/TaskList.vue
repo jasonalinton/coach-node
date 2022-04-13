@@ -48,7 +48,7 @@ function onDrop(ev) {
         if (data.parentType && data.parentType == "routineEvent") {
             this.unmapTaskFromRoutineEvent(data.id, data.parentID, this.date, null, null, this.$apollo);
         } else {
-            this.rescheduleIteration(data.id, this.date, this.$apollo);
+            this.rescheduleIteration(data.id, this.date, this.date, this.$apollo);
         }
     } else if (data.type && data.type == "todo") {
         if (data.parentType && data.parentType == "goal") {

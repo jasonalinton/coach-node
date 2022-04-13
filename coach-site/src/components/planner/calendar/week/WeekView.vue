@@ -89,7 +89,7 @@ export default {
     computed: {
         queryVariables() {
             return {
-                startAt: firstDayOfMonth(this.selectedDate),
+                startAt: firstDayOfWeek(firstDayOfMonth(this.selectedDate)),
                 endAt: lastDayOfMonth(addDay(this.selectedDate, this.dayCount)),
             }
         }
@@ -153,9 +153,9 @@ export default {
             },
             update(data) {
                 this.dayModels.forEach((model) => {
-                    model.tasks.length = 0;
                     let tasks = data.iterations.filter(_task => model.dateString == new Date(_task.startAt).toDateString());
                     tasks = tasks.filter(_task => _task.events.length == 0);
+                    model.tasks.length = 0;
                     model.tasks.push(...tasks);
                 });
 
@@ -166,16 +166,16 @@ export default {
                     document: require('../../../../graphql/subscription/planner/IterationAdded.gql'),
                     variables() { return this.queryVariables },
                     updateQuery: (previousResult, { subscriptionData: { data: { iterationAdded }} }) => {
-                        previousResult.tasks.splice(0, 0, iterationAdded);
-                        return { tasks: previousResult.tasks };
+                        previousResult.iterations.splice(0, 0, iterationAdded);
+                        return { iterations: previousResult.iterations };
                     },
                 },
                 {
                     document: require('../../../../graphql/subscription/planner/IterationDeleted.gql'),
                     variables() { return this.queryVariables },
                     updateQuery: (previousResult, { subscriptionData: { data: { iterationDeleted }} }) => {
-                        removeItem(iterationDeleted, previousResult.tasks);
-                        return { events: previousResult.tasks };
+                        removeItem(iterationDeleted, previousResult.iterations);
+                        return { iterations: previousResult.iterations };
                     },
                 },
             ],

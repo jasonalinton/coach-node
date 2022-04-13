@@ -1,5 +1,5 @@
-mutation rescheduleIteration($id: Int!, $startAt: String!) {
-  rescheduleIteration(id: $id, startAt: $startAt) {
+mutation rescheduleIteration($id: Int!, $startAt: String!, $endAt: String!) {
+  rescheduleIteration(id: $id, startAt: $startAt, endAt: $endAt) {
         id
         text
         startAt
