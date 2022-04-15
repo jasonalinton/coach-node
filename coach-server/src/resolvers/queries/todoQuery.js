@@ -1,4 +1,5 @@
-const { todoInclude, todoIterationIncude } = require('../../properties/todoProperties');
+const { todoInclude } = require('../../properties/todoProperties');
+const { iterationIncude } = require('../../properties/event/eventProperties');
 const { select_repeat } = require('../../properties/time/repeatProperties');
 
 async function todos(parent, args, context, info) {
@@ -63,7 +64,7 @@ async function todoIterations(parent, args, context, info) {
                 }
             ],
         },
-        include: todoIterationIncude,
+        include: iterationIncude,
         orderBy: { id: 'desc' }
     })
 

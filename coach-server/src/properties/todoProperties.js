@@ -1,5 +1,6 @@
 const { select_timePair } = require('./time/timePairProperties')
 const { select_repeat } = require('./time/repeatProperties')
+const { iterationIncude } = require('./event/eventProperties')
 
 const where_isDeleted_false = {
     where: {
@@ -27,46 +28,6 @@ const routineTodoIterationIncude = {
     }
 };
 
-const todoIterationIncude = {
-    todo: {
-        select: {
-            id: true,
-            text: true,
-            metrics: {
-                select: {
-                    id: true,
-                    text: true
-                }
-            },
-            goals: {
-                select: {
-                    id: true,
-                    text: true
-                }
-            },
-            routines: {
-                select: {
-                    id: true,
-                    text: true
-                }
-            },
-            // timePairs: {
-            //     select: {
-
-            //     }
-            // }
-        }
-    },
-    repeat: {
-        include: {
-            routineIterations: true
-        }
-    },
-    todoRepeat: true,
-    routineRepeat: select_repeat,
-    routineIteration: routineTodoIterationIncude
-}
-
 const todoInclude = {
     metrics: true,
     parents: where_isDeleted_false,
@@ -75,11 +36,10 @@ const todoInclude = {
     routines: where_isDeleted_false,
     timePairs: select_timePair,
     repeats: select_repeat,
-    iterations: { include: todoIterationIncude },
+    iterations: { include: iterationIncude },
     // todo_repeats: false,
 }
 
 module.exports = {
-    todoInclude,
-    todoIterationIncude
+    todoInclude
 }

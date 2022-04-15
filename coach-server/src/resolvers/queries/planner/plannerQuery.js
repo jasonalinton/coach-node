@@ -1,5 +1,5 @@
 const { eventInclude, iterationIncude } = require("../../../properties/event/eventProperties");
-const { todoIterationIncude, todoInclude } = require('../../../properties/todoProperties');
+const { todoInclude } = require('../../../properties/todoProperties');
 const { routineInclude,  } = require('../../../properties/routineProperties');
 const { startOfDay, endOfDay, addDay } = require('../../../../utility');
 const moment = require('moment');

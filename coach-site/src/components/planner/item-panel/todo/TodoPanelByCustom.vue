@@ -169,6 +169,9 @@ export default {
         show(value) {
             this.showGoals = (value) ? false : true;
             console.log(this.goals);
+        },
+        temp() {
+            console.log("Temp")
         }
     },
 }
