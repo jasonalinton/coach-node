@@ -6,7 +6,7 @@
                     <div class="left" :class="{open: showLeft}">
                         <LeftPanel @dateChange="dateChange"></LeftPanel>
                     </div>
-                    <div class="body overflow-clip h-100">
+                    <div class="body overflow-auto h-100">
                         <WeekView v-if="selectedView=='weekView'" 
                                   :dayCount="dayCount" 
                                   :selectedDate="selectedDate" 

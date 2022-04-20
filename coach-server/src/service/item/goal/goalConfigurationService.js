@@ -1,12 +1,13 @@
-const { configureMappedObject } = require("../itemConfigurationService");
+const { configureMapObject, configureMappedObject } = require("../itemConfigurationService");
 const timePairService = require("../../time/timePairService");
 const { clone } = require("../../../../utility");
 const repeatService = require("../../time/repeatService");
 
-function configureNewGoal(goal) {
+function configurGoal(goal, configurationType) {
     let configuredGoal = {};
 
     configureText(goal, configuredGoal);
+    configureType(goal, configuredGoal, configurationType);
     configureFamily(goal, configuredGoal);
     configureTimePairs(goal, configuredGoal);
     configureRepeats(goal, configuredGoal);
@@ -17,6 +18,10 @@ function configureNewGoal(goal) {
 function configureText(goal, configuredGoal) {
     configuredGoal.text = goal.text;
     configuredGoal.description = goal.description;
+}
+
+function configureType(goal, configuredGoal, configurationType) {
+    configureMapObject(goal, 'type', configuredGoal, configurationType);
 }
 
 /* Connect and/or create family items */
@@ -39,7 +44,7 @@ function configureTimePairs(goal, configuredGoal) {
     try {
         if (goal.timePairs) {
             let _goal = { timePairs: clone(goal.timePairs) };
-            timePairService.configureTimePairs(goal);
+            timePairService.configureTimePairs(_goal);
             configuredGoal.timePairs = _goal.timePairs;
         }
     } catch (ex) {
@@ -59,10 +64,11 @@ function configureRepeats(goal, configuredGoal) {
                     unmappedIDs: _goal.unmappedIDs
                 };
                 repeatService.configureRepeats(_goal);
-            }
+        } else {
+            _goal.repeats = undefined;
+        }
             
-        if (_goal.repeats)
-            configuredGoal.repeats = _goal.repeats;
+        configuredGoal.repeats = _goal.repeats;
     } catch (ex) {
         console.log("Error configuring repeats for goal");
         console.log(ex);
@@ -70,5 +76,5 @@ function configureRepeats(goal, configuredGoal) {
 }
 
 module.exports = {
-    configureNewGoal
+    configurGoal
 }

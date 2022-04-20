@@ -3,6 +3,10 @@ query goalsByDate($startAt: String, $endAt: String) {
     id
     text
     description
+    type {
+      id
+      text
+    }
     parents {
       id
       text

@@ -7,7 +7,17 @@ const where_isDeleted_false = {
     }
 }
 
+const type = {
+    id: true,
+    text: true
+}
+
+const select_type = {
+    select: type
+}
+
 const goalInclude = {
+    type: select_type,
     metrics: true,
     parents: where_isDeleted_false,
     children: where_isDeleted_false,

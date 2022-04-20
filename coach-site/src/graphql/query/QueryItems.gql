@@ -21,6 +21,10 @@ query items($getMetrics: Boolean, $getGoals: Boolean, $getTodos: Boolean, $getRo
             id
             text
             description
+            type {
+                id
+                text
+            }
             parents {
                 id
                 text

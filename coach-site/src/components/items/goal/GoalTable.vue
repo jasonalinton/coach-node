@@ -5,7 +5,18 @@
     <div v-else-if="errorMessage">{{ errorMessage }}</div>
     <!-- Table -->
     <div v-else-if="items" class="row g-0">
-        <div class="table col">
+        <div class="col-12">
+            <div class="d-flex flex-row">
+                <!-- Sort By Priority - Checkbox -->
+                <div class="form-check">
+                    <input :id="`sort-goals-by-priority-checkbox`" class="form-check-input" type="checkbox" v-model="shouldSortByPriority" >
+                    <label class="form-check-label" :for="`sort-goals-by-priority-checkbox`">
+                        Sort By Priority
+                    </label>
+                </div>
+            </div>
+        </div>
+        <div class="table col-12">
             <table class="table table-sm table-borderless">
                 <thead class="sticky-top">
                     <tr>
@@ -18,7 +29,7 @@
                     </tr>
                 </thead>
                 <tbody is="transition-group" :name="`item-list`" v-cloak>
-                    <tr v-for="item in items" :key="item.id" :class="{ selected: selectedItem && selectedItem.id == item.id }" @click.prevent="$emit('itemSelected', item)">
+                    <tr v-for="item in goals" :key="item.id" :class="{ selected: selectedItem && selectedItem.id == item.id }" @click.prevent="$emit('itemSelected', item)">
                         <td v-for="column in config.table.columns" :key="column.id">
                             <div class="d-flex flex-row align-items-center">
                                 <img v-if="columnData(column, item) && column.icon" :src="column.icon" width="24" height="24"/>
@@ -54,6 +65,24 @@ export default {
             items: [],
             loadingQueriesCount: 0,
             errorMessage: null,
+            shouldSortByPriority: true
+        }
+    },
+    computed: {
+        goals() {
+            if (this.shouldSortByPriority) {
+                let goals = [];
+                goals = goals.concat(this.items.filter(_item => _item.type && _item.type.text.toLowerCase() == "primary"));
+                goals = goals.concat(this.items.filter(_item => _item.type && _item.type.text.toLowerCase() == "secondary"));
+                goals = goals.concat(this.items.filter(_item => _item.type && _item.type.text.toLowerCase() == "tertiary"));
+                
+                let ids = goals.map(_goal => _goal.id);
+                goals = goals.concat(this.items.filter(_goal => !ids.includes(_goal.id)));
+                
+                return goals;
+            } else {
+                return this.items;
+            }
         }
     },
     apollo: {
@@ -158,7 +187,8 @@ table {
 }
 
 .table {
-    max-height: calc(100vh - 64px - 42px);
+    /* viewheight - navbar - tabstrip + toolbar */
+    max-height: calc(100vh - 64px - 42px - 26px);
     overflow-y: scroll;
 }
 

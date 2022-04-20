@@ -24,6 +24,7 @@ model Metric {
 
 model Goal {
   id               Int       @id @default(autoincrement())
+  idType           Int?
   text             String
   description      String?
   // position         Int?
@@ -31,6 +32,8 @@ model Goal {
   dateTimeDeleted  DateTime? @db.Timestamptz(6)
   createdAt        DateTime  @default(now()) @db.Timestamptz(6)
   updatedAt        DateTime  @default(now()) @updatedAt @db.Timestamptz(6)
+
+  type             Type? @relation(fields: [idType], references: [id], name: "Goal_Type")
 
   reasons          Blurb[]
 
@@ -100,6 +103,8 @@ model Type {
   description String?
   createdAt   DateTime @default(now()) @db.Timestamptz(6)
   updatedAt   DateTime @default(now()) @updatedAt @db.Timestamptz(6)
+
+  goals            Goal[] @relation(name: "Goal_Type")
 
   times            Time[] @relation(name: "Time_Type")
   endpointTimes    Time[] @relation(name: "Endpoint_TimeType")

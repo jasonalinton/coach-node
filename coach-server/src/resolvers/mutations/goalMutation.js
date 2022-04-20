@@ -1,9 +1,10 @@
 const controller = require('../../controller/itemController');
 const { goalInclude } = require('../../properties/goalProperties');
-const { configureNewGoal } = require("../../service/item/goal/goalCreationService");
+const { configurGoal } = require("../../service/item/goal/goalConfigurationService");
+const { CONFIGURATION_TYPES } = require("../../../constant")
 
 async function addGoal(parent, args, context, info) {
-    let data = configureNewGoal(args.goal);
+    let data = configurGoal(args.goal, CONFIGURATION_TYPES.CREATE);
 
     let goal = await context.prisma.goal.create({
         data,
@@ -17,7 +18,7 @@ async function addGoal(parent, args, context, info) {
 
 async function updateGoal(parent, args, context, info) {
     let id = args.goal.id;
-    let data = controller.initData(args.goal);
+    let data = configurGoal(args.goal, CONFIGURATION_TYPES.UPDATE);
 
     let goal = await context.prisma.goal.update({
         where: { id },

@@ -1,8 +1,10 @@
 type Goal {
   id: Int!
+  idType: Int
   text: String!
   description: String
   isDeleted: Int
+  type: Type
   parents: [Goal]
   children: [Goal]
   metrics: [Metric]
@@ -14,9 +16,11 @@ type Goal {
 
 input GoalInput {
   id: Int
+  idType: Int
   text: String
   description: String
   # isDeleted:   Int
+  type: TypeInput
   parents: [GoalInput]
   children: [GoalInput]
   metrics: [MetricInput]

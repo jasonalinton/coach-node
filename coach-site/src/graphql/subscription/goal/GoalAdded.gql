@@ -3,6 +3,10 @@ subscription goalAdded {
     id
     text
     description
+    type {
+      id
+      text
+    }
     parents {
       id
       text

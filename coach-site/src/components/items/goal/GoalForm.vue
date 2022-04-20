@@ -20,6 +20,12 @@
                       v-model="item.description"
                       v-on:keyup.enter="save(item)" />
         </div>
+        <!-- Type -->
+        <div class="form-group mt-1">
+            <select class="form-select panel-select" aria-label="select" v-model="type">
+                <option v-for="type in types" v-bind:key="type.id" :value="type.text">{{type.text}}</option> 
+            </select> 
+        </div>
         <!-- Metrics -->
         <ApolloQuery :query="require('../../../graphql/query/QueryMetrics.gql')">
             <template slot-scope="{ result: { error, data }, isLoading }">
@@ -112,6 +118,13 @@ import { replaceItem, removeItem, clone } from '../../../../utility'
 import RepeatControl from '../../controls/time/RepeatControl.vue'
 import TimePairControl from '../../controls/time/TimePairControl.vue'
 
+var types = [
+    { id: 0, text: "Type" },
+    { id: 19, text: "Primary" },
+    { id: 20, text: "Secondary" },
+    { id: 21, text: "Tertiary" },
+];
+
 export default {
     components: { SelectItem, RepeatControl, TimePairControl },
     name: "GoalForm",
@@ -124,10 +137,32 @@ export default {
             originalItem: null,
             togglePanel: false,
             newItem: {},
-            itemProps: this.config.props.filter(prop => prop.isItem)
+            itemProps: this.config.props.filter(prop => prop.isItem),
+            types,
         }
     },
     computed: {
+        type: {
+            get() {
+                if (this.item.type && this.item.type.text) {
+                    return this.item.type.text;
+                } else {
+                    return "Type"
+                }
+            },
+            set(value) {
+                if (value == "Type") {
+                    this.item.type = null;
+                } else {
+                    let index = this.types.findIndex(_type => _type.text == value);
+                    if (index > 0) {
+                        this.item.type = clone(this.types[index]);
+                    } else {
+                        this.item.type = null;
+                    } 
+                }
+            }
+        },
         allGoals() {
             return this.$apollo.getClient().cache.readQuery({ query: require('../../../graphql/query/QueryItems.gql') })
                 .items.goals;

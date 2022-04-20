@@ -191,6 +191,7 @@ export default {
         getHoursObjectArray,
         onScroll,
         taskList(day) {
+            // If task is mapped to an event, don't add to task list
             return day.tasks.filter((_task) => !_task.isInEvent);
         },
     },
