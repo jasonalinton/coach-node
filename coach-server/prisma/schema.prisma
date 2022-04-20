@@ -184,6 +184,8 @@ model Todo_TimePair {
 
   startTime   Time? @relation(fields: [idStartTime], references: [id], name: "Todo_StartTime")
   endTime     Time? @relation(fields: [idEndTime], references: [id], name: "Todo_EndTime")
+
+  iterations  Iteration[] @relation("iteration_todotimepair")
 }
 
 model Routine_TimePair {
@@ -297,32 +299,35 @@ model Routine_Repeat {
 }
 
 model Iteration {
-  id               Int       @id @default(autoincrement())
-  text             String
-  startAt          DateTime? @db.Timestamptz(6)
-  endAt            DateTime? @db.Timestamptz(6)
-  attemptedAt      DateTime? @db.Timestamptz(6)
-  completedAt      DateTime? @db.Timestamptz(6)
-  isRecommended    Boolean   @default(false)
-  idGoogleTask     Int?
-  idGoogleTaskList Int?
-  idTodo           Int?
-  idRoutine        Int?
-  idRepeat         Int?
-  idTodoRepeat     Int?
-  idRoutineRepeat  Int?
+  id                 Int       @id @default(autoincrement())
+  text               String
+  startAt            DateTime? @db.Timestamptz(6)
+  endAt              DateTime? @db.Timestamptz(6)
+  attemptedAt        DateTime? @db.Timestamptz(6)
+  completedAt        DateTime? @db.Timestamptz(6)
+  isRecommended      Boolean   @default(false)
+  idGoogleTask       Int?
+  idGoogleTaskList   Int?
+  idTodo             Int?
+  idRoutine          Int?
+  idRepeat           Int?
+  idTodoRepeat       Int?
+  idRoutineRepeat    Int?
+  idTodoTimePair     Int?
   idRoutineIteration Int?
   createdAt          DateTime  @default(now()) @db.Timestamptz(6)
   updatedAt          DateTime  @default(now()) @updatedAt @db.Timestamptz(6)
 
-  todo              Todo?      @relation(fields: [idTodo], references: [id], name: "todo_iteration")
-  routine           Routine?   @relation(fields: [idRoutine], references: [id], name: "routine_iteration")
+  todo               Todo?      @relation(fields: [idTodo], references: [id], name: "todo_iteration")
+  routine            Routine?   @relation(fields: [idRoutine], references: [id], name: "routine_iteration")
 
-  repeat          Repeat?    @relation(fields: [idRepeat], references: [id], name: "repeat_iteration")
-  todoRepeat      Repeat?    @relation(fields: [idTodoRepeat], references: [id], name: "repeat_todoIteration")
-  routineRepeat   Repeat?    @relation(fields: [idRoutineRepeat], references: [id], name: "repeat_routineIteration")
+  repeat             Repeat?    @relation(fields: [idRepeat], references: [id], name: "repeat_iteration")
+  todoRepeat         Repeat?    @relation(fields: [idTodoRepeat], references: [id], name: "repeat_todoIteration")
+  routineRepeat      Repeat?    @relation(fields: [idRoutineRepeat], references: [id], name: "repeat_routineIteration")
+  
+  todoTimePair      Todo_TimePair?    @relation(fields: [idTodoTimePair], references: [id], name: "iteration_todotimepair")
 
-  events           Event[]
+  events            Event[]
 
   // RoutineTodo_Iteration for routine iterations
   // If you're looking for the RoutineTodo_iteration for a routine task/iteration use this mapping property

@@ -35,6 +35,10 @@ export function toDateTimeString(dateTimeJSON) {
     return `${dateArray[0]}-${dateArray[1]}-${dateArray[2]} ${timeArray[0]}:${timeArray[1]}`;
 }
 
+export function formatDate(dateTime) {
+    return moment(dateTime).format();
+}
+
 export function toTimezoneOffset(dateTimeJSON) {
     return dateTimeJSON.slice(19, 25);
 }

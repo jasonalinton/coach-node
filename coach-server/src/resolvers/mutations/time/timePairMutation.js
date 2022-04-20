@@ -2,10 +2,8 @@ const { configureTime } = require('../../../controller/time/timeController')
 const { configureMapObject } = require('../../../controller/objectController')
 
 async function configureTimePairTrans(data, transaction = [], context) {
-    console.log("huh")
     if (data.timePairs) {
         if (data.timePairs.update) {
-            console.log("huh")
             for (let i = 0; i < data.timePairs.update.length; i++) {
                 let _transaction = await updateTimePair(context, data.timePairs.update[i], true);
                 _transaction.forEach(tran => transaction.push(tran));

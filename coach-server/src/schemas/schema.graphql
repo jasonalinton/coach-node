@@ -88,6 +88,9 @@ type Mutation {
   ): EventAndIteration!
   deleteIteration(id: Int!): Iteration
   deleteIterations(from: String, after: String): Int!
+
+  # Universal
+  tempMisc(temp: String): Boolean
 }
 
 type Subscription {

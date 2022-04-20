@@ -25,6 +25,7 @@ const TodoIterationMutation = require('./resolvers/mutations/todo/todoIterationM
 const RoutineMutation = require('./resolvers/mutations/routineMutation');
 const IterationMutation = require('./resolvers/mutations/event/iterationMutation');
 const EventMutation = require('./resolvers/mutations/event/eventMutation');
+const UniversalMutation = require('./resolvers/mutations/universal/universalMutation');
 
 const MetricSubscription = require('./resolvers/subscriptions/metricSubscription');
 const GoalSubscription = require('./resolvers/subscriptions/goalSubscription');
@@ -49,7 +50,8 @@ const Mutation = {
   ...TodoIterationMutation,
   ...RoutineMutation,
   ...IterationMutation,
-  ...EventMutation
+  ...EventMutation,
+  ...UniversalMutation
 }
 const Subscription = {
     ...MetricSubscription,

@@ -80,7 +80,7 @@ export default {
     data: function() {
         return {
             activeTimePair: null,
-            newTimePairID: 0,
+            newTimePairID: -1, // Todos start with a default new timepair
             newTimeID: 0,
         }
     },

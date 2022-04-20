@@ -1,6 +1,5 @@
-import {
-    addTodo, updateTodo, deleteTodo
-} from '../../resolvers/todo-resolvers'
+import { addTodo, updateTodo, deleteTodo } from '../../resolvers/todo-resolvers';
+import { today, formatDate } from '../../../utility/timeUtility'
 
 let config = {
     itemType: "todo",
@@ -119,7 +118,21 @@ let config = {
         metrics: [],
         goals: [],
         routines: [],
-        timePairs: [],
+        timePairs: [
+            {
+                id: -1,
+                timeType: { id: 80 },
+                startTime: {
+                    id: -1,
+                    type: { id: 80 },
+                    endpoint: { id: 84 },
+                    moment: { id: 87, text: "Date" },
+                    flexibility: { id: 25 },
+                    dateTime: formatDate(today()),
+                },
+                endTime: null,
+            }
+        ],
         repeats: [],
         iterations: [],
     },
