@@ -230,6 +230,7 @@ function close() {
 
 <style scoped>
 form {
+    background-color: #F5F5F5;
     padding-left: 2px;
     padding-right: 12px;
     height: calc(100vh - 64px - 42px);
@@ -276,11 +277,12 @@ form {
     border: none;
     font-size: 14px;
     line-height: 14px;
+    background-color: #F5F5F5;
     color: #343434;
 }
 
 .list-group-item:hover {
-    background-color:#F5F5F5;
+    background-color:#DCDCDC;
 }
 
 .list-group-item:hover img {

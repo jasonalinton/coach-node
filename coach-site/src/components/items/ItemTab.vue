@@ -94,10 +94,8 @@ function refreshForm() {
     }   
 
     .item .gutter {
-        /* background-color: rgba(220, 220, 220, .5); */
-        border-left: 1px solid rgba(220, 220, 220, 1);
-        
-        background-color: transparent;
+        border-left: 1px solid rgba(220, 220, 220, .5);
+        background-color: #F5F5F5;
         background-repeat: no-repeat;
         background-position: 50%;
     }

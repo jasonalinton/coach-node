@@ -29,21 +29,47 @@
                     </tr>
                 </thead>
                 <tbody is="transition-group" :name="`item-list`" v-cloak>
-                    <tr v-for="item in goals" :key="item.id" :class="{ selected: selectedItem && selectedItem.id == item.id }" @click.prevent="$emit('itemSelected', item)">
-                        <td v-for="column in config.table.columns" :key="column.id">
-                            <div class="d-flex flex-row align-items-center">
-                                <img v-if="columnData(column, item) && column.icon" :src="column.icon" width="24" height="24"/>
-                                {{ columnData(column, item) }}
-                            </div>
-                        </td>
-                        <td>
-                            <div class="d-flex justufy-content-center">
-                                <button class="delete-btn btn btn-secondary btn-sm float-end" type="button" @click.prevent.stop="onDeleteItem(item)">
-                                    <i class="far fa-trash-alt"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
+                    <template v-for="row in rows">
+                        <tr :key="row.id" :class="{ selected: selectedItem && selectedItem.id == row.id, todosShown: row.todos }" 
+                                @click.prevent="$emit('itemSelected', row.goal)">
+                            <td>{{ row.goal.id }}</td>
+                            <td>{{ row.goal.text }}</td>
+                            <td>{{ row.goal.description }}</td>
+                            <td>
+                                <img v-if="row.goal.parents.length > 0" src="/icon/parent-icon.png" width="24" height="24"/>
+                                <span>{{ listToString(row.goal.parents, 'text') }}</span>
+                            </td>
+                            <td>
+                                <img v-if="row.goal.children.length > 0" src="/icon/child-icon.png" width="24" height="24"/>
+                                <span>{{ listToString(row.goal.children, 'text') }}</span>
+                            </td>
+                            <td>
+                                <span>{{ listToString(row.goal.metrics, 'text') }}</span>
+                            </td>
+                            <td>
+                                <div @click.prevent.stop="onGoalClicked(row)">
+                                    <img v-if="row.goal.todos.length > 0" src="/icon/task-icon.png" width="24" height="24"/>
+                                    <span>{{ listToString(row.goal.todos, 'text') }}</span>
+                                </div>
+                            </td>
+                            <td>
+                                <img v-if="row.goal.routines.length > 0" src="/icon/routine-icon.png" width="24" height="24"/>
+                                <span>{{ listToString(row.goal.routines, 'text') }}</span>
+                            </td>
+                            <td>
+                                <div class="d-flex justufy-content-center">
+                                    <button class="delete-btn btn btn-secondary btn-sm float-end" type="button" @click.prevent.stop="onDeleteItem(row.goal)">
+                                        <i class="far fa-trash-alt"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="child-row" :key="row.id + 100000">
+                            <td colspan="9">
+                                <TodoTableView v-if="row.todos" :todos="row.todos" class="todo-table"></TodoTableView>
+                            </td>
+                        </tr>
+                    </template>
                 </tbody>
             </table>
         </div>
@@ -53,8 +79,10 @@
 <script>
 import { listToString, replaceItem, removeItem } from '../../../../utility';
 import { addPropertyToCache, updatePropertyInCache, deletePropertyInCache } from '../../../resolvers/resolve.js'
+import TodoTableView from '../todo/TodoTableView.vue';
 
 export default {
+    components: { TodoTableView },
     name: 'GoalTable',
     props: {
         config: Object,
@@ -63,32 +91,17 @@ export default {
     data: function() {
         return {
             items: [],
+            rows: [],
             loadingQueriesCount: 0,
             errorMessage: null,
             shouldSortByPriority: true
         }
     },
-    computed: {
-        goals() {
-            if (this.shouldSortByPriority) {
-                let goals = [];
-                goals = goals.concat(this.items.filter(_item => _item.type && _item.type.text.toLowerCase() == "primary"));
-                goals = goals.concat(this.items.filter(_item => _item.type && _item.type.text.toLowerCase() == "secondary"));
-                goals = goals.concat(this.items.filter(_item => _item.type && _item.type.text.toLowerCase() == "tertiary"));
-                
-                let ids = goals.map(_goal => _goal.id);
-                goals = goals.concat(this.items.filter(_goal => !ids.includes(_goal.id)));
-                
-                return goals;
-            } else {
-                return this.items;
-            }
-        }
-    },
     apollo: {
         items: {
             query: require('../../../graphql/query/QueryItems.gql'),
-            update(data) { 
+            update(data) {
+                this.initRows(data.items.goals);
                 return data.items.goals;
             },
             loadingKey: 'loadingQueriesCount',
@@ -109,7 +122,7 @@ export default {
                 {
                     document: require('../../../graphql/subscription/goal/GoalUpdated.gql'),
                     updateQuery: (previousResult, { subscriptionData: { data: { goalUpdated }} }) => {
-                        replaceItem(goalUpdated, previousResult.items.todos);
+                        replaceItem(goalUpdated, previousResult.items.goals);
                         updatePropertyInCache(goalUpdated, 'goals', ['metrics', 'todos', 'routines'], previousResult);
                         return previousResult;
                     },
@@ -117,7 +130,7 @@ export default {
                 {
                     document: require('../../../graphql/subscription/goal/GoalDeleted.gql'),
                     updateQuery: (previousResult, { subscriptionData: { data: { goalDeleted }} }) => {
-                        removeItem(goalDeleted, previousResult.items.todos);
+                        removeItem(goalDeleted, previousResult.items.goals);
                         deletePropertyInCache(goalDeleted, 'goals', ['metrics', 'todos', 'routines'], previousResult);
                         return previousResult;
                     },
@@ -134,9 +147,19 @@ export default {
     },
     methods: {
         columnData,
+        initRows,
+        sortGoals,
+        setTodos,
+        getTodos,
+        onGoalClicked,
         listToString,
         onAddItem,
         onDeleteItem
+    },
+    watch: {
+        shouldSortByPriority() {
+            this.initRows(this.items);
+        }
     }
 }
 
@@ -145,6 +168,82 @@ function columnData(column, item) {
         return listToString(item[column.prop], 'text');
     } else {
         return item[column.prop];
+    }
+}
+
+function initRows(goals) {
+    let rows = [...this.rows];
+    this.rows = [];
+    goals = this.sortGoals(goals);
+    goals.forEach(_goal => {
+        let row = rows.find(_row => _row.goal.id == _goal.id);
+        this.rows.push({
+            id: _goal.id,
+            goal: _goal,
+            todos: (row && row.todos) ? this.getTodos(_goal) : null 
+        })
+    })
+}
+
+function sortGoals(goalsIn) {
+    if (this.shouldSortByPriority) {
+        let goals = [];
+        goals = goals.concat(goalsIn.filter(_item => _item.type && _item.type.text.toLowerCase() == "primary"));
+        goals = goals.concat(goalsIn.filter(_item => _item.type && _item.type.text.toLowerCase() == "secondary"));
+        goals = goals.concat(goalsIn.filter(_item => _item.type && _item.type.text.toLowerCase() == "tertiary"));
+        
+        let ids = goals.map(_goal => _goal.id);
+        goals = goals.concat(goalsIn.filter(_goal => !ids.includes(_goal.id)));
+        
+        return goals;
+    } else {
+        return goalsIn;
+    }
+}
+
+function setTodos(row) {
+    // this.$apollo.addSmartQuery('todos', {
+    //     query: require('../../../graphql/query/QueryItems.gql'),
+    //     variables: {
+    //         getMetrics: false,
+    //         getGoals: false,
+    //         getTodos: true,
+    //         getRoutines: false
+    //     },
+    //     update(data) {
+    //         let todos = data.items.todos;
+    //         let todoIDs = row.goal.todos.map(_todo => _todo.id);
+    //         todos = todos.filter(_todo => todoIDs.includes(_todo.id));
+    //         row.todos = todos;
+    //     }
+    // })
+    let todos = this.$apollo.getClient().cache.readQuery({
+        query: require('../../../graphql/query/QueryItems.gql')
+    })
+    .items.todos;
+
+    let todoIDs = row.goal.todos.map(_todo => _todo.id);
+    todos = todos.filter(_todo => todoIDs.includes(_todo.id));
+    row.todos = todos;
+}
+
+function getTodos(goal) {
+    let todos = this.$apollo.getClient().cache.readQuery({
+        query: require('../../../graphql/query/QueryItems.gql')
+    })
+    .items.todos;
+
+    let todoIDs = goal.todos.map(_todo => _todo.id);
+    todos = todos.filter(_todo => todoIDs.includes(_todo.id));
+    return todos;
+}
+
+function onGoalClicked(row) {
+    // row.todos = (!row.todos) ? row.goal.todos : null;
+    if (!row.todos) {
+        this.setTodos(row);
+    } else {
+        row.todos = null;
     }
 }
 
@@ -193,7 +292,7 @@ table {
 }
 
 .table th {
-    background-color: white;
+    background-color: #F5F5F5;
     color: #565656;
     font-weight: 300;
     /* font-size: 12px; */
@@ -211,6 +310,7 @@ td, th {
 
 td {
     font-weight: 400;
+    line-height: 29px;
 }
 
 .table th:nth-child(1) {
@@ -221,8 +321,12 @@ td {
     min-width: 250px;
 }
 
-.table tbody tr:hover {
+.table tbody tr:hover:not(.child-row) {
     background-color:#F5F5F5;
+}
+
+.table tbody tr.todosShown {
+    background-color: #F5F5F5
 }
 
 .table tbody tr.selected {
@@ -235,6 +339,14 @@ td {
 /* .table tbody tr:nth-of-type(2n+1) {
     background-color:#F5F5F5;
 } */
+
+tr.child-row {
+    background-color: #DCDCDC;
+}
+
+.todo-table {
+    padding: 15px 5px;
+}
 
 .add-btn {
     width: 30px;
