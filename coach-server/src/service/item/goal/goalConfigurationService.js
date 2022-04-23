@@ -5,10 +5,12 @@ const repeatService = require("../../time/repeatService");
 
 function configurGoal(goal, configurationType) {
     let configuredGoal = {};
+    // if (goal.id) configurGoal.id = goal.id;
 
     configureText(goal, configuredGoal);
     configureType(goal, configuredGoal, configurationType);
     configureFamily(goal, configuredGoal);
+    configureMappedItems(goal, configuredGoal);
     configureTimePairs(goal, configuredGoal);
     configureRepeats(goal, configuredGoal);
 
@@ -24,18 +26,29 @@ function configureType(goal, configuredGoal, configurationType) {
     configureMapObject(goal, 'type', configuredGoal, configurationType);
 }
 
-/* Connect and/or create family items */
+/* Connect and/or create and/or disconnect family items */
 function configureFamily(goal, configuredGoal) {
     try {
-        configureMappedObject(goal, 'metrics', configuredGoal);
         configureMappedObject(goal, 'parents', configuredGoal);
         configureMappedObject(goal, 'children', configuredGoal);
+
+        return configuredGoal;
+    } catch (ex) {
+        console.log(`Error configuring family for goal`);
+        console.log(ex);
+    }
+}
+
+/* Connect and/or create and/or disconnect mapped items */
+function configureMappedItems(goal, configuredGoal) {
+    try {
+        configureMappedObject(goal, 'metrics', configuredGoal);
         configureMappedObject(goal, 'todos', configuredGoal);
         configureMappedObject(goal, 'routines', configuredGoal);
 
         return configuredGoal;
     } catch (ex) {
-        console.log(`Error configuring family for goal`);
+        console.log(`Error configuring mapped items for goal`);
         console.log(ex);
     }
 }

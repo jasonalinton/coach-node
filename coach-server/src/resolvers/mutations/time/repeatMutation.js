@@ -38,7 +38,7 @@ async function updateRepeat(context, repeat, useTransaction = false) {
     if (useTransaction)
         return transaction;
     else
-        await prisma.$transaction(transaction);
+        await context.prisma.$transaction(transaction);
 }
 
 async function createTimeUpdateTransactions(time, context, transaction) {

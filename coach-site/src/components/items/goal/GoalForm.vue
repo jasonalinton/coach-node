@@ -245,8 +245,9 @@ function initNewItems() {
     let _this = this;
     this.itemProps.forEach(prop => {
         _this.newItem[prop.prop] = { 
+            __typename: "Goal",
             id: -1,
-            text: null 
+            text: null
         };
     });
 }
@@ -255,8 +256,9 @@ function addItem(item, itemsList) {
     var text = item.text.trim();
     if (text != "") {
         var newItem = {
-          id: item.id--,
-          text
+            __typename: "Goal",
+            id: item.id--,
+            text
         }
         itemsList.push(newItem);
         item.text = "";

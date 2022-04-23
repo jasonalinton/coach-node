@@ -114,7 +114,7 @@ export default {
                 {
                     document: require('../../../graphql/subscription/goal/GoalAdded.gql'),
                     updateQuery: (previousResult, { subscriptionData: { data: { goalAdded }} }) => {
-                        previousResult.items.todos.splice(0, 0, goalAdded);
+                        previousResult.items.goals.splice(0, 0, goalAdded);
                         addPropertyToCache(goalAdded, 'goals', ['metrics', 'todos', 'routines'], previousResult);
                         return previousResult;
                     },
@@ -172,17 +172,22 @@ function columnData(column, item) {
 }
 
 function initRows(goals) {
-    let rows = [...this.rows];
-    this.rows = [];
+    let _this = this;
+    let rows = [];
     goals = this.sortGoals(goals);
+    let todos = this.$apollo.getClient().cache.readQuery({
+        query: require('../../../graphql/query/QueryItems.gql')
+    })
+    .items.todos;
     goals.forEach(_goal => {
-        let row = rows.find(_row => _row.goal.id == _goal.id);
-        this.rows.push({
+        let row = _this.rows.find(_row => _row.goal.id == _goal.id);
+        rows.push({
             id: _goal.id,
             goal: _goal,
-            todos: (row && row.todos) ? this.getTodos(_goal) : null 
+            todos: (row && row.todos) ? _this.getTodos(_goal, todos) : null 
         })
     })
+    this.rows = [...rows];
 }
 
 function sortGoals(goalsIn) {
@@ -202,21 +207,6 @@ function sortGoals(goalsIn) {
 }
 
 function setTodos(row) {
-    // this.$apollo.addSmartQuery('todos', {
-    //     query: require('../../../graphql/query/QueryItems.gql'),
-    //     variables: {
-    //         getMetrics: false,
-    //         getGoals: false,
-    //         getTodos: true,
-    //         getRoutines: false
-    //     },
-    //     update(data) {
-    //         let todos = data.items.todos;
-    //         let todoIDs = row.goal.todos.map(_todo => _todo.id);
-    //         todos = todos.filter(_todo => todoIDs.includes(_todo.id));
-    //         row.todos = todos;
-    //     }
-    // })
     let todos = this.$apollo.getClient().cache.readQuery({
         query: require('../../../graphql/query/QueryItems.gql')
     })
@@ -227,19 +217,13 @@ function setTodos(row) {
     row.todos = todos;
 }
 
-function getTodos(goal) {
-    let todos = this.$apollo.getClient().cache.readQuery({
-        query: require('../../../graphql/query/QueryItems.gql')
-    })
-    .items.todos;
-
+function getTodos(goal, todos) {
     let todoIDs = goal.todos.map(_todo => _todo.id);
     todos = todos.filter(_todo => todoIDs.includes(_todo.id));
     return todos;
 }
 
 function onGoalClicked(row) {
-    // row.todos = (!row.todos) ? row.goal.todos : null;
     if (!row.todos) {
         this.setTodos(row);
     } else {
@@ -345,7 +329,7 @@ tr.child-row {
 }
 
 .todo-table {
-    padding: 15px 5px;
+    padding: 10px 0px;
 }
 
 .add-btn {

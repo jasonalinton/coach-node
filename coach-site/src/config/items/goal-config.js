@@ -94,6 +94,7 @@ let config = {
     updateItem: updateGoal,
     deleteItem: deleteGoal,
     itemModel: {
+        __typename: "Goal",
         text: "",
         description: null,
         parents: [],
