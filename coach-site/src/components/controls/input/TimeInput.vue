@@ -87,9 +87,7 @@ function onChange(value) {
 
 <style scoped>
 @import '../../../../node_modules/@livelybone/vue-datepicker/lib/css/index.css';
-</style>
 
-<style>
 .datetime-picker .input-wrapper {
     border-radius: 0px;
 }

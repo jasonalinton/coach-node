@@ -411,7 +411,6 @@ form {
 }
 
 .list-group-item {
-    height: 30px;
     padding: 4px 8px;
     border-radius: initial;
     border: none;
@@ -419,6 +418,7 @@ form {
     line-height: 14px;
     background-color: #F5F5F5;
     color: #343434;
+    text-align: left;
 }
 
 .list-group-item:hover {

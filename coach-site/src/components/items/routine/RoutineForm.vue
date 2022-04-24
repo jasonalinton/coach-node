@@ -411,14 +411,14 @@ form {
 }
 
 .list-group-item {
-    height: 30px;
     padding: 4px 8px;
     border-radius: initial;
     border: none;
     font-size: 14px;
-    line-height: 14px;
+    line-height: 16px;
     background-color: #F5F5F5;
     color: #343434;
+    text-align: left;
 }
 
 .list-group-item:hover {

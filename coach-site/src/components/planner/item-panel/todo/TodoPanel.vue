@@ -2,10 +2,27 @@
     <div class="row g-0 h-100">
         <div class="col h-100">
             <!-- Header -->
-            <ItemPanelHeader :title="'todos'" :sort="sort" :selectedDate="selectedDate" @onSortChange="onSortChange"></ItemPanelHeader>
-            <TodoPanelByMetric v-if="sort.by=='Metric'" :selectedDate="selectedDate"></TodoPanelByMetric>
-            <TodoPanelByDate v-if="sort.by=='Date'" :selectedDate="selectedDate"></TodoPanelByDate>
-            <TodoPanelByCustom v-if="sort.by=='Custom'" :selectedDate="selectedDate"></TodoPanelByCustom>
+            <ItemPanelHeader :title="'todos'" :sort="sort" :selectedDate="selectedDate"
+                                @onSortChange="onSortChange">
+            </ItemPanelHeader>
+            <template v-if="!iteration_Form">
+                <TodoPanelByMetric v-if="sort.by=='Metric'" 
+                                :selectedDate="selectedDate"
+                                    @editIteration="iteration => iteration_Form = iteration">
+                </TodoPanelByMetric>
+                <TodoPanelByDate v-if="sort.by=='Date'" 
+                                :selectedDate="selectedDate"
+                                    @editIteration="iteration => iteration_Form = iteration">
+                </TodoPanelByDate>
+                <TodoPanelByCustom v-if="sort.by=='Custom'" 
+                                :selectedDate="selectedDate"
+                                    @editIteration="iteration => iteration_Form = iteration">
+                </TodoPanelByCustom>
+            </template>
+            <IterationForm v-if="iteration_Form" 
+                           :iteration="iteration_Form"
+                               @closeForm="iteration_Form = null">
+            </IterationForm>
         </div>
     </div>
 </template>
@@ -15,6 +32,7 @@ import ItemPanelHeader from '../component/ItemPanelHeader.vue';
 import TodoPanelByDate from './TodoPanelByDate.vue';
 import TodoPanelByMetric from './TodoPanelByMetric.vue';
 import TodoPanelByCustom from './TodoPanelByCustom.vue';
+import IterationForm from '../component/form/IterationForm.vue';
 
 var sortItems = [
     { id: 1, text: "Metric" },
@@ -25,7 +43,7 @@ var sortItems = [
 
 export default {
     name: 'TodoPanel',
-    components: { ItemPanelHeader, TodoPanelByMetric, TodoPanelByDate, TodoPanelByCustom, },
+    components: { ItemPanelHeader, TodoPanelByMetric, TodoPanelByDate, TodoPanelByCustom, IterationForm, },
     props: {
         selectedDate: Date
     },
@@ -33,8 +51,9 @@ export default {
         return {
             sort: {
                 by: 'Metric',
-                items: sortItems
+                items: sortItems,
             },
+            iteration_Form: null
         }
     },
     created: function() {

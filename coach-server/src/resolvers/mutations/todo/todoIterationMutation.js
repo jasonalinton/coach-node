@@ -4,6 +4,28 @@ const { deleteTodo } = require('./todoMutation');
 const { refreshRepetitiveEvents } = require('../../../controller/planner/plannerController');
 const moment = require('moment');
 
+async function updateIteration(parent, { iteration }, context, info) {
+    delete iteration.todo;
+    delete iteration.routine;
+    delete iteration.todos;
+    delete iteration.routines;
+    delete iteration.todoRepeat;
+    delete iteration.routineRepeat;
+    delete iteration.routineIteration;
+    delete iteration.todoIteration;
+    delete iteration.events;
+
+    iteration = await context.prisma.iteration.update({
+        where: { id: iteration.id },
+        data: iteration,
+        include: iterationIncude
+    });
+
+    context.pubsub.publish("ITERATION_UPDATED", { iterationUpdated: iteration });
+
+    return iteration;
+}
+
 /* Create default task with only title and recommended start time */
 /* Create iteration. Set completion */
 async function createDefaultTask(parent, { iteration }, context, info) {
@@ -217,6 +239,7 @@ async function refreshRepetitiveItems(parent, args, context, info) {
 }
 
 module.exports = {
+    updateIteration,
     createDefaultTask,
     toggleCompletion,
     rescheduleIteration,
