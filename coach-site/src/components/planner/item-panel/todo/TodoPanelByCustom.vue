@@ -32,7 +32,11 @@
                         </div>
                     </li>
                     <li v-for="(iteration, index) in pending" v-bind:key="iteration.id" :style="{ 'z-index': -index }">
-                        <ListItem :iteration="iteration" @markComplete="toggleCompletion(iteration, $apollo)" @onDelete="deleteIteration(iteration.id, $apollo)"></ListItem>
+                        <ListItem :iteration="iteration" 
+                                    @markComplete="toggleCompletion(iteration, $apollo)"
+                                    @onEdit="$emit('editIteration', iteration)"
+                                    @onDelete="deleteIteration(iteration.id, $apollo)">
+                        </ListItem>
                     </li>
                 </ul>
                 <!-- Complete  -->
@@ -40,7 +44,11 @@
                     <div class="header">Completed ({{ complete.length }})</div>
                     <ul v-if="complete" class="item-list">
                         <li v-for="(iteration, index) in complete" v-bind:key="index" :style="{ 'z-index': -index }">
-                            <ListItem class="complete" :iteration="iteration" @markIncomplete="toggleCompletion(iteration, $apollo)" @onDelete="deleteIteration(iteration.id, $apollo)"></ListItem>
+                            <ListItem class="complete" :iteration="iteration" 
+                                        @markIncomplete="toggleCompletion(iteration, $apollo)"
+                                        @onEdit="$emit('editIteration', iteration)"
+                                        @onDelete="deleteIteration(iteration.id, $apollo)">
+                            </ListItem>
                         </li>
                     </ul>
                 </div>

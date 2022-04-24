@@ -1,23 +1,39 @@
 <template>
     <div> 
         <div class="iteration d-flex flex-row justify-content-between align-items-center" :class="[{ complete: checked}]"
-             :style="{ 'font-size': fontSize }"
-             draggable @dragstart="onDragStart($event)" @dragend="onDragEnd($event)">
+             :style="{ 'font-size': fontSize }">
             <ItemCheckbox class="checkbox align-self-start" 
                           :checked="checked" 
                             @onChecked="markComplete" 
                             @onUnchecked="markIncomplete"
                             @onDelete="onDelete">
             </ItemCheckbox>
-            <span class="flex-fill">{{ iteration.text }}</span>
-            <div class="button-group d-flex flex-column justify-content-between">
-                <!-- <img class="icon-button" src='/icon/add-button.png' width="16" height="16"/> -->
-                <img class="icon-button" 
-                     src='/icon/edit-button.png' width="16" height="16"
-                        @click="onEdit"/>
-                <img class="icon-button" 
-                     src='/icon/delete-button.png' width="16" height="16"
-                        @click="onDelete"/>
+             <form :id="`iteration-form`" class="pb-2" v-on:submit.prevent>
+                <!-- Title/Text -->
+                <div class="form-group mt-3">
+                    <input class="title textbox" type="text" ref="text" placeholder="Title"
+                            v-model.lazy.trim="iteration.text"
+                            v-on:keyup.enter="save(iteration)"
+                            spellcheck/>
+                </div>
+                <!-- Time -->
+                <div class="form-group mt-1">
+                    <DateSelector class="mt-3" :date="iteration.startAt" @onChange="iteration.startAt = $event"></DateSelector>
+                    <span v-if="!iteration.startAt" class="error float-start mb-2">Iteration must have start</span>
+                    <DateSelector class="mt-3" :date="iteration.endAt" @onChange="iteration.endAt = $event"></DateSelector>
+                </div>
+            </form>
+            <div>
+                <span class="flex-fill">{{ iteration.text }}</span>
+                <div class="button-group d-flex flex-column justify-content-between">
+                    <!-- <img class="icon-button" src='/icon/add-button.png' width="16" height="16"/> -->
+                    <img class="icon-button" 
+                        src='/icon/edit-button.png' width="16" height="16"
+                            @click="onEdit"/>
+                    <img class="icon-button" 
+                        src='/icon/delete-button.png' width="16" height="16"
+                            @click="onDelete"/>
+                </div>
             </div>
         </div>
     </div>
@@ -26,6 +42,8 @@
 <script>
 import ItemCheckbox from './ItemCheckbox.vue';
 import { clone } from '../../../../../utility'
+import DateSelector from '../../../controls/select/DateSelector.vue'
+import { updateIteration } from '../../../../resolvers/planner-resolvers';
 
 /* 
 Parent Types
@@ -43,9 +61,9 @@ Parent Types
 */
 
 export default {
-    name: 'ListItem',
+    name: 'ListItemForm',
     components: { 
-        ItemCheckbox
+        ItemCheckbox, DateSelector
     },
     props: {
         iteration: Object,
@@ -74,10 +92,10 @@ export default {
     methods: {
         markComplete,
         markIncomplete,
+        save,
+        updateIteration,
         onEdit,
         onDelete,
-        onDragStart,
-        onDragEnd
     }
 }
 
@@ -96,6 +114,16 @@ function markIncomplete() {
     this.$emit('markIncomplete', this.iteration);
 }
 
+function save(iteration) {
+    var title = iteration.text.trim();
+    if (title == "") return;
+    if (!iteration.startAt) return;
+
+    this.updateIteration(iteration, this.$apollo);
+
+    this.close();
+}
+
 function onEdit() {
     let iteration =  clone(this.iteration);
     delete iteration.__typename;
@@ -105,26 +133,6 @@ function onEdit() {
 
 function onDelete() {
     this.$emit('onDelete', this.iteration);
-}
-
-function onDragStart(ev) {
-    let data = {
-        id: this.iteration.id,
-        type: (this.parentType == "goal") ? "todo" : "task",
-        parentType: this.parentType,
-        parentID: this.parent.id
-    };
-    data = JSON.stringify(data);
-
-    console.log("Drag Started");
-    ev.target.classList.add("drag");
-    ev.dataTransfer.dropEffect = 'move';
-    ev.dataTransfer.effectAllowed = 'move';
-    ev.dataTransfer.setData("text", data);
-}
-
-function onDragEnd(ev) {
-    ev.target.classList.remove("drag");
 }
 </script>
 

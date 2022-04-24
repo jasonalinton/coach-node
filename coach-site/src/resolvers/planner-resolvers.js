@@ -1,8 +1,9 @@
-import MAP_ITERATION_TO_EVENT from '../graphql/mutation/event/MapIterationToEvent.gql'
-import UNMAP_TASK_FROM_ROUTINEEVENT from '../graphql/mutation/event/UnmapTaskFromRoutineEvent.gql'
-import SCHEDULE_TODO from '../graphql/mutation/todo/ScheduleTodo.gql'
-import MAP_TODO_TO_EVENT from '../graphql/mutation/todo/MapTodoToEvent.gql'
-import REFRESH_REPETITIVE_ITEMS from '../graphql/mutation/item/RefreshRepetitiveItems.gql'
+import MAP_ITERATION_TO_EVENT from '../graphql/mutation/event/MapIterationToEvent.gql';
+import UNMAP_TASK_FROM_ROUTINEEVENT from '../graphql/mutation/event/UnmapTaskFromRoutineEvent.gql';
+import SCHEDULE_TODO from '../graphql/mutation/todo/ScheduleTodo.gql';
+import MAP_TODO_TO_EVENT from '../graphql/mutation/todo/MapTodoToEvent.gql';
+import REFRESH_REPETITIVE_ITEMS from '../graphql/mutation/item/RefreshRepetitiveItems.gql';
+import UPDATE_ITERATION from '../graphql/mutation/todo/UpdateIteration.gql';
 
 export function mapIterationToEvent(iterationID, eventID, apollo) {
     apollo.mutate({
@@ -35,5 +36,12 @@ export function mapTodoToEvent(idTodo, idEvent, apollo) {
 export function refreshRepetitiveItems(apollo) {
     apollo.mutate({
         mutation: REFRESH_REPETITIVE_ITEMS,
+    });
+}
+
+export function updateIteration(iteration, apollo) {
+    apollo.mutate({
+        mutation: UPDATE_ITERATION,
+        variables: { iteration }
     });
 }

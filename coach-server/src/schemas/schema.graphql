@@ -51,6 +51,7 @@ type Mutation {
   updateTodo(todo: TodoInput!): Todo!
   deleteTodo(id: Int!): Todo!
   createTodoIterations(todo: TodoInput!): Todo
+  updateIteration(iteration: IterationInput!): Iteration
   createDefaultTask(iteration: IterationInput!): Todo
   toggleCompletion(idIteration: Int!, attemptedAt: String, completedAt: String): Iteration
   rescheduleIteration(id: Int!, startAt: String!, endAt: String!): Iteration

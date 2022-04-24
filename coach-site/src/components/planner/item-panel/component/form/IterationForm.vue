@@ -1,48 +1,43 @@
 <template>
     <form :id="`iteration-form`" class="pb-2" v-on:submit.prevent>
         <!-- Header -->
-        <div class="d-flex flew-row justify-content-between mt-4">
+        <div class="d-flex flew-row justify-content-between mt-2">
             <!-- Back Button -->
             <div class="form-group d-flex justify-content-start">
-                <img class="icon-button" 
+                <img class="icon-button"
                      src='/icon/previous.png' width="16" height="16"
                         @click.prevent="close"/>
             </div>
         </div>
         <!-- Title/Text -->
-        <div class="form-group mt-1">
-            <input class="title textbox" type="text" ref="text"  placeholder="Title"
-                    v-model.lazy.trim="iteration.text" 
+        <div class="form-group mt-3">
+            <input class="title textbox" type="text" ref="text" placeholder="Title"
+                    v-model.lazy.trim="iteration.text"
                     v-on:keyup.enter="save(iteration)"
                     spellcheck/>
         </div>
         <!-- Time -->
         <div class="form-group mt-1">
-        <!-- <Datepicker :value="startDateTimeString" :dayStr="daysOfWeek" :btnStr="btnStr"
-                        @input="setDateTime($event, 'startAt')">
-        </Datepicker> -->
-            <DateSelector :date="iteration.startAt" @onChange="iteration.startAt = $event"></DateSelector>
-            
+            <DateSelector class="mt-3" :date="iteration.startAt" @onChange="iteration.startAt = $event"></DateSelector>
+            <span v-if="!iteration.startAt" class="error float-start mb-2">Iteration must have start</span>
+            <DateSelector class="mt-3" :date="iteration.endAt" @onChange="iteration.endAt = $event"></DateSelector>
         </div>
-        <div class="d-flex flew-row justify-content-between mt-4">
+        <div class="d-flex flew-row justify-content-end mt-3">
             <!-- Buttons -->
             <div class="form-group d-flex justify-content-end">
-                <button class="btn btn-primary me-2" type="button" @click.prevent="save(iteration)">Save</button>
-                <button class="btn btn-warning" type="button" @click.prevent="close">Cancel</button>
+                <button class="btn-sm btn-primary me-2" type="button" @click.prevent="save(iteration)">Save</button>
+                <button class="btn-sm btn-warning" type="button" @click.prevent="close">Cancel</button>
             </div>
         </div>
     </form>
 </template>
 
 <script>
-// import { Datepicker } from '@livelybone/vue-datepicker';
-// import { toDateString, toTimezoneOffset } from '../../../../../../utility';
-
 import DateSelector from "../../../../controls/select/DateSelector.vue"
+import { updateIteration } from '../../../../../resolvers/planner-resolvers';
 
 export default {
     components: { DateSelector },
-    // components: { Datepicker },
     props: {
         iteration: Object
     },
@@ -52,31 +47,19 @@ export default {
             btnStr: "Done",
         }
     },
-    // computed: {
-    //     startDateTimeString() { 
-    //         return (this.iteration.startAt) ? this.toDateString(this.iteration.startAt) : null; 
-    //     }
-    // },
     methods: {
         save,
         close,
-        // setDateTime,
-        // saveIteration,
-        // toDateString,
-        // toTimezoneOffset
+        updateIteration
     },
 }
-
-// function setDateTime(value, prop) {
-//     let timezoneOffset = this.toTimezoneOffset(new Date(value).toJSON());
-//     this.iteration[prop] = value + "T00:00:00" + timezoneOffset;
-// }
 
 function save(iteration) {
     var title = iteration.text.trim();
     if (title == "") return;
+    if (!iteration.startAt) return;
 
-    this.saveIteration(iteration, this.$apollo);
+    this.updateIteration(iteration, this.$apollo);
 
     this.close();
 }
@@ -87,8 +70,6 @@ function close() {
 </script>
 
 <style>
-/* @import '../../../../../../node_modules/@livelybone/vue-datepicker/lib/css/index.css'; */
-
 form {
     padding-left: 12px;
     padding-right: 12px;
@@ -96,8 +77,19 @@ form {
     overflow: scroll;
 }
 
+input {
+    background-color: white;
+}
+
 .title {
     padding-top: 10px;
 }
 
+.error {
+    color: red;
+    font-size: 12px;
+    border-color: red
+    /* outline-style: none; */
+    /* -webkit-appearance: none; */
+}
 </style>
