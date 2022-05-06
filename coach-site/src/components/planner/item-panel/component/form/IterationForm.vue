@@ -19,7 +19,7 @@
         <!-- Time -->
         <div class="form-group mt-1">
             <DateSelector class="mt-3" :date="iteration.startAt" @onChange="iteration.startAt = $event"></DateSelector>
-            <span v-if="!iteration.startAt" class="error float-start mb-2">Iteration must have start</span>
+            <!-- <span v-if="!iteration.startAt" class="error float-start mb-2">Iteration must have start</span> -->
             <DateSelector class="mt-3" :date="iteration.endAt" @onChange="iteration.endAt = $event"></DateSelector>
         </div>
         <div class="d-flex flew-row justify-content-end mt-3">
@@ -41,12 +41,6 @@ export default {
     props: {
         iteration: Object
     },
-    data: function () {
-        return {
-            daysOfWeek: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-            btnStr: "Done",
-        }
-    },
     methods: {
         save,
         close,
@@ -57,7 +51,7 @@ export default {
 function save(iteration) {
     var title = iteration.text.trim();
     if (title == "") return;
-    if (!iteration.startAt) return;
+    // if (!iteration.startAt) return;
 
     this.updateIteration(iteration, this.$apollo);
 

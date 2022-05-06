@@ -6,14 +6,17 @@ query metrics {
     goals {
       id
       text
+      position
     }
     todos {
       id
       text
+      position
     }
     routines {
       id
       text
+      position
     }
   }
 }

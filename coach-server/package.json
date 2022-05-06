@@ -5,6 +5,8 @@
   "scripts": {
     "start": "nodemon src/index",
     "test": "echo \"Error: no test specified\" && exit 1",
+    "findProcess": "sudo lsof -i :4013",
+    "killProcess": "kill -9",
     "migrate": "npx prisma migrate dev",
     "generate": "npx prisma generate"
   },

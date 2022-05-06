@@ -3,6 +3,7 @@ type Goal {
   idType: Int
   text: String!
   description: String
+  position: String
   isDeleted: Int
   type: Type
   parents: [Goal]
@@ -19,6 +20,7 @@ input GoalInput {
   idType: Int
   text: String
   description: String
+  position: String
   # isDeleted:   Int
   type: TypeInput
   parents: [GoalInput]

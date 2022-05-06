@@ -6,14 +6,17 @@ subscription metricUpdated {
     goals {
       id
       text
+      position
     }
     todos {
       id
       text
+      position
     }
     routines {
       id
       text
+      position
     }
   }
 }

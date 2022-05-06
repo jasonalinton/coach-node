@@ -4,11 +4,12 @@
     <!-- Error -->
     <div v-else-if="errorMessage">{{ errorMessage }}</div>
     <!-- Table -->
-    <div v-else-if="todos" class="row g-0">
+    <div v-else-if="todoRows" class="row g-0">
         <div class="table col">
-            <table class="table table-sm table-borderless">
+            <table class="table table-sm table-borderless" :class="{ 'sort': isSorting }">
                 <thead class="sticky-top">
                     <tr>
+                        <th v-if="isSorting" >Sort</th>
                         <th v-for="column in config.table.columns" :key="column.id">{{ column.name }}</th>
                         <th  v-if="config.itemType != 'metric'">
                             <button class="add-btn my-auto" type="button" @click="onAddItem">
@@ -18,16 +19,26 @@
                     </tr>
                 </thead>
                 <tbody is="transition-group" :name="`item-list`" v-cloak>
-                    <tr v-for="item in todos" :key="item.id" :class="{ selected: selectedItem && selectedItem.id == item.id }" @click.prevent="$emit('itemSelected', item)">
-                        <td v-for="column in config.table.columns" :key="column.id">
+                    <tr v-for="(row, index) in todoRows" :key="row.todo.id" :class="{ selected: selectedItem && selectedItem.id == row.todo.id }" @click.prevent="$emit('itemSelected', row.todo)">
+                        <td v-if="isSorting">
+                            <div class="d-flex flex-row justify-content-between">
+                                <button class="btn btn-sm" type="button" @click="$emit('moveUp', row, index, todoRows)">
+                                    <img class="m-auto" src="/icon/icon-collapsed.png" width="10" height="14"/>
+                                </button>
+                                <button class="btn btn-sm" type="button" @click="$emit('moveDown', row, index, todoRows)">
+                                    <img class="m-auto" src="/icon/icon-expanded.png" width="10" height="14"/>
+                                </button>
+                            </div>
+                        </td>
+                       <td v-for="column in config.table.columns" :key="column.id">
                             <div class="d-flex flex-row align-items-center">
-                                <img v-if="columnData(column, item) && column.icon" :src="column.icon" width="24" height="24"/>
-                                {{ columnData(column, item) }}
+                                <img v-if="columnData(column, row.todo) && column.icon" :src="column.icon" width="24" height="24"/>
+                                {{ columnData(column, row.todo) }}
                             </div>
                         </td>
                         <td>
                             <div class="d-flex justufy-content-center">
-                                <button class="delete-btn btn btn-secondary btn-sm float-end" type="button" @click.prevent.stop="onDeleteItem(item)">
+                                <button class="delete-btn btn btn-secondary btn-sm float-end" type="button" @click.prevent.stop="onDeleteItem(row.todo)">
                                     <i class="far fa-trash-alt"></i>
                                 </button>
                             </div>
@@ -48,7 +59,8 @@ export default {
     name: 'TodoTableView',
     props: {
         selectedItem: Object,
-        todos: Array
+        todoRows: Array,
+        isSorting: Boolean
     },
     data: function() {
         return {
@@ -146,6 +158,14 @@ td {
 }
 
 .table th:nth-child(2) {
+    min-width: 250px;
+}
+
+.table.sort th:nth-child(2) {
+    min-width: 40px;
+}
+
+.table.sort th:nth-child(3) {
     min-width: 250px;
 }
 

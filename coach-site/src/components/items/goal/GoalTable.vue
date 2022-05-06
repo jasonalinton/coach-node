@@ -14,6 +14,11 @@
                         Sort By Priority
                     </label>
                 </div>
+                <!-- Sorting -->
+                <div class="sort">
+                    <button v-if="!isSorting" class="btn btn-sm btn-secondary" @click="isSorting = true">Sort</button>
+                    <button v-if="isSorting" class="btn btn-sm btn-success" @click="onDoneSorting">Done</button>
+                </div>
             </div>
         </div>
         <div class="table col-12">
@@ -30,7 +35,7 @@
                 </thead>
                 <tbody is="transition-group" :name="`item-list`" v-cloak>
                     <template v-for="row in rows">
-                        <tr :key="row.id" :class="{ selected: selectedItem && selectedItem.id == row.id, todosShown: row.todos }" 
+                        <tr :key="row.id" :class="{ selected: selectedItem && selectedItem.id == row.id, todosShown: row.todoRows }" 
                                 @click.prevent="$emit('itemSelected', row.goal)">
                             <td>{{ row.goal.id }}</td>
                             <td>{{ row.goal.text }}</td>
@@ -66,7 +71,9 @@
                         </tr>
                         <tr class="child-row" :key="row.id + 100000">
                             <td colspan="9">
-                                <TodoTableView v-if="row.todos" :todos="row.todos" class="todo-table"></TodoTableView>
+                                <TodoTableView v-if="row.todoRows" class="todo-table"
+                                               :todoRows="row.todoRows" :isSorting="isSorting"
+                                                   @moveUp="moveUp" @moveDown="moveDown"></TodoTableView>
                             </td>
                         </tr>
                     </template>
@@ -77,9 +84,20 @@
 </template>
 
 <script>
-import { listToString, replaceItem, removeItem } from '../../../../utility';
+import { listToString, replaceItem, removeItem, sortAsc } from '../../../../utility';
 import { addPropertyToCache, updatePropertyInCache, deletePropertyInCache } from '../../../resolvers/resolve.js'
 import TodoTableView from '../todo/TodoTableView.vue';
+
+/*
+- The goal table is a list of rows
+    - Rows have a property for the goal and for the child todoRows
+        - todoRows have a property for the todo and a property for the position
+            - When sorting is enabled, if a nested todo's order is changed todoRow.position will be updated and an update flag will be set
+            - When sorting is done, the goal table will check for any rowTodos with updated positions, updated the todo.position and save the todo
+*/
+
+// Set position when saving todo
+// Save updated positions
 
 export default {
     components: { TodoTableView },
@@ -94,7 +112,8 @@ export default {
             rows: [],
             loadingQueriesCount: 0,
             errorMessage: null,
-            shouldSortByPriority: true
+            shouldSortByPriority: true,
+            isSorting: false
         }
     },
     apollo: {
@@ -140,10 +159,10 @@ export default {
     },
     mounted: function() {
         // An error gets thrown if pollInterval is set with the query
-        this.$apollo.queries.items.setOptions({
-            fetchPolicy: 'cache-and-network',
-            pollInterval: 50000,
-        })
+        // this.$apollo.queries.items.setOptions({
+        //     fetchPolicy: 'cache-and-network',
+        //     pollInterval: 50000,
+        // })
     },
     methods: {
         columnData,
@@ -151,8 +170,13 @@ export default {
         sortGoals,
         setTodos,
         getTodos,
+        getTodosForGoal,
+        sortTodos,
+        moveUp,
+        moveDown,
         onGoalClicked,
         listToString,
+        onDoneSorting,
         onAddItem,
         onDeleteItem
     },
@@ -175,16 +199,18 @@ function initRows(goals) {
     let _this = this;
     let rows = [];
     goals = this.sortGoals(goals);
-    let todos = this.$apollo.getClient().cache.readQuery({
-        query: require('../../../graphql/query/QueryItems.gql')
-    })
-    .items.todos;
+    let todos = this.getTodos();
     goals.forEach(_goal => {
         let row = _this.rows.find(_row => _row.goal.id == _goal.id);
+
+        let todosForGoal = (row && row.todoRows) ? _this.getTodosForGoal(_goal, todos) : null;
+        if (todosForGoal) this.sortTodos(row.todoRows);
+
         rows.push({
             id: _goal.id,
             goal: _goal,
-            todos: (row && row.todos) ? _this.getTodos(_goal, todos) : null 
+            // todos: todosForGoal
+            todoRows: (row && row.todoRows) ? row.todoRows : null
         })
     })
     this.rows = [...rows];
@@ -214,20 +240,107 @@ function setTodos(row) {
 
     let todoIDs = row.goal.todos.map(_todo => _todo.id);
     todos = todos.filter(_todo => todoIDs.includes(_todo.id));
-    row.todos = todos;
+
+    let todoRows = todos.map(_todo => {
+        let position = JSON.parse(_todo.position);
+        position = (position) ? position[`goal_${row.goal.id}`] : null;
+        return {
+            id: _todo.id,
+            todo: _todo,
+            position
+        }
+    });
+
+    row.todoRows = todoRows;
 }
 
-function getTodos(goal, todos) {
-    let todoIDs = goal.todos.map(_todo => _todo.id);
-    todos = todos.filter(_todo => todoIDs.includes(_todo.id));
+function getTodos() {
+    let todos = this.$apollo.getClient().cache.readQuery({
+        query: require('../../../graphql/query/QueryItems.gql')
+    })
+    .items.todos;
+
     return todos;
 }
 
+function getTodosForGoal(goal, todos) {
+    let todoIDs = goal.todos.map(_todo => _todo.id);
+    todos = todos.filter(_todo => todoIDs.includes(_todo.id));
+
+    return todos;
+}
+
+function sortTodos(todoRows) {
+    if (todoRows) {
+        sortAsc(todoRows, 'position');
+    }
+}
+
+function moveUp(row, index, todoRows) {
+    if (index > 0) {
+        --row.position;
+        row.isUpdated = true;
+
+        let previousRow = todoRows[index-1];
+        ++previousRow.position;
+        previousRow.isUpdated = true;
+
+        this.sortTodos(todoRows);
+    }
+}
+
+function moveDown(row, index, todoRows) {
+    if (todoRows.length > index + 1) {
+        ++row.position;
+        row.isUpdated = true;
+
+        let nextRow = todoRows[index+1];
+        --nextRow.position;
+        nextRow.isUpdated = true;
+
+        this.sortTodos(todoRows);
+    }
+}
+
+function onDoneSorting() {
+    let todos_updated = [];
+    this.rows.forEach(_row => {
+        let todoRows = _row.todoRows.filter(_todoRow => _todoRow.isUpdated);
+        todoRows.forEach(_todoRow => {
+            let position = JSON.parse(_todoRow.todo.position);
+            position[`goal_${_row.goal.id}`] = _todoRow.position;
+            todos_updated.push({
+                id: _todoRow.id,
+                position: JSON.stringify(position)
+            })
+            delete _todoRow.isUpdated;
+        })  
+    })
+
+    this.isSorting = true
+
+    // let todos = this.rows.flatMap(_row => _row.todoRows)
+    //     .filter(_todoRow => _todoRow.isUpdated)
+    //     .map(_todoRow => _todoRow.todo);
+
+    // let todos_updated = [];
+    // todos.forEach(_todo => {
+    //     let position = JSON.parse(_todo.position);
+    //     position = position.find()
+    //     todos_updated.push({
+
+    //     })
+    //     delete _todo.isUpdated;
+    // })
+
+}
+
 function onGoalClicked(row) {
-    if (!row.todos) {
+    if (!row.todoRows) {
         this.setTodos(row);
+        this.sortTodos(row.todoRows);
     } else {
-        row.todos = null;
+        row.todoRows = null;
     }
 }
 

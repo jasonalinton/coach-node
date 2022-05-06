@@ -3,6 +3,7 @@ query goalsByDate($startAt: String, $endAt: String) {
     id
     text
     description
+    position
     type {
       id
       text
@@ -10,10 +11,12 @@ query goalsByDate($startAt: String, $endAt: String) {
     parents {
       id
       text
+      position
     }
     children {
       id
       text
+      position
     }
     metrics {
       id
@@ -22,17 +25,21 @@ query goalsByDate($startAt: String, $endAt: String) {
     todos {
       id
       text
+      position
       iterations {
         id
         text
         startAt
         endAt
         attemptedAt
+        completedAt
+        isRecommended
       }
     }
     routines {
       id
       text
+      position
     }
     timePairs {
       id

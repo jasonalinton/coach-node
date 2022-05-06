@@ -133,6 +133,7 @@ function onDragEnd(ev) {
     background-color: white;
     /* max-height: 40px; */
     user-select: none;
+    padding: 4px 0px;
 }
 
 .complete span {

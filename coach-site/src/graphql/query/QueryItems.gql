@@ -7,20 +7,24 @@ query items($getMetrics: Boolean, $getGoals: Boolean, $getTodos: Boolean, $getRo
             goals {
                 id
                 text
+                position
             }
             todos {
                 id
                 text
+                position
             }
             routines {
                 id
                 text
+                position
             }
         }
         goals {
             id
             text
             description
+            position
             type {
                 id
                 text
@@ -28,10 +32,12 @@ query items($getMetrics: Boolean, $getGoals: Boolean, $getTodos: Boolean, $getRo
             parents {
                 id
                 text
+                position
             }
             children {
                 id
                 text
+                position
             }
             metrics {
                 id
@@ -40,10 +46,12 @@ query items($getMetrics: Boolean, $getGoals: Boolean, $getTodos: Boolean, $getRo
             todos {
                 id
                 text
+                position
             }
             routines {
                 id
                 text
+                position
             }
             timePairs {
                 id
@@ -194,14 +202,17 @@ query items($getMetrics: Boolean, $getGoals: Boolean, $getTodos: Boolean, $getRo
             id
             text
             description
+            position
             isGroup
             parents {
                 id
                 text
+                position
             }
             children {
                 id
                 text
+                position
             }
             metrics {
                 id
@@ -210,10 +221,12 @@ query items($getMetrics: Boolean, $getGoals: Boolean, $getTodos: Boolean, $getRo
             goals {
                 id
                 text
+                position
             }
             routines {
                 id
                 text
+                position
             }
             timePairs {
                 id
@@ -390,13 +403,16 @@ query items($getMetrics: Boolean, $getGoals: Boolean, $getTodos: Boolean, $getRo
             id
             text
             description
+            position
             parents {
                 id
                 text
+                position
             }
             children {
                 id
                 text
+                position
             }
             metrics {
                 id
@@ -405,10 +421,12 @@ query items($getMetrics: Boolean, $getGoals: Boolean, $getTodos: Boolean, $getRo
             goals {
                 id
                 text
+                position
             }
             todos {
                 id
                 text
+                position
             }
             timePairs {
                 id

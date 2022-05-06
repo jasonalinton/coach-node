@@ -28,7 +28,7 @@ model Goal {
   idType           Int?
   text             String
   description      String?
-  // position         Int?
+  position         String?
   isDeleted        Boolean   @default(false)
   dateTimeDeleted  DateTime? @db.Timestamptz(6)
   createdAt        DateTime  @default(now()) @db.Timestamptz(6)
@@ -45,8 +45,6 @@ model Goal {
   todos            Todo[]
   routines         Routine[]
 
-  childTodos       Goal_Todo[] 
-
   timePairs        Goal_TimePair[]
   repeats          Repeat[]
   goal_repeats     Goal_Repeat[]
@@ -56,6 +54,7 @@ model Todo {
   id              Int       @id @default(autoincrement())
   text            String
   description     String?
+  position        String?
   isGroup         Boolean   @default(false)
   isDeleted       Boolean   @default(false)
   dateTimeDeleted DateTime? @db.Timestamptz(6)
@@ -69,8 +68,6 @@ model Todo {
   goals           Goal[]
   routines        Routine[]
 
-  parentGoals       Goal_Todo[] 
-
   timePairs       Todo_TimePair[]
   repeats         Repeat[]
   todo_repeats    Todo_Repeat[]
@@ -82,32 +79,24 @@ model Routine {
   id              Int       @id @default(autoincrement())
   text            String
   description     String?
+  position        String?
   isDeleted       Boolean   @default(false)
   dateTimeDeleted DateTime? @db.Timestamptz(6)
   createdAt       DateTime  @default(now()) @db.Timestamptz(6)
   updatedAt       DateTime  @default(now()) @updatedAt @db.Timestamptz(6)
 
-  parents  Routine[] @relation("RoutineFamily")
-  children Routine[] @relation("RoutineFamily")
+  parents         Routine[] @relation("RoutineFamily")
+  children        Routine[] @relation("RoutineFamily")
 
-  metrics Metric[]
-  goals   Goal[]
-  todos   Todo[]
+  metrics         Metric[]
+  goals           Goal[]
+  todos           Todo[]
 
-  timePairs      Routine_TimePair[]
-  repeats        Repeat[]
-  routine_repeats  Routine_Repeat[]
+  timePairs       Routine_TimePair[]
+  repeats         Repeat[]
+  routine_repeats Routine_Repeat[]
 
   iterations      Iteration[] @relation(name: "routine_iteration")
-}
-model Goal_Todo {
-  id                 Int      @id @default(autoincrement())
-  idGoal_Parent      Int
-  idTodo_Child       Int
-  todoPosition       Int
-
-  goal        Goal            @relation(fields: [idGoal_Parent], references: [id])
-  todo        Todo            @relation(fields: [idTodo_Child], references: [id])
 }
 
 model Type {

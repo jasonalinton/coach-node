@@ -3,6 +3,7 @@ query goals {
     id
     text
     description
+    position
     type {
       id
       text
@@ -10,10 +11,12 @@ query goals {
     parents {
       id
       text
+      position
     }
     children {
       id
       text
+      position
     }
     metrics {
       id
@@ -22,10 +25,12 @@ query goals {
     todos {
       id
       text
+      position
     }
     routines {
       id
       text
+      position
     }
     timePairs {
       id

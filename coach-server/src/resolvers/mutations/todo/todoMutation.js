@@ -22,6 +22,7 @@ async function addTodo(parent, args, context, info) {
 
     console.log("");
 
+    /* Create todo_repeat relationship */
     repeats.forEach(async _repeat => {
         _repeat.todo_repeats.create.todo.connect.id = todo.id;
         _repeat.todos = { connect: { id: todo.id }};
@@ -34,8 +35,6 @@ async function addTodo(parent, args, context, info) {
         where: { id: todo.id },
         include: todoInclude
     });
-
-    console.log("");
 
     todo = await configureIteration(todo, context);
 

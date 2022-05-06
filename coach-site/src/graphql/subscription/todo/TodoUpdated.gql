@@ -3,14 +3,17 @@ subscription todoUpdated {
     id
     text
     description
+    position
     isGroup
     parents {
       id
       text
+      position
     }
     children {
       id
       text
+      position
     }
     metrics {
       id
@@ -19,10 +22,12 @@ subscription todoUpdated {
     goals {
       id
       text
+      position
     }
     routines {
       id
       text
+      position
     }
     timePairs {
       id

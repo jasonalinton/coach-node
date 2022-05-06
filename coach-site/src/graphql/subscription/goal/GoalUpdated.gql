@@ -3,6 +3,7 @@ subscription goalUpdated {
     id
     text
     description
+    position
     type {
       id
       text
@@ -10,10 +11,12 @@ subscription goalUpdated {
     parents {
       id
       text
+      position
     }
     children {
       id
       text
+      position
     }
     metrics {
       id
@@ -22,10 +25,12 @@ subscription goalUpdated {
     todos {
       id
       text
+      position
     }
     routines {
       id
       text
+      position
     }
     timePairs {
       id

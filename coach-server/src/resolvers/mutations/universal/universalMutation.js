@@ -1,3 +1,6 @@
+const { clone } = require('../../../../utility');
+const { goalInclude } = require('../../../properties/goalProperties');
+
 async function getTypes(parent, { parentType }, context, info) {
     let types = await context.prisma.type.findMany({
         where: { description: parentType }
@@ -7,7 +10,43 @@ async function getTypes(parent, { parentType }, context, info) {
 }
 
 async function tempMisc(parent, args, context, info) {
+    setItemPosition(context)
+    
     return true;
+}
+
+async function setItemPosition(context) {
+    let include = clone(goalInclude);
+
+    let goals = await context.prisma.goal.findMany({
+        include
+    });
+
+    let goals_Updated = [];
+    let todos_Updated = [];
+    let routines_Updated = [];
+
+    goals.forEach(_goal => {
+        let position = (_goal.position) ? _goal.position : "{}";
+        position = JSON.parse(position);
+
+        for (let i = 1; i < _goal.todos.length + 1; i++) {
+            let _todo = _goal.todos[i-1];
+            position[`goal_${_goal.id}`] = i;
+            _todo.position = JSON.stringify(position);
+            if (!todos_Updated.includes(_ => _.id = _todo.id))
+                todos_Updated.push(_todo);
+        }
+    });
+
+    for (let i = 0; i < todos_Updated.length; i++) {
+        let _todo = todos_Updated[i];
+        let todo = await context.prisma.todo.update({
+            where: { id: _todo.id },
+            data: { position: _todo.position }
+        })
+        console.log(todo.position);
+    }
 }
 
 /*

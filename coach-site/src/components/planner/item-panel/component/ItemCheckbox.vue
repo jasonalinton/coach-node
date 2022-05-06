@@ -1,4 +1,4 @@
-<template>
+  <template>
     <div @click="click" @mouseover="hovered = true" @mouseleave="hovered = false; pressed = false" 
          @mousedown="pressed = true" @mouseup="pressed = false">
         <img v-if="!checked" class="checked" :src='`/icon/checkbox/unchecked/${state}.png`' :width="width_" :height="height_"/>
