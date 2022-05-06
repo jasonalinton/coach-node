@@ -2,6 +2,7 @@ type Routine {
   id: Int!
   text: String!
   description: String
+  position: String
   isDeleted: Int
   parents: [Routine]
   children: [Routine]
@@ -16,6 +17,7 @@ input RoutineInput {
   id: Int
   text: String
   description: String
+  position: String
   # isDeleted:   Int
   parents: [RoutineInput]
   children: [RoutineInput]
@@ -26,4 +28,3 @@ input RoutineInput {
   timePairs: [Routine_TimePairInput]
   repeats: [RepeatInput]
 }
-

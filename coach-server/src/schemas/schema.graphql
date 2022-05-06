@@ -45,6 +45,7 @@ type Mutation {
   addGoal(goal: GoalInput!): Goal!
   updateGoal(goal: GoalInput!): Goal!
   deleteGoal(id: Int!): Goal!
+  saveGoalPositions(goalPositions: [ItemPositionsInput]!): Boolean
 
   # Todo
   addTodo(todo: TodoInput!): Todo!

@@ -1,0 +1,19 @@
+type Items {
+  metrics: [Metric!]
+  goals: [Goal!]
+  todos: [Todo!]
+  routines: [Routine!]
+}
+
+input ItemPositionsInput {
+    idParent: Int!
+    metricPositions: [ItemPositionInput]
+    goalPositions: [ItemPositionInput]
+    todoPositions: [ItemPositionInput]
+    routinePositions: [ItemPositionInput]
+}
+
+input ItemPositionInput {
+    idChild: Int!
+    position: Int!
+}

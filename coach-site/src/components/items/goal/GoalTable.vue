@@ -86,6 +86,7 @@
 <script>
 import { listToString, replaceItem, removeItem, sortAsc } from '../../../../utility';
 import { addPropertyToCache, updatePropertyInCache, deletePropertyInCache } from '../../../resolvers/resolve.js'
+import { saveGoalPositions } from '../../../resolvers/goal-resolvers.js'
 import TodoTableView from '../todo/TodoTableView.vue';
 
 /*
@@ -167,7 +168,7 @@ export default {
     methods: {
         columnData,
         initRows,
-        sortGoals,
+        sortGoalsByPriority,
         setTodos,
         getTodos,
         getTodosForGoal,
@@ -198,7 +199,7 @@ function columnData(column, item) {
 function initRows(goals) {
     let _this = this;
     let rows = [];
-    goals = this.sortGoals(goals);
+    goals = this.sortGoalsByPriority(goals);
     let todos = this.getTodos();
     goals.forEach(_goal => {
         let row = _this.rows.find(_row => _row.goal.id == _goal.id);
@@ -216,7 +217,7 @@ function initRows(goals) {
     this.rows = [...rows];
 }
 
-function sortGoals(goalsIn) {
+function sortGoalsByPriority(goalsIn) {
     if (this.shouldSortByPriority) {
         let goals = [];
         goals = goals.concat(goalsIn.filter(_item => _item.type && _item.type.text.toLowerCase() == "primary"));
@@ -276,63 +277,58 @@ function sortTodos(todoRows) {
     }
 }
 
-function moveUp(row, index, todoRows) {
+function moveUp(row, index, rows) {
     if (index > 0) {
         --row.position;
         row.isUpdated = true;
 
-        let previousRow = todoRows[index-1];
+        let previousRow = rows[index-1];
         ++previousRow.position;
         previousRow.isUpdated = true;
 
-        this.sortTodos(todoRows);
+        this.sortTodos(rows);
     }
 }
 
-function moveDown(row, index, todoRows) {
-    if (todoRows.length > index + 1) {
+function moveDown(row, index, rows) {
+    if (rows.length > index + 1) {
         ++row.position;
         row.isUpdated = true;
 
-        let nextRow = todoRows[index+1];
+        let nextRow = rows[index+1];
         --nextRow.position;
         nextRow.isUpdated = true;
 
-        this.sortTodos(todoRows);
+        this.sortTodos(rows);
     }
 }
 
 function onDoneSorting() {
-    let todos_updated = [];
+    let itemPositions = [];
+
     this.rows.forEach(_row => {
+        if (!_row.todoRows) return;
         let todoRows = _row.todoRows.filter(_todoRow => _todoRow.isUpdated);
+        if (todoRows.length == 0) return;
+
+        let goalPositions = {
+            idParent: _row.id,
+            todoPositions: []
+        };
+
         todoRows.forEach(_todoRow => {
-            let position = JSON.parse(_todoRow.todo.position);
-            position[`goal_${_row.goal.id}`] = _todoRow.position;
-            todos_updated.push({
-                id: _todoRow.id,
-                position: JSON.stringify(position)
-            })
+            goalPositions.todoPositions.push({
+                idChild: _todoRow.id,
+                position: _todoRow.position
+            });
             delete _todoRow.isUpdated;
-        })  
+        });
+
+        itemPositions.push(goalPositions);
     })
 
-    this.isSorting = true
-
-    // let todos = this.rows.flatMap(_row => _row.todoRows)
-    //     .filter(_todoRow => _todoRow.isUpdated)
-    //     .map(_todoRow => _todoRow.todo);
-
-    // let todos_updated = [];
-    // todos.forEach(_todo => {
-    //     let position = JSON.parse(_todo.position);
-    //     position = position.find()
-    //     todos_updated.push({
-
-    //     })
-    //     delete _todo.isUpdated;
-    // })
-
+    saveGoalPositions(itemPositions, this.$apollo);
+    this.isSorting = false;
 }
 
 function onGoalClicked(row) {
