@@ -1,0 +1,138 @@
+1,Root,,Root node
+2,Item,,Root
+3,Inventory Item,,Item
+4,Goal,,Item
+5,Routine,,Item
+6,Todo,,Item
+7,Task,,Todo
+8,Event,,Todo - Todo item that needs its date and time set
+9,Reminder,,Todo
+10,Tally,,Todo
+11,Inverse,,Todo
+12,Errand,,Todo
+13,Task Routine,,Routine
+14,Lifestyle,,Routine
+15,Maintainance,,Routine
+16,Housekeeping,,Routine
+17,Priority,,Root
+18,Spotlight,,Priority
+19,Primary,,Priority
+20,Secondary,,Priority
+21,Tertiary,,Priority
+22,Flexibility,,Root
+23,Definitive,,Flexibility
+24,Strict,,Flexibility
+25,Elastic,,Flexibility
+26,Flexible,,Flexibility
+27,Medium,,Root - Type of location that todo can be done. Allows for easier planning
+28,Mobile,,Medium
+29,Computer,,Medium
+30,Travel,,Medium
+31,Brick & Mortar,,Medium
+32,Home,,Medium
+33,Any,,Medium
+34,Era,,Root - Point in time
+35,Past,,Era
+36,Present,,Era
+37,Future,,Era
+38,Timeframe,,Root
+39,Millisecond,,Timeframe
+40,Second,,Timeframe
+41,Minute,,Timeframe
+42,Hour,,Timeframe
+43,Day,,Timeframe
+44,Workday,,Timeframe
+45,Weekday,,Timeframe
+46,Weekend Day,,Timeframe
+47,Weekend,,Timeframe
+48,Week,,Timeframe
+49,Month,,Timeframe
+50,Season,,Timeframe
+51,Quarter,,Timeframe
+52,Trimester,,Timeframe
+53,Bimester,,Timeframe
+54,Semester,,Timeframe
+55,Year,,Timeframe
+56,Milestone,,Timeframe
+57,Life,,Timeframe
+58,Repetition,,Root
+59,Millisecondly,,Repetition
+60,Secondly,,Repetition
+61,Minutley,,Repetition
+62,Hourly,,Repetition
+63,Daily,,Repetition
+64,Workdaily,,Repetition
+65,Weekdaily,,Repetition
+66,Weekendaily,,Repetition
+67,Weekendly,,Repetition
+68,Weekly,,Repetition
+69,Monthly,,Repetition
+70,Seasonally,,Repetition
+71,Quarterly,,Repetition
+72,Tri-Annually,,Repetition
+73,Bi-Annually,,Repetition
+74,Semi-Anually,,Repetition
+75,Annually,,Repetition
+76,Milestonly,,Repetition
+77,Lifely,,Repetition
+78,Time,,Root
+79,Time Type,time-type,Time
+80,Scheduled,,Time Type
+81,Recommended,,Time Type
+82,Due,,Time Type
+83,Endpoint,,Time
+84,Start,,Endpoint
+85,End,,Endpoint
+86,Moment,,Time
+87,Date,,Moment
+88,Time,,Moment
+89,DateTime,,Moment
+90,Point In Time,,Moment
+91,Point In Time Index,,Moment
+92,Day of Week,,Point In Time
+93,Day of Month,,Point In Time
+94,Sunday,,Day of Week
+95,Monday,,Day of Week
+96,Tuesday,,Day of Week
+97,Wednesday,,Day of Week
+98,Thursday,,Day of Week
+99,Friday,,Day of Week
+100,Saturday,,Day of Week
+101,Meal,,Root
+102,Recommended,,Meal - Recommended meals
+103,Consumed,,Meal - consumed meals
+104,Saved,,Meal - Meals that are saved so they can be copied later
+105,Control,,Root - Input of field where user can manipulate data
+106,Slider,,Control - Slider field type of the inventory log item
+107,Numberpad,,Control - Nuberpad field type of the inventory log item
+108,Counter,,Control - Up down tally counter field type of the inventory log item
+109,Textbox,,Control - Textbox field type of the inventory log item
+110,Textarea,,Control - Textarea field type of the inventory log item
+111,Textblock,,Control - Prevents having to create mapping tables for properties that are just a bunch of textblocks
+112,Dropdown,,Control - Dropdown field type for Inventory log item. The dropdown values are determined my other values that were used for the field
+113,Date Type,,Root
+114,Int,,Data Type
+115,Double,,Data Type
+116,String,,Data Type
+117,Boolean,,Data Type
+118,Object,,Data Type
+119,BriefingType,,Root
+120,Briefing,,Briefing Type
+121,Debriefing,,Briefing Type
+122,Event Type,,Root
+123,Event,,
+124,All-Day,,
+125,Todo,,
+126,Task,,
+127,Routine,,
+128,Routine 2,,"(This isn’t actually anything as yet. It’s for, just in case)"
+129,Task Routine,,
+130,Sub-Type,,
+131,Sleep,,
+132,Breifing,,
+133,Meal,,
+134,Workout,,
+135,Log,,
+136,Inventory,,
+137,Time,,
+138,Repetitive,,
