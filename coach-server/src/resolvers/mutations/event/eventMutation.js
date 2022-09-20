@@ -120,6 +120,8 @@ async function refreshRepetitiveTodo(parent, { idTodo }, context, info) {
 }
 
 async function refreshRepetitiveRoutine(parent, { idRoutine }, context, info) {
+    console.log("Start: Refresh repetitive routine");
+
     let include = { ...routineInclude };
     include.todos = { include: todoInclude };
     
@@ -128,7 +130,9 @@ async function refreshRepetitiveRoutine(parent, { idRoutine }, context, info) {
         include
     });
 
-    plannerController.refreshRepetitiveRoutine(routine, null, null, null, context)
+    await plannerController.refreshRepetitiveRoutine(routine, null, null, null, context);
+
+    console.log("End: Refresh repetitive routine");
 }
 
 module.exports = {

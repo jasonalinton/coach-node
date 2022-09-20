@@ -19,6 +19,7 @@ function configureRepeats(data, type = "") {
 }
 
 function createRepeats(data, type = "") {
+    if (!data.repeats) return [];
     let newRepeats = data.repeats.filter(repeat => (!repeat.id || repeat.id < 0) || repeat.isConnected);
     newRepeats.forEach(repeat => {
         configureTime(repeat, 'startRepeat');
@@ -38,7 +39,7 @@ function createRepeats(data, type = "") {
         
         configureDayIndicies(repeat);
 
-        configureMapObject(repeat, 'routineRepeat');
+        // configureMapObject(repeat, 'routineRepeat');
 
         if (type == "todo")
             createTodoRepeats(data, repeat)
@@ -126,25 +127,24 @@ function configureDayIndicies(repeat) {
         delete repeat.dayIndecies;
 }
 
-function createTodoRepeats(data) {
-    data.repeats.forEach(repeat => {
-        repeat.todo_repeats = {
-            create: {
-                isEventVisible: (!repeat.isEventVisible) ? false : repeat.isEventVisible,
-                todo: {
-                    connect: { id: data.id }
-                }
+function createTodoRepeats(data, repeat) {
+    repeat.todo_repeats = {
+        create: {
+            isEventVisible: (!repeat.isEventVisible) ? false : repeat.isEventVisible,
+            todo: {
+                // ID will be undifined if todo is in creation process
+                // This property will need to be updated in the transaction that creates to todo
+                connect: { id: data.id }
             }
         }
-        if (repeat.isConnected) {
-            repeat.routineRepeat = {
-                connect: { id: repeat.id }
-            }
-            delete repeat.isConnected;
+    }
+    if (repeat.routineRepeat) {
+        repeat.routineRepeat = {
+            connect: { id: repeat.routineRepeat.id }
         }
+    }
 
-        delete repeat.isEventVisible;
-    })       
+    delete repeat.isEventVisible;  
 }
 
 module.exports = {

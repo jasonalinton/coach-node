@@ -241,10 +241,12 @@ model Repeat {
   todoIterations    Iteration[] @relation("repeat_todoIteration")
   routineIterations Iteration[] @relation("repeat_routineIteration")
 
+  // Repeat mapped to item
   goal_repeats    Goal_Repeat[]
   todo_repeats    Todo_Repeat[]
   routine_repeats Routine_Repeat[]
 
+  // Routine repeat mapped to its corresponding todo repeats
   routineRepeat Repeat?  @relation(fields: [idRoutineRepeat], references: [id], name: "RoutineTodo_Repeat")
   todoRepeats   Repeat[] @relation("RoutineTodo_Repeat")
 }
@@ -328,7 +330,7 @@ model Iteration {
   todoRepeat    Repeat? @relation(fields: [idTodoRepeat], references: [id], name: "repeat_todoIteration")
   routineRepeat Repeat? @relation(fields: [idRoutineRepeat], references: [id], name: "repeat_routineIteration")
 
-  todoTimePair Todo_TimePair? @relation(fields: [idTodoTimePair], references: [id], name: "iteration_todotimepair")
+  todoTimePair Todo_TimePair? @relation(fields: [idTodoTimePair], references: [id], name: "iteration_todotimepair") 
 
   events Event[]
 

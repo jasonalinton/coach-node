@@ -168,7 +168,7 @@ export default {
     methods: {
         columnData,
         initRows,
-        sortGoalsByPriority,
+        sortGoals,
         setTodos,
         getTodos,
         getTodosForGoal,
@@ -199,7 +199,7 @@ function columnData(column, item) {
 function initRows(goals) {
     let _this = this;
     let rows = [];
-    goals = this.sortGoalsByPriority(goals);
+    goals = this.sortGoals(goals);
     let todos = this.getTodos();
     goals.forEach(_goal => {
         let row = _this.rows.find(_row => _row.goal.id == _goal.id);
@@ -217,7 +217,7 @@ function initRows(goals) {
     this.rows = [...rows];
 }
 
-function sortGoalsByPriority(goalsIn) {
+function sortGoals(goalsIn) {
     if (this.shouldSortByPriority) {
         let goals = [];
         goals = goals.concat(goalsIn.filter(_item => _item.type && _item.type.text.toLowerCase() == "primary"));

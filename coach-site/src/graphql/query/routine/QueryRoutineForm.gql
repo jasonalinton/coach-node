@@ -1,5 +1,5 @@
-query todos {
-  todos {
+query routines {
+  routines {
     id
     text
     description
@@ -23,10 +23,110 @@ query todos {
       text
       position
     }
-    routines {
+    todos {
       id
       text
       position
+      repeats {
+        id
+        type {
+          id
+          text
+        }
+        timeframe {
+          id
+          text
+        }
+        startRepeat {
+          id
+          type {
+            id
+            text
+          }
+          endpoint {
+            id
+            text
+          }
+          moment {
+            id
+            text
+          }
+          flexibility {
+            id
+            text
+          }
+          dateTime
+        }
+        endRepeat {
+          id
+          type {
+            id
+            text
+          }
+          endpoint {
+            id
+            text
+          }
+          moment {
+            id
+            text
+          }
+          flexibility {
+            id
+            text
+          }
+          dateTime
+        }
+        startIteration {
+          id
+          type {
+            id
+            text
+          }
+          endpoint {
+            id
+            text
+          }
+          moment {
+            id
+            text
+          }
+          flexibility {
+            id
+            text
+          }
+          dateTime
+        }
+        endIteration {
+          id
+          type {
+            id
+            text
+          }
+          endpoint {
+            id
+            text
+          }
+          moment {
+            id
+            text
+          }
+          flexibility {
+            id
+            text
+          }
+          dateTime
+        }
+        interval
+        frequency
+        dayIndecies {
+          id
+          index
+        }
+        routineRepeat {
+          id
+        }
+      }
     }
     timePairs {
       id
@@ -171,35 +271,6 @@ query todos {
         id
         index
       }
-      routines {
-        id
-      }
-      routine_repeats {
-        id
-        lastIterationDateTime
-        isEventVisible
-        routine {
-          id
-          text
-        }
-      }
-      todo_repeats {
-        id
-        lastIterationDateTime
-        isEventVisible
-      }
-      routineRepeat {
-        id
-      }
-    }
-    iterations {
-      id
-      text
-      startAt
-      endAt
-      attemptedAt
-      completedAt
-      isRecommended
     }
   }
 }

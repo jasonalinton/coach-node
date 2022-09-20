@@ -21,7 +21,12 @@ async function runCreateTransaction(data, context) {
             transaction.subscriptions[i].payload = await transaction.records[i];
             
         return goal_Created;
-    });
+    },
+    {
+        maxWait: 60000, // default: 2000
+        timeout: 60000, // default: 5000
+    }
+    );
 
     /* Publish new mappings */
     for (let i = 0; i < transaction.subscriptions.length; i++) {
@@ -97,7 +102,12 @@ function createTransaction(data, goalID, prisma) {
 function createRecords(data, goalID, include, prop, table, subscriptionName, subscriptionProp, transaction, prisma) {
     if (data[prop] && data[prop].create) {
         data[prop].create.forEach(_item => {
-            _item.goals = { connect: { id: goalID } }
+            if (prop == 'parents')
+                _item.children = { connect: { id: goalID } }
+            else if (prop == 'children')
+                _item.parents = { connect: { id: goalID } }
+            else
+                _item.goals = { connect: { id: goalID } }
 
             transaction.records.push(prisma[table].create({
                 data: _item,

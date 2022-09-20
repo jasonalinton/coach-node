@@ -1,8 +1,14 @@
+const { clone } = require('../../../utility');
 const controller = require('../../controller/itemController');
 const { eventInclude } = require('../../properties/event/eventProperties');
 const { routineInclude } = require('../../properties/routineProperties');
 const { configureRepeatTrans } = require('./time/repeatMutation');
 const { configureTimePairTrans } = require('./time/timePairMutation');
+
+const { configureRoutine } = require("../../service/item/routine/routineConfigurationService");
+const { runCreateTransaction, runUpdateTransaction } = require('../../service/item/routine/routineTransactionService');
+const { CONFIGURATION_TYPES } = require("../../../constant");
+
 
 async function addRoutine(parent, args, context, info) {
     let data = controller.initData(args.routine);
@@ -19,25 +25,32 @@ async function addRoutine(parent, args, context, info) {
     return routine;
 }
 
+// async function updateRoutine(parent, args, context, info) {
+//     let id = args.routine.id;
+//     let data = controller.initData(args.routine);
+
+//     let transaction = []
+//     await configureRepeatTrans(data, transaction, context);
+//     await configureTimePairTrans(data, transaction, context);
+
+//     let routine = context.prisma.routine.update({
+//         where: { id },
+//         data,
+//         include: routineInclude
+//     });
+//     transaction.push(routine);
+
+//     let result = await context.prisma.$transaction(transaction);
+//     routine = result.pop();
+
+//     context.pubsub.publish("ROUTINE_UPDATED", { routineUpdated: routine });
+    
+//     return routine;
+// }
+
 async function updateRoutine(parent, args, context, info) {
-    let id = args.routine.id;
-    let data = controller.initData(args.routine);
-
-    let transaction = []
-    await configureRepeatTrans(data, transaction, context);
-    await configureTimePairTrans(data, transaction, context);
-
-    let routine = context.prisma.routine.update({
-        where: { id },
-        data,
-        include: routineInclude
-    });
-    transaction.push(routine);
-
-    let result = await context.prisma.$transaction(transaction);
-    routine = result.pop();
-
-    context.pubsub.publish("ROUTINE_UPDATED", { routineUpdated: routine });
+    let data = configureRoutine(args.routine, CONFIGURATION_TYPES.UPDATE);
+    let routine = await runUpdateTransaction(data, args.routine.id, context);
     
     return routine;
 }
@@ -204,10 +217,89 @@ async function mapTodoIterations(parent, routineTodo_Iteration, context, info) {
     return routineTodo_Iteration;
 }
 
+// Delete routine iterations
+    // Delete events mapped to iteration
+    // Update last iterations datetime
+// Delete todo iterations
+    // Update last iterations datetime
+async function deleteFutureRoutineIterations(parent, { idRoutine, datetime }, context, info) {
+    datetime = (datetime) ? datetime : new Date();
+    let deletedIterations = [];
+
+    let include = {};
+    include.repeats = clone(routineInclude.repeats);
+    include.repeats.select.routineIterations.where = {
+        startAt: { gte: datetime }
+    }
+    include.repeats.select.todoIterations.where = {
+        startAt: { gte: datetime }
+    }
+    include.repeats.select.todoRepeats.select.todo_repeats = { select: { id: true } }
+
+    
+    await context.prisma.$transaction(async prisma => {
+        let routine = await context.prisma.routine.findFirst({
+            where: { id: idRoutine },
+            include
+        });
+
+        for (let i = 0; i < routine.repeats.length; i++) {
+            let _repeat = routine.repeats[i];
+            for (let j = 0; j < _repeat.routineIterations.length; j++) {
+                let _routineIteration = _repeat.routineIterations[j];
+                await prisma.iteration.update({
+                    data: {
+                        events: { deleteMany: { startAt: { gte: datetime } } },
+                        routineIteration: { delete: true }
+                    },
+                    where: { id: _routineIteration.id }
+                });
+                await prisma.iteration.delete({
+                    where: { id: _routineIteration.id }
+                });
+                deletedIterations.push({ id: _routineIteration });
+            }
+
+            await prisma.routine_Repeat.updateMany({
+                data: { lastIterationDateTime: datetime },
+                where: { idRoutine, idRepeat: _repeat.id }
+            });
+
+            for (let j = 0; j < _repeat.todoRepeats.length; j++) {
+                let _todoRepeat = _repeat.todoRepeats[j];
+                for (let k = 0; k < _todoRepeat.todoIterations.length; k++) {
+                    let _todoIteration = _todoRepeat.todoIterations[k];
+                    // await prisma.iteration.update({
+                    //     data: { todoIteration: { delete: true } },
+                    //     where: { id: _todoIteration.id },
+                    // });
+                    await prisma.iteration.delete({
+                        where: { id: _todoIteration.id },
+                    });
+                    deletedIterations.push({ id: _todoIteration });
+                }
+
+                for (let k = 0; k < _todoRepeat.todo_repeats.length; k++) {
+                    let _todo_repeat = _todoRepeat.todo_repeats[k];
+                    await prisma.todo_Repeat.update({
+                        data: { lastIterationDateTime: datetime },
+                        where: { id: _todo_repeat.id }
+                    })
+                }
+            }
+
+        }
+        return routine;
+    })
+
+    return true;
+}
+
 module.exports = {
     addRoutine,
     updateRoutine,
     deleteRoutine,
     createRoutineIterations,
-    mapTodoIterations
+    mapTodoIterations,
+    deleteFutureRoutineIterations
 }

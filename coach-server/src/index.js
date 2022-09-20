@@ -91,3 +91,6 @@ initMiddleware(prisma);
 server.listen({ port: PORT }, () => {
   console.log(`🚀 Server ready at http://localhost:${PORT}${server.graphqlPath}`);
 });
+
+
+// RoutineMutation.deleteFutureRoutineIterations(null, { idRoutine: 1, datetime: new Date(2022, 9, 5, 0, 0, 0)}, prisma, null)

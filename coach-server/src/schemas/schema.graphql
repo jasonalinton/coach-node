@@ -73,6 +73,7 @@ type Mutation {
     routineTodo_Iteration: RoutineTodo_IterationInput
   ): RoutineTodo_Iteration!
   refreshRepetitiveRoutine(idRoutine: Int!): Routine!
+  deleteFutureRoutineIterations(idRoutine: Int!, datetime: String!): Boolean
 
   # Type
   getTypes(parentType: String!): [Type!]!

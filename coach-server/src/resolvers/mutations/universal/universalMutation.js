@@ -1,4 +1,4 @@
-const { clone } = require('../../../../utility');
+const { clone, addHour } = require('../../../../utility');
 const { goalInclude } = require('../../../properties/goalProperties');
 
 async function getTypes(parent, { parentType }, context, info) {
@@ -10,7 +10,7 @@ async function getTypes(parent, { parentType }, context, info) {
 }
 
 async function tempMisc(parent, args, context, info) {
-    setItemPosition(context)
+    await fixTimes(context);
     
     return true;
 }
@@ -100,7 +100,203 @@ async function mapIteraitonsToTodoTimePair(context) {
 }
 
 async function fixTimes(context) {
+    let daylight1 = new Date(2021, 10, 7, 2, 0, 0);
+    let daylight2 = new Date(2022, 2, 13, 2, 0, 0);
 
+    let periods = [{
+            expression: { gte: daylight2 },
+            hours: 4
+        },
+        {
+            expression: { gte: daylight1, lt: daylight2 },
+            hours: 5
+        },
+        {
+            expression: { lt: daylight1 },
+            hours: 4
+        },
+        
+    ]
+
+    let tables = [
+        {
+            name: 'event',
+            columns: [
+                'createdAt',
+                'updatedAt',
+                'startAt',
+                'endAt'
+            ],
+            records: []
+        },
+        {
+            name: 'goal',
+            columns: [
+                'createdAt',
+                'updatedAt'
+            ],
+            records: []
+        },
+        {
+            name: 'goal_TimePair',
+            columns: [
+                'createdAt',
+                'updatedAt'
+            ],
+            records: []
+        },
+        {
+            name: 'iteration',
+            columns: [
+                'createdAt',
+                'updatedAt',
+                'startAt',
+                'endAt',
+                'completedAt',
+                'attemptedAt'
+            ],
+            records: []
+        },
+        {
+            name: 'metric',
+            columns: [
+                'createdAt',
+                'updatedAt'
+            ],
+            records: []
+        },
+        {
+            name: 'repeat',
+            columns: [
+                'createdAt',
+                'updatedAt'
+            ],
+            records: []
+        },
+        {
+            name: 'repeat_DayIndex',
+            columns: [
+                'createdAt',
+                'updatedAt'
+            ],
+            records: []
+        },
+        {
+            name: 'routine',
+            columns: [
+                'createdAt',
+                'updatedAt'
+            ],
+            records: []
+        },
+        {
+            name: 'routine_Repeat',
+            columns: [
+                'createdAt',
+                'updatedAt',
+                'lastIterationDateTime'
+            ],
+            records: []
+        },
+        {
+            name: 'time',
+            columns: [
+                'createdAt',
+                'updatedAt',
+                'dateTime'
+            ],
+            records: []
+        },
+        {
+            name: 'todo',
+            columns: [
+                'createdAt',
+                'updatedAt'
+            ],
+            records: []
+        },
+        {
+            name: 'todo_Repeat',
+            columns: [
+                'createdAt',
+                'updatedAt',
+                'lastIterationDateTime'
+            ],
+            records: []
+        },
+        {
+            name: 'todo_TimePair',
+            columns: [
+                'createdAt',
+                'updatedAt'
+            ],
+            records: []
+        },
+        {
+            name: 'type',
+            columns: [
+                'createdAt',
+                'updatedAt'
+            ],
+            records: []
+        },
+    ];
+
+    await context.prisma.$transaction(async prisma => {
+        for (let i = 0; i < tables.length; i++) {
+            let _table = tables[i];
+            console.log(_table);
+            for (let j = 0; j < _table.columns.length; j++) {
+                let _column = _table.columns[j];
+                console.log(_column);
+
+                for (let k = 0; k < periods.length; k++) {
+                    let _period = periods[k];
+
+                    let where = {};
+                    where[_column] = _period.expression;
+
+                    let select = { id: true };
+                    select[_column] = true;
+
+                    let records = await prisma[_table.name].findMany({
+                        where,
+                        select
+                    });
+
+                    for (let l = 0; l < records.length; l++) {
+                        let original = records[l];
+
+                        let date_original = original[_column];
+                        let date_updated = addHour(date_original, _period.hours);
+                        let date_updated1 = addHour(date_original, 0);
+
+                        let data = {};
+                        data[_column] = date_updated;
+
+                        let updated = await prisma[_table.name].update({
+                            where: { id: original.id },
+                            data,
+                            select
+                        });
+
+                        let record = { original, updated };
+                        _table.records.push(record);
+
+                        // console.log(record);
+                    }
+                }
+            }
+        }
+
+        return true;
+    },
+    {
+        maxWait: 360000, // default: 2000
+        timeout: 360000, // default: 5000
+    });
+    
+    return true;
 }
 
 module.exports = {

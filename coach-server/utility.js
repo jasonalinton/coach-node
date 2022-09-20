@@ -34,6 +34,10 @@ function addDay(dateTime = new Date(), days = 1) {
     return moment(dateTime).add( days, 'day').toDate();   
 }
 
+function addHour(dateTime = new Date(), hours = 1) {
+    return moment(dateTime).add( hours, 'hour').toDate();   
+}
+
 function subtractDay(dateTime = new Date(), days = 1) {
     return moment(dateTime).add( -days, 'day').toDate();   
 }
@@ -69,6 +73,7 @@ module.exports = {
     today,
     concatDate,
     addDay,
+    addHour,
     subtractDay,
     startOfDay,
     endOfDay,

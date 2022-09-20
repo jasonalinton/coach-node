@@ -21,7 +21,8 @@
 import Split from 'split.js'
 import MetricTable from './metric/MetricTable.vue';
 import MetricForm from './metric/MetricForm.vue';
-import GoalTable from './goal/GoalTable.vue';
+import GoalTable from './goal/netcore/GoalTableAndToolbar.vue'
+// import GoalTable from './goal/GoalTable.vue';
 import GoalForm from './goal/GoalForm.vue';
 import TodoTable from './todo/TodoTable.vue';
 import TodoForm from './todo/TodoForm.vue';

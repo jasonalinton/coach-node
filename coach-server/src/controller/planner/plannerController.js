@@ -3,7 +3,7 @@ const { today, concatDate, firstDayOfWeek, lastDayOfWeek, firstDayOfMonth, lastD
 const { repetitiveTodos } = require('../../resolvers/queries/todoQuery');
 const { repetitiveRoutines } = require('../../resolvers/queries/routineQuery');
 const { getLastIterationDateTime, setLastIterationDateTime, isEventVisible } = require('../time/repeatController');
-const { createRoutineIterations, mapTodoIterations } = require('../../resolvers/mutations/routineMutation');
+const { createRoutineIterations, mapTodoIterations, deleteFutureIterations } = require('../../resolvers/mutations/routineMutation');
 const { createTodoIterations } = require('../../resolvers/mutations/todo/todoMutation');
 
 let repetitions = {
@@ -67,6 +67,8 @@ async function refreshRepetitiveRoutines(indexDate, indexEnd, timeframe = repeti
 }
 
 async function refreshRepetitiveRoutine(routine, indexDate, indexEnd, timeframe = repetitions.month, context) {
+    await deleteFutureIterations(null, { idRoutine: routine.id }, context, null);
+
     let repeatIDs_Routine = routine.repeats.map(_repeat => _repeat.id);
     routine.todos.forEach(async _todo => {
         /* Remove any todo repeats that are not shared by routine */
@@ -115,7 +117,7 @@ async function createRepetition(repeat, item, itemType, indexDate = null, indexE
     let lastIterationDateTime = await getLastIterationDateTime(repeat, itemType, item.id, context);
     let props = { repeat, item, itemType, indexDate, indexEnd, lastIterationDateTime, context };
     let isValid = validateDates(lastIterationDateTime, props);
-    console.log();
+    console.log(`Create repetition for ${item.text} ${indexDate.toJSON()}`);
     if (!isValid) return item;
 
 
@@ -161,6 +163,22 @@ function createDailyRepetitions({item, itemType, indexDate, indexEnd, repeat}) {
                     _event.endAt = concatDate(iteration.endAt, new Date(repeat.endIteration.dateTime))
                 // else if (item.estimatedTime)
                 //     _event.endAt = concatDate(iteration.endAt, new Date(())
+
+                // /* If IsGroup & IsEventVisible, add child todos to the event */
+                // if (item.children & item.children.length > 0) {
+                //     let iterations = [];
+                //     item.children.forEach(_child => {
+                //         iterations.push({
+                //             text: _child.text,
+                //             startAt: indexDate,
+                //             endAt: indexDate,
+                //             isRecommended: (repeat.type.text == "Recommended") ? true : false
+                //         });
+                //     });
+                //     _event.iterations = { craeteMany: { date: iterations } };
+                //     // TODO: Connect iteratons to parent todos
+                // }
+
 
                 if (!iteration.events) iteration.events = [];
                 iteration.events.push(_event);
@@ -294,7 +312,7 @@ function validateDates(lastIterationDateTime, props) {
     // }
     
     if (lastIterationDateTime >= props.indexDate && lastIterationDateTime < props.indexEnd) {
-        props.indexDate = moment(lastIterationDateTime).add(1, 'day').toDate();
+        props.indexDate = moment(lastIterationDateTime).hour(0).minute(0).second(0).millisecond(0).add(1, 'day').toDate();
     }
 
     if (new Date(props.repeat.startRepeat.dateTime) > props.indexDate) {

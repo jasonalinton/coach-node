@@ -51,8 +51,9 @@
                             data-bs-toggle="collapse"
                             :data-bs-target="`.${prop.prop}.collapse`"
                             aria-controls="offcanvas-items"
-                            >{{ prop.name }}</a
                         >
+                            {{ prop.name }}
+                        </a>
                     </div>
                     <!-- Quick Add Item -->
                     <div class="d-flex justify-content-between mt-1">
@@ -67,7 +68,8 @@
                                 src="/icon/button/add.png"
                                 width="10"
                                 height="10"
-                            />Add
+                            />
+                            Add
                         </button>
                         <input
                             class="add textbox"
@@ -178,6 +180,11 @@ import { replaceItem, removeItem, clone } from "../../../../utility";
 import RepeatControl from "../../controls/time/RepeatControl.vue";
 import TimePairControl from "../../controls/time/TimePairControl.vue";
 import { refreshRepetitiveRoutine } from "../../../resolvers/routine-resolvers";
+
+import {
+    getRoutineRepeatIDsAssociatedWithTodo,
+    createTodoRepeatFromRoutineRepeat,
+} from "../../../service/time/repeatService";
 
 export default {
     components: { SelectItem, RepeatControl, TimePairControl },
@@ -331,14 +338,32 @@ function save(item) {
     }
 }
 
+// function configureRoutine(item) {
+//     item.todos.forEach((todo) => {
+//         item.repeats.forEach((repeat) => {
+//             let cloned = clone(repeat);
+//             cloned.isConnected = true;
+//             if (!todo.repeats) todo.repeats = [];
+//             todo.repeats.push(cloned);
+//         });
+//     });
+// }
+
 function configureRoutine(item) {
     item.todos.forEach((todo) => {
-        item.repeats.forEach((repeat) => {
-            let cloned = clone(repeat);
-            cloned.isConnected = true;
-            if (!todo.repeats) todo.repeats = [];
-            todo.repeats.push(cloned);
-        });
+        if (todo.repeats) {
+            let routineRepeatIDs = getRoutineRepeatIDsAssociatedWithTodo(todo, item);
+            let repeatsToMap = item.repeats.filter(_repeat => !routineRepeatIDs.includes(_repeat.id));
+
+            for (let i = 0; i < repeatsToMap.length; i++) {
+                let _repeat = repeatsToMap[i];
+                let repeat_new = createTodoRepeatFromRoutineRepeat(_repeat);
+                repeat_new.id = -i - 1;
+
+                if (!todo.repeats) todo.repeats = [];
+                todo.repeats.push(repeat_new);
+            }
+        }
     });
 }
 
@@ -362,6 +387,19 @@ function close() {
 //     })
 // }
 
+// function mapTodoToRoutine(todo) {
+//     let routineRepeatIDs = getRoutineRepeatIDsAssociatedWithTodo(todo, this.item);
+//     let repeatsToMap = this.item.repeats.filter(_repeat => !routineRepeatIDs.includes(_repeat.id));
+
+//     for (let i = 0; i < repeatsToMap.length; i++) {
+//         let _repeat = repeatsToMap[i];
+//         let repeat_new = createTodoRepeatFromRoutineRepeat(_repeat);
+//         repeat_new.id = -i - 1;
+//     }
+
+//     this.item.todos.push(todo);
+// }
+
 function refreshRepetitive() {
     refreshRepetitiveRoutine(this.item.id, this.$apollo);
 }
@@ -369,7 +407,7 @@ function refreshRepetitive() {
 
 <style scoped>
 form {
-    background-color: #F5F5F5;
+    background-color: #f5f5f5;
     padding-left: 2px;
     padding-right: 12px;
     height: calc(100vh - 64px - 42px);
@@ -416,13 +454,13 @@ form {
     border: none;
     font-size: 14px;
     line-height: 16px;
-    background-color: #F5F5F5;
+    background-color: #f5f5f5;
     color: #343434;
     text-align: left;
 }
 
 .list-group-item:hover {
-    background-color: #DCDCDC;
+    background-color: #dcdcdc;
 }
 
 .list-group-item:hover img {
@@ -488,7 +526,7 @@ form {
 }
 
 .add-btn {
-    width: 50px;
+    width: 53px;
     height: 28px;
     line-height: 28px;
     padding-left: 5px;

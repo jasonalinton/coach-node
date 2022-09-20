@@ -1,7 +1,7 @@
 export function getHoursObjectArray() {
     let hours = [];
 
-    for (let i = 0; i < 24; i++) {
+    for (let i = 4; i < 24; i++) {
         let hour = { };
         hours.push(hour);
         
