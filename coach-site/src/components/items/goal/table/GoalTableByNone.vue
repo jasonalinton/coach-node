@@ -7,14 +7,13 @@
     <div v-else-if="goalTableVM" class="row g-0">
         <div class="table col-12">
             <table :class="['table table-sm table-borderless', (parentID) ? 'child' : '']">
-                <!-- <thead v-if="!parentID" class="sticky-top"> -->
                 <thead :class="[(!parentID) ? 'sticky-top' : '']">
                     <th v-for="column in columns" :key="column.position"
                         :style="(column.width) ? { 'width': `${column.width}`, 'min-width': `${column.width}` } : {}">{{ column.text }}</th>
                 </thead>
                 <tbody>
-                    <template v-for="row in rows">
-                        <tr :key="row.id">
+                    <template v-for="row in rows" :key="row.id">
+                        <tr>
                             <td v-for="column in columns" :key="column.position"
                                 :class="(parent && parent[`show${column.text}`]) ? `column-expanded` : `column-collapsed`" >
                                 <img v-if="column.type == 'Object' && (row[column.text.toLowerCase()] != '')" 
@@ -26,9 +25,12 @@
                                 <span>{{ row[column.text.toLowerCase()] }}</span>
                             </td>
                         </tr>
-                        <tr class="child-row" :key="row.id + 100000">
+                        <tr class="child-row">
                             <td :colspan="columns.length" >
-                                <GoalTableCore v-show="row.showText" :parent="row" :selectedColumns="selectedColumns"></GoalTableCore>
+                                <GoalTableCore v-show="row.showText || row.showParents" :parent="row" :selectedColumns="selectedColumns"></GoalTableCore>
+                                <GoalTableCore v-show="row.showText || row.showChildren" :parent="row" :selectedColumns="selectedColumns"></GoalTableCore>
+                                <TodoTableCore v-show="row.showText || row.showTodos" :parent="row" :selectedColumns="selectedColumns"></TodoTableCore>
+                                <RoutineTableCore v-show="row.showText || row.showRoutines" :parent="row" :selectedColumns="selectedColumns"></RoutineTableCore>
                             </td>
                         </tr>
                     </template>
@@ -49,7 +51,9 @@ export default {
     props: {
         options: Object,
         selectedColumns: Array,
-        parent: Object
+        parent: Object, // Parent item/row
+        isParent: Boolean, // Is item a parent of parent item
+        isChild: Boolean // Is item a child of parent item
 
     },
     computed: {
@@ -71,6 +75,9 @@ export default {
         getGoals,
         showItems(row, column) {
             row[`show${column.text}`] = !row[`show${column.text}`];
+        },
+        shouldShowTable(row) {
+
         }
     },
     watch: {
@@ -82,10 +89,11 @@ export default {
 
 function getGoals() {
     this.isLoading = true;
-    let endpoint = (this.parentID == undefined) ? 'GetGoalTableByNoneVM' : 'GetChildGoalTableByNoneVM';
-    let data = (this.parentID == undefined) ? this.selectedColumns : { parentID: this.parentID, properties: this.selectedColumns } 
+    let controller = (!this.parent) ? "Goal" : this.parent.modelType;
+    let endpoint = (this.parent == undefined) ? 'GetGoalTableByNoneVM' : 'GetChildGoalTableByNoneVM';
+    let data = (this.parent == undefined) ? this.selectedColumns : { parentID: this.parentID, properties: this.selectedColumns } 
 
-    fetch(`https://localhost:7104/api/Goal/${endpoint}`, {
+    fetch(`https://localhost:7104/api/${controller}/${endpoint}`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
