@@ -5,7 +5,7 @@
     <div v-else-if="isLoading == true && !parentID">Loading...</div>
     <!-- Table -->
     <div v-else-if="goalTableVM" class="row g-0">
-        <div class="table col-12">
+        <div class="goal table col-12">
             <table :class="['table table-sm table-borderless', (parentID) ? 'child' : '']">
                 <thead :class="[(!parentID) ? 'sticky-top' : '']">
                     <th v-for="column in columns" :key="column.position"
@@ -13,33 +13,25 @@
                 </thead>
                 <tbody>
                     <template v-for="row in rows">
-                        <tr :key="row.id">
-                            <td v-for="column in columns" :key="column.position"
-                                :class="(parent && parent[`show${column.text}`]) ? `column-expanded` : `column-collapsed`" >
-                                <img v-if="column.type == 'Object' && (row[column.text.toLowerCase()] != '')" 
-                                     :src="(row[`show${column.text}`]) ? `/icon/icon-expanded.png` : `/icon/icon-collapsed-right.png`" 
-                                     width="14" height="14"
-                                     @click="showItems(row, column)" />
-                                <img v-if="column.iconName && (row[column.text.toLowerCase()] != '')" 
-                                     :src="iconSource(column)" 
-                                     width="24" height="24" />
-                                <span>{{ row[column.text.toLowerCase()] }}</span>
-                            </td>
-                        </tr>
+                        <ItemTableRow :key="row.id"
+                                      :goal="row.goal"
+                                      :row="row.viewModel"
+                                      :columns="columns"
+                                      :parent="row"/>
                         <tr :key="row.id + 1000000" class="child-row">
                             <td :colspan="columns.length" >
-                                <GoalTableCore v-show="row.showText || row.showParents" 
+                                <GoalTableCore v-show="row.viewModel.showText || row.viewModel.showParents" 
                                                :parent="row" 
                                                :selectedColumns="selectedColumns" 
                                                :isParent="true" 
                                                :level="level + 1"></GoalTableCore>
-                                <GoalTableCore v-show="row.showText || row.showChildren" 
+                                <GoalTableCore v-show="row.viewModel.showText || row.viewModel.showChildren" 
                                                :parent="row" 
                                                :selectedColumns="selectedColumns" 
                                                :isChild="true" 
                                                :level="level + 1"></GoalTableCore>
-                                <!-- <TodoTableCore v-show="row.showText || row.showTodos" :parent="row" :selectedColumns="selectedColumns"></TodoTableCore> -->
-                                <!-- <RoutineTableCore v-show="row.showText || row.showRoutines" :parent="row" :selectedColumns="selectedColumns"></RoutineTableCore> -->
+                                <!-- <TodoTableCore v-show="row.showText || row.showTodos" :parent="row" :selectedColumns="selectedColumns"></TodoTableCore>
+                                <RoutineTableCore v-show="row.showText || row.showRoutines" :parent="row" :selectedColumns="selectedColumns"></RoutineTableCore> -->
                             </td>
                         </tr>
                     </template>
@@ -52,11 +44,13 @@
 
 <script>
 import { sortDesc } from '../../../../../../utility'
+import ItemTableRow from '../../../component/ItemTableRow.vue';
 // import GoalTableCore from '../netcore/GoalTableCore.vue';
 
 export default {
     components: { 
-        GoalTableCore: () => import('../GoalTableCore.vue') ,
+        ItemTableRow,
+        GoalTableCore: () => import('../GoalTableCore.vue'),
         // TodoTableCore: () => import('../../../todo/netcore/TodoTableCore.vue'),
         // RoutineTableCore: () => import('../../../routine/netcore/RoutineTableCore.vue')
     },
@@ -118,7 +112,7 @@ export default {
 
 function getGoals() {
     this.isLoading = true;
-    let controller = (!this.parent) ? "Goal" : this.parent.modelType;
+    let controller = (!this.parent) ? "Goal" : this.parent.viewModel.modelType;
     let endpoint = (this.isParent || this.isChild) ? 'GetChildGoalTableByNoneVM': 'GetGoalTableByNoneVM';
     let data = (this.parent == undefined) ? this.selectedColumns : { parentID: this.parentID, properties: this.selectedColumns } 
 
@@ -186,7 +180,15 @@ function getEndpoint() {
         margin-top: -29px;
     }
 
-    td, th {
+   
+
+    .table tbody tr:hover:not(.child-row) {
+        background-color:#F5F5F5;
+    }
+</style>
+
+<style>
+    .goal.table td, .goal.table th {
         max-width: 150px;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -196,20 +198,16 @@ function getEndpoint() {
         border: none;
     }
 
-    td {
+    .goal.table td {
         font-weight: 400;
         line-height: 29px;
     }
 
-    .table tbody tr:hover:not(.child-row) {
-        background-color:#F5F5F5;
-    }
-
-    td.column-expanded {
+    .goal.table td.column-expanded {
         padding-left: 30px;
     }
 
-    .child-row > td {
+    .goal.table .child-row > td {
         padding: 0px;
     }
 </style>

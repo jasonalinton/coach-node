@@ -28,7 +28,7 @@ export default {
         parent: Object,
         isParent: Boolean, // Is item a parent of parent item
         isChild: Boolean // Is item a child of parent item
-    },
+    }
 }
 </script>
 

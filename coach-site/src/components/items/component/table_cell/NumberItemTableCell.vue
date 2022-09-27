@@ -1,0 +1,23 @@
+<template>
+    <td>
+        <img v-if="column.iconName && (text != '')" 
+             :src="`/icon/${column.iconName}.png`" 
+             width="24" height="24" />
+        <span>{{ text }}</span>
+    </td>
+</template>
+
+<script>
+export default {
+    name: "NumberItemTableCell",
+    props: {
+        column: Object,
+        property: Number,
+        text: Number
+    },
+}
+</script>
+
+<style>
+
+</style>
