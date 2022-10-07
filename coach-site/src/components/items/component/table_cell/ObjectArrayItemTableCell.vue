@@ -20,7 +20,7 @@ export default {
         text: String,
         isExpanded: Boolean
     },
-    inject: [ 'parent', 'isParent', 'isChild' ],
+    inject: [ 'parentRow', 'isParent', 'isChild' ],
     methods: {
         showItems() {
             this.$emit('showItems', this.column.text);

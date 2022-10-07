@@ -1,9 +1,10 @@
 <template>
-    <td :class="tdClass()">
+    <td :class="tdClass()" :style="{'padding-left': `${level * levelPadding}px`}">
         <img v-if="shouldShowExpander()" 
              :src="(isExpanded) ? `/icon/icon-expanded.png` : `/icon/icon-collapsed-right.png`"
              width="14" height="14"
              @click="showItems()" />
+        <!-- <span v-else  style="width: 18px; height: 18px; display: inline-block;"></span> -->
         <img v-if="column.iconName && (text.toLowerCase() != '')" 
              :src="`/icon/${iconSource()}.png`" 
              width="24" height="24" />
@@ -22,26 +23,26 @@ export default {
         column: Object,
         property: Object,
         text: String,
-        isExpanded: Boolean
     },
-    inject: [ 'parent', 'isParent', 'isChild' ],
+    inject: [ 'parentRow', 'isParent', 'isChild', 'level', 'levelPadding' ],
     data: function() {
         return {
-            shouldShowExpander1: this.shouldShowExpander(),
+            isExpanded: false,
             tdClasss: this.tdClass()
         }
     },
     methods: {
         iconSource() {
             if (this.isChild) {
-                return'child';
+                return'child-icon';
             } else if (this.isParent) {
-                return `parent`
+                return `parent-icon`
             } else {
                 return this.column.iconName
             }
         },
         showItems() {
+            this.isExpanded = !this.isExpanded;
             this.$emit('showItems', 'Text');
         },
         shouldShowExpander() {
@@ -67,6 +68,6 @@ export default {
 
 <style scoped>
     td:not(.expandable) {
-        padding-left: 24px !important;
+        padding-left: 14px !important;
     }
 </style>

@@ -47,10 +47,7 @@ export default {
     props: {
         goal: Object,
         row: Object,
-        columns: Array,
-        parent: Object,
-        isParent: Boolean,
-        isChild: Boolean
+        columns: Array
     },
     methods: {
         toCamelCase,
@@ -70,14 +67,9 @@ export default {
                 return this.row[toCamelCase(column.text)];
             }
         },
-        showItems(prop) {
-            this.row[`show${prop}`] = !this.row[`show${prop}`];
+        showItems(propName) {
+            this.row[`show${propName}`] = !this.row[`show${propName}`];
         },
-    },
-    provide: {
-        parent: {},
-        isParent: false,
-        isChild: false
     },
 }
 </script>

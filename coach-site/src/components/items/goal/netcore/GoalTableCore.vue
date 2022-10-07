@@ -1,11 +1,7 @@
 <template>
   <div v-if="selectedColumns" class="w-100">
     <GoalTableByNone v-if="sortBy == 'None'"
-                     :level="0"
-                     :selectedColumns="selectedColumns"
-                     :parent="parent"
-                     :isParent="isParent"
-                     :isChild="isChild"></GoalTableByNone>
+                     :selectedColumns="selectedColumns"></GoalTableByNone>
   </div>
 </template>
 
@@ -17,6 +13,10 @@ export default {
     components: { GoalTableByNone },
     name: 'GoalTableCore',
     props: {
+        level: {
+          type: Number,
+          default: 0
+        },
         sortBy: {
           type: String,
           default: "None"
@@ -25,10 +25,24 @@ export default {
           type: Array,
           default: goalProperties.map(x => x.text)
         },
-        parent: Object,
-        isParent: Boolean, // Is item a parent of parent item
-        isChild: Boolean // Is item a child of parent item
-    }
+        parentRow: Object,
+        isParent: Boolean, // Is item a parent of parent row
+        isChild: Boolean // Is item a child of parent row
+    },
+    provide() {
+        return {
+            level: this.level,
+            levelPadding: this.levelPadding,
+            parentRow: this.parentRow,
+            isParent: this.isParent,
+            isChild: this.isChild,
+        }
+    },
+    data: function() {
+        return {
+            levelPadding: 18 // amount of left-padding added to of each child row
+        }
+    },
 }
 </script>
 

@@ -2,12 +2,12 @@
     <!-- Error -->
     <div v-if="errorMessage">{{ errorMessage }}</div>
     <!-- Loading -->
-    <div v-else-if="isLoading == true && !parentID">Loading...</div>
+    <div v-else-if="isLoading == true && !parentRowID">Loading...</div>
     <!-- Table -->
     <div v-else-if="goalTableVM" class="row g-0">
         <div class="goal table col-12">
-            <table :class="['table table-sm table-borderless', (parentID) ? 'child' : '']">
-                <thead :class="[(!parentID) ? 'sticky-top' : '']">
+            <table :class="['table table-sm table-borderless', (parentRowID) ? 'child' : '']">
+                <thead :class="[(!parentRowID) ? 'sticky-top' : '']">
                     <th v-for="column in columns" :key="column.position"
                         :style="(column.width) ? { 'width': `${column.width}`, 'min-width': `${column.width}` } : {}">{{ column.text }}</th>
                 </thead>
@@ -17,21 +17,21 @@
                                       :goal="row.goal"
                                       :row="row.viewModel"
                                       :columns="columns"
-                                      :parent="row"/>
+                                      :parentRow="row"/>
                         <tr :key="row.id + 1000000" class="child-row">
                             <td :colspan="columns.length" >
-                                <GoalTableCore v-show="row.viewModel.showText || row.viewModel.showParents" 
-                                               :parent="row" 
+                                <GoalTableCore v-if="row.viewModel.showText || row.viewModel.showParents" 
+                                               :parentRow="row" 
                                                :selectedColumns="selectedColumns" 
-                                               :isParent="true" 
+                                               :isParent="true"
                                                :level="level + 1"></GoalTableCore>
-                                <GoalTableCore v-show="row.viewModel.showText || row.viewModel.showChildren" 
-                                               :parent="row" 
+                                <GoalTableCore v-if="row.viewModel.showText || row.viewModel.showChildren" 
+                                               :parentRow="row" 
                                                :selectedColumns="selectedColumns" 
                                                :isChild="true" 
                                                :level="level + 1"></GoalTableCore>
-                                <!-- <TodoTableCore v-show="row.showText || row.showTodos" :parent="row" :selectedColumns="selectedColumns"></TodoTableCore>
-                                <RoutineTableCore v-show="row.showText || row.showRoutines" :parent="row" :selectedColumns="selectedColumns"></RoutineTableCore> -->
+                                <!-- <TodoTableCore v-show="row.showText || row.showTodos" :parentRow="row" :selectedColumns="selectedColumns"></TodoTableCore>
+                                <RoutineTableCore v-show="row.showText || row.showRoutines" :parentRow="row" :selectedColumns="selectedColumns"></RoutineTableCore> -->
                             </td>
                         </tr>
                     </template>
@@ -56,27 +56,23 @@ export default {
     },
     name: 'GoalTableByNone',
     props: {
-        level: Number,
         options: {
           type: Object,
-          default: () => ({ showRoot: true })
+          default: () => ({ ShowRootOnly: true })
         },
         selectedColumns: Array,
-        parent: Object, // Parent item/row
-        isParent: Boolean, // Is item a parent of parent item
-        isChild: Boolean // Is item a child of parent item
-
     },
+    inject: [ 'level', 'levelPadding', 'parentRow', 'isParent', 'isChild' ],
     computed: {
         columns() { return this.goalTableVM.columns; },
         rows() { return sortDesc(this.goalTableVM.rows, 'id'); }
     },
     data: function() {
         return {
-            parentID: (this.parent) ? this.parent.id : null,
+            parentRowID: (this.parentRow) ? this.parentRow.id : null,
             isLoading: true,
             goalTableVM: null,
-            errorMessage: null
+            errorMessage: null,
         }
     },
     created: function() {
@@ -85,6 +81,7 @@ export default {
     methods: {
         getGoals,
         getEndpoint,
+        getEndpointData,
         showItems(row, column) {
             row[`show${column.text}`] = !row[`show${column.text}`];
         },
@@ -99,9 +96,6 @@ export default {
             }
             return iconSource;
         }
-        // shouldShowTable(row) {
-
-        // }
     },
     watch: {
         selectedColumns() {
@@ -112,9 +106,9 @@ export default {
 
 function getGoals() {
     this.isLoading = true;
-    let controller = (!this.parent) ? "Goal" : this.parent.viewModel.modelType;
-    let endpoint = (this.isParent || this.isChild) ? 'GetChildGoalTableByNoneVM': 'GetGoalTableByNoneVM';
-    let data = (this.parent == undefined) ? this.selectedColumns : { parentID: this.parentID, properties: this.selectedColumns } 
+    let controller = (!this.parentRow) ? "Goal" : this.parentRow.viewModel.modelType;
+    let endpoint = this.getEndpoint();
+    let data = this.getEndpointData(); 
 
     fetch(`https://localhost:7104/api/${controller}/${endpoint}`, {
         method: 'POST',
@@ -139,7 +133,32 @@ function getGoals() {
 }
 
 function getEndpoint() {
+    let endpoint;
 
+    if (this.isParent) {
+        endpoint = 'GetParentGoalTableByNoneVM';
+    } else if (this.isChild) {
+        endpoint = 'GetChildGoalTableByNoneVM';
+    } else {
+        endpoint = 'GetGoalTableByNoneVM';
+    }
+
+    return endpoint;
+}
+
+function getEndpointData() {
+    let data = {
+        properties: this.selectedColumns,
+        options: this.options
+    };
+
+    if (this.isParent) {
+        data.childID = this.parentRowID;
+    } else if (this.isChild) {
+        data.parentID = this.parentRowID;
+    }
+
+    return data;
 }
 </script>
 
@@ -203,9 +222,9 @@ function getEndpoint() {
         line-height: 29px;
     }
 
-    .goal.table td.column-expanded {
+    /* .goal.table td.column-expanded {
         padding-left: 30px;
-    }
+    } */
 
     .goal.table .child-row > td {
         padding: 0px;
