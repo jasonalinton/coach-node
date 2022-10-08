@@ -48,6 +48,7 @@ export default {
 }
 
     function onOptionChanged() {
+        localStorage.setItem(`${this.itemType.toLowerCase()}-table-props`, JSON.stringify(this.properties));
         var props = sortAsc(this.properties.filter(x => x.isSelected == true), 'position');
         let selectedColumns = props.map(x => x.text);
         this.$emit('setColumns', selectedColumns);

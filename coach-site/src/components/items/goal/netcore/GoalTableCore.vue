@@ -1,7 +1,10 @@
 <template>
-  <div v-if="selectedColumns" class="w-100">
-    <GoalTableByNone v-if="sortBy == 'None'"
-                     :selectedColumns="selectedColumns"></GoalTableByNone>
+  <div ref="tableContainer">
+    <div v-if="selectedColumns" class="w-100">
+      <GoalTableByNone v-if="sortBy == 'None'"
+                      :selectedColumns="selectedColumns"
+                      :width="width"></GoalTableByNone>
+    </div>
   </div>
 </template>
 
@@ -40,9 +43,17 @@ export default {
     },
     data: function() {
         return {
-            levelPadding: 18 // amount of left-padding added to of each child row
+            levelPadding: 18, // amount of left-padding added to of each child row
+            width: 0
         }
     },
+    mounted() {
+      let _this = this;
+      this.width = this.$refs.tableContainer.clientWidth;
+      window.addEventListener('resize', function() {
+        _this.width = _this.$refs.tableContainer.clientWidth;
+      });
+    }
 }
 </script>
 

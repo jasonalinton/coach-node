@@ -6,10 +6,13 @@
     <!-- Table -->
     <div v-else-if="goalTableVM" class="row g-0">
         <div class="goal table col-12">
-            <table :class="['table table-sm table-borderless', (parentRowID) ? 'child' : '']">
+            <table :class="['table table-sm table-borderless', (parentRowID) ? 'child' : '']"
+                   :style="{ 'width': `${tableWidth}px`}">
                 <thead :class="[(!parentRowID) ? 'sticky-top' : '']">
                     <th v-for="column in columns" :key="column.position"
-                        :style="(column.width) ? { 'width': `${column.width}`, 'min-width': `${column.width}` } : {}">{{ column.text }}</th>
+                        :style="{ 'min-width': `${column.setWidth}px`, 'max-width': `${column.setWidth}px`}">
+                        {{ column.text }}
+                    </th>
                 </thead>
                 <tbody>
                     <template v-for="row in rows">
@@ -61,10 +64,15 @@ export default {
           default: () => ({ ShowRootOnly: true })
         },
         selectedColumns: Array,
+        width: Number
     },
     inject: [ 'level', 'levelPadding', 'parentRow', 'isParent', 'isChild' ],
     computed: {
-        columns() { return this.goalTableVM.columns; },
+        columns() {
+            let columns = this.goalTableVM.columns;
+            this.setColumnWidths(columns);
+            return columns; 
+        },
         rows() { return sortDesc(this.goalTableVM.rows, 'id'); }
     },
     data: function() {
@@ -72,16 +80,18 @@ export default {
             parentRowID: (this.parentRow) ? this.parentRow.id : null,
             isLoading: true,
             goalTableVM: null,
+            tableWidth: this.width,
             errorMessage: null,
         }
     },
-    created: function() {
+    mounted: function() {
         this.getGoals();
     },
     methods: {
         getGoals,
         getEndpoint,
         getEndpointData,
+        setColumnWidths,
         showItems(row, column) {
             row[`show${column.text}`] = !row[`show${column.text}`];
         },
@@ -130,6 +140,31 @@ function getGoals() {
         this.isLoading = false;
         console.error('Error:', error);
     });
+}
+
+function setColumnWidths(columns) {
+    let containerWidth = this.width;
+    let minTableWidth = columns.map(x => x.minWidth).reduce((prev, curr) => prev + curr);
+
+    if (containerWidth <= minTableWidth) {
+        columns.forEach(column => {
+            column.setWidth = (column.width != null) ? column.width : column.minWidth;
+        });        
+    } else if (containerWidth > minTableWidth) {
+        /* Set widths of columns with a specified width */
+        let colsWithWidth = columns.filter(x => x.width != null);
+        colsWithWidth.forEach(x => x.setWidth = x.width);
+
+        let knownWidth = colsWithWidth.map(x => x.width).reduce((prev, curr) => prev + curr);
+        let remainingWidth = containerWidth - knownWidth;
+        
+        /* Set widths of columns without a specified width */
+        let colsNoWidth = columns.filter(x => x.width == null);
+        let dynamicWidth = remainingWidth / colsNoWidth.length;
+        colsNoWidth.forEach(x => x.setWidth = dynamicWidth);
+    }
+
+    this.tableWidth = columns.map(x => x.setWidth).reduce((prev, curr) => prev + curr);
 }
 
 function getEndpoint() {
