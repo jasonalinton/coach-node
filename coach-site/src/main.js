@@ -2,6 +2,10 @@ import Vue from 'vue'
 import App from './App.vue'
 import { createProvider } from './vue-apollo'
 import moment from 'moment'
+import { createPinia, PiniaVuePlugin } from 'pinia'
+
+Vue.use(PiniaVuePlugin);
+const pinia = createPinia();
 
 Vue.config.productionTip = false;
 
@@ -17,6 +21,7 @@ Vue.prototype.$navbarConfig = {
 
 new Vue({
   apolloProvider: createProvider(),
+  pinia,
   render: h => h(App)
 }).$mount('#app')
 

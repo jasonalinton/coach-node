@@ -1,10 +1,9 @@
 <template>
-    <td :class="tdClass()" :style="{'padding-left': `${level * levelPadding}px`}">
+    <td :class="tdClass()" :style="{'padding-left': `${leftPadding()}px`}">
         <img v-if="shouldShowExpander()" 
              :src="(isExpanded) ? `/icon/icon-expanded.png` : `/icon/icon-collapsed-right.png`"
              width="14" height="14"
              @click="showItems()" />
-        <!-- <span v-else  style="width: 18px; height: 18px; display: inline-block;"></span> -->
         <img v-if="column.iconName && (text.toLowerCase() != '')" 
              :src="`/icon/${iconSource()}.png`" 
              width="24" height="24" />
@@ -24,7 +23,7 @@ export default {
         property: Object,
         text: String,
     },
-    inject: [ 'parentRow', 'isParent', 'isChild', 'level', 'levelPadding' ],
+    inject: [ 'parentRow', 'isParent', 'isChild', 'level', 'levelPadding', 'options' ],
     data: function() {
         return {
             isExpanded: false,
@@ -46,10 +45,12 @@ export default {
             this.$emit('showItems', 'Text');
         },
         shouldShowExpander() {
-            if (this.property.parents.length > 0 ||
-                this.property.children.length > 0 ||
-                this.property.routines.length > 0 ||
-                this.property.todos.length > 0) {
+            if ((this.options.dropItems.items.parents && this.property.parents.length > 0) ||
+                (this.options.dropItems.items.children && this.property.children.length > 0) ||
+                (this.options.dropItems.items.routines && this.property.routines.length > 0) ||
+                (this.options.dropItems.items.todos && this.property.todos.length > 0) ||
+                (this.options.dropItems.items.events && this.property.events.length > 0) ||
+                (this.options.dropItems.items.iterations && this.property.iterations.length > 0)) {
                     return true;
             } else {
                 return false;
@@ -61,13 +62,18 @@ export default {
             } else {
                 return '';
             }
+        },
+        leftPadding() {
+            let padding = this.level * this.levelPadding;
+            if (!this.shouldShowExpander()) {
+                padding += 14;
+            }
+            return padding;
         }
     }
 }
 </script>
 
 <style scoped>
-    td:not(.expandable) {
-        padding-left: 14px !important;
-    }
+
 </style>

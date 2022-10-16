@@ -23,12 +23,12 @@
                                       :parentRow="row"/>
                         <tr :key="row.id + 1000000" class="child-row">
                             <td :colspan="columns.length" >
-                                <GoalTableCore v-if="row.viewModel.showText || row.viewModel.showParents" 
+                                <GoalTableCore v-if="options.dropItems.items.parents && row.viewModel.showText || row.viewModel.showParents" 
                                                :parentRow="row" 
                                                :selectedColumns="selectedColumns" 
                                                :isParent="true"
                                                :level="level + 1"></GoalTableCore>
-                                <GoalTableCore v-if="row.viewModel.showText || row.viewModel.showChildren" 
+                                <GoalTableCore v-if="options.dropItems.items.children && row.viewModel.showText || row.viewModel.showChildren" 
                                                :parentRow="row" 
                                                :selectedColumns="selectedColumns" 
                                                :isChild="true" 
@@ -48,7 +48,7 @@
 <script>
 import { sortDesc } from '../../../../../../utility'
 import ItemTableRow from '../../../component/ItemTableRow.vue';
-// import GoalTableCore from '../netcore/GoalTableCore.vue';
+import { useGoalStore } from '@/store/goalStore';
 
 export default {
     components: { 
@@ -61,10 +61,30 @@ export default {
     props: {
         options: {
           type: Object,
-          default: () => ({ ShowRootOnly: true })
+          default: () => ({ 
+            showRootOnly: true,
+            dropItems: {
+                items: {
+                    parents: false,
+                    children: true,
+                    goals: true,
+                    routines: true,
+                    todos: true
+                },
+                planner: {
+                    events: false,
+                    iterations: false
+                }
+            }
+         })
         },
         selectedColumns: Array,
         width: Number
+    },
+    provide() {
+        return {
+            options: this.options,
+        }
     },
     inject: [ 'level', 'levelPadding', 'parentRow', 'isParent', 'isChild' ],
     computed: {
@@ -82,7 +102,11 @@ export default {
             goalTableVM: null,
             tableWidth: this.width,
             errorMessage: null,
+            // goals: goalStore.count
         }
+    },
+    created: function() {
+        console.log(useGoalStore());
     },
     mounted: function() {
         this.getGoals();
