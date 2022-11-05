@@ -21,14 +21,16 @@ export default {
     props: {
         column: Object,
         property: Object,
-        text: String,
     },
-    inject: [ 'parentRow', 'isParent', 'isChild', 'level', 'levelPadding', 'options' ],
+    inject: [ 'parentItem', 'isParent', 'isChild', 'level', 'levelPadding', 'options' ],
     data: function() {
         return {
             isExpanded: false,
             tdClasss: this.tdClass()
         }
+    },
+    computed: {
+        text() { return this.property.text; }
     },
     methods: {
         iconSource() {
@@ -42,15 +44,16 @@ export default {
         },
         showItems() {
             this.isExpanded = !this.isExpanded;
-            this.$emit('showItems', 'Text');
+            this.$emit('showItems', 'text');
         },
         shouldShowExpander() {
-            if ((this.options.dropItems.items.parents && this.property.parents.length > 0) ||
-                (this.options.dropItems.items.children && this.property.children.length > 0) ||
-                (this.options.dropItems.items.routines && this.property.routines.length > 0) ||
-                (this.options.dropItems.items.todos && this.property.todos.length > 0) ||
-                (this.options.dropItems.items.events && this.property.events.length > 0) ||
-                (this.options.dropItems.items.iterations && this.property.iterations.length > 0)) {
+            if ((this.options.dropItems.items.parents && this.property.parents && this.property.parents.length > 0) ||
+                (this.options.dropItems.items.children && this.property.children && this.property.children.length > 0) ||
+                (this.options.dropItems.items.metrics && this.property.metrics && this.property.metrics.length > 0) ||
+                (this.options.dropItems.items.routines && this.property.routines && this.property.routines.length > 0) ||
+                (this.options.dropItems.items.todos && this.property.todos && this.property.todos.length > 0) ||
+                (this.options.dropItems.items.events && this.property.events && this.property.events.length > 0) ||
+                (this.options.dropItems.items.iterations && this.property.iterations && this.property.iterations.length > 0)) {
                     return true;
             } else {
                 return false;

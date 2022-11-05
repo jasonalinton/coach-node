@@ -1,7 +1,10 @@
 <template>
     <div class="item row g-0" tabindex="0" v-on:keyup.esc="closeForm">
         <div :class="{ split: selectedItem }">
-            <component :is="`${config.name}Table`"
+            <!-- <ItemTableAndToolbar v-if="config.name.toLowerCase() == 'goal'" :itemType="config.name.toLowerCase()" /> -->
+            <!-- <component v-if="config.name.toLowerCase() != 'goal'" :is="`${config.name}Table`" -->
+                <ItemTableAndToolbar v-if="config.name.toLowerCase() == 'goal' || config.name.toLowerCase() == 'todo'" :itemType="config.name.toLowerCase()" />
+                <component v-if="config.name.toLowerCase() != 'goal' && config.name.toLowerCase() != 'todo'" :is="`${config.name}Table`"
                        :id="`${config.itemType}-table`"
                        :config="config"
                        :selectedItem="selectedItem"
@@ -19,6 +22,7 @@
 
 <script>
 import Split from 'split.js'
+import ItemTableAndToolbar from './table/ItemTableAndToolbar.vue';
 import MetricTable from './metric/MetricTable.vue';
 import MetricForm from './metric/MetricForm.vue';
 import GoalTable from './goal/netcore/GoalTableAndToolbar.vue'
@@ -30,7 +34,8 @@ import RoutineTable from './routine/RoutineTable.vue';
 import RoutineForm from './routine/RoutineForm.vue';
 
 export default {
-    components: { TodoTable, TodoForm, GoalTable, GoalForm, RoutineTable, RoutineForm, MetricTable, MetricForm },
+    // components: { TodoTable, TodoForm, GoalForm, RoutineTable, RoutineForm, MetricTable, MetricForm, ItemTableAndToolbar },
+    components: { TodoTable, TodoForm, GoalTable, GoalForm, RoutineTable, RoutineForm, MetricTable, MetricForm, ItemTableAndToolbar },
     name: 'ItemTab',
     props: {
         config: Object,

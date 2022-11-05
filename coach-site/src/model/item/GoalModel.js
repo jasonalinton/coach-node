@@ -59,12 +59,12 @@ export let goalProperties = [
         position: 10,
         isSelected: false
     },
-    {
-        id: 10,
-        text: "Todos",
-        position: 11,
-        isSelected: true
-    },
+    // {
+    //     id: 10,
+    //     text: "Todos",
+    //     position: 11,
+    //     isSelected: true
+    // },
     {
         id: 11,
         position: 12,

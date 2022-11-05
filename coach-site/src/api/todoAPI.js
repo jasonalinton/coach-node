@@ -1,5 +1,5 @@
-export async function getGoals() {
-    return fetch(`https://localhost:7104/api/Goal/GetGoals`, {
+export async function getTodos() {
+    return fetch(`https://localhost:7104/api/Todo/GetTodos`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         // body: JSON.stringify(data)

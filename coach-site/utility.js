@@ -84,6 +84,10 @@ export function toCamelCase(str) {
     }).replace(/\s+/g, '');
 }
 
+export function capitalizeFirstLetter(string) {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+  }
+
 export function toDateString(dateTimeJSON) {
     let dateTimeArray = dateTimeJSON.split("T");
     let dateArray = dateTimeArray[0].split("-");

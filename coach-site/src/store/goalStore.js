@@ -1,15 +1,25 @@
 import { defineStore } from 'pinia'
+import { getGoals } from '../api/goalAPI'
 
 export const useGoalStore = defineStore('goal', {
     state: () => ({
         goals: []
     }),
     getters: {
-        getGoals: (state) => state.count * 2,
+        tableGoals: async (state) => {
+            // let goals = await getGoals();
+            return state.goals;
+        },
     },
     actions: {
-        increment() {
-        this.count++
+        async fill() {
+            this.goals = await getGoals();
         },
+        remove() {
+            this.goals = this.goals.filter(x => x.id < 17);
+        }
+        // getGoals() {
+        //     let goals = await getGoals();
+        // },
     },
 })

@@ -13,7 +13,20 @@ export default {
     props: {
         column: Object,
         property: Array,
-        text: Number
+        isShowZero: {
+            type: Boolean,
+            default: false
+        }
+    },
+    computed: {
+        text() { 
+            let length = this.property.length;
+            if (length != 0 || this.isShowZero) {
+                return length;
+            } else {
+                return ""
+            }
+         }
     }
 }
 </script>

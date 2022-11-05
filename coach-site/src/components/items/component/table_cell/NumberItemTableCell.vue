@@ -13,8 +13,11 @@ export default {
     props: {
         column: Object,
         property: Number,
-        text: Number
+        
     },
+    computed: {
+        text() { return this.property }
+    }
 }
 </script>
 

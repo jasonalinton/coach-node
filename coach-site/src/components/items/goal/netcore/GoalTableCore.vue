@@ -10,7 +10,6 @@
 
 <script>
 import GoalTableByNone from '../netcore/table/GoalTableByNone.vue'
-import { goalProperties } from '../../../../model/item/GoalModel'
 
 export default {
     components: { GoalTableByNone },
@@ -24,10 +23,7 @@ export default {
           type: String,
           default: "None"
         },
-        selectedColumns: {
-          type: Array,
-          default: goalProperties.map(x => x.text)
-        },
+        selectedColumns: Array,
         parentRow: Object,
         isParent: Boolean, // Is item a parent of parent row
         isChild: Boolean // Is item a child of parent row
@@ -36,7 +32,7 @@ export default {
         return {
             level: this.level,
             levelPadding: this.levelPadding,
-            parentRow: this.parentRow,
+            parentItem: this.parentRow,
             isParent: this.isParent,
             isChild: this.isChild,
         }

@@ -12,20 +12,27 @@
 </template>
 
 <script>
+import { listToString } from '../../../../../utility'
+
 export default {
     name: "ObjectArrayItemTableCell",
     props: {
         column: Object,
         property: Array,
-        text: String,
         isExpanded: Boolean
     },
-    inject: [ 'parentRow', 'isParent', 'isChild' ],
+    inject: [ 'parentItem', 'isParent', 'isChild' ],
+    computed: {
+        text() { return listToString(this.property, "text"); }
+    },
     methods: {
         showItems() {
             this.$emit('showItems', this.column.text);
         },
         shouldShowExpander() {
+            if (!this.property) {
+                console.log("stop")
+            }
             if (this.property.length > 0) {
                 return true;
             } else {

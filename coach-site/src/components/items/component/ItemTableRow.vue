@@ -1,27 +1,22 @@
 <template>
-    <tr :key="goal.id">
+    <tr :key="item.id">
         <template v-for="column in columns">
             <TextItemTableCell v-if="column.type == 'Text'" :key="column.position"
                                :column="column"
-                               :property="goal"
-                               :text="text(column)"
+                               :property="item"
                                @showItems="showItems" />
             <ArrayLengthItemTableCell v-if="column.type == 'ArrayLength'" :key="column.position"
                                       :column="column"
-                                      :property="property(column)"
-                                      :text="text(column)" />
+                                      :property="property(column)" />
             <NumberItemTableCell v-if="column.type == 'Number'" :key="column.position"
                                  :column="column"
-                                 :property="property(column)"
-                                 :text="text(column)" />
+                                 :property="property(column)" />
             <StringItemTableCell v-if="column.type == 'String'" :key="column.position"
                                  :column="column"
-                                 :property="property(column)"
-                                 :text="text(column)" />
+                                 :property="property(column)"/>
             <ObjectArrayItemTableCell v-if="column.type == 'ObjectArray'" :key="column.position"
                                :column="(column != undefined) ? column : { iconName: null }"
-                                      :property="property(column)"
-                                      :text="text(column)" />
+                                      :property="property(column)"/>
 
         </template>
     </tr>
@@ -45,30 +40,28 @@ export default {
         ObjectArrayItemTableCell
     },
     props: {
-        goal: Object,
-        row: Object,
+        item: Object,
         columns: Array
+    },
+    data: function() {
+        return {
+        }
     },
     methods: {
         toCamelCase,
         property(column) {
             if (column.text == 'ID') {
-                return this.goal.id;
+                return this.item.id;
             } else if (column.text == "Time") {
-                return this.goal.timePairs;
+                return this.item.timePairs;
+            } else if (column.text == "Repeat") {
+                return this.item.repeats;
             } else {
-                return this.goal[toCamelCase(column.text)];
+                return this.item[column.text.toLowerCase()];
             }
         },
-        text(column) {
-            if (column.text == 'ID') {
-                return this.row.id;
-            } else {
-                return this.row[toCamelCase(column.text)];
-            }
-        },
-        showItems(propName) {
-            this.row[`show${propName}`] = !this.row[`show${propName}`];
+        showItems(prop) {
+            this.$emit('showItems', this.item.id, prop);
         },
     },
 }

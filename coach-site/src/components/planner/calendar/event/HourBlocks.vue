@@ -45,7 +45,10 @@ function initHours() {
 function getEventsForHour(hourObject) {
     let events = this.events.filter(_event => {
         let hour = getHour(_event.startAt);
-        return hourObject.military == hour;
+        // return hourObject.military == hour;
+        return hourObject.military == hour 
+               && _event.text != "Morning Joy"
+               && _event.text != "Morning Routine";
     });
 
     return events;
