@@ -2,6 +2,7 @@
     <div v-if="events" class="d-flex flex-column">
         <div v-for="(hour, index) in hours" :key="index" class="text-start">
             <HourBlock :hour="hour" 
+                       :dateString="dateString"
                        :blockHeight="blockHeight"
                        :events="getEventsForHour(hour)"
                        :zIndex="index * 100"
@@ -20,6 +21,7 @@ export default {
     name: "HourBlocks",
     components: { HourBlock },
     props: {
+        dateString: String,
         events: Array,
         blockHeight: Number,
     },

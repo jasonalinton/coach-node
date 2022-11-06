@@ -40,6 +40,7 @@
                     <HourBlocks v-for="(day, index) in dayModels"
                                 :key="index"
                                 class="day-view flex-grow-1"
+                                :dateString="day.dateString"
                                 :events="day.events"
                                 :style="{ 'flex-basis': 0 }"
                                 :blockHeight="hour.blockHeight"
@@ -83,7 +84,8 @@ export default {
             events: [],
             tasks: [],
             firstDay: null,
-            lastDay: null
+            lastDay: null,
+            plannerStore: undefined
         };
     },
     computed: {
@@ -92,7 +94,19 @@ export default {
                 startAt: firstDayOfWeek(firstDayOfMonth(this.selectedDate)),
                 endAt: lastDayOfMonth(addDay(this.selectedDate, this.dayCount)),
             }
+        },
+        currentTime() {
+            if (this.plannerStore) {
+                return this.plannerStore.currentTime;
+            } else {
+                return new Date();
+            }
         }
+    },
+    created: async function() {
+        let plannerStore = await import(`@/store/plannerStore`);
+        this.plannerStore = plannerStore.usePlannerStore();
+        this.plannerStore.startClock();
     },
     beforeMount: function () {},
     mounted: function () {
