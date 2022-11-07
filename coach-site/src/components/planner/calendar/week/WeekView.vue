@@ -40,7 +40,7 @@
                     <HourBlocks v-for="(day, index) in dayModels"
                                 :key="index"
                                 class="day-view flex-grow-1"
-                                :dateString="day.dateString"
+                                :date="day.date"
                                 :events="day.events"
                                 :style="{ 'flex-basis': 0 }"
                                 :blockHeight="hour.blockHeight"
@@ -58,7 +58,7 @@ import TaskList from "../TaskList.vue";
 import HourBlocks from "../event/HourBlocks.vue";
 import { replaceItem, removeItem } from "../../../../../utility";
 import { getHoursObjectArray } from "../../../../../utility/plannerUtility";
-import { firstDayOfWeek, firstDayOfMonth, lastDayOfMonth, addDay } from "../../../../../utility/timeUtility";
+import { firstDayOfWeek, lastDayOfWeek, firstDayOfMonth, lastDayOfMonth, addDay } from "../../../../../utility/timeUtility";
 
 export default {
     name: "WeekView",
@@ -85,7 +85,8 @@ export default {
             tasks: [],
             firstDay: null,
             lastDay: null,
-            plannerStore: undefined
+            plannerStore: undefined,
+            eventStore: undefined
         };
     },
     computed: {
@@ -101,12 +102,23 @@ export default {
             } else {
                 return new Date();
             }
+        },
+        startAt() {
+            return firstDayOfWeek(this.selectedDate);
+            // return firstDayOfWeek(firstDayOfMonth(this.selectedDate));
+        },
+        endAt() {
+            return lastDayOfWeek(this.selectedDate);
         }
     },
     created: async function() {
         let plannerStore = await import(`@/store/plannerStore`);
         this.plannerStore = plannerStore.usePlannerStore();
         this.plannerStore.startClock();
+
+        let eventStore = await import(`@/store/eventStore`);
+        this.eventStore = eventStore.useEventStore();
+        this.eventStore.getEvents(this.startAt, this.endAt, true);
     },
     beforeMount: function () {},
     mounted: function () {
@@ -244,7 +256,7 @@ function initTimeline() {
 
 function newDay(day) {
     let tasks = this.tasks.filter(_task => day.toDateString() == new Date(_task.startAt).toDateString());
-    tasks = tasks.filter(_task => _task.events.length == 0);
+        tasks = tasks.filter(_task => _task.events.length == 0);
     let events = this.events.filter(_event => day.toDateString() == new Date(_event.startAt).toDateString());
 
     let pointInTime = "";

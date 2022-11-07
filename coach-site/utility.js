@@ -49,6 +49,18 @@ export function replaceItem(item, itemList) {
     }
 }
 
+export function replaceOrAddItem(item, itemList) {
+    var findObject = (object) => object.id == item.id;
+    var index = itemList.findIndex(findObject);
+    if (index === -1) {
+        itemList.push(item);
+        return false;
+    } else {
+        itemList.splice(index, 1, item);
+        return true;
+    }
+}
+
 // Ten bucks says this causes a probalem in the future JL: 7/4/21
 export function replaceProperties(newObject, oldObject) {
     for (let prop in newObject) {

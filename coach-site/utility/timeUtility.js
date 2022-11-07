@@ -35,6 +35,14 @@ export function toDateTimeString(dateTimeJSON) {
     return `${dateArray[0]}-${dateArray[1]}-${dateArray[2]} ${timeArray[0]}:${timeArray[1]}`;
 }
 
+export function dow(dateTime) {
+   return date.format(dateTime, "ddd");
+}
+
+export function dateNumber(dateTime) {
+   return date.format(dateTime, "ddd");
+}
+
 export function formatDate(dateTime) {
     return moment(dateTime).format();
 }
@@ -50,6 +58,10 @@ export function today(dateTime) {
 export function startOfDay(dateTime) {
     // return moment(dateTime).hour(0).minute(0).second(0).millisecond(0).toDate();
     return moment(dateTime).startOf('day').toDate();
+}
+
+export function endOfDay(dateTime) {
+    return moment(dateTime).endOf('day').toDate();
 }
 
 export function firstDayOfWeek(dateTime) {

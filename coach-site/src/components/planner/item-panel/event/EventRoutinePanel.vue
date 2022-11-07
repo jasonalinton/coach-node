@@ -13,7 +13,7 @@
         <!-- Body -->
         <div v-if="_event" class="d-flex flex-column flex-grow-1 justify-content-between">
             <!-- Pending -->
-            <ul v-if="iterations.pending" class="item-list pending">
+            <ul v-if="incompleteIterations" class="item-list pending">
                 <li v-if="iterations.new">
                     <!-- New Task -->
                     <div class="new-task d-flex flex-row align-items-center">
@@ -25,16 +25,16 @@
                                autofocus/>
                     </div>
                 </li>
-                <li v-for="(iteration, index) in iterations.pending" v-bind:key="iteration.id" :style="{ 'z-index': -index }">
+                <li v-for="(iteration, index) in incompleteIterations" v-bind:key="iteration.id" :style="{ 'z-index': -index }">
                     <ListItem :iteration="iteration" :parent="_event" :parentType="'routineEvent'" @markComplete="toggleCompletion(iteration, $apollo)" @onDelete="deleteIteration(iteration.id, $apollo)"></ListItem>
                     <!-- <ListItem :iteration="iteration" @markComplete="markComplete" @onDelete="removeIteration"></ListItem> -->
                 </li>
             </ul>
             <!-- Complete  -->
             <div class="complete d-flex flex-column">
-                <div class="header">Completed ({{ iterations.complete.length }})</div>
-                <ul v-if="iterations.complete" class="item-list">
-                    <li v-for="(iteration, index) in iterations.complete" v-bind:key="index" :style="{ 'z-index': -index }">
+                <div class="header">Completed ({{ completeIterations.length }})</div>
+                <ul v-if="completeIterations" class="item-list">
+                    <li v-for="(iteration, index) in completeIterations" v-bind:key="index" :style="{ 'z-index': -index }">
                             <ListItem class="complete" :iteration="iteration" @markIncomplete="toggleCompletion(iteration, $apollo)" @onDelete="deleteIteration(iteration.id, $apollo)"></ListItem>
                         <!-- <ListItem class="complete" :iteration="iteration" @markIncomplete="markIncomplete" @onDelete="removeIteration"></ListItem> -->
                     </li>
@@ -67,6 +67,14 @@ export default {
                 pending: [],
                 new: null
             },
+        }
+    },
+    computed: {
+        completeIterations() {
+            return this._event.iterations.filter(iteration => iteration.attemptedAt);
+        },
+        incompleteIterations() {
+            return this._event.iterations.filter(iteration => !iteration.attemptedAt);
         }
     },
     created: function() {
