@@ -227,6 +227,7 @@ export default {
         },
         selectedDate() {
             this.initTimeline();
+            this.eventStore.getEvents(this.startAt, this.endAt, true);
         },
     },
 };
