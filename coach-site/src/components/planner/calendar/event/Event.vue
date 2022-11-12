@@ -9,13 +9,13 @@
             <span v-if="size == 'sm' || size == 'md'">,</span>
          </div>
          <div class="time">
-             {{ toTimeString(_event.startAt)}}
+             {{ getTimeString(new Date(_event.startAt))}}
          </div>
     </div>
 </template>
 
 <script>
-import { getDurationInMinutes, toTimeString } from '../../../../../utility/timeUtility';
+import { getDurationInMinutes, getTimeString } from '../../../../../utility/timeUtility';
 import { sortDesc } from '../../../../../utility';
 import { mapIterationToEvent, unmapTaskFromRoutineEvent, mapTodoToEvent } from '../../../../resolvers/planner-resolvers'
 
@@ -89,7 +89,7 @@ export default {
     },
     methods: {
         getDurationInMinutes,
-        toTimeString,
+        getTimeString,
         onDrop,
         mapIterationToEvent,
         unmapTaskFromRoutineEvent,

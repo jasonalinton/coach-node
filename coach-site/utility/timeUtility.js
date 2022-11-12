@@ -1,6 +1,10 @@
 import moment from "moment";
 import date from 'date-and-time';
 
+export function getTimeString(datetime) {
+    return datetime.toLocaleTimeString([], {hour: 'numeric', minute:'2-digit'});
+}
+
 export function toDateString(dateTimeJSON) {
     let dateTimeArray = dateTimeJSON.split("T");
     let dateArray = dateTimeArray[0].split("-");
