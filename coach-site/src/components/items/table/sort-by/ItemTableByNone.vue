@@ -15,11 +15,17 @@
                     </th>
                 </thead>
                 <tbody>
-                    <template v-for="item in items">
+                    <template v-for="(item) in items">
                         <ItemTableRow :key="item.id"
                                       :item="item"
+                                      :parent="parentItem"
                                       :columns="columns"
-                                      @showItems="showItems"/>
+                                      @showItems="showItems"
+                                      @keydown.alt="initializeMove(item)"
+                                      @keyup.alt="moveIndex = 0"
+                                      @keydown.alt.up="moveUp(item)"
+                                      @keydown.alt.down="moveDown(item)"
+                                      @moveItem="moveItem"/>
                         <tr :key="item.id + 1000000" class="child-row">
                             <td :colspan="columns.length">
                                 <ItemTable v-if="options.dropItems.items.parents && states(item).text || states(item).parents"
@@ -111,7 +117,6 @@ export default {
                 let items = this.store[`${this.itemType}s`];
 
                 if (this.parentItem) {
-                    // let parentItem = items.find(x => x.id == this.parentItem.id);
                     let childIDs;
                     if (this.isParent) {
                         childIDs = this.parentItem.parents.map(x => x.id);
@@ -120,7 +125,16 @@ export default {
                     } else {
                         childIDs = this.parentItem[`${this.itemType}s`].map(x => x.id);
                     }
-                    items = sortDesc(items.filter(x => childIDs.includes(x.id)), 'id');
+                    
+                    items = items.filter(x => childIDs.includes(x.id));
+                    
+                    let items2 = [];
+                    childIDs.forEach(id => {
+                        let item = items.find(x => x.id == id);
+                        if (item)
+                            items2.push(item);
+                    });
+                    items = items2;
                 } else {
                     if (this.options.showRootOnly) {
                         items = items.filter(x => x.parents.length == 0);
@@ -145,6 +159,12 @@ export default {
             shownItems: [],
             store: null,
             todoStore: null,
+            goalStore: undefined,
+            move: {
+                item: undefined,
+                index: 0
+            },
+            moveIndex: 0
             // items: []
             // columns: null
         }
@@ -153,12 +173,12 @@ export default {
         let storeObject = await import(`@/store/${this.itemType}Store`);
         let useStore = storeObject[`use${this.itemTypeCapitalized}Store`];
         this.store = useStore();
-
         
         let todoStore = await import(`@/store/todoStore`);
         this.todoStore = todoStore.useTodoStore();
-
         
+        let goalStore = await import(`@/store/goalStore`);
+        this.goalStore = goalStore.useGoalStore();
     },
     mounted: function() {
         // this.getGoals();
@@ -189,7 +209,12 @@ export default {
                 iconSource = `/icon/${column.iconName}.png`
             }
             return iconSource;
-        }
+        },
+        initializeMove,
+        moveUp,
+        moveDown,
+        completeMove,
+        moveItem
     },
     watch: {
         
@@ -323,6 +348,71 @@ function getUpdatedSelectedColumns(selectedColumns, itemType) {
     }
     return columns;
 }
+
+function initializeMove(item) {
+    item = this.items.find(x => x.id == 127);
+    this.move.item = item;
+    this.move.index = 0;
+}
+
+function moveUp(item) {
+    // this.move.index--;
+
+    console.log("Move up")
+
+    item = this.items.find(x => x.id == 127);
+
+    var index = this.items.findIndex(x => x.id == item.id);
+    if (index > 0) {
+        this.items.splice(index, 1);
+        this.items.splice(index - 1, 0, item);
+    }
+}
+
+function moveDown(item) {
+    // this.move.index--;
+
+    console.log("Move down")
+    item = this.items.find(x => x.id == 127);
+
+    var index = this.items.findIndex(x => x.id == item.id);
+    if (index < this.items.length - 1) {
+        this.items.splice(index, 1);
+        this.items.splice(index + 1, 0, item);
+    }
+}
+
+function completeMove(item) {
+    this.move.item = item;
+    this.move.index = 0;
+}
+
+// function moveItem(item, sibling, placement) {
+//     var index_Sibling = this.items.findIndex(x => x.id == sibling.id);
+//     var newPosition;
+
+//     if (placement == "before") {
+//         newPosition = sibling.position;
+//     } else if (placement == "after") {
+//         newPosition = sibling.position + 1;
+//     }
+// }
+
+function moveItem(item, sibling, isBefore) {
+    var newPosition;
+
+    if (sibling.itemType == "todo") {
+        newPosition = (isBefore) ? sibling.positon : sibling.positon + 1;
+    } else {
+        newPosition = (isBefore) ? sibling.position : sibling.position + 1;
+    }
+
+    if (this.parentItem && this.parentItem.itemType == "goal") {
+        if (item.itemType == "todo") {
+            this.goalStore.repositionTodo(this.parentItem.id, item.id, newPosition)
+        }
+    }
+}
 </script>
 
 <style scoped>
@@ -331,8 +421,17 @@ function getUpdatedSelectedColumns(selectedColumns, itemType) {
     }
 
     .table-borderless tr {
-        border-bottom: none !important; 
+        border-bottom: 1px solid transparent; 
+        border-top: 1px solid transparent; 
+        /* border-bottom: none !important;  */
         vertical-align: middle;
+        -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
+        -moz-box-sizing: border-box;    /* Firefox, other Gecko */
+        box-sizing: border-box;         /* Opera/IE 8+ */
+    }
+
+    .table-borderless tr.child-row {
+        border: none;
     }
 
     .table {

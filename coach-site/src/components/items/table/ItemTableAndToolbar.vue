@@ -5,7 +5,8 @@
                           @setSortBy="sortBy = $event"/>
         <ItemTable :itemType="itemType"
                    :sortBy="sortBy"
-                   :selectedColumns="selectedColumns"/>
+                   :selectedColumns="selectedColumns"
+                   @setDraggedItem="draggedItem = $event"/>
     </div>
 </template>
 
@@ -19,11 +20,17 @@ export default {
     props: {
       itemType: String
     },
+    provide() {
+        return {
+            draggedItem: this.draggedItem,
+        }
+    },
     data: function() {
         return {
             sortBy: null,
             selectedColumns: null,
-            store: null
+            store: null,
+            draggedItem: null
         }
     },
     created: async function() {

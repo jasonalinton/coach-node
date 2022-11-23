@@ -345,9 +345,7 @@ function getEndpointData() {
     .table tbody tr:hover:not(.child-row) {
         background-color:#F5F5F5;
     }
-</style>
-
-<style>
+    
     .goal.table td, .goal.table th {
         max-width: 150px;
         overflow: hidden;

@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { getGoals } from '../api/goalAPI'
+import { getGoals, repositionTodo } from '../api/goalAPI'
 
 export const useGoalStore = defineStore('goal', {
     state: () => ({
@@ -17,9 +17,9 @@ export const useGoalStore = defineStore('goal', {
         },
         remove() {
             this.goals = this.goals.filter(x => x.id < 17);
+        },
+        repositionTodo(goalID, todoID, newPosition) {
+            repositionTodo(goalID, todoID, newPosition);
         }
-        // getGoals() {
-        //     let goals = await getGoals();
-        // },
     },
 })
