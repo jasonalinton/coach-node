@@ -5,7 +5,8 @@ export const useItemTableStore = defineStore('itemTable', {
         dragged: {
             item: undefined,
             parent: undefined
-        }
+        },
+        containerWidth: 0
     }),
     getters: {
         getDragged() {
@@ -20,6 +21,9 @@ export const useItemTableStore = defineStore('itemTable', {
         clearDraggedProps() {
             this.dragged.item = undefined;
             this.dragged.parent = undefined;
+        },
+        setContainerWidth(width) {
+            this.containerWidth = width;
         }
     },
 })

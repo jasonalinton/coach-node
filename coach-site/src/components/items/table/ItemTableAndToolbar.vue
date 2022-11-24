@@ -37,8 +37,7 @@ export default {
         let storeObject = await import(`@/store/${this.itemType}Store`);
         let useStore = storeObject[`use${capitalizeFirstLetter(this.itemType)}Store`];
         let store = useStore();
-        await store.fill();
-        console.log(store);
+        await store.initialize();
     },
 }
 </script>

@@ -12,7 +12,10 @@ export default {
     name: "StringItemTableCell",
     props: {
         column: Object,
-        property: String
+        property: {
+            type: String,
+            default: ""
+        },
     },
     computed: {
         text() { return this.property; }

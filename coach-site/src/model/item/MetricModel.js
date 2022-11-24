@@ -1,9 +1,10 @@
-export let goalProperties = [
+export let metricProperties = [
     {
         id: 0,
         text: "Position",
         position: 1,
         isSelected: true,
+        isActive: true,
         isActive: true
     },
     {
@@ -25,49 +26,49 @@ export let goalProperties = [
         text: "Time",
         position: 4,
         isSelected: true,
-        isActive: true
+        isActive: false
     },
     {
         id: 4,
         text: "Repeat",
         position: 5,
         isSelected: true,
-        isActive: true
+        isActive: false
     },
     {
         id: 5,
         text: "Type",
         position: 6,
         isSelected: false,
-        isActive: true
+        isActive: false
     },
     {
         id: 6,
         text: "Parents",
         position: 7,
         isSelected: true,
-        isActive: true
+        isActive: false
     },
     {
         id: 7,
         text: "Children",
         position: 8,
         isSelected: true,
-        isActive: true
+        isActive: false
     },
     {
         id: 8,
         text: "Metrics",
         position: 9,
         isSelected: true,
-        isActive: true
+        isActive: false
     },
     {
         id: 9,
         text: "Goals",
         position: 10,
         isSelected: false,
-        isActive: false
+        isActive: true
     },
     {
         id: 10,

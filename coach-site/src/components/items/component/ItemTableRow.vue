@@ -9,6 +9,7 @@
             <TextItemTableCell v-if="column.type == 'Text'" :key="column.position"
                                :column="column"
                                :property="item"
+                               :isExpanded="states.text"
                                @showItems="showItems" />
             <ArrayLengthItemTableCell v-if="column.type == 'ArrayLength'" :key="column.position"
                                       :column="column"
@@ -22,6 +23,7 @@
             <ObjectArrayItemTableCell v-if="column.type == 'ObjectArray'" :key="column.position"
                                       :column="(column != undefined) ? column : { iconName: null }"
                                       :property="property(column)"
+                                      :isExpanded="states[column.text.toLowerCase()]"
                                       @showItems="showItems"/>
 
         </template>
@@ -48,7 +50,8 @@ export default {
     props: {
         item: Object,
         parent: Object,
-        columns: Array
+        columns: Array,
+        states: Object
     },
     inject: [ 'draggedItem' ],
     data: function() {
@@ -69,6 +72,7 @@ export default {
         onDrop,
         onDragLeave,
         onDragEnd,
+        hasSameParent,
         property(column) {
             if (column.text == 'ID') {
                 return this.item.id;
@@ -109,42 +113,23 @@ function onDragOver(ev) {
     ev.preventDefault();
     this.position = "";
 
-    var item = ev.currentTarget.__vue__.item;
-    console.log(item);
+    // var item = ev.currentTarget.__vue__.item;
 
     if (!ev.currentTarget.classList.contains("drag")) {
         ev.preventDefault();
-        
-        var rect = this.$refs.tr.getBoundingClientRect();
-        
-        var offset = ev.clientY - rect.y;
-        var percent = offset / rect.height;
 
-        if ((percent < .50)) {
-            this.position = "before";
-        } else {
-            this.position = "after";
+        if (this.hasSameParent()) {
+            var rect = this.$refs.tr.getBoundingClientRect();
+            var offset = ev.clientY - rect.y;
+            var percent = offset / rect.height;
+
+            if ((percent < .50)) {
+                this.position = "before";
+            } else {
+                this.position = "after";
+            }
         }
-
-        var dragged = this.itemTableStore.getDragged;
-
-        /* Same Parent */
-        if (this.parent == undefined && dragged.parent == undefined) {
-            console.log("No parent");
-        } else if ((this.parent && dragged.parent) && 
-                    this.parent.itemType == dragged.parent.itemType && 
-                    this.parent.id == dragged.parent.id) {
-                     
-            
-            console.log("Same parent")
-        }
-
-        /* Different Parent */
-
-        /* Child */
     }
-
-    
 }
 
 function getPosition(ev) {
@@ -164,11 +149,12 @@ function onDrop(ev) {
     
     let data = ev.dataTransfer.getData("text");
     data = JSON.parse(data);
-
-    this.$emit('moveItem', data.item, this.item, (this.position == "before") ? true : false);
+    
+    if (this.hasSameParent()) {
+        this.$emit('repositionItem', data.item, this.item, (this.position == "before") ? true : false);
+    }
     
     this.position = "";
-    
 }
 
 function onDragLeave() {
@@ -180,6 +166,18 @@ function onDragEnd(ev) {
     this.position = "";
 
     this.itemTableStore.clearDraggedProps();
+}
+
+/* Do the dragged item and hoved item have the same parent? */
+function hasSameParent() {
+    var dragged = this.itemTableStore.getDragged;
+    if ((this.parent == undefined && dragged.parent == undefined) ||
+        ((this.parent && dragged.parent) && 
+            this.parent.itemType == dragged.parent.itemType && this.parent.id == dragged.parent.id)) {
+                return true;
+    } else {
+        return false;
+    }
 }
 </script>
 

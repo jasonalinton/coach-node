@@ -12,7 +12,12 @@ export default {
     name: "ArrayLengthItemTableCell",
     props: {
         column: Object,
-        property: Array,
+        property: {
+            type: Array,
+            default(rawProps) {
+                return (rawProps) ? rawProps : [];
+            }
+        },
         isShowZero: {
             type: Boolean,
             default: false

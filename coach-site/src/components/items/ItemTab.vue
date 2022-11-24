@@ -3,8 +3,8 @@
         <div :class="{ split: selectedItem }">
             <!-- <ItemTableAndToolbar v-if="config.name.toLowerCase() == 'goal'" :itemType="config.name.toLowerCase()" /> -->
             <!-- <component v-if="config.name.toLowerCase() != 'goal'" :is="`${config.name}Table`" -->
-                <ItemTableAndToolbar v-if="config.name.toLowerCase() == 'goal' || config.name.toLowerCase() == 'todo'" :itemType="config.name.toLowerCase()" />
-                <component v-if="config.name.toLowerCase() != 'goal' && config.name.toLowerCase() != 'todo'" :is="`${config.name}Table`"
+                <ItemTableAndToolbar v-if="config.name.toLowerCase() == 'goal' || config.name.toLowerCase() == 'todo' || config.name.toLowerCase() == 'metric'" :itemType="config.name.toLowerCase()" />
+                <component v-if="config.name.toLowerCase() != 'goal' && config.name.toLowerCase() != 'todo' && config.name.toLowerCase() != 'metric'" :is="`${config.name}Table`"
                        :id="`${config.itemType}-table`"
                        :config="config"
                        :selectedItem="selectedItem"

@@ -12,8 +12,10 @@ export default {
     name: "NumberItemTableCell",
     props: {
         column: Object,
-        property: Number,
-        
+        property: {
+            type: Number,
+            default: 0
+        },
     },
     computed: {
         text() { return this.property }

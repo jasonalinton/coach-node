@@ -20,12 +20,9 @@
                                       :item="item"
                                       :parent="parentItem"
                                       :columns="columns"
+                                      :states="states(item)"
                                       @showItems="showItems"
-                                      @keydown.alt="initializeMove(item)"
-                                      @keyup.alt="moveIndex = 0"
-                                      @keydown.alt.up="moveUp(item)"
-                                      @keydown.alt.down="moveDown(item)"
-                                      @moveItem="moveItem"/>
+                                      @repositionItem="repositionItem"/>
                         <tr :key="item.id + 1000000" class="child-row">
                             <td :colspan="columns.length">
                                 <ItemTable v-if="options.dropItems.items.parents && states(item).text || states(item).parents"
@@ -39,6 +36,11 @@
                                            :parentItem="item"
                                            :selectedColumns="selectedColumns" 
                                            :isChild="true"
+                                           :level="level + 1" />
+                                <ItemTable v-if="options.dropItems.items.todos && states(item).text || states(item).metrics"
+                                           itemType="metric"
+                                           :parentItem="item"
+                                           :selectedColumns="getUpdatedSelectedColumns(selectedColumns, 'metric')" 
                                            :level="level + 1" />
                                 <ItemTable v-if="options.dropItems.items.todos && states(item).text || states(item).todos"
                                            itemType="todo"
@@ -101,10 +103,11 @@ export default {
         columns() {
             let columns = [];
             let i = 1;
+            let _this = this;
             this.selectedColumns.forEach(column => {
                 let columnConfig = clone(columnConfigs.find(x => x.text == column));
                 columnConfig.position = i++;
-                if (column == "Text" && !this.isParent && !this.isChild) {
+                if (column == "Text" && !_this.isParent && !_this.isChild) {
                     columnConfig.iconName = `${this.itemType}-icon`;
                 }
                 columns.push(columnConfig);
@@ -114,29 +117,33 @@ export default {
         },
         items() {
             if (this.store) {
-                let items = this.store[`${this.itemType}s`];
+                let items = this.store.getItems();
 
                 if (this.parentItem) {
+                    let parent = this[`${this.parentItem.itemType}Store`].getItem(this.parentItem.id);
                     let childIDs;
                     if (this.isParent) {
-                        childIDs = this.parentItem.parents.map(x => x.id);
+                        childIDs = parent.parents.map(x => {return { id: x.id, position: x.position }});
                     } else if (this.isChild) {
-                        childIDs = this.parentItem.children.map(x => x.id);
+                        childIDs = parent.children.map(x => {return { id: x.id, position: x.position }});
                     } else {
-                        childIDs = this.parentItem[`${this.itemType}s`].map(x => x.id);
+                        childIDs = parent[`${this.itemType}s`].map(x => {return { id: x.id, position: x.position }});
                     }
                     
-                    items = items.filter(x => childIDs.includes(x.id));
+                    items = items.filter(x => childIDs.map(y => y.id).includes(x.id));
                     
                     let items2 = [];
-                    childIDs.forEach(id => {
-                        let item = items.find(x => x.id == id);
-                        if (item)
+                    childIDs.forEach(__ => {
+                        let item = items.find(x => x.id == __.id);
+                        if (item) {
+                            item = clone(item);
+                            item.position = __.position;
                             items2.push(item);
+                        }
                     });
                     items = items2;
                 } else {
-                    if (this.options.showRootOnly) {
+                    if (this.options.showRootOnly && this.itemType != 'metric') {
                         items = items.filter(x => x.parents.length == 0);
                     }
                     items = sortDesc(items, 'id');
@@ -158,8 +165,9 @@ export default {
             tableWidth: this.width,
             shownItems: [],
             store: null,
-            todoStore: null,
+            metricStore: undefined,
             goalStore: undefined,
+            todoStore: null,
             move: {
                 item: undefined,
                 index: 0
@@ -170,26 +178,24 @@ export default {
         }
     },
     created: async function() {
-        let storeObject = await import(`@/store/${this.itemType}Store`);
-        let useStore = storeObject[`use${this.itemTypeCapitalized}Store`];
-        this.store = useStore();
+        let metricStore = await import(`@/store/metricStore`);
+        this.metricStore = metricStore.useMetricStore();
+        
+        let goalStore = await import(`@/store/goalStore`);
+        this.goalStore = goalStore.useGoalStore();
         
         let todoStore = await import(`@/store/todoStore`);
         this.todoStore = todoStore.useTodoStore();
         
-        let goalStore = await import(`@/store/goalStore`);
-        this.goalStore = goalStore.useGoalStore();
-    },
-    mounted: function() {
-        // this.getGoals();
+        let storeObject = await import(`@/store/${this.itemType}Store`);
+        let useStore = storeObject[`use${this.itemTypeCapitalized}Store`];
+        this.store = useStore();
+        
     },
     methods: {
         setColumnWidths,
         refreshShownItems,
         newStateModel,
-        getGoals,
-        getEndpoint,
-        getEndpointData,
         getUpdatedSelectedColumns,
         // setItems,
         states(item) {
@@ -197,7 +203,9 @@ export default {
         },
         showItems(id, prop) {
             let states = this.shownItems.find(x => x.id === id).states;
-            states[prop.toLowerCase()] = !states[prop.toLowerCase()];
+            let value = !states[prop.toLowerCase()];
+            for (let _prop in states) { states[_prop] = false; }
+            states[prop.toLowerCase()] = value;
         },
         iconSource(column) {
             let iconSource;
@@ -211,10 +219,10 @@ export default {
             return iconSource;
         },
         initializeMove,
-        moveUp,
-        moveDown,
-        completeMove,
-        moveItem
+        // moveUp,
+        // moveDown,
+        // completeMove,
+        repositionItem
     },
     watch: {
         
@@ -278,68 +286,6 @@ function newStateModel(item) {
     return data;
 }
 
-function getGoals() {
-    this.isLoading = true;
-    let controller = "Goal";
-    // let controller = (!this.parentRow) ? "Goal" : this.parentRow.viewModel.modelType;
-    let endpoint = this.getEndpoint();
-    let data = this.getEndpointData(); 
-
-    let _this = this;
-    fetch(`https://localhost:7104/api/${controller}/${endpoint}`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data)
-    })
-    .then((response) => response.json())
-    .then((data) => {
-        if (!data.errorMessage) {
-            // _this.columns = data.columns;
-            // _this.setItems();
-            _this.itemTableVM = data;
-
-        } else {
-            _this.errorMessage = data.errorMessage;
-        }
-        _this.isLoading = false;
-    })
-    .catch((error) => {
-        this.isLoading = false;
-        console.error('Error:', error);
-    });
-}
-
-function getEndpoint() {
-    let endpoint;
-
-    if (this.isParent) {
-        endpoint = 'GetParentGoalTableByNoneVM';
-    } else if (this.isChild) {
-        endpoint = 'GetChildGoalTableByNoneVM';
-    } else {
-        endpoint = 'GetGoalTableByNoneVM';
-    }
-
-    return endpoint;
-}
-
-function getEndpointData() {
-    let data = {
-        properties: this.selectedColumns,
-        options: this.options
-    };
-
-    if (this.isParent) {
-        data.childID = this.parentRowID;
-    } else if (this.isChild) {
-        data.parentID = this.parentRowID;
-    }
-
-    return data;
-}
-
 function getUpdatedSelectedColumns(selectedColumns, itemType) {
     let columns = [...selectedColumns];
     let index = columns.findIndex(x => x.toLowerCase() == `${itemType.toLowerCase()}s`);
@@ -355,59 +301,45 @@ function initializeMove(item) {
     this.move.index = 0;
 }
 
-function moveUp(item) {
-    // this.move.index--;
+// function moveUp(item) {
+//     // this.move.index--;
 
-    console.log("Move up")
+//     console.log("Move up")
 
-    item = this.items.find(x => x.id == 127);
+//     item = this.items.find(x => x.id == 127);
 
-    var index = this.items.findIndex(x => x.id == item.id);
-    if (index > 0) {
-        this.items.splice(index, 1);
-        this.items.splice(index - 1, 0, item);
-    }
-}
-
-function moveDown(item) {
-    // this.move.index--;
-
-    console.log("Move down")
-    item = this.items.find(x => x.id == 127);
-
-    var index = this.items.findIndex(x => x.id == item.id);
-    if (index < this.items.length - 1) {
-        this.items.splice(index, 1);
-        this.items.splice(index + 1, 0, item);
-    }
-}
-
-function completeMove(item) {
-    this.move.item = item;
-    this.move.index = 0;
-}
-
-// function moveItem(item, sibling, placement) {
-//     var index_Sibling = this.items.findIndex(x => x.id == sibling.id);
-//     var newPosition;
-
-//     if (placement == "before") {
-//         newPosition = sibling.position;
-//     } else if (placement == "after") {
-//         newPosition = sibling.position + 1;
+//     var index = this.items.findIndex(x => x.id == item.id);
+//     if (index > 0) {
+//         this.items.splice(index, 1);
+//         this.items.splice(index - 1, 0, item);
 //     }
 // }
 
-function moveItem(item, sibling, isBefore) {
-    var newPosition;
+// function moveDown(item) {
+//     // this.move.index--;
 
-    if (sibling.itemType == "todo") {
-        newPosition = (isBefore) ? sibling.positon : sibling.positon + 1;
-    } else {
-        newPosition = (isBefore) ? sibling.position : sibling.position + 1;
-    }
+//     console.log("Move down")
+//     item = this.items.find(x => x.id == 127);
+
+//     var index = this.items.findIndex(x => x.id == item.id);
+//     if (index < this.items.length - 1) {
+//         this.items.splice(index, 1);
+//         this.items.splice(index + 1, 0, item);
+//     }
+// }
+
+// function completeMove(item) {
+//     this.move.item = item;
+//     this.move.index = 0;
+// }
+
+function repositionItem(item, sibling, isBefore) {
+    var newPosition = (isBefore) ? sibling.position : sibling.position + 1;
 
     if (this.parentItem && this.parentItem.itemType == "goal") {
+        if (item.itemType == "metric") {
+            this.goalStore.repositionMetric(this.parentItem.id, item.id, newPosition)
+        }
         if (item.itemType == "todo") {
             this.goalStore.repositionTodo(this.parentItem.id, item.id, newPosition)
         }

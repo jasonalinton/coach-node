@@ -20,12 +20,20 @@ export default {
     name: "TextItemTableCell",
     props: {
         column: Object,
-        property: Object,
+        property: {
+            type: Object,
+            default(rawProp) {
+                return (rawProp) ? rawProp : {};
+            }
+        },
+        isExpanded: {
+            type: Boolean,
+            default: false
+        }
     },
     inject: [ 'parentItem', 'isParent', 'isChild', 'level', 'levelPadding', 'options' ],
     data: function() {
         return {
-            isExpanded: false,
             tdClasss: this.tdClass()
         }
     },
@@ -43,7 +51,6 @@ export default {
             }
         },
         showItems() {
-            this.isExpanded = !this.isExpanded;
             this.$emit('showItems', 'text');
         },
         shouldShowExpander() {
@@ -78,5 +85,7 @@ export default {
 </script>
 
 <style scoped>
-
+img {
+    margin-top: -2px;
+}
 </style>
