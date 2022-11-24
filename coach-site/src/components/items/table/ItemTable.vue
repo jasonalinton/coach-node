@@ -3,8 +3,7 @@
         <div v-if="selectedColumns" class="w-100">
             <ItemTableByNone v-if="sortBy == 'None'"
                              :itemType="itemType"
-                             :selectedColumns="selectedColumns"
-                             :width="width"/>
+                             :selectedColumns="selectedColumns"/>
         </div>
     </div>
 </template>
@@ -42,20 +41,7 @@ export default {
     data: function() {
         return {
             levelPadding: 18, // amount of left-padding added to of each child row
-            width: 0
         }
-    },
-    mounted() {
-      let _this = this;
-      this.width = this.$refs.tableContainer.clientWidth;
-      window.addEventListener('resize', function() {
-        if (_this.$refs.tableContainer.clientWidth) {
-            _this.width = _this.$refs.tableContainer.clientWidth;
-        } 
-        // else {
-        //     console.log("hi")
-        // }
-      });
     }
 }
 </script>
