@@ -3,8 +3,6 @@ export async function getEvents(start, end) {
         start: start,
         end: end
     };
-    
-    console.log(1)
 
     return fetch(`https://localhost:7104/api/Event/GetEventsInRange`, {
         method: 'POST',

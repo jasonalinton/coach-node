@@ -4,7 +4,7 @@
              :src="(isExpanded) ? `/icon/icon-expanded.png` : `/icon/icon-collapsed-right.png`"
              width="14" height="14"
              @click="showItems()" />
-        <img v-if="column.iconName && (text.toLowerCase() != '')" 
+        <img v-if="column.iconName && (text.toLowerCase() != '') && column.iconName != 'metric-icon'" 
              :src="`/icon/${iconSource()}.png`" 
              width="24" height="24" />
         <span>{{ text }}</span>

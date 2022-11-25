@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
-import { getTodos } from '../api/todoAPI'
+import { getTodos } from '../api/todoAPI';
+import { repositionItem } from '../api/itemAPI';
 import { replaceItem, sortAsc } from '../../utility';
 import { getSocketConnection } from './socket'
 
@@ -10,10 +11,7 @@ export const useTodoStore = defineStore('todo', {
         todos: []
     }),
     getters: {
-        tableTodos: async (state) => {
-            // let todos = await getTodos();
-            return state.todos;
-        },
+        
     },
     actions: {
         async initialize() {
@@ -29,6 +27,9 @@ export const useTodoStore = defineStore('todo', {
         },
         getItem(id) {
             return this.todos.find(x => x.id == id);
+        },
+        repositionItem(parentType, itemType, goalID, metricID, newPosition) {
+            repositionItem(parentType, itemType, goalID, metricID, newPosition);
         },
         connectSocket() {
             if (!initialized) {

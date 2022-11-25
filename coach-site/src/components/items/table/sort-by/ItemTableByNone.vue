@@ -24,30 +24,44 @@
                                      @showItems="showItems"
                                       @repositionItem="repositionItem"/>
                        <tr :key="item.id + 1000000" class="child-row">
-                        <td :colspan="columns.length">
-                                <ItemTable v-if="options.dropItems.items.parents && states(item).text || states(item).parents"
-                                           :itemType="itemType"
-                                           :parentItem="item"
-                                           :selectedColumns="selectedColumns" 
-                                           :isParent="true"
-                                           :level="level + 1" />
-                                <ItemTable v-if="options.dropItems.items.children && states(item).text || states(item).children"
-                                           :itemType="itemType"
-                                           :parentItem="item"
-                                           :selectedColumns="selectedColumns" 
-                                           :isChild="true"
-                                           :level="level + 1" />
-                                <ItemTable v-if="options.dropItems.items.todos && states(item).text || states(item).metrics"
-                                           itemType="metric"
-                                           :parentItem="item"
-                                           :selectedColumns="getUpdatedSelectedColumns(selectedColumns, 'metric')" 
-                                           :level="level + 1" />
-                                <ItemTable v-if="options.dropItems.items.todos && states(item).text || states(item).todos"
-                                           itemType="todo"
-                                           :parentItem="item"
-                                           :selectedColumns="getUpdatedSelectedColumns(selectedColumns, 'todo')" 
-                                           :level="level + 1" />
-                            </td>
+                           <td :colspan="columns.length">
+                               <ItemTable v-if="options.dropItems.items.parents && states(item).text || states(item).parents"
+                                          :itemType="itemType"
+                                          :parentItem="item"
+                                          :selectedColumns="selectedColumns" 
+                                          :isParent="true"
+                                          :level="level + 1" />
+                               <ItemTable v-if="options.dropItems.items.children && states(item).text || states(item).children"
+                                          :itemType="itemType"
+                                          :parentItem="item"
+                                          :selectedColumns="selectedColumns" 
+                                          :isChild="true"
+                                          :level="level + 1" />
+                               <ItemTable v-if="(options.dropItems.items.todos && states(item).text 
+                                          || states(item).metrics) && itemType != 'metric'"
+                                          itemType="metric"
+                                          :parentItem="item"
+                                          :selectedColumns="getUpdatedSelectedColumns(selectedColumns, 'metric')" 
+                                          :level="level + 1" />
+                               <ItemTable v-if="(options.dropItems.items.goals && states(item).text 
+                                          || states(item).goals) && itemType != 'goal'"
+                                          itemType="goal"
+                                          :parentItem="item"
+                                          :selectedColumns="getUpdatedSelectedColumns(selectedColumns, 'goal')" 
+                                          :level="level + 1" />
+                               <ItemTable v-if="(options.dropItems.items.routines && states(item).text 
+                                          || states(item).routines) && itemType != 'routine'"
+                                          itemType="routine"
+                                          :parentItem="item"
+                                          :selectedColumns="getUpdatedSelectedColumns(selectedColumns, 'routine')" 
+                                          :level="level + 1" />
+                               <ItemTable v-if="(options.dropItems.items.todos && states(item).text 
+                                          || states(item).todos) && itemType != 'todo'"
+                                          itemType="todo"
+                                          :parentItem="item"
+                                          :selectedColumns="getUpdatedSelectedColumns(selectedColumns, 'todo')" 
+                                          :level="level + 1" />
+                           </td>
                        </tr>
                    </template>
                </tbody>
@@ -99,13 +113,7 @@ export default {
    inject: [ 'level', 'levelPadding', 'parentItem', 'isParent', 'isChild' ],
    computed: {
        itemTypeCapitalized() { return capitalizeFirstLetter(this.itemType); },
-       width() { 
-           if (this.itemTableStore) {
-               return this.itemTableStore.containerWidth; 
-           } else {
-               return 0;
-           }
-       },
+       width() { return (this.itemTableStore) ? this.itemTableStore.containerWidth : 0 },
        columns() {
            let columns = [];
            let i = 1;
@@ -173,15 +181,9 @@ export default {
            store: null,
            metricStore: undefined,
            goalStore: undefined,
+           routineStore: undefined,
            todoStore: undefined,
            itemTableStore: undefined,
-           move: {
-               item: undefined,
-               index: 0
-           },
-           moveIndex: 0
-           // items: []
-           // columns: null
        }
    },
    created: async function() {
@@ -190,6 +192,9 @@ export default {
        
        let goalStore = await import(`@/store/goalStore`);
        this.goalStore = goalStore.useGoalStore();
+       
+       let routineStore = await import(`@/store/routineStore`);
+       this.routineStore = routineStore.useRoutineStore();
        
        let todoStore = await import(`@/store/todoStore`);
        this.todoStore = todoStore.useTodoStore();
@@ -206,35 +211,15 @@ export default {
        refreshShownItems,
        newStateModel,
        getUpdatedSelectedColumns,
-       // setItems,
-       states(item) {
-           return  this.shownItems.find(x => x.id === item.id).states;
-       },
+       getStore(itemType) { return this[`${itemType}Store`]; },
+       states(item) { return  this.shownItems.find(x => x.id === item.id).states; },
        showItems(id, prop) {
            let states = this.shownItems.find(x => x.id === id).states;
            let value = !states[prop.toLowerCase()];
            for (let _prop in states) { states[_prop] = false; }
            states[prop.toLowerCase()] = value;
        },
-       iconSource(column) {
-           let iconSource;
-           if (column.text == 'Text' && this.isChild) {
-               iconSource = '/icon/child-icon.png';
-           } else if (column.text == 'Text' && this.isParent) {
-               iconSource = `/icon/parent-icon.png`
-           } else {
-               iconSource = `/icon/${column.iconName}.png`
-           }
-           return iconSource;
-       },
-       initializeMove,
        repositionItem
-       // moveUp,
-       // moveDown,
-       // completeMove,
-   },
-   watch: {
-       
    }
 }
 
@@ -304,11 +289,20 @@ function getUpdatedSelectedColumns(selectedColumns, itemType) {
    return columns;
 }
 
-function initializeMove(item) {
-   item = this.items.find(x => x.id == 127);
-   this.move.item = item;
-   this.move.index = 0;
+function repositionItem(item, sibling, isBefore) {
+    var newPosition = (isBefore) ? sibling.position : sibling.position + 1;
+
+    if (this.parentItem) {
+        let store = this.getStore(this.parentItem.itemType);
+        store.repositionItem(this.parentItem.itemType, item.itemType, this.parentItem.id, item.id, newPosition);
+    }
 }
+
+// function initializeMove(item) {
+//    item = this.items.find(x => x.id == 127);
+//    this.move.item = item;
+//    this.move.index = 0;
+// }
 
 // function moveUp(item) {
 //     // this.move.index--;
@@ -341,19 +335,6 @@ function initializeMove(item) {
 //     this.move.item = item;
 //     this.move.index = 0;
 // }
-
-function repositionItem(item, sibling, isBefore) {
-   var newPosition = (isBefore) ? sibling.position : sibling.position + 1;
-
-   if (this.parentItem && this.parentItem.itemType == "goal") {
-       if (item.itemType == "metric") {
-           this.goalStore.repositionMetric(this.parentItem.id, item.id, newPosition)
-       }
-       if (item.itemType == "todo") {
-           this.goalStore.repositionTodo(this.parentItem.id, item.id, newPosition)
-       }
-   }
-}
 </script>
 
 <style scoped>

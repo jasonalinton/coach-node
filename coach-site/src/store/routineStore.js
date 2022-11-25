@@ -1,14 +1,14 @@
 import { defineStore } from 'pinia'
-import { getGoals } from '../api/goalAPI'
+import { getRoutines } from '../api/routineAPI'
 import { repositionItem } from '../api/itemAPI';
 import { replaceItem, sortAsc } from '../../utility';
 import { getSocketConnection } from './socket'
 
 let initialized = false;
 
-export const useGoalStore = defineStore('goal', {
+export const useRoutineStore = defineStore('routine', {
     state: () => ({
-        goals: []
+        routines: []
     }),
     getters: {
         
@@ -20,32 +20,31 @@ export const useGoalStore = defineStore('goal', {
             initialized = true;
         },
         async fill() {
-            this.goals = await getGoals();
+            this.routines = await getRoutines();
         },
         getItems() {
-            return this.goals;
+            return this.routines;
         },
         getItem(id) {
-            return this.goals.find(x => x.id == id);
+            return this.routines.find(x => x.id == id);
         },
         repositionItem(parentType, itemType, goalID, metricID, newPosition) {
             repositionItem(parentType, itemType, goalID, metricID, newPosition);
         },
         connectSocket() {
             if (!initialized) {
-                let connection = getSocketConnection("goalHub");
+                let connection = getSocketConnection("routineHub");
 
                 let _this = this;
-                connection.on("UpdateGoals", goals => {
-                    goals.forEach(goal => {
-                        let exists = replaceItem(goal, _this.goals);
-                        if (!exists) _this.goals.push(goal);
+                connection.on("UpdateRoutines", routines => {
+                    routines.forEach(routine => {
+                        let exists = replaceItem(routine, _this.routines);
+                        if (!exists) _this.routines.push(routine);
                     })
-                    sortAsc(_this.goals);
+                    sortAsc(_this.routines);
                 });
 
                 connection.start();
-                    // .then(() => connection.invoke("SendMessage", "Hello"));
             }
         }
     },

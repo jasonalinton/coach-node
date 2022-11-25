@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
-import { getMetrics, repositionTodo } from '../api/metricAPI'
+import { getMetrics } from '../api/metricAPI'
+import { repositionItem } from '../api/itemAPI';
 import { replaceItem, sortAsc } from '../../utility';
 import { getSocketConnection } from './socket'
 
@@ -27,8 +28,8 @@ export const useMetricStore = defineStore('metric', {
         getItem(id) {
             return this.metrics.find(x => x.id == id);
         },
-        repositionTodo(metricID, todoID, newPosition) {
-            repositionTodo(metricID, todoID, newPosition);
+        repositionItem(parentType, itemType, goalID, metricID, newPosition) {
+            repositionItem(parentType, itemType, goalID, metricID, newPosition);
         },
         connectSocket() {
             if (!initialized) {
