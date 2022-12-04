@@ -1,5 +1,5 @@
 <template>
-    <div id="app" class="grid-container">
+    <div id="app" :class="['grid-container', (selectedItemPanel) ? 'show-item-panel' : 'hide-item-panel']">
         <div class="nav-bar">
             <PlannerNavbar
                 :dayCount="navbar.week.dayCount" 
@@ -24,7 +24,9 @@
         </div>
         <div class="grid-right-panel">
             <ItemPanel :selectedDate="selectedDate"
-                       :selectPanel="itemsPage.selectPanel"></ItemPanel>
+                       :selectPanel="itemsPage.selectPanel"
+                       :selectedPanel="selectedItemPanel"
+                       @setSelectedPanel="selectedItemPanel = $event"></ItemPanel>
         </div>
     </div>
 </template>
@@ -56,7 +58,8 @@ export default {
             itemsPage: {
                 selectPanel: undefined,
             },
-            selectedDate: today()
+            selectedDate: today(),
+            selectedItemPanel: "todo"
         };
     },
     created: function () {
@@ -134,8 +137,14 @@ body {
     display: grid;
     /* gap: 20px; */
     grid-template-rows: 64px auto;
+}
+
+.show-item-panel {
     grid-template-columns: 272px auto 352px;
-    /* grid-template-columns: 272px auto 5px; */
+}
+
+.hide-item-panel {
+    grid-template-columns: 272px auto 57px;
 }
 
 .nav-bar {

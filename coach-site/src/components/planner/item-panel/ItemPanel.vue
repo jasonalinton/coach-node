@@ -4,27 +4,32 @@
             <div :style="{'width': '100%', 'height': '64px', 'border-bottom': '1px solid rgba(220, 220, 220, .5)'}"></div>
             <div :style="{'width': '56px', 'height': '258px', 'padding-left': '8px', 'overflow': 'hidden'}">
                 <div class="d-flex flex-row mb-1">
-                    <img class="todo" :class="[{ active: selectedPanel == 'todo' }]" src='/icon/todo-icon.png' width="40" height="40" :style="{'margin-top': '8px'}" @click="selectedPanel = (selectedPanel != 'todo') ? 'todo' : null"/>
+                    <img class="todo" :class="[{ active: selectedPanel == 'todo' }]" src='/icon/todo-icon.png' width="40" height="40" :style="{'margin-top': '8px'}"
+                         @click="setSelectedPanel('todo')"/>
                     <div v-if="selectedPanel == 'todo'">
                     <div :style="{ 'width': '12px', 'height': '40px', 'background-color': '#4285F4', 'margin-left': '3px', 'margin-top': '8px', 'border-radius': '4px'}"></div></div>
                 </div>
                 <div class="d-flex flex-row mb-1">
-                    <img class="routine" :class="[{ active: selectedPanel == 'routine' }]" src='/icon/routine-icon.png' width="40" height="40" @click="selectedPanel = (selectedPanel != 'routine') ? 'routine' : null"/>
+                    <img class="routine" :class="[{ active: selectedPanel == 'routine' }]" src='/icon/routine-icon.png' width="40" height="40"
+                         @click="setSelectedPanel('routine')"/>
                     <div v-if="selectedPanel == 'routine'">
                     <div :style="{ 'width': '12px', 'height': '40px', 'background-color': '#4C6EF5', 'margin-left': '3px', 'border-radius': '4px'}"></div></div>
                 </div>
                 <div class="d-flex flex-row mb-1">
-                    <img class="goal" :class="[{ active: selectedPanel == 'goal' }]" src='/icon/goal-icon.png' width="40" height="40" @click="selectedPanel = (selectedPanel != 'goal') ? 'goal' : null"/>
+                    <img class="goal" :class="[{ active: selectedPanel == 'goal' }]" src='/icon/goal-icon.png' width="40" height="40"
+                         @click="setSelectedPanel('goal')"/>
                     <div v-if="selectedPanel == 'goal'">
                     <div :style="{ 'width': '12px', 'height': '40px', 'background-color': '#9013FE', 'margin-left': '3px', 'border-radius': '4px'}"></div></div>
                 </div>
                 <div class="d-flex flex-row mb-1">
-                    <img class="task-routine" :class="[{ active: selectedPanel == 'task-routine' }]" src='/icon/task-routine-icon.png' width="40" height="40" @click="selectedPanel = (selectedPanel != 'task-routine') ? 'task-routine' : null"/>
+                    <img class="task-routine" :class="[{ active: selectedPanel == 'task-routine' }]" src='/icon/task-routine-icon.png' width="40" height="40" 
+                         @click="setSelectedPanel('task-routine')"/>
                     <div v-if="selectedPanel == 'task-routine'">
                     <div :style="{ 'width': '12px', 'height': '40px', 'background-color': '#F4511E', 'margin-left': '3px', 'border-radius': '4px'}"></div></div>
                 </div>
                 <div class="d-flex flex-row mb-1">
-                    <img class="event" :class="[{ active: selectedPanel == 'event' }]" src='/icon/task-routine-icon.png' width="40" height="40" @click="selectedPanel = (selectedPanel != 'event') ? 'event' : null"/>
+                    <img class="event" :class="[{ active: selectedPanel == 'event' }]" src='/icon/task-routine-icon.png' width="40" height="40" 
+                         @click="setSelectedPanel('event')"/>
                     <div v-if="selectedPanel == 'event'">
                     <div :style="{ 'width': '12px', 'height': '40px', 'background-color': '#F4511E', 'margin-left': '3px', 'border-radius': '4px'}"></div></div>
                 </div>
@@ -58,24 +63,26 @@ export default {
     components: { MetricPanel, GoalPanel, TodoPanel, RoutinePanel, TaskRoutinePanel, EventPanel },
     props: {
         selectedDate: Date,
-        selectPanel: Object
+        selectPanel: Object,
+        selectedPanel: String
     },
     data: function() {
         return {
-            selectedPanel: "todo",
             eventPanelProps: { }
         }
     },
     created: function() {
         let selectedPanel_Store = localStorage.getItem(`selected-item-panel`);
         if (selectedPanel_Store) {
-            this.selectedPanel = selectedPanel_Store;
+            selectedPanel_Store = (selectedPanel_Store == "undefined") ? undefined : selectedPanel_Store;
+            this.$emit('setSelectedPanel', selectedPanel_Store);
         } else {
             localStorage.setItem(`selected-item-panel`, this.selectedPanel);
         }
     },
     methods: {
-        refreshRepetitive
+        refreshRepetitive,
+        setSelectedPanel
     },
     watch: {
         selectedPanel(value) {
@@ -83,7 +90,7 @@ export default {
         },
         selectPanel(value) {
             if (value && value.panel && value.panel == 'event') {
-                this.selectedPanel = 'event';
+                this.$emit('setSelectedPanel', 'event');
                 this.eventPanelProps = value.props;
             }
         }
@@ -92,6 +99,10 @@ export default {
 
 function refreshRepetitive(){
     refreshRepetitiveItems(this.$apollo);
+}
+
+function setSelectedPanel(type) {
+    this.$emit('setSelectedPanel', (this.selectedPanel != type) ? type : undefined)
 }
 </script>
 <style scoped>
