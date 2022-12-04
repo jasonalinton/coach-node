@@ -37,6 +37,10 @@ import ItemPanel from './components/planner/item-panel/ItemPanel.vue';
 import Planner from "./components/planner/Planner.vue";
 import ItemTabs from "./components/items/ItemTabs.vue";
 import { today } from "../utility"
+import { useMetricStore } from '@/store/metricStore'
+import { useGoalStore } from '@/store/goalStore'
+import { useTodoStore } from '@/store/todoStore'
+import { useRoutineStore } from '@/store/routineStore'
 
 export default {
     name: "App",
@@ -62,7 +66,7 @@ export default {
             selectedItemPanel: "todo"
         };
     },
-    created: function () {
+    created: async function () {
         let selectedPage_Store = localStorage.getItem(`selected-page`);
         if (selectedPage_Store) {
             this.navbar.selectedPage = selectedPage_Store;
@@ -83,6 +87,23 @@ export default {
         } else {
             localStorage.setItem(`week-view-day-count`, this.dayCount);
         }
+
+        let metricStore = useMetricStore();
+        let goalStore = useGoalStore();
+        let todoStore = useTodoStore();
+        let routineStore = useRoutineStore();
+
+        let metricPromise = metricStore.initialize();
+        let goalPromise = goalStore.initialize();
+        let todoPromise = todoStore.initialize();
+        let routinePromise = routineStore.initialize();
+
+        await Promise.all([metricPromise, goalPromise, todoPromise, routinePromise]).then(() => {
+            metricStore.initializeItems();
+            goalStore.initializeItems();
+            todoStore.initializeItems();
+            routineStore.initializeItems();
+        });
     },
     methods: {
         dayCountChange,

@@ -13,7 +13,6 @@
 <script>
 import ItemTableToolbar from './ItemTableToolbar.vue';
 import ItemTable from './ItemTable.vue';
-import { capitalizeFirstLetter } from '../../../../utility'
 
 export default {
     components: { ItemTableToolbar, ItemTable },
@@ -32,12 +31,6 @@ export default {
             store: null,
             draggedItem: null
         }
-    },
-    created: async function() {
-        let storeObject = await import(`@/store/${this.itemType}Store`);
-        let useStore = storeObject[`use${capitalizeFirstLetter(this.itemType)}Store`];
-        let store = useStore();
-        await store.initialize();
-    },
+    }
 }
 </script>

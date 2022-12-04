@@ -16,7 +16,8 @@
                                       :property="property(column)" />
             <NumberItemTableCell v-if="column.type == 'Number'" :key="column.position"
                                  :column="column"
-                                 :property="property(column)" />
+                                 :property="property(column)"
+                                 :showZero="(column.text == 'Order') ? false : true" />
             <StringItemTableCell v-if="column.type == 'String'" :key="column.position"
                                  :column="column"
                                  :property="property(column)"/>
@@ -79,7 +80,10 @@ export default {
             } else if (column.text == "Time") {
                 return this.item.timePairs;
             } else if (column.text == "Order") {
-                return this.item.position;
+                if (this.parent) {
+                    return this.item.positions
+                        .find(x => x.parentType == this.parent.itemType && x.parentID == this.parent.id).position;
+                }
             } else if (column.text == "Repeat") {
                 return this.item.repeats;
             } else {
@@ -93,16 +97,10 @@ export default {
 }
 
 function onDragStart(ev) {
-    let data = {
-        item: this.item
-    };
-    data = JSON.stringify(data);
-
     console.log("Drag Started");
     ev.target.classList.add("drag");
     ev.dataTransfer.dropEffect = 'move';
     ev.dataTransfer.effectAllowed = 'move';
-    ev.dataTransfer.setData("text", data);
 
     this.itemTableStore.setDraggedProps(this.item, this.parent);
 
@@ -146,12 +144,11 @@ function getPosition(ev) {
 
 function onDrop(ev) {
     ev.preventDefault();
-    
-    let data = ev.dataTransfer.getData("text");
-    data = JSON.parse(data);
+
+    var dragged = this.itemTableStore.getDragged
     
     if (this.hasSameParent()) {
-        this.$emit('repositionItem', data.item, this.item, (this.position == "before") ? true : false);
+        this.$emit('repositionItem', dragged.item, this.item, (this.position == "before") ? true : false);
     }
     
     this.position = "";

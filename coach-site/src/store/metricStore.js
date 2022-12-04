@@ -3,6 +3,9 @@ import { getMetrics } from '../api/metricAPI'
 import { repositionItem } from '../api/itemAPI';
 import { replaceItem, sortAsc } from '../../utility';
 import { getSocketConnection } from './socket'
+import { useGoalStore } from '@/store/goalStore'
+import { useTodoStore } from '@/store/todoStore'
+import { useRoutineStore } from '@/store/routineStore'
 
 let initialized = false;
 
@@ -15,12 +18,27 @@ export const useMetricStore = defineStore('metric', {
     },
     actions: {
         async initialize() {
-            this.fill();
+            let promise = this.fill();
             this.connectSocket();
             initialized = true;
+            return promise;
         },
         async fill() {
-            this.metrics = await getMetrics();
+            return getMetrics().then(res => this.metrics = res);
+        },
+        initializeItems(metrics) {
+            let goalStore = useGoalStore();
+            let todoStore = useTodoStore();
+            let routineStore = useRoutineStore();
+
+            metrics = metrics || this.metrics;
+            metrics.forEach(metric => {
+                metric.parents = this.metrics.filter(x => metric.parentIDs.includes(x.id));
+                metric.children = this.metrics.filter(x => metric.childIDs.includes(x.id));
+                metric.goals = goalStore.getItems().filter(x => metric.goalIDs.includes(x.id));
+                metric.todos = todoStore.getItems().filter(x => metric.todoIDs.includes(x.id));
+                metric.routines = routineStore.getItems().filter(x => metric.routineIDs.includes(x.id));
+            })
         },
         getItems() {
             return this.metrics;
@@ -37,6 +55,7 @@ export const useMetricStore = defineStore('metric', {
 
                 let _this = this;
                 connection.on("UpdateMetrics", metrics => {
+                    this.initializeItems(metrics);
                     metrics.forEach(metric => {
                         let exists = replaceItem(metric, _this.metrics);
                         if (!exists) _this.metrics.push(metric);

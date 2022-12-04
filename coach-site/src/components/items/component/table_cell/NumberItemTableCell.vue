@@ -16,13 +16,19 @@ export default {
             type: Number,
             default: 0
         },
+        showZero: {
+            type: Boolean,
+            default: true
+        },
     },
     computed: {
-        text() { return this.property }
+        text() { return (!this.showZero && this.property == 0) ? "" : this.property }
     }
 }
 </script>
 
-<style>
-
+<style scoped>
+/* td {
+    text-align: center;
+} */
 </style>

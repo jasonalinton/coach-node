@@ -3,6 +3,7 @@
         <div v-if="selectedColumns" class="w-100">
             <ItemTableByNone v-if="sortBy == 'None'"
                              :itemType="itemType"
+                             :property="property"
                              :selectedColumns="selectedColumns"/>
         </div>
     </div>
@@ -16,6 +17,7 @@ export default {
     name: 'ItemTable',
     props: {
         itemType: String,
+        property: String,
         selectedColumns: Array,
         sortBy: {
           type: String,
@@ -35,7 +37,7 @@ export default {
             levelPadding: this.levelPadding,
             parentItem: this.parentItem,
             isParent: this.isParent,
-            isChild: this.isChild,
+            isChild: this.isChild
         }
     },
     data: function() {

@@ -22,17 +22,19 @@
                                      :columns="columns"
                                      :states="states(item)"
                                      @showItems="showItems"
-                                      @repositionItem="repositionItem"/>
+                                     @repositionItem="repositionItem"/>
                        <tr :key="item.id + 1000000" class="child-row">
                            <td :colspan="columns.length">
                                <ItemTable v-if="options.dropItems.items.parents && states(item).text || states(item).parents"
                                           :itemType="itemType"
+                                          property="parents"
                                           :parentItem="item"
                                           :selectedColumns="selectedColumns" 
                                           :isParent="true"
                                           :level="level + 1" />
                                <ItemTable v-if="options.dropItems.items.children && states(item).text || states(item).children"
                                           :itemType="itemType"
+                                          property="children"
                                           :parentItem="item"
                                           :selectedColumns="selectedColumns" 
                                           :isChild="true"
@@ -40,24 +42,28 @@
                                <ItemTable v-if="(options.dropItems.items.todos && states(item).text 
                                           || states(item).metrics) && itemType != 'metric'"
                                           itemType="metric"
+                                          property="metrics"
                                           :parentItem="item"
                                           :selectedColumns="getUpdatedSelectedColumns(selectedColumns, 'metric')" 
                                           :level="level + 1" />
                                <ItemTable v-if="(options.dropItems.items.goals && states(item).text 
                                           || states(item).goals) && itemType != 'goal'"
                                           itemType="goal"
+                                          property="goals"
                                           :parentItem="item"
                                           :selectedColumns="getUpdatedSelectedColumns(selectedColumns, 'goal')" 
                                           :level="level + 1" />
                                <ItemTable v-if="(options.dropItems.items.routines && states(item).text 
                                           || states(item).routines) && itemType != 'routine'"
                                           itemType="routine"
+                                          property="routines"
                                           :parentItem="item"
                                           :selectedColumns="getUpdatedSelectedColumns(selectedColumns, 'routine')" 
                                           :level="level + 1" />
                                <ItemTable v-if="(options.dropItems.items.todos && states(item).text 
                                           || states(item).todos) && itemType != 'todo'"
                                           itemType="todo"
+                                          property="todos"
                                           :parentItem="item"
                                           :selectedColumns="getUpdatedSelectedColumns(selectedColumns, 'todo')" 
                                           :level="level + 1" />
@@ -76,151 +82,148 @@ import { sortDesc, capitalizeFirstLetter, clone } from '../../../../../utility';
 import { columnConfigs } from '../../../../config/item-table-column-config';
 
 export default {
-   components: { 
-       ItemTableRow,
-       ItemTable: () => import('../ItemTable.vue')
+    components: { 
+        ItemTableRow,
+        ItemTable: () => import('../ItemTable.vue')
     },
-   name: 'ItemTableByNone',
-   props: {
-       itemType: String,
-       selectedColumns: Array,
-       options: {
-         type: Object,
-         default: () => ({ 
-           showRootOnly: true,
-           dropItems: {
-               items: {
-                   parents: false,
-                   children: true,
-                   metrics: true,
-                   goals: true,
-                   routines: true,
-                   todos: true
-               },
-               planner: {
-                   events: false,
-                   iterations: false
-               }
-           }
+    name: 'ItemTableByNone',
+    props: {
+        itemType: String,
+        property: String,
+        selectedColumns: Array,
+        options: {
+            type: Object,
+            default: () => ({ 
+            showRootOnly: true,
+            dropItems: {
+                items: {
+                    parents: false,
+                    children: true,
+                    metrics: true,
+                    goals: true,
+                    routines: true,
+                    todos: true
+                },
+                planner: {
+                    events: false,
+                    iterations: false
+                }
+            }
         })
-       },
-   },
-   provide() {
-       return {
-           options: this.options,
-       }
-   },
-   inject: [ 'level', 'levelPadding', 'parentItem', 'isParent', 'isChild' ],
-   computed: {
-       itemTypeCapitalized() { return capitalizeFirstLetter(this.itemType); },
-       width() { return (this.itemTableStore) ? this.itemTableStore.containerWidth : 0 },
-       columns() {
-           let columns = [];
-           let i = 1;
-           let _this = this;
-           this.selectedColumns.forEach(column => {
-               let columnConfig = clone(columnConfigs.find(x => x.text == column));
-               columnConfig.position = i++;
-               if (column == "Text" && !_this.isParent && !_this.isChild) {
-                   columnConfig.iconName = `${this.itemType}-icon`;
-               }
-               columns.push(columnConfig);
-           })
-           this.setColumnWidths(columns);
-           return columns;
-       },
-       items() {
-           if (this.store) {
-               let items = this.store.getItems();
+        },
+    },
+    provide() {
+        return {
+            options: this.options,
+        }
+    },
+    inject: [ 'level', 'levelPadding', 'parentItem', 'isParent', 'isChild'],
+    computed: {
+        itemTypeCapitalized() { return capitalizeFirstLetter(this.itemType); },
+        width() { return (this.itemTableStore) ? this.itemTableStore.containerWidth : 0 },
+        columns() {
+            let columns = [];
+            let i = 1;
+            let _this = this;
+            this.selectedColumns.forEach(column => {
+                let columnConfig = clone(columnConfigs.find(x => x.text == column));
+                columnConfig.position = i++;
+                if (column == "Text" && !_this.isParent && !_this.isChild) {
+                    columnConfig.iconName = `${this.itemType}-icon`;
+                }
+                columns.push(columnConfig);
+            })
+            this.setColumnWidths(columns);
+            return columns;
+        },
+        items() {
+            if (this.store) {
+                let items = this.getStore(this.itemType).getItems();
 
-               if (this.parentItem) {
-                   let parent = this[`${this.parentItem.itemType}Store`].getItem(this.parentItem.id);
-                   let childIDs;
-                   if (this.isParent) {
-                       childIDs = parent.parents.map(x => {return { id: x.id, position: x.position }});
-                   } else if (this.isChild) {
-                       childIDs = parent.children.map(x => {return { id: x.id, position: x.position }});
-                   } else {
-                       childIDs = parent[`${this.itemType}s`].map(x => {return { id: x.id, position: x.position }});
-                   }
-                   
-                   items = items.filter(x => childIDs.map(y => y.id).includes(x.id));
-                   
-                   let items2 = [];
-                   childIDs.forEach(__ => {
-                       let item = items.find(x => x.id == __.id);
-                       if (item) {
-                           item = clone(item);
-                           item.position = __.position;
-                           items2.push(item);
-                       }
-                   });
-                   items = items2;
-               } else {
-                   if (this.options.showRootOnly && this.itemType != 'metric') {
-                       items = items.filter(x => x.parents.length == 0);
-                   }
-                   items = sortDesc(items, 'id');
-               }
+                if (this.parentItem) {
+                    let parent = this[`${this.parentItem.itemType}Store`].getItem(this.parentItem.id);
 
-               this.refreshShownItems(items);
+                    let childIDs = parent[this.property].map(x => x.id);
+                    items = items.filter(x => childIDs.includes(x.id));
 
-               return items;
-           } else {
-               return [];
-           }
-       }
-   },
-   data: function() {
-       return {
-           errorMessage: null,
-           isLoading: false,
-           itemTableVM: null,
-           tableWidth: this.width,
-           shownItems: [],
-           store: null,
-           metricStore: undefined,
-           goalStore: undefined,
-           routineStore: undefined,
-           todoStore: undefined,
-           itemTableStore: undefined,
-       }
-   },
-   created: async function() {
-       let metricStore = await import(`@/store/metricStore`);
-       this.metricStore = metricStore.useMetricStore();
-       
-       let goalStore = await import(`@/store/goalStore`);
-       this.goalStore = goalStore.useGoalStore();
-       
-       let routineStore = await import(`@/store/routineStore`);
-       this.routineStore = routineStore.useRoutineStore();
-       
-       let todoStore = await import(`@/store/todoStore`);
-       this.todoStore = todoStore.useTodoStore();
-       
-       let storeObject = await import(`@/store/${this.itemType}Store`);
-       let useStore = storeObject[`use${this.itemTypeCapitalized}Store`];
-       this.store = useStore();
+                    items = items.sort((a, b) => {
+                        let positionA = a.positions
+                            .find(x => x.parentType == parent.itemType && x.parentID == parent.id).position;
+                        let positionB = b.positions
+                            .find(x => x.parentType == parent.itemType && x.parentID == parent.id).position;
+                        return  positionA - positionB;
+                    })
 
-       let itemTableStore = await import(`@/store/itemTableStore`);
-       this.itemTableStore = itemTableStore.useItemTableStore();
-   },
-   methods: {
-       setColumnWidths,
-       refreshShownItems,
-       newStateModel,
-       getUpdatedSelectedColumns,
-       getStore(itemType) { return this[`${itemType}Store`]; },
-       states(item) { return  this.shownItems.find(x => x.id === item.id).states; },
-       showItems(id, prop) {
-           let states = this.shownItems.find(x => x.id === id).states;
-           let value = !states[prop.toLowerCase()];
-           for (let _prop in states) { states[_prop] = false; }
-           states[prop.toLowerCase()] = value;
-       },
-       repositionItem
-   }
+
+                } else {
+                    if (this.options.showRootOnly && this.itemType != 'metric') {
+                        items = items.filter(x => x.parentIDs.length == 0);
+                    }
+                    items = sortDesc(items, 'id');
+                }
+
+                this.refreshShownItems(items);
+
+                return items;
+            } else {
+                return [];
+            }
+        }
+    },
+    data: function() {
+        return {
+            errorMessage: null,
+            isLoading: false,
+            itemTableVM: null,
+            tableWidth: this.width,
+            shownItems: [],
+            store: null,
+            metricStore: undefined,
+            goalStore: undefined,
+            routineStore: undefined,
+            todoStore: undefined,
+            itemTableStore: undefined,
+        }
+    },
+    created: async function() {
+        let itemTableStore = await import(`@/store/itemTableStore`);
+        this.itemTableStore = itemTableStore.useItemTableStore();
+        
+        let metricStore = await import(`@/store/metricStore`);
+        this.metricStore = metricStore.useMetricStore();
+        
+        let goalStore = await import(`@/store/goalStore`);
+        this.goalStore = goalStore.useGoalStore();
+        
+        let routineStore = await import(`@/store/routineStore`);
+        this.routineStore = routineStore.useRoutineStore();
+        
+        let todoStore = await import(`@/store/todoStore`);
+        this.todoStore = todoStore.useTodoStore();
+        
+        let storeObject = await import(`@/store/${this.itemType}Store`);
+        let useStore = storeObject[`use${this.itemTypeCapitalized}Store`];
+        this.store = useStore();
+    },
+    methods: {
+        setColumnWidths,
+        refreshShownItems,
+        newStateModel,
+        getUpdatedSelectedColumns,
+        getStore(itemType) { return this[`${itemType}Store`]; },
+        states(item) { return  this.shownItems.find(x => x.id === item.id).states; },
+        showItems(id, prop) {
+            let states = this.shownItems.find(x => x.id === id).states;
+            let value = !states[prop.toLowerCase()];
+            for (let _prop in states) { states[_prop] = false; }
+            states[prop.toLowerCase()] = value;
+        },
+        itemPosition(item, parent) {
+            return item.positions
+                .find(x => x.parentType == parent.itemType && x.parentID == (parent.id || null)).position;
+        },
+        repositionItem
+    }
 }
 
 function setColumnWidths(columns) {
@@ -290,11 +293,12 @@ function getUpdatedSelectedColumns(selectedColumns, itemType) {
 }
 
 function repositionItem(item, sibling, isBefore) {
-    var newPosition = (isBefore) ? sibling.position : sibling.position + 1;
+    var position = this.itemPosition(sibling, this.parentItem);
+    var newPosition = (isBefore) ? position : position + 1;
 
     if (this.parentItem) {
         let store = this.getStore(this.parentItem.itemType);
-        store.repositionItem(this.parentItem.itemType, item.itemType, this.parentItem.id, item.id, newPosition);
+        store.repositionItem(this.parentItem.itemType, this.property, this.parentItem.id, item.id, newPosition);
     }
 }
 
@@ -382,8 +386,6 @@ function repositionItem(item, sibling, isBefore) {
    .table.child {
        margin-top: -29px;
    }
-
-  
 
    .table tbody tr:hover:not(.child-row) {
        background-color:#F5F5F5;

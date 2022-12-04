@@ -1,3 +1,5 @@
+// import axios from "axios";
+
 export async function getRoutines() {
     return fetch(`https://localhost:7104/api/Routine/GetRoutines`, {
         method: 'POST',
@@ -16,3 +18,27 @@ export async function getRoutines() {
         console.error('Error:', error);
     });
 }
+
+// export async function getRoutines() {
+//     return axios({
+//         method: 'post',
+//         url: 'https://localhost:7104/api/Routine/GetRoutines',
+//         // data: { }
+//       })
+//       .then(response => response.data)
+//       .then(data => {
+//           if (!data.errorMessage) {
+//             if (typeof data === 'string' || data instanceof String) {
+//                 data = data.replaceAll(',null', '')
+//                 data = JSON.parse(data);
+//             }
+//             // data = data.replaceAll(',null', '')
+//               return data;
+//           } else {
+//               this.errorMessage = data.errorMessage;
+//           }
+//       })
+//       .catch(error => {
+//           console.error('Error:', error);
+//       });
+// }

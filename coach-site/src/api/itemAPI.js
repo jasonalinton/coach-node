@@ -3,7 +3,7 @@ import { capitalizeFirstLetter } from "../../utility";
 export async function repositionItem(parentType, itemType, parentID, itemID, newPosition) {
     var data = { newPosition };
     data[`${parentType}ID`] = parentID;
-    data[`${itemType}ID`] = itemID;
+    data.itemID = itemID;
 
     itemType = capitalizeFirstLetter(itemType);
     parentType = capitalizeFirstLetter(parentType);
