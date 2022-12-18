@@ -19,7 +19,7 @@ export const columnConfigs = [
         "propertyText": "Text",
         "text": "Text",
         "type": "Text",
-        "width": 250,
+        "width": 450,
         "minWidth": 150,
         "iconName": "goal-icon"
     },

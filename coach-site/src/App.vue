@@ -21,6 +21,7 @@
                     @selectEvent="selectEvent">
             </Planner>
             <ItemTabs v-show="navbar.selectedPage == 'items'"></ItemTabs>
+            <ItemTabsOG v-show="navbar.selectedPage == 'itemsOG'"></ItemTabsOG>
         </div>
         <div class="grid-right-panel">
             <ItemPanel :selectedDate="selectedDate"
@@ -36,6 +37,7 @@ import PlannerNavbar from "./components/nav/PlannerNavbar.vue";
 import ItemPanel from './components/planner/item-panel/ItemPanel.vue';
 import Planner from "./components/planner/Planner.vue";
 import ItemTabs from "./components/items/ItemTabs.vue";
+import ItemTabsOG from "./components/items/ItemTabsOG.vue";
 import { today } from "../utility"
 import { useMetricStore } from '@/store/metricStore'
 import { useGoalStore } from '@/store/goalStore'
@@ -49,6 +51,7 @@ export default {
         ItemPanel,
         Planner,
         ItemTabs,
+        ItemTabsOG,
     },
     data: function () {
         return {
