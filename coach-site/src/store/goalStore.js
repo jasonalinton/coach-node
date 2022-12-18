@@ -25,8 +25,14 @@ export const useGoalStore = defineStore('goal', {
             initialized = true;
             return promise;
         },
+        async refresh() {
+            let promise = this.fill();
+            return promise;
+        },
         async fill() {
-            return getGoals().then(res => this.goals = res);
+            let promise = getGoals().then(res => this.goals = res);
+            this.initializeItems();
+            return promise;
         },
         initializeItems(goals) {
             let metricStore = useMetricStore();

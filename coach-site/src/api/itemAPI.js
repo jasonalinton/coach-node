@@ -25,3 +25,21 @@ export async function repositionItem(parentType, itemType, parentID, itemID, new
         console.error('Error:', error);
     });
 }
+
+export async function refreshItemPositions() {
+    await fetch(`https://localhost:7104/api/Goal/SetItemPositions`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+
+    await fetch(`https://localhost:7104/api/Todo/SetItemPositions`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}

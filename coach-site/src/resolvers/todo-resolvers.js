@@ -9,14 +9,16 @@ import ATTEMPT_ITERATION from '../graphql/mutation/todo/AttemptIteration.gql'
 import DELETE_ITERATION from '../graphql/mutation/todo/DeleteIteration.gql'
 import REFRESH_REPETITIVE_TODO from '../graphql/mutation/todo/RefreshRepetitiveTodo.gql'
 
+import { refreshItemPositions } from '../api/itemAPI'
+
 export function addTodo(todo, apollo) {
     apollo.mutate({
         mutation: ADD_TODO,
         variables: { todo },
-        // update: (cache, { data }) => {
-        //     addItemToCache(cache, TODOS, 'todos', data.addTodo);
-        //     // onTodoAdded(cache, data.addTodo)
-        // }
+        update: () => {
+            console.log("Todo added");
+            refreshItemPositions();
+        }
     });
 }
 
@@ -24,10 +26,10 @@ export function updateTodo(todo, apollo) {
     apollo.mutate({
         mutation: UPDATE_TODO,
         variables: { todo },
-        // update: (cache, { data: { updateTodo } }) => {
-        //     updateItemInCache(cache, TODOS, 'todos', updateTodo);
-        //     // onTodoUpdated(cache, updateTodo);
-        // }
+        update: () => {
+            console.log("Todo updated");
+            refreshItemPositions();
+        }
     });
 }
 

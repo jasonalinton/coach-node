@@ -3,10 +3,16 @@ import DELETE_GOAL from '../graphql/mutation/goal/DeleteGoal.gql'
 import UPDATE_GOAL from '../graphql/mutation/goal/UpdateGoal.gql'
 import SAVE_GOAL_POSITIONS from '../graphql/mutation/goal/SaveGoalPositions.gql'
 
+import { refreshItemPositions } from '../api/itemAPI'
+
 export function addGoal(goal, apollo) {
     apollo.mutate({
         mutation: ADD_GOAL,
         variables: { goal },
+        update: () => {
+            console.log("Goal added");
+            refreshItemPositions();
+        }
     });
 }
 
@@ -14,6 +20,10 @@ export function updateGoal(goal, apollo) {
     apollo.mutate({
         mutation: UPDATE_GOAL,
         variables: { goal },
+        update: () => {
+            console.log("Goal updated");
+            refreshItemPositions();
+        }
     });
 }
 
