@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { getRoutines } from '../api/routineAPI'
 import { repositionItem } from '../api/itemAPI';
-import { replaceItem, sortAsc } from '../../utility';
+import { replaceOrAddItem, sortAsc } from '../../utility';
 import { getSocketConnection } from './socket'
 import { useMetricStore } from '@/store/metricStore'
 import { useTodoStore } from '@/store/todoStore'
@@ -57,13 +57,10 @@ export const useRoutineStore = defineStore('routine', {
                 connection.on("UpdateRoutines", routines => {
                     this.initializeItems(routines);
                     routines.forEach(routine => {
-                        let exists = replaceItem(routine, _this.routines);
-                        if (!exists) _this.routines.push(routine);
+                        replaceOrAddItem(routine, _this.routines);
                     })
                     sortAsc(_this.routines);
                 });
-
-                connection.start();
             }
         }
     },

@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { getEvents } from '../api/eventAPI'
-import { replaceOrAddItem } from '../../utility'
+import { replaceOrAddItem, sortAsc } from '../../utility'
+import { getSocketConnection } from './socket'
 
 let initialized = false;
 
@@ -33,24 +34,16 @@ export const useEventStore = defineStore('event', {
         },
         connectSocket() {
             if (!initialized) {
-                // let connection = new HubConnectionBuilder()
-                //     .withUrl("https://localhost:7104/eventHub", {
-                //         withCredentials: false,
-                //         keepAliveIntervalInMilliseconds: 60000,
-                //         serverTimeoutInMilliseconds: 120000,
-                //        })
-                //     .build();
+                let connection = getSocketConnection("plannerHub");
 
-                // let _this = this;
-                // connection.on("UpdateEvents", events => {
-                //     events.forEach(event => {
-                //         let exists = replaceItem(event, _this.events);
-                //         if (!exists) _this.events.push(event);
-                //         sortAsc(_this.events);
-                //     })
-                // });
-
-                // connection.start();
+                let _this = this;
+                connection.on("UpdateEvents", events => {
+                    // this.initializeItems(events);
+                    events.forEach(event => {
+                        replaceOrAddItem(event, _this.events);
+                    })
+                    sortAsc(_this.events);
+                });
             }
         }
     },

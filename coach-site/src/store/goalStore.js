@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { getGoals } from '../api/goalAPI'
 import { repositionItem } from '../api/itemAPI';
-import { replaceItem, sortAsc } from '../../utility';
+import { replaceOrAddItem, sortAsc } from '../../utility';
 import { getSocketConnection } from './socket'
 import { useMetricStore } from '@/store/metricStore'
 import { useTodoStore } from '@/store/todoStore'
@@ -65,14 +65,10 @@ export const useGoalStore = defineStore('goal', {
                 connection.on("UpdateGoals", goals => {
                     this.initializeItems(goals);
                     goals.forEach(goal => {
-                        let exists = replaceItem(goal, _this.goals);
-                        if (!exists) _this.goals.push(goal);
+                        replaceOrAddItem(goal, _this.goals);
                     })
                     sortAsc(_this.goals);
                 });
-
-                connection.start();
-                    // .then(() => connection.invoke("SendMessage", "Hello"));
             }
         }
     },

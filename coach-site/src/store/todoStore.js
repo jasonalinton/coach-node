@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { getTodos } from '../api/todoAPI';
 import { repositionItem } from '../api/itemAPI';
-import { replaceItem, sortAsc } from '../../utility';
+import { replaceOrAddItem, sortAsc } from '../../utility';
 import { getSocketConnection } from './socket'
 import { useMetricStore } from '@/store/metricStore'
 import { useGoalStore } from '@/store/goalStore'
@@ -58,13 +58,10 @@ export const useTodoStore = defineStore('todo', {
                 connection.on("UpdateTodos", todos => {
                     this.initializeItems(todos);
                     todos.forEach(todo => {
-                        let exists = replaceItem(todo, _this.todos);
-                        if (!exists) _this.todos.push(todo);
-                    })
+                        replaceOrAddItem(todo, _this.todos);
+                    });
                     sortAsc(_this.todos);
                 });
-
-                connection.start();
             }
         }
     },
