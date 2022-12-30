@@ -1,10 +1,9 @@
 <template>
-    <div v-if="events" class="d-flex flex-column">
+    <div class="d-flex flex-column">
         <div v-for="(hour, index) in hours" :key="index" class="text-start">
             <HourBlock :hour="hour" 
                        :date="date"
                        :blockHeight="blockHeight"
-                       :events="getEventsForHour(hour)"
                        :zIndex="index * 100"
                         @selectEvent="$emit('selectEvent', $event)">
             </HourBlock>
@@ -15,14 +14,12 @@
 <script>
 import HourBlock from "./HourBlock.vue"
 import { getHoursObjectArray } from "../../../../../utility/plannerUtility"
-import { getHour } from '../../../../../utility/timeUtility';
 
 export default {
     name: "HourBlocks",
     components: { HourBlock },
     props: {
         date: Date,
-        events: Array,
         blockHeight: Number,
     },
     created: function() {
@@ -35,25 +32,12 @@ export default {
     },
     methods: {
         initHours,
-        getHoursObjectArray,
-        getEventsForHour,
+        getHoursObjectArray
     }
 }
 
 function initHours() {
     this.hours = this.getHoursObjectArray();
-}
-
-function getEventsForHour(hourObject) {
-    let events = this.events.filter(_event => {
-        let hour = getHour(_event.startAt);
-        // return hourObject.military == hour;
-        return hourObject.military == hour 
-               && _event.text != "Morning Joy"
-               && _event.text != "Morning Routine";
-    });
-
-    return events;
 }
 </script>
 

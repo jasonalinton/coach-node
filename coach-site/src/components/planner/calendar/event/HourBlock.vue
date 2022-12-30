@@ -2,7 +2,7 @@
     <div class="hour-block position-relative" :style="{ 'height': `${blockHeight}px` }">
         <span v-if="isCurrentHour" class="time circle" :style="{ 'top': `${timeTop - 4}px`}"></span>
         <span v-if="isCurrentHour" class="time line" :style="{ 'top': `${timeTop}px`}"></span>
-        <Event v-for="(_event, index) in events2" :key="index"
+        <Event v-for="(_event, index) in events" :key="index"
                :_event="_event"
                :minuteHeight="minuteHeight"
                :zIndex="zIndex"
@@ -22,7 +22,6 @@ export default {
         date: Date,
         hour: Object,
         blockHeight: Number,
-        events: Array,
         zIndex: Number
     },
     computed: {
@@ -50,7 +49,7 @@ export default {
                 return false;
             }
         },
-        events2() {
+        events() {
             if (this.eventStore) {
                 let start = startOfDay(this.date);
                 start.setHours(this.hour.military);

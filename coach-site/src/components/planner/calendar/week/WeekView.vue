@@ -41,7 +41,6 @@
                                 :key="index"
                                 class="day-view flex-grow-1"
                                 :date="day.date"
-                                :events="day.events"
                                 :style="{ 'flex-basis': 0 }"
                                 :blockHeight="hour.blockHeight"
                                     @selectEvent="$emit('selectEvent', $event)">
@@ -127,47 +126,6 @@ export default {
         this.initHours();
     },
     apollo: {
-        events: {
-            query() {
-                return require("../../../../graphql/query/planner/QueryEvents.gql");
-            },
-            variables() { return this.queryVariables },
-            error: function (error) {
-                this.errorMessage = "Error occurred while loading event query";
-                console.log(this.errorMessage, error);
-            },
-            update(data) {
-                this.dayModels.forEach((model) => {
-                    model.events.length = 0;
-                    let events = data.events.filter(
-                        (_event) =>
-                            model.dateString ==
-                            new Date(_event.startAt).toDateString()
-                    );
-                    model.events.push(...events);
-                });
-
-                return data.events;
-            },
-            subscribeToMore: [
-                {
-                    document: require('../../../../graphql/subscription/planner/EventAdded.gql'),
-                    variables() { return this.queryVariables },
-                    updateQuery: (previousResult, { subscriptionData: { data: { eventAdded }} }) => {
-                        previousResult.events.splice(0, 0, eventAdded);
-                        return { events: previousResult.events };
-                    },
-                },
-                {
-                    document: require('../../../../graphql/subscription/planner/EventDeleted.gql'),
-                    variables() { return this.queryVariables },
-                    updateQuery: (previousResult, { subscriptionData: { data: { eventDeleted }} }) => {
-                        removeItem(eventDeleted, previousResult.events);
-                        return { events: previousResult.events };
-                    },
-                },
-            ],
-        },
         tasks: {
             query() {
                 return require("../../../../graphql/query/planner/QueryIterations.gql");
@@ -210,7 +168,6 @@ export default {
     methods: {
         initHours,
         initTimeline,
-        iterationsToDays,
         newDay,
         replaceItem,
         removeItem,
@@ -258,7 +215,6 @@ function initTimeline() {
 function newDay(day) {
     let tasks = this.tasks.filter(_task => day.toDateString() == new Date(_task.startAt).toDateString());
         tasks = tasks.filter(_task => _task.events.length == 0);
-    let events = this.events.filter(_event => day.toDateString() == new Date(_event.startAt).toDateString());
 
     let pointInTime = "";
     if (day.getTime() < this.selectedDate.getTime()) {
@@ -275,54 +231,8 @@ function newDay(day) {
         date: new Date(day.getTime()),
         dateString: day.toDateString(),
         tasks,
-        events,
         pointInTime
     };
-}
-
-function iterationsToDays() {
-    let indexDate = new Date(this.selectedDate.toJSON());
-    let self = this;
-
-    let days = [];
-    this.days.forEach((_day) => {
-        const dateString = new Date(_day.toJSON()).toDateString();
-
-        let iterations = self.iterations.filter((iteration) => {
-            const start = new Date(iteration.startAt).toDateString();
-            const end = new Date(iteration.endAt).toDateString();
-            return (
-                start == dateString ||
-                (!iteration.startAt && iteration.endAt && end == dateString)
-            );
-        });
-
-        let events = self.events.filter((_event) => {
-            const start = new Date(_event.startAt).toDateString();
-            return start == dateString;
-        });
-
-        let day = {
-            tasks: iterations,
-            events: events,
-            text: date.format(_day, "ddd D"),
-            dow: date.format(_day, "ddd"),
-            day: date.format(_day, "D"),
-            date: new Date(_day.getTime()),
-        };
-        if (_day.getTime() < indexDate.getTime()) {
-            day.pointInTime = "past";
-        } else if (_day.getTime() == indexDate.getTime()) {
-            day.pointInTime = "present";
-        } else if (_day.getTime() > indexDate.getTime()) {
-            day.pointInTime = "future";
-        }
-        days.push(day);
-
-        // this.maxTasks = (iterations.length > this.maxTasks) ? iterations.length : this.maxTasks;
-        this.maxTasks = 5;
-    });
-    return days;
 }
 
 function onScroll() {
