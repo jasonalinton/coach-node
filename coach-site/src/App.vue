@@ -39,6 +39,7 @@ import Planner from "./components/planner/Planner.vue";
 import ItemTabs from "./components/items/ItemTabs.vue";
 import ItemTabsOG from "./components/items/ItemTabsOG.vue";
 import { today } from "../utility"
+import { useEventStore } from '@/store/eventStore'
 import { useMetricStore } from '@/store/metricStore'
 import { useGoalStore } from '@/store/goalStore'
 import { useTodoStore } from '@/store/todoStore'
@@ -91,11 +92,13 @@ export default {
             localStorage.setItem(`week-view-day-count`, this.dayCount);
         }
 
+        let eventStore = useEventStore();
         let metricStore = useMetricStore();
         let goalStore = useGoalStore();
         let todoStore = useTodoStore();
         let routineStore = useRoutineStore();
 
+        eventStore.initialize();
         let metricPromise = metricStore.initialize();
         let goalPromise = goalStore.initialize();
         let todoPromise = todoStore.initialize();

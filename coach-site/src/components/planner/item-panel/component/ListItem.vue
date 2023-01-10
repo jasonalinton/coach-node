@@ -1,6 +1,6 @@
 <template>
     <div> 
-        <div class="iteration d-flex flex-row justify-content-between align-items-center" :class="[{ complete: checked}]"
+        <div class="iteration d-flex flex-row justify-content-between align-items-center" :class="[{ complete: checked, unplanned: isUnplanned }]"
              :style="{ 'font-size': fontSize }"
              draggable @dragstart="onDragStart($event)" @dragend="onDragEnd($event)">
             <ItemCheckbox class="checkbox align-self-start" 
@@ -51,6 +51,7 @@ export default {
         iteration: Object,
         parent: Object,
         parentType: String,
+        isUnplanned: Boolean,
         size: String,
     },
     computed: {
@@ -134,6 +135,10 @@ function onDragEnd(ev) {
     /* max-height: 40px; */
     user-select: none;
     padding: 4px 0px;
+}
+
+.iteration.unplanned {
+    background-color: lightpink;
 }
 
 .complete span {

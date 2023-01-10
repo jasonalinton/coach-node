@@ -32,6 +32,7 @@ query iterations($type: String, $startAt: String, $endAt: String) {
         endAt
         attemptedAt
         completedAt
+        isRecommended
         events {
           id
           startAt

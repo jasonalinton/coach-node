@@ -172,9 +172,11 @@ async function attemptIteration(parent, { id, attemptedAt }, context, info) {
 
     console.log(`updated iteration`);
     
+    let datetime = moment(iteration_orig.startAt).add(1, 'day').toDate();
     let data = {
         text: iteration_orig.text,
-        startAt: moment(iteration_orig.startAt).add(1, 'day').toDate(),
+        startAt: datetime,
+        endAt: datetime,
         isRecommended: (iteration_orig.isRecommended) ? iteration.isRecommended : false,
         todo: { connect: { id: iteration_orig.todo.id } }
     }

@@ -137,7 +137,12 @@ export default {
             },
             update(data) {
                 this.dayModels.forEach((model) => {
-                    let tasks = data.iterations.filter(_task => model.dateString == new Date(_task.startAt).toDateString());
+                    /* Get tasks in correct date range */
+                    let tasks = data.iterations.filter(_task => 
+                        new Date(_task.startAt).toDateString() == model.dateString &&
+                        (_task.endAt == null || new Date(_task.endAt).toDateString() == model.dateString));
+
+                    /* Get tasks that aren't in events */
                     tasks = tasks.filter(_task => _task.events.length == 0);
                     model.tasks.length = 0;
                     model.tasks.push(...tasks);
@@ -213,8 +218,14 @@ function initTimeline() {
 }
 
 function newDay(day) {
-    let tasks = this.tasks.filter(_task => day.toDateString() == new Date(_task.startAt).toDateString());
-        tasks = tasks.filter(_task => _task.events.length == 0);
+    /* Get tasks in correct date range */
+    let tasks = this.tasks.filter(_task => 
+        new Date(_task.startAt).toDateString() == day.toDateString() &&
+        (_task.endAt == null || new Date(_task.endAt).toDateString() == day.toDateString()));
+
+    /* Get tasks that aren't in events */
+    tasks = tasks.filter(_task => _task.events.length == 0);
+    
 
     let pointInTime = "";
     if (day.getTime() < this.selectedDate.getTime()) {

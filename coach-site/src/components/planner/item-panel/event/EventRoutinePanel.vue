@@ -51,7 +51,7 @@ import AddTaskButton from '../component/AddTaskButton.vue';
 import ItemCheckbox from '../component/ItemCheckbox.vue';
 import ListItem from '../component/ListItem.vue';
 import { toShortWeekdayString, startOfDay } from '../../../../../utility/timeUtility';
-import { replaceItem, removeItem, today, sortDesc } from '../../../../../utility';
+import { replaceItem, removeItem, today, sortAsc } from '../../../../../utility';
 import { createDefaultTask, toggleCompletion, deleteIteration } from '../../../../resolvers/todo-resolvers';
 
 export default {
@@ -71,10 +71,12 @@ export default {
     },
     computed: {
         completeIterations() {
-            return this._event.iterations.filter(iteration => iteration.attemptedAt);
+            // return this._event.iterations.filter(iteration => iteration.attemptedAt);
+            return this.iterations.complete;
         },
         incompleteIterations() {
-            return this._event.iterations.filter(iteration => !iteration.attemptedAt);
+            // return this._event.iterations.filter(iteration => !iteration.attemptedAt);
+            return this.iterations.pending;
         }
     },
     created: function() {
@@ -164,7 +166,7 @@ export default {
         today,
         toShortWeekdayString,
         refreshIterations,
-        sortDesc
+        sortAsc
     },
     watch: {
         _event() {
@@ -245,8 +247,8 @@ function refreshIterations(_event) {
         complete = complete.concat(_event.iterations.filter(iteration => iteration.routineIteration == null && iteration.attemptedAt));
         pending = pending.concat(_event.iterations.filter(iteration => iteration.routineIteration == null && !iteration.attemptedAt));
 
-        this.iterations.complete = sortDesc(complete, 'id');
-        this.iterations.pending = sortDesc(pending, 'id');
+        this.iterations.complete = sortAsc(complete, 'id');
+        this.iterations.pending = sortAsc(pending, 'id');
 }
 </script>
 

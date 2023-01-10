@@ -17,6 +17,7 @@ query event($id: Int!) {
         endAt
         attemptedAt
         completedAt
+        isRecommended
         todo {
             id
             text
@@ -42,6 +43,7 @@ query event($id: Int!) {
             endAt
             attemptedAt
             completedAt
+            isRecommended
             todo {
                 id
                 text

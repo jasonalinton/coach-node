@@ -33,6 +33,7 @@
                     </li>
                     <li v-for="(iteration, index) in pending" v-bind:key="iteration.id" :style="{ 'z-index': -index }">
                         <ListItem :iteration="iteration" 
+                                  :isUnplanned="isUnplanned(iteration)"
                                     @markComplete="toggleCompletion(iteration, $apollo)"
                                     @onEdit="$emit('editIteration', iteration)"
                                     @onDelete="deleteIteration(iteration.id, $apollo)">
@@ -44,7 +45,8 @@
                     <div class="header">Completed ({{ complete.length }})</div>
                     <ul v-if="complete" class="item-list">
                         <li v-for="(iteration, index) in complete" v-bind:key="index" :style="{ 'z-index': -index }">
-                            <ListItem class="complete" :iteration="iteration" 
+                            <ListItem class="complete" 
+                                      :iteration="iteration"
                                         @markIncomplete="toggleCompletion(iteration, $apollo)"
                                         @onEdit="$emit('editIteration', iteration)"
                                         @onDelete="deleteIteration(iteration.id, $apollo)">
@@ -110,7 +112,8 @@ export default {
             else
                 return null
         },
-        complete() { return (this.iterations) ? this.iterations.filter(iteration => iteration.attemptedAt) : [] },
+        complete() { 
+            return (this.iterations) ? this.iterations.filter(iteration => iteration.attemptedAt) : [] },
         pending() { return (this.iterations) ? this.iterations.filter(iteration => !iteration.attemptedAt) : [] },
         goals() {
             let goals = this.iterations.map(_it => _it.todo).map(_todo => _todo.goals).flat();
@@ -133,8 +136,46 @@ export default {
             },
             update(data) { 
                 let iterations = data.iterations;
+                let _this = this;
+
+                iterations.forEach(task => {
+                    console.log("Stop");
+                    if ((new Date(task.startAt).toDateString() >= _this.start.toDateString() & 
+                    new Date(task.endAt).toDateString()) >= _this.start.toDateString()) {
+                        console.log("ok")
+                    }
+                    if ((new Date(task.startAt).toDateString() & new Date(task.endAt).toDateString()) <= _this.end.toDateString()) {
+                        console.log("ok2")
+                    }
+                })
+
+                iterations.forEach(task => {
+                    console.log("Stop");
+                    if (new Date(task.startAt).getTime() >= _this.start.getTime() & 
+                        new Date(task.endAt).getTime() >= _this.start.getTime()) {
+                        console.log("ok")
+                    }
+                    if (new Date(task.startAt).getTime() <= _this.end.getTime() & 
+                        new Date(task.endAt).getTime() <= _this.end.getTime()) {
+                        console.log("ok2")
+                    }
+                })
+
+                /* Start & end date must be between timeframe */
+                iterations = iterations.filter(task => 
+                    (new Date(task.startAt).getTime() >= _this.start.getTime() & 
+                        new Date(task.endAt).getTime() >= _this.start.getTime()) &&
+                    (new Date(task.startAt).getTime() <= _this.end.getTime() & 
+                        new Date(task.endAt).getTime() <= _this.end.getTime()));
+
+                /* If timeframe is day */    
+                if (this.start.toDateString() == this.end.toDateString()) {
+                    iterations = iterations.filter(task => new Date(task.startAt).toDateString() == this.start.toDateString() &&
+                            (task.endAt != null && new Date(task.endAt).toDateString() == this.end.toDateString())); 
+                }
+
                 if (!this.showRoutineTasks)
-                    iterations = data.iterations.filter(_iteration => _iteration.events.length == 0 )
+                    iterations = iterations.filter(_iteration => _iteration.events.length == 0 )
                 iterations = sortAsc(iterations, 'startAt');
                 return iterations;
             },
@@ -180,6 +221,14 @@ export default {
         },
         temp() {
             console.log("Temp")
+        },
+        isUnplanned(task) {
+                // /* Mark tasks that aren't set to specific date */
+                if (this.start.toDateString() != this.end.toDateString())
+                {
+                    return new Date(task.startAt).toDateString() == this.start.toDateString() &&
+                        (task.endAt != null && new Date(task.endAt).toDateString() == this.end.toDateString())
+                }
         }
     },
 }
