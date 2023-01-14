@@ -138,29 +138,6 @@ export default {
                 let iterations = data.iterations;
                 let _this = this;
 
-                iterations.forEach(task => {
-                    console.log("Stop");
-                    if ((new Date(task.startAt).toDateString() >= _this.start.toDateString() & 
-                    new Date(task.endAt).toDateString()) >= _this.start.toDateString()) {
-                        console.log("ok")
-                    }
-                    if ((new Date(task.startAt).toDateString() & new Date(task.endAt).toDateString()) <= _this.end.toDateString()) {
-                        console.log("ok2")
-                    }
-                })
-
-                iterations.forEach(task => {
-                    console.log("Stop");
-                    if (new Date(task.startAt).getTime() >= _this.start.getTime() & 
-                        new Date(task.endAt).getTime() >= _this.start.getTime()) {
-                        console.log("ok")
-                    }
-                    if (new Date(task.startAt).getTime() <= _this.end.getTime() & 
-                        new Date(task.endAt).getTime() <= _this.end.getTime()) {
-                        console.log("ok2")
-                    }
-                })
-
                 /* Start & end date must be between timeframe */
                 iterations = iterations.filter(task => 
                     (new Date(task.startAt).getTime() >= _this.start.getTime() & 
