@@ -3,6 +3,7 @@
         <div v-if="selectedColumns" class="w-100">
             <ItemTableByNone v-if="sortBy == 'None'"
                              :itemType="itemType"
+                             :searchTerm="searchTerm"
                              :property="property"
                              :selectedColumns="selectedColumns"/>
         </div>
@@ -22,6 +23,10 @@ export default {
         sortBy: {
           type: String,
           default: "None"
+        },
+        searchTerm: {
+          type: String,
+          default: ""
         },
         level: {
           type: Number,

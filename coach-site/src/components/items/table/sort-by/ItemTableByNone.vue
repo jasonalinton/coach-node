@@ -91,6 +91,10 @@ export default {
         itemType: String,
         property: String,
         selectedColumns: Array,
+        searchTerm: {
+          type: String,
+          default: ""
+        },
         options: {
             type: Object,
             default: () => ({ 
@@ -121,6 +125,7 @@ export default {
     computed: {
         itemTypeCapitalized() { return capitalizeFirstLetter(this.itemType); },
         width() { return (this.itemTableStore) ? this.itemTableStore.containerWidth : 0 },
+        showRootOnly() { return (this.options.showRootOnly && this.searchTerm == "") ? true : false },
         columns() {
             let columns = [];
             let i = 1;
@@ -156,7 +161,7 @@ export default {
 
 
                 } else {
-                    if (this.options.showRootOnly && this.itemType != 'metric') {
+                    if (this.showRootOnly && this.itemType != 'metric') {
                         items = items.filter(x => x.parentIDs.length == 0);
                     }
                     items = sortDesc(items, 'id');
@@ -164,7 +169,12 @@ export default {
 
                 this.refreshShownItems(items);
 
-                return items;
+                if (this.searchTerm == "") {
+                    return items;
+                } else {
+                    let _this = this;
+                    return items.filter(x => x.text.toLowerCase().includes(_this.searchTerm.toLowerCase()))
+                }
             } else {
                 return [];
             }

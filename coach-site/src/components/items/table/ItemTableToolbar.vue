@@ -1,7 +1,7 @@
 <template>
     <div class="toolbar d-flex flex-row justify-content-between align-content-center">
       <div class="left d-flex align-content-center">
-          <input class="search textbox" type="text" placeholder="Search" onblur="onSearch" />
+          <input class="search textbox" type="text" placeholder="Search" v-model="searchTerm" />
       </div>
       <div class="right d-flex flex-row">
           <div class="column-options">
@@ -53,6 +53,7 @@ import ItemTableColumnOptions from '../component/ItemTableColumnOptions.vue'
               sortBy: null,
               sortOptions,
               showColumnOptions: false,
+              searchTerm: ""
           }
       },
       created: function() {
@@ -61,6 +62,9 @@ import ItemTableColumnOptions from '../component/ItemTableColumnOptions.vue'
       watch: {
           sortBy(value) {
               this.$emit('setSortBy', value);
+          },
+          searchTerm(value) {
+            this.$emit('setSearchTerm', value);
           }
       }
   }

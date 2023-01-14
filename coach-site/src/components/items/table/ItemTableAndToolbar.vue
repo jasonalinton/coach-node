@@ -2,9 +2,11 @@
     <div class="d-flex flex-column">
         <ItemTableToolbar :itemType="itemType"
                           @setColumns="selectedColumns = $event" 
-                          @setSortBy="sortBy = $event"/>
+                          @setSortBy="sortBy = $event"
+                          @setSearchTerm="searchTerm = $event"/>
         <ItemTable :itemType="itemType"
                    :sortBy="sortBy"
+                   :searchTerm="searchTerm"
                    :selectedColumns="selectedColumns"
                    @setDraggedItem="draggedItem = $event"/>
     </div>
@@ -27,6 +29,7 @@ export default {
     data: function() {
         return {
             sortBy: null,
+            searchTerm: "",
             selectedColumns: null,
             store: null,
             draggedItem: null
