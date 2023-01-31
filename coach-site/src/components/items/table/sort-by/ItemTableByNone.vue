@@ -39,7 +39,7 @@
                                           :selectedColumns="selectedColumns" 
                                           :isChild="true"
                                           :level="level + 1" />
-                               <ItemTable v-if="(options.dropItems.items.todos && states(item).text 
+                               <ItemTable v-if="(options.dropItems.items.metrics && states(item).text 
                                           || states(item).metrics) && itemType != 'metric'"
                                           itemType="metric"
                                           property="metrics"
@@ -103,7 +103,7 @@ export default {
                 items: {
                     parents: false,
                     children: true,
-                    metrics: true,
+                    metrics: false,
                     goals: true,
                     routines: true,
                     todos: true
