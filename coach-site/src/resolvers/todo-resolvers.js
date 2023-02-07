@@ -7,7 +7,7 @@ import TOGGLE_COMPLETION from '../graphql/mutation/todo/ToggleCompletion.gql'
 import RESCHEDULE_ITERATION from '../graphql/mutation/todo/RescheduleIteration.gql'
 import ATTEMPT_ITERATION from '../graphql/mutation/todo/AttemptIteration.gql'
 import DELETE_ITERATION from '../graphql/mutation/todo/DeleteIteration.gql'
-import REFRESH_REPETITIVE_TODO from '../graphql/mutation/todo/RefreshRepetitiveTodo.gql'
+// import REFRESH_REPETITIVE_TODO from '../graphql/mutation/todo/RefreshRepetitiveTodo.gql'
 
 import { refreshItemPositions } from '../api/itemAPI'
 
@@ -83,9 +83,9 @@ export function deleteIteration(id, apollo) {
     });
 }
 
-export function refreshRepetitiveTodo(idTodo, apollo) {
-    apollo.mutate({
-        mutation: REFRESH_REPETITIVE_TODO,
-        variables: { idTodo },
-    });
-}
+// export function refreshRepetitiveTodo(idTodo, apollo) {
+//     apollo.mutate({
+//         mutation: REFRESH_REPETITIVE_TODO,
+//         variables: { idTodo },
+//     });
+// }

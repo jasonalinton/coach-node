@@ -280,7 +280,7 @@ import SelectItem from "../../controls/SelectItem.vue";
 import { replaceItem, removeItem, clone } from "../../../../utility";
 import RepeatControl from "../../controls/time/RepeatControl.vue";
 import TimePairControl from "../../controls/time/TimePairControl.vue";
-import { refreshRepetitiveTodo } from "../../../resolvers/todo-resolvers";
+import { refreshRepetitiveEvents } from "../../../api/todoAPI";
 
 export default {
     components: { SelectItem, RepeatControl, TimePairControl },
@@ -538,7 +538,7 @@ function close() {
 // }
 
 function refreshRepetitive() {
-    refreshRepetitiveTodo(this.item.id, this.$apollo);
+    refreshRepetitiveEvents(this.item.id);
 }
 </script>
 

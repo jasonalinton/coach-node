@@ -60,15 +60,10 @@
                         <button
                             class="add-btn my-auto"
                             type="button"
-                            @click="
-                                addItem(newItem[prop.prop], item[prop.prop])
-                            "
-                        >
-                            <img
-                                src="/icon/button/add.png"
+                            @click="addItem(newItem[prop.prop], item[prop.prop])">
+                            <img src="/icon/button/add.png"
                                 width="10"
-                                height="10"
-                            />
+                                height="10"/>
                             Add
                         </button>
                         <input
@@ -141,8 +136,7 @@
                 />
                 <label
                     class="form-check-label"
-                    :for="`toggle-${config.itemType}-panel`"
-                >
+                    :for="`toggle-${config.itemType}-panel`">
                     Toggle
                 </label>
             </div>
@@ -155,18 +149,14 @@
             </button>
             <!-- Buttons -->
             <div class="form-group d-flex justify-content-end">
-                <button
-                    class="btn btn-primary me-2"
-                    type="button"
-                    @click.prevent="save(item)"
-                >
+                <button class="btn btn-primary me-2" type="button"
+                        @click.prevent="save(item)">
                     Save
                 </button>
                 <button
                     class="btn btn-warning"
                     type="button"
-                    @click.prevent="close"
-                >
+                    @click.prevent="close">
                     Cancel
                 </button>
             </div>
@@ -179,7 +169,7 @@ import SelectItem from "../../controls/SelectItem.vue";
 import { replaceItem, removeItem, clone } from "../../../../utility";
 import RepeatControl from "../../controls/time/RepeatControl.vue";
 import TimePairControl from "../../controls/time/TimePairControl.vue";
-import { refreshRepetitiveRoutine } from "../../../resolvers/routine-resolvers";
+import { refreshRepetitiveEvents } from "../../../api/routineAPI"
 
 import {
     getRoutineRepeatIDsAssociatedWithTodo,
@@ -401,7 +391,7 @@ function close() {
 // }
 
 function refreshRepetitive() {
-    refreshRepetitiveRoutine(this.item.id, this.$apollo);
+    refreshRepetitiveEvents(this.item.id);
 }
 </script>
 

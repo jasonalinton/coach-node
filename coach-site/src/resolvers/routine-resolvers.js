@@ -1,7 +1,7 @@
 import ADD_ROUITNE from '../graphql/mutation/routine/AddRoutine.gql'
 import DELETE_ROUITNE from '../graphql/mutation/routine/DeleteRoutine.gql'
 import UPDATE_ROUITNE from '../graphql/mutation/routine/UpdateRoutine.gql'
-import REFRESH_REPETITIVE_ROUTINE from '../graphql/mutation/routine/RefreshRepetitiveRoutine.gql'
+// import REFRESH_REPETITIVE_ROUTINE from '../graphql/mutation/routine/RefreshRepetitiveRoutine.gql'
 
 export function addRoutine(routine, apollo) {
     apollo.mutate({
@@ -36,9 +36,9 @@ export function deleteRoutine(routine, apollo) {
     });
 }
 
-export function refreshRepetitiveRoutine(idRoutine, apollo) {
-    apollo.mutate({
-        mutation: REFRESH_REPETITIVE_ROUTINE,
-        variables: { idRoutine },
-    });
-}
+// export function refreshRepetitiveRoutine(idRoutine, apollo) {
+//     apollo.mutate({
+//         mutation: REFRESH_REPETITIVE_ROUTINE,
+//         variables: { idRoutine },
+//     });
+// }
