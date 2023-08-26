@@ -5,7 +5,8 @@
                              :itemType="itemType"
                              :searchTerm="searchTerm"
                              :property="property"
-                             :selectedColumns="selectedColumns"/>
+                             :selectedColumns="selectedColumns"
+                             @openItemForm="$emit('openItemForm', $event)"/>
         </div>
     </div>
 </template>

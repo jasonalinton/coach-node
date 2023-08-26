@@ -22,7 +22,8 @@
                                      :columns="columns"
                                      :states="states(item)"
                                      @showItems="showItems"
-                                     @repositionItem="repositionItem"/>
+                                     @repositionItem="repositionItem"
+                                     @openItemForm="$emit('openItemForm', $event)"/>
                        <tr :key="item.id + 1000000" class="child-row">
                            <td :colspan="columns.length">
                                <ItemTable v-if="options.dropItems.items.parents && states(item).text || states(item).parents"

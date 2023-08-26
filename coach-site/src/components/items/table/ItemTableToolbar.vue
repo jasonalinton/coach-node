@@ -44,7 +44,7 @@ import ItemTableColumnOptions from '../component/ItemTableColumnOptions.vue'
   
   export default {
       components: { ItemTableColumnOptions },
-      name: 'IteTableToolbar',
+      name: 'ItemTableToolbar',
       props: {
         itemType: String
       },

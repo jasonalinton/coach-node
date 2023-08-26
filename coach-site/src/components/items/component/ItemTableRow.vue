@@ -10,7 +10,8 @@
                                :column="column"
                                :property="item"
                                :isExpanded="states.text"
-                               @showItems="showItems" />
+                               @showItems="showItems"
+                               @openItemForm="$emit('openItemForm', $event)" />
             <ArrayLengthItemTableCell v-if="column.type == 'ArrayLength'" :key="column.position"
                                       :column="column"
                                       :property="property(column)" />
