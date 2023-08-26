@@ -48,7 +48,7 @@
 
 <script>
 import { removeItem, toDateString, toTimeString, toDateTimeString, today } from '../../../../utility'
-import TimeControl from './TimeControl.vue';
+import TimeControl from './TimeControl1.vue';
 import moment from 'moment';
 
 let timeTypes = [

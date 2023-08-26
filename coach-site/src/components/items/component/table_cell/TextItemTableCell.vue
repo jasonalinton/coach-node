@@ -82,7 +82,7 @@ export default {
             return padding;
         },
         openItemForm() {
-            this.$emit('openItemForm', this.property.id);
+            this.$emit('openItemForm', { id: this.property.id, itemType: this.property.itemType });
         }
     }
 }

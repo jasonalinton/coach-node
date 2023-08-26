@@ -17,7 +17,7 @@ var momentTypes = [
 ]
 
 export default {
-    name: 'TimeInput',
+    name: 'TimeInput1',
     components: { Datepicker, Timepicker, DatetimePicker },
     props: {
         time: Object,
@@ -38,7 +38,7 @@ export default {
         this.timezoneOffset = this.toTimezoneOffset(this.time.dateTime);
     },
     computed: {
-        type() { return momentTypes.find(x => x.id == this.time.idMoment).text; }
+        type() { return this.time.moment.text }
     },
     methods: {
         getMomentID,
@@ -71,18 +71,17 @@ function getDateTimeString() {
 }
 
 function onChange(value) {
-    let time;
     if (this.type == "Date") {
-        time = value + "T00:00:00" + this.timezoneOffset;
+        this.time.dateTime = value + "T00:00:00" + this.timezoneOffset;
     } else if (this.type == "Time") {
         let dateString = this.toDateString(new Date().toJSON());
-        time = `${dateString}T${value}:00${this.timezoneOffset}`;
+        this.time.dateTime = `${dateString}T${value}:00${this.timezoneOffset}`;
     } else if (this.type == "DateTime") {
         let valueArray = value.split(" ");
-        time = `${valueArray[0]}T${valueArray[1]}:00${this.timezoneOffset}`;
+        this.time.dateTime = `${valueArray[0]}T${valueArray[1]}:00${this.timezoneOffset}`;
     }
     this.dateTimeString = value;
-    this.$emit("setTime", time);
+    this.time.isUpdated = true;
 }
 </script>
 

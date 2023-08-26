@@ -4,7 +4,7 @@
             <label class="control-label" for="description">{{ (title) ? title : endpoint }}</label>
             <MomentSelector :moment="moment" :endpoint="endpoint" :type="type" @addTime="addTime" @removeTime="removeTime"></MomentSelector>
         </div>
-        <TimeInput v-if="time" :time="time" :momentID="time.idMoment" @setTime="setTime"></TimeInput>
+        <TimeInput v-if="time" :time="time" :momentID="time.moment.id"></TimeInput>
         <!-- Recommended -->
         <!-- <div class="form-check mt-2">
             <input id="flexCheckDefault" class="form-check-input" type="checkbox" value="" v-model="time.isRecommended">
@@ -14,18 +14,11 @@
 </template>
 
 <script>
-import MomentSelector from "./MomentSelector.vue"
-import TimeInput from '../input/TimeInput.vue'
-import { clone } from "../../../../utility"
-
-var moments = [
-    { id: 87, text: "Date" },
-    { id: 88, text: "Time" },
-    { id: 89, text: "DateTime" },
-]
+import MomentSelector from "./MomentSelector1.vue"
+import TimeInput from '../input/TimeInput1.vue'
 
 export default {
-    name: 'TimeControl',
+    name: 'TimeControl1',
     components: { MomentSelector, TimeInput },
     props: {
         title: String,
@@ -35,23 +28,24 @@ export default {
     },
     data: function () {
         return {
-            moment: (this.time) ? clone(moments.find(x => x.id == this.time.idMoment)) : null,
+            moment: (this.time) ? this.time.moment : null,
         }
     },
     methods: {
         addTime: function(moment) {
-            this.$emit('addTime', this.endpoint, this.type);
-        },
-        setTime(time) {
-            this.$emit("setTime", time, this.type, this.endpoint);
+            this.$emit('addTime', moment, this.endpoint, this.type)
         },
         removeTime: function() {
-            this.$emit('removeTime', this.time);
+            this.$emit('removeTime', this.time)
         },
     },
     watch: {
         time(value) { 
-            this.moment = (value) ? clone(moments.find(x => x.id == this.time.idMoment)) : null;
+            if (value) {
+                this.moment = this.time.moment;
+            } else {
+                this.moment = null;
+            }
         }
     }
 }

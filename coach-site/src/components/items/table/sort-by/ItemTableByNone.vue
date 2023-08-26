@@ -32,42 +32,48 @@
                                           :parentItem="item"
                                           :selectedColumns="selectedColumns" 
                                           :isParent="true"
-                                          :level="level + 1" />
+                                          :level="level + 1" 
+                                          @openItemForm="$emit('openItemForm', $event)"/>
                                <ItemTable v-if="options.dropItems.items.children && states(item).text || states(item).children"
                                           :itemType="itemType"
                                           property="children"
                                           :parentItem="item"
                                           :selectedColumns="selectedColumns" 
                                           :isChild="true"
-                                          :level="level + 1" />
+                                          :level="level + 1" 
+                                          @openItemForm="$emit('openItemForm', $event)"/>
                                <ItemTable v-if="(options.dropItems.items.metrics && states(item).text 
                                           || states(item).metrics) && itemType != 'metric'"
                                           itemType="metric"
                                           property="metrics"
                                           :parentItem="item"
                                           :selectedColumns="getUpdatedSelectedColumns(selectedColumns, 'metric')" 
-                                          :level="level + 1" />
+                                          :level="level + 1" 
+                                          @openItemForm="$emit('openItemForm', $event)"/>
                                <ItemTable v-if="(options.dropItems.items.goals && states(item).text 
                                           || states(item).goals) && itemType != 'goal'"
                                           itemType="goal"
                                           property="goals"
                                           :parentItem="item"
                                           :selectedColumns="getUpdatedSelectedColumns(selectedColumns, 'goal')" 
-                                          :level="level + 1" />
+                                          :level="level + 1" 
+                                          @openItemForm="$emit('openItemForm', $event)"/>
                                <ItemTable v-if="(options.dropItems.items.routines && states(item).text 
                                           || states(item).routines) && itemType != 'routine'"
                                           itemType="routine"
                                           property="routines"
                                           :parentItem="item"
                                           :selectedColumns="getUpdatedSelectedColumns(selectedColumns, 'routine')" 
-                                          :level="level + 1" />
+                                          :level="level + 1" 
+                                          @openItemForm="$emit('openItemForm', $event)" />
                                <ItemTable v-if="(options.dropItems.items.todos && states(item).text 
                                           || states(item).todos) && itemType != 'todo'"
                                           itemType="todo"
                                           property="todos"
                                           :parentItem="item"
                                           :selectedColumns="getUpdatedSelectedColumns(selectedColumns, 'todo')" 
-                                          :level="level + 1" />
+                                          :level="level + 1"
+                                          @openItemForm="$emit('openItemForm', $event)" />
                            </td>
                        </tr>
                    </template>
@@ -79,7 +85,7 @@
 
 <script>
 import ItemTableRow from '../../component/ItemTableRow.vue'; 
-import { sortDesc, capitalizeFirstLetter, clone } from '../../../../../utility';
+import { sortDesc, capitalize, clone } from '../../../../../utility';
 import { columnConfigs } from '../../../../config/item-table-column-config';
 
 export default {
@@ -124,7 +130,7 @@ export default {
     },
     inject: [ 'level', 'levelPadding', 'parentItem', 'isParent', 'isChild'],
     computed: {
-        itemTypeCapitalized() { return capitalizeFirstLetter(this.itemType); },
+        itemTypeCapitalized() { return capitalize(this.itemType); },
         width() { return (this.itemTableStore) ? this.itemTableStore.containerWidth : 0 },
         showRootOnly() { return (this.options.showRootOnly && this.searchTerm == "") ? true : false },
         columns() {
@@ -298,7 +304,7 @@ function getUpdatedSelectedColumns(selectedColumns, itemType) {
    let columns = [...selectedColumns];
    let index = columns.findIndex(x => x.toLowerCase() == `${itemType.toLowerCase()}s`);
    if (index >= 0) {
-       columns[index] = `${capitalizeFirstLetter(this.itemType)}s`;
+       columns[index] = `${capitalize(this.itemType)}s`;
    }
    return columns;
 }
