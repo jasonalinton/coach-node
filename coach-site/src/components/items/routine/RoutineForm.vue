@@ -113,12 +113,12 @@
                 </div>
             </template>
         </ApolloQuery>
-        <RepeatControl
+        <RepeatControl2
             class="mt-2"
             :repeats="item.repeats"
             @addRepeat="addRepeat"
             @updateRepeat="updateRepeat"
-        ></RepeatControl>
+        ></RepeatControl2>
         <TimePairControl
             class="mt-2"
             :timePairs="item.timePairs"
@@ -167,7 +167,7 @@
 <script>
 import SelectItem from "../../controls/SelectItem.vue";
 import { replaceItem, removeItem, clone } from "../../../../utility";
-import RepeatControl from "../../controls/time/RepeatControl.vue";
+import RepeatControl2 from "../../controls/time/RepeatControl2.vue";
 import TimePairControl from "../../controls/time/TimePairControl.vue";
 import { refreshRepetitiveEvents } from "../../../api/routineAPI"
 
@@ -177,7 +177,7 @@ import {
 } from "../../../service/time/repeatService";
 
 export default {
-    components: { SelectItem, RepeatControl, TimePairControl },
+    components: { SelectItem, RepeatControl2, TimePairControl },
     name: "RoutineForm",
     props: {
         config: Object,

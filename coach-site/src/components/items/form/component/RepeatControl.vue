@@ -1,7 +1,7 @@
 <template>
     <div>
         <div v-if="!isEditing" class="wrapper d-flex flex-row"
-             @click="isEditing = true">
+             @click="onRepeatClicked">
             <img src="/icon/calendar-day.png" width="14" height="14"/>
             <div class="timeframe d-flex flex-column">
                 <div>
@@ -28,7 +28,7 @@
              class="wrapper-edit d-flex flex-row" :class="{ 'isValid': isValid}">
             <div>
                 <!-- Timeframe -->
-                <div class="d-flex flew-rowalign-middle mb-2">
+                <div class="d-flex flew-rowalign-middle mt-2">
                     <div v-for="repetition in timeframes.filter(rep => rep.isActive)" v-bind:key="repetition.id" 
                          class="form-check form-check-inline">
                         <input class="form-check-input" type="radio" :id="repetition.text" :value="repetition.id" 
@@ -38,7 +38,7 @@
                     </div>
                 </div>
                 <!-- Interval -->
-                <div class="interval d-flex flew-row mb-2">
+                <div class="interval d-flex flew-row mb-1">
                     <div class="d-flex flex-row">
                         <span class="me-1">Every</span>
                         <input class="form-control form-control-sm me-1" type="number" min="1" v-model="updatedRepeat.interval"
@@ -76,14 +76,14 @@
                 </div>
                 <!-- Repeat Times -->
                 <div class="d-flex flex-column">
-                    <div class="d-flex flex-column mt-2">
-                        <TimeControl class="time-control mt-2" :class="{ 'invalid': !updatedRepeat.startRepeat.isValid}"
+                    <div class="d-flex flex-column">
+                        <TimeControl class="time-control" :class="{ 'invalid': !updatedRepeat.startRepeat.isValid}"
                                      label="Repeat Start" :time="updatedRepeat.startRepeat.value" 
                                      title="Repeat Start" endpoint="Start" type="repeat"
                                      @setTime="setTime"></TimeControl>
                     </div>
-                    <div class="d-flex flex-column mt-2">
-                        <TimeControl class="time-control mt-2" :class="{ 'invalid': !updatedRepeat.endRepeat.isValid}"
+                    <div class="d-flex flex-column">
+                        <TimeControl class="time-control" :class="{ 'invalid': !updatedRepeat.endRepeat.isValid}"
                                      label="Repeat End" :time="updatedRepeat.endRepeat.value" 
                                      title="Repeat End" endpoint="End" type="repeat" 
                                      @addTime="addTime" @setTime="setTime"></TimeControl>
@@ -91,35 +91,42 @@
                 </div>
                 <!-- Iteration -->
                 <div class="d-flex flex-column">
-                <!-- Start -->
-                <div class="d-flex flex-column mt-2">
-                    <TimeControl class="time-control mt-2" :class="{ 'invalid': !updatedRepeat.startIteration.isValid}" 
-                                 label="Iteration Start" :time="updatedRepeat.startIteration.value" 
-                                 title="Iteration Start" type="iteration" endpoint="Start" 
-                                 @addTime="addTime" @setTime="setTime" @removeTime="removeTime"></TimeControl>
-                </div>
-                <!-- End -->
-                <div class="d-flex flex-column mt-2">
-                    <TimeControl class="time-control mt-2" :class="{ 'invalid': !updatedRepeat.endIteration.isValid}" 
-                                 label="Iteration End" :time="updatedRepeat.endIteration.value" 
-                                 title="Iteration End" type="iteration" endpoint="End" 
-                                 @addTime="addTime" @setTime="setTime" @removeTime="removeTime"></TimeControl>
-                </div>
-                <!-- Repeats for Todos -->
-                <div class="d-felx flex-column">
-                    <div v-for="todoRepeat in todoRepeats" :key="todoRepeat.id" class="todo-repeat">
-                        <div class="todo-text text-left"
-                             @click="toggleTodoRepeat(todoRepeat)">{{ todoRepeat.todoText }}</div>
-                        <TodoRepeatControl v-if="todoRepeat.isShown"
-                                           :repeat="todoRepeat.repeat" :itemID="todoRepeat.todoID" itemType="todo"></TodoRepeatControl>
+                    <!-- Start -->
+                    <div class="d-flex flex-column">
+                        <TimeControl class="time-control" :class="{ 'invalid': !updatedRepeat.startIteration.isValid}" 
+                                    label="Iteration Start" :time="updatedRepeat.startIteration.value" 
+                                    title="Iteration Start" type="iteration" endpoint="Start" 
+                                    @addTime="addTime" @setTime="setTime" @removeTime="removeTime"></TimeControl>
+                    </div>
+                    <!-- End -->
+                    <div class="d-flex flex-column">
+                        <TimeControl class="time-control" :class="{ 'invalid': !updatedRepeat.endIteration.isValid}" 
+                                    label="Iteration End" :time="updatedRepeat.endIteration.value" 
+                                    title="Iteration End" type="iteration" endpoint="End" 
+                                    @addTime="addTime" @setTime="setTime" @removeTime="removeTime"></TimeControl>
                     </div>
                 </div>
-                </div>
                 <!-- End - Iteration -->
+                <!-- Is Event Visible -->
+                <div class="form-check">
+                    <input class="form-check-input mt-1" type="checkbox" value="" id="isEventVisible" 
+                           v-model="updatedRepeat.isEventVisible">
+                    <label class="form-check-label float-start" for="isEventVisible">
+                        Is Event Visible
+                    </label>
+                </div>
+                <!-- Recommended -->
+                <div class="form-check">
+                    <input class="form-check-input mt-1" type="checkbox" value="" id="flexCheckDefault" 
+                           v-model="updatedRepeat.isRecommended">
+                    <label class="form-check-label float-start" for="flexCheckDefault">
+                        Recommended
+                    </label>
+                </div>
                 <!-- Buttons -->
                 <div class="d-flex justify-content-end">
                     <button class="btn btn-sm btn-link" type="button" @click="save">Save</button>
-                    <button class="btn btn-sm btn-link" type="button" @click="isEditing = false">Cancel</button>
+                    <button class="btn btn-sm btn-link" type="button" @click="cancel">Cancel</button>
                 </div>
             </div>
         </div>
@@ -130,7 +137,7 @@
 import TimeControl from '../../../controls/time/TimeControl.vue'
 import { clone, capitalize } from '../../../../../utility'
 import { saveRoutineRepeat } from '../../../../api/routineAPI'
-import TodoRepeatControl from './TodoRepeatControl.vue'
+import { saveTodoRepeat } from '../../../../api/todoAPI'
 
 let timeframes = [
     {
@@ -212,7 +219,7 @@ let dow = [
 
 export default {
     name: "RepeatControl",
-    components: { TimeControl, TodoRepeatControl },
+    components: { TimeControl },
     props: {
         repeat: Object,
         itemID: Number,
@@ -276,7 +283,7 @@ export default {
             dow.forEach(dayOfWeek => {
                 let day = clone(dayOfWeek);
                 days.push(day);
-                if (this.updatedRepeat.idTimeframe == 68)  {
+                if (this.updatedRepeat && this.updatedRepeat.idTimeframe == 68)  {
                     day.isSelected = this.updatedRepeat.dayIndecies.includes(day.index);
                 }
             })
@@ -284,13 +291,11 @@ export default {
         },
         dom() {
             var days = [];
-            if (this.updatedRepeat.idTimeframe == 69) {
-                for (let i = 1; i <= 31; i++) {
-                    let day = { index: i }
-                    days.push(day);
+            for (let i = 1; i <= 31; i++) {
+                let day = { index: i }
+                days.push(day);
                 if (this.updatedRepeat.idTimeframe == 69)  {
                     day.isSelected = this.updatedRepeat.dayIndecies.includes(day.index);
-                }
                 }
             }
             return days;
@@ -341,6 +346,7 @@ export default {
     },
     methods: {
         initUpdatedRepeat,
+        onRepeatClicked,
         onDayClicked,
         onTimeFrameChanged,
         addTime,
@@ -351,23 +357,9 @@ export default {
         toggleTodoRepeat(todoRepeat) {
             todoRepeat.isShown = !todoRepeat.isShown;
         },
-        getTodoRepeats() {
-            if (this.updatedRepeat) {
-                let todoRepeats = [];
-                this.updatedRepeat.todoRepeats.forEach(tr => {
-                    let todo = this.todoStore.getItem(tr.idTodo);
-                    todoRepeats.push({
-                        idTodo: todo.id,
-                        todoText: todo.text,
-                        repeat: tr,
-                        isShown: false
-                    });
-                });
-                this.todoRepeats = todoRepeats;
-                // return todoRepeats
-            } else {
-                return [];
-            }
+        cancel() {
+            this.isEditing = false;
+            this.$emit("setSelectedRepeat", undefined);
         },
         save
     },
@@ -398,8 +390,12 @@ function initUpdatedRepeat() {
             oldValue: this.updatedRepeat[prop] ? clone(this.updatedRepeat[prop]) : null
         };
     });
-    this.getTodoRepeats();
     this.validateTimes();
+}
+
+function onRepeatClicked() {
+    this.isEditing = true;
+    this.$emit("setSelectedRepeat", this.repeat.id);
 }
 
 function onDayClicked(day) {
@@ -540,10 +536,16 @@ function save() {
         startRepeat: this.updatedRepeat.startRepeat,
         endRepeat: this.updatedRepeat.endRepeat,
         startIteration: this.updatedRepeat.startIteration,
-        endIteration: this.updatedRepeat.endIteration
+        endIteration: this.updatedRepeat.endIteration,
+        isEventVisible: this.updatedRepeat.isEventVisible,
+        isRecommended: this.updatedRepeat.isRecommended,
     };
-
-    saveRoutineRepeat(repeat);
+    
+    if (this.itemType.toLowerCase() == "routine") {
+        saveRoutineRepeat(repeat);
+    } else if (this.itemType.toLowerCase() == "todo") {
+        saveTodoRepeat(repeat);
+    }
 
     this.$emit("saveRepeat", repeat);
     this.isEditing = false;
@@ -566,6 +568,10 @@ function save() {
 .wrapper-edit {
     border: solid 1px transparent;
 }
+/* .wrapper-edit:hover {
+    background-color: #EAEAEA;
+    border: solid 1px transparent;
+} */
 .wrapper-edit.invalid {
     border: solid 1px red;
 }

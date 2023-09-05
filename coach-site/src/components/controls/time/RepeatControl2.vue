@@ -147,7 +147,7 @@ var timeframes = [
 ];
 
 export default {
-  name: 'RepeatControl',
+  name: 'RepeatControl2',
   components: {
     TimeControl
   },

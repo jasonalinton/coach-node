@@ -39,7 +39,7 @@ export default {
         }
     },
     methods: {
-        addTime: function(moment) {
+        addTime: function() {
             this.$emit('addTime', this.endpoint, this.type);
         },
         setTime(time) {
@@ -60,7 +60,7 @@ export default {
 <style scoped>
 label {
     font-size: 14px;
-    padding: 0px 8px;
+    padding: 0px;
     line-height: 24px;
     height: 24px;
 }

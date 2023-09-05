@@ -29,6 +29,17 @@ export function listToString(objectArray, property) {
     return string;
 }
 
+export function sortItems(items, parentType, parentID) {
+    var _items = items.sort((a, b) => {
+        let positionA = a.positions
+            .find(x => x.parentType == parentType && x.parentID == parentID).position;
+        let positionB = b.positions
+            .find(x => x.parentType == parentType && x.parentID == parentID).position;
+        return  positionA - positionB;
+    })
+    return _items;
+}
+
 export function removeItem(item, itemList) {
     var findObject = (object) => object.id == item.id;
     var index = itemList.findIndex(findObject);
