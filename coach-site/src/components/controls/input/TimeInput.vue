@@ -21,7 +21,11 @@ export default {
     components: { Datepicker, Timepicker, DatetimePicker },
     props: {
         time: Object,
-        momentID: Number
+        momentID: Number,
+        canRemove: {
+            type: Boolean,
+            default: true
+        }
     },
     data: function () {
         return {
@@ -72,17 +76,23 @@ function getDateTimeString() {
 
 function onChange(value) {
     let time;
-    if (this.type == "Date") {
-        time = value + "T00:00:00" + this.timezoneOffset;
-    } else if (this.type == "Time") {
-        let dateString = this.toDateString(new Date().toJSON());
-        time = `${dateString}T${value}:00${this.timezoneOffset}`;
-    } else if (this.type == "DateTime") {
-        let valueArray = value.split(" ");
-        time = `${valueArray[0]}T${valueArray[1]}:00${this.timezoneOffset}`;
+    if (value == "") {
+        if (this.canRemove) {
+            this.$emit("removeTime");
+        }
+    } else {
+        if (this.type == "Date") {
+            time = value + "T00:00:00" + this.timezoneOffset;
+        } else if (this.type == "Time") {
+            let dateString = this.toDateString(new Date().toJSON());
+            time = `${dateString}T${value}:00${this.timezoneOffset}`;
+        } else if (this.type == "DateTime") {
+            let valueArray = value.split(" ");
+            time = `${valueArray[0]}T${valueArray[1]}:00${this.timezoneOffset}`;
+        }
+        this.dateTimeString = value;
+        this.$emit("setTime", time);
     }
-    this.dateTimeString = value;
-    this.$emit("setTime", time);
 }
 </script>
 

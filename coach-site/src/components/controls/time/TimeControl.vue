@@ -1,10 +1,14 @@
 <template>
     <div class="d-flex flex-column">
         <div class="d-flex flex-row justify-content-between">
-            <label class="control-label" for="description">{{ (title) ? title : endpoint }}</label>
-            <MomentSelector :moment="moment" :endpoint="endpoint" :type="type" @addTime="addTime" @removeTime="removeTime"></MomentSelector>
+            <label class="control-label" for="description"
+                   @click="addTime">
+                {{ (title) ? title : endpoint }}</label>
+            <!-- <MomentSelector :moment="moment" :endpoint="endpoint" :type="type" @addTime="addTime" @removeTime="removeTime"></MomentSelector> -->
         </div>
-        <TimeInput v-if="time" :time="time" :momentID="time.idMoment" @setTime="setTime"></TimeInput>
+        <TimeInput v-if="time && isSet" 
+                   :time="time" :momentID="time.idMoment" :canRemove="canRemove"
+                   @setTime="setTime" @removeTime="removeTime"></TimeInput>
         <!-- Recommended -->
         <!-- <div class="form-check mt-2">
             <input id="flexCheckDefault" class="form-check-input" type="checkbox" value="" v-model="time.isRecommended">
@@ -14,7 +18,7 @@
 </template>
 
 <script>
-import MomentSelector from "./MomentSelector.vue"
+// import MomentSelector from "./MomentSelector.vue"
 import TimeInput from '../input/TimeInput.vue'
 import { clone } from "../../../../utility"
 
@@ -26,12 +30,21 @@ var moments = [
 
 export default {
     name: 'TimeControl',
-    components: { MomentSelector, TimeInput },
+    // components: { MomentSelector, TimeInput },
+    components: {  TimeInput },
     props: {
         title: String,
         time: Object,
         endpoint: String,
-        type: String
+        type: String,
+        canRemove: {
+            type: Boolean,
+            default: true
+        },
+        isSet: {
+            type: Boolean,
+            default: true
+        }
     },
     data: function () {
         return {
@@ -46,7 +59,7 @@ export default {
             this.$emit("setTime", time, this.type, this.endpoint);
         },
         removeTime: function() {
-            this.$emit('removeTime', this.time);
+            this.$emit('removeTime');
         },
     },
     watch: {

@@ -79,14 +79,14 @@
                     <div class="d-flex flex-column">
                         <TimeControl class="time-control" :class="{ 'invalid': !updatedRepeat.startRepeat.isValid}"
                                      label="Repeat Start" :time="updatedRepeat.startRepeat.value" 
-                                     title="Repeat Start" endpoint="Start" type="repeat"
+                                     title="Repeat Start" endpoint="Start" type="repeat" :canRemove="false"
                                      @setTime="setTime"></TimeControl>
                     </div>
                     <div class="d-flex flex-column">
                         <TimeControl class="time-control" :class="{ 'invalid': !updatedRepeat.endRepeat.isValid}"
                                      label="Repeat End" :time="updatedRepeat.endRepeat.value" 
-                                     title="Repeat End" endpoint="End" type="repeat" 
-                                     @addTime="addTime" @setTime="setTime"></TimeControl>
+                                     title="Repeat End" endpoint="End" type="repeat" :isSet="!updatedRepeat.endRepeat.isRemoved"
+                                     @addTime="addTime" @setTime="setTime" @removeTime="removeTime(updatedRepeat.endRepeat)"></TimeControl>
                     </div>
                 </div>
                 <!-- Iteration -->
@@ -94,16 +94,16 @@
                     <!-- Start -->
                     <div class="d-flex flex-column">
                         <TimeControl class="time-control" :class="{ 'invalid': !updatedRepeat.startIteration.isValid}" 
-                                    label="Iteration Start" :time="updatedRepeat.startIteration.value" 
-                                    title="Iteration Start" type="iteration" endpoint="Start" 
-                                    @addTime="addTime" @setTime="setTime" @removeTime="removeTime"></TimeControl>
+                                    label="Iteration Start" :time="updatedRepeat.startIteration.value" :canRemove="false"
+                                    title="Iteration Start" type="iteration" endpoint="Start" :isSet="!updatedRepeat.startIteration.isRemoved"
+                                    @addTime="addTime" @setTime="setTime"></TimeControl>
                     </div>
                     <!-- End -->
                     <div class="d-flex flex-column">
                         <TimeControl class="time-control" :class="{ 'invalid': !updatedRepeat.endIteration.isValid}" 
-                                    label="Iteration End" :time="updatedRepeat.endIteration.value" 
-                                    title="Iteration End" type="iteration" endpoint="End" 
-                                    @addTime="addTime" @setTime="setTime" @removeTime="removeTime"></TimeControl>
+                                    label="Iteration End" :time="updatedRepeat.endIteration.value"  :canRemove="false"
+                                    title="Iteration End" type="iteration" endpoint="End" :isSet="!updatedRepeat.endIteration.isRemoved"
+                                    @addTime="addTime" @setTime="setTime"></TimeControl>
                     </div>
                 </div>
                 <!-- End - Iteration -->
@@ -424,23 +424,37 @@ function onTimeFrameChanged() {
 }
 
 function addTime(endpoint, type) {
-    if (endpoint == "end" && type == "repeat") { 
-        this.updatedRepeat.endRepeat.value = {
+    var idEndpoint;
+    if (endpoint.toLowerCase() == "start") {
+        idEndpoint = 84
+    } else if (endpoint.toLowerCase() == "end") {
+        idEndpoint = 85
+    }
+    var idMoment;
+    if (type.toLowerCase() == "repeat") {
+        idMoment = 87
+    } else if (type.toLowerCase() == "iteration") {
+        idMoment = 88
+    }
+
+    this.updatedRepeat[`${endpoint.toLowerCase()}${capitalize(type)}`] = {
             isEdited: false,
             isRemoved: false,
             isValid: true,
             value: {
-                idEndpoint: 84,
-                idMoment: 87,
-                idType: 80
+                idEndpoint,
+                idMoment,
+                idType: 80,
+                // dateTime: toDateString(new Date().toJSON())
             },
             oldValue: {
-                idEndpoint: 84,
-                idMoment: 87,
-                idType: 80
+                idEndpoint,
+                idMoment,
+                idType: 80,
+                // dateTime: toDateString(new Date().toJSON())
             }
-        }
     }
+
 }
 
 function setTime(time, type, endpoint) {
@@ -454,8 +468,8 @@ function setTime(time, type, endpoint) {
     this.validateTimes();
 }
 
-function removeTime() {
-
+function removeTime(time) {
+    time.isRemoved = true;
 }
 
 function validateTimes() {
