@@ -1,10 +1,14 @@
 <template>
     <div class="d-flex flex-column">
         <div class="d-flex flex-row justify-content-between">
-            <label class="control-label" for="description">{{ (title) ? title : endpoint }}</label>
-            <MomentSelector :moment="moment" :endpoint="endpoint" :type="type" @addTime="addTime" @removeTime="removeTime"></MomentSelector>
+            <label class="control-label" for="description"
+                   @click="addTime">
+                {{ (title) ? title : endpoint }}</label>
+            <!-- <MomentSelector :moment="moment" :endpoint="endpoint" :type="type" @addTime="addTime" @removeTime="removeTime"></MomentSelector> -->
         </div>
-        <TimeInput v-if="time" :time="time" :momentID="time.moment.id"></TimeInput>
+        <TimeInput v-if="time && isSet" 
+                   :time="time" :momentID="time.idMoment" :canRemove="canRemove"
+                   @setTime="setTime" @removeTime="removeTime"></TimeInput>
         <!-- Recommended -->
         <!-- <div class="form-check mt-2">
             <input id="flexCheckDefault" class="form-check-input" type="checkbox" value="" v-model="time.isRecommended">
@@ -14,38 +18,53 @@
 </template>
 
 <script>
-import MomentSelector from "./MomentSelector.vue"
+// import MomentSelector from "./MomentSelector.vue"
 import TimeInput from '../input/TimeInput.vue'
+import { clone } from "../../../../utility"
+
+var moments = [
+    { id: 87, text: "Date" },
+    { id: 88, text: "Time" },
+    { id: 89, text: "DateTime" },
+]
 
 export default {
     name: 'TimeControl',
-    components: { MomentSelector, TimeInput },
+    // components: { MomentSelector, TimeInput },
+    components: {  TimeInput },
     props: {
         title: String,
         time: Object,
         endpoint: String,
-        type: String
+        type: String,
+        canRemove: {
+            type: Boolean,
+            default: true
+        },
+        isSet: {
+            type: Boolean,
+            default: true
+        }
     },
     data: function () {
         return {
-            moment: (this.time) ? this.time.moment : null,
+            moment: (this.time) ? clone(moments.find(x => x.id == this.time.idMoment)) : null,
         }
     },
     methods: {
-        addTime: function(moment) {
-            this.$emit('addTime', moment, this.endpoint, this.type)
+        addTime: function() {
+            this.$emit('addTime', this.endpoint, this.type);
+        },
+        setTime(time) {
+            this.$emit("setTime", time, this.type, this.endpoint);
         },
         removeTime: function() {
-            this.$emit('removeTime', this.time)
+            this.$emit('removeTime');
         },
     },
     watch: {
         time(value) { 
-            if (value) {
-                this.moment = this.time.moment;
-            } else {
-                this.moment = null;
-            }
+            this.moment = (value) ? clone(moments.find(x => x.id == this.time.idMoment)) : null;
         }
     }
 }
@@ -54,7 +73,7 @@ export default {
 <style scoped>
 label {
     font-size: 14px;
-    padding: 0px 8px;
+    padding: 0px;
     line-height: 24px;
     height: 24px;
 }

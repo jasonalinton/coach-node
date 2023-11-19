@@ -43,7 +43,7 @@
         <!-- Repeat Times -->
         <div class="d-flex flex-column">
           <div class="d-flex flex-column mt-2">
-            <TimeControl class="mt-2" label="Repeat Start" :time="activeRepeat.startRepeat" title="Repeat Start" endpoint="Start"></TimeControl>
+            <TimeControl class="mt-2" label="Repeat Start" :time="activeRepeat.startRepeat" title="Repeat Start" endpoint="Start" type="repeat"></TimeControl>
           </div>
           <div class="d-flex flex-column mt-2">
             <TimeControl class="mt-2" label="Repeat End" :time="activeRepeat.endRepeat" title="Repeat End" endpoint="End" type="repeat" @addTime="addTime"></TimeControl>
@@ -104,7 +104,7 @@
 </template>
 
 <script>
-import TimeControl from '../time/TimeControl.vue'
+import TimeControl from '../time/TimeControl1.vue'
 import { today, clone } from '../../../../utility'
 
 let timeTypes = [
@@ -147,7 +147,7 @@ var timeframes = [
 ];
 
 export default {
-  name: 'RepeatControl',
+  name: 'RepeatControl2',
   components: {
     TimeControl
   },

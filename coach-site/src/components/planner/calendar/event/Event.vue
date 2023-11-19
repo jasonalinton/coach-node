@@ -62,6 +62,7 @@ export default {
         iterations() {
             let iterations = [];
             iterations = iterations.concat(this.routineTodoIterations).concat(this.todoIterations);
+            iterations = iterations.filter(x => x.text != this._event.text);
             return sortDesc(iterations, 'id');
         },
         complete() {

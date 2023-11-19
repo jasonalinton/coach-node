@@ -93,7 +93,7 @@
                 </div>
             </template>
         </ApolloQuery>
-        <RepeatControl class="mt-2" :repeats="item.repeats" @addRepeat="addRepeat" @updateRepeat="updateRepeat"></RepeatControl>
+        <RepeatControl2 class="mt-2" :repeats="item.repeats" @addRepeat="addRepeat" @updateRepeat="updateRepeat"></RepeatControl2>
         <TimePairControl class="mt-2" :timePairs="item.timePairs" @addTimePair="addTimePair" @updateTimePair="updateTimePair"></TimePairControl>
         <div class="d-flex flew-row justify-content-between mt-4">
             <!-- Toggle Panel - Checkbox -->
@@ -115,7 +115,7 @@
 <script>
 import SelectItem from "../../controls/SelectItem.vue"
 import { replaceItem, removeItem, clone } from '../../../../utility'
-import RepeatControl from '../../controls/time/RepeatControl.vue'
+import RepeatControl2 from '../../controls/time/RepeatControl2.vue'
 import TimePairControl from '../../controls/time/TimePairControl.vue'
 
 var types = [
@@ -126,7 +126,7 @@ var types = [
 ];
 
 export default {
-    components: { SelectItem, RepeatControl, TimePairControl },
+    components: { SelectItem, RepeatControl2, TimePairControl },
     name: "GoalForm",
     props: {
         config: Object,

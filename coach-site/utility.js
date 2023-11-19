@@ -29,6 +29,17 @@ export function listToString(objectArray, property) {
     return string;
 }
 
+export function sortItems(items, parentType, parentID) {
+    var _items = items.sort((a, b) => {
+        let positionA = a.positions
+            .find(x => x.parentType == parentType && x.parentID == parentID).position;
+        let positionB = b.positions
+            .find(x => x.parentType == parentType && x.parentID == parentID).position;
+        return  positionA - positionB;
+    })
+    return _items;
+}
+
 export function removeItem(item, itemList) {
     var findObject = (object) => object.id == item.id;
     var index = itemList.findIndex(findObject);
@@ -50,6 +61,18 @@ export function replaceItem(item, itemList) {
 }
 
 export function replaceOrAddItem(item, itemList) {
+    var findObject = (object) => object.id == item.id;
+    var index = itemList.findIndex(findObject);
+    if (index === -1) {
+        itemList.push(item);
+        return false;
+    } else {
+        itemList.splice(index, 1, item);
+        return true;
+    }
+}
+
+export function addOrReplaceItem(item, itemList) {
     var findObject = (object) => object.id == item.id;
     var index = itemList.findIndex(findObject);
     if (index === -1) {
@@ -96,7 +119,7 @@ export function toCamelCase(str) {
     }).replace(/\s+/g, '');
 }
 
-export function capitalizeFirstLetter(string) {
+export function capitalize(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
   }
 

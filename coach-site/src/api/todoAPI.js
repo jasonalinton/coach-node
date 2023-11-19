@@ -17,6 +17,27 @@ export async function getTodos() {
     });
 }
 
+export async function saveTodoRepeat(repeat) {
+    let data = { repeat };
+    
+    return fetch(`https://localhost:7104/api/Todo/SaveTodoRepeat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (!data.errorMessage) {
+            return data;
+        } else {
+            this.errorMessage = data.errorMessage;
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
+
 export async function refreshRepetitiveEvents(id, startAt, endAt, timeframeID, properties) {
     let data = { id, startAt, endAt, timeframeID, properties };
     

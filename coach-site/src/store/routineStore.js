@@ -40,8 +40,8 @@ export const useRoutineStore = defineStore('routine', {
                 routine.goals = goalStore.getItems().filter(x => routine.goalIDs.includes(x.id));
             })
         },
-        getItems() {
-            return this.routines;
+        getItems(ids) {
+            return this.routines = (ids) ? this.routines.find(x => ids.includes(x.id)) : this.routines;
         },
         getItem(id) {
             return this.routines.find(x => x.id == id);

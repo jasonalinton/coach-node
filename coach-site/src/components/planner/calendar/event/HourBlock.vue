@@ -62,9 +62,9 @@ export default {
                 });
 
                 /* TEMP: Remove Moring Joy & Morning Routines */
-                events = events.filter(_event => {
-                    return _event.text != "Morning Joy" && _event.text != "Morning Routine";
-                });
+                // events = events.filter(_event => {
+                //     return _event.text != "Morning Joy" && _event.text != "Morning Routine";
+                // });
                 return events;
             } else {
                 return [];
