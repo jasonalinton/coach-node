@@ -14,6 +14,10 @@
                                 :selectedDate="selectedDate"
                                     @editIteration="iteration => iteration_Form = iteration">
                 </TodoPanelByDate>
+                <TodoPanelByRepetition v-if="sort.by=='Repetition'" 
+                                       :selectedDate="selectedDate"
+                                       @editIteration="iteration => iteration_Form = iteration">
+                </TodoPanelByRepetition>
                 <TodoPanelByCustom v-if="sort.by=='Custom'" 
                                 :selectedDate="selectedDate"
                                     @editIteration="iteration => iteration_Form = iteration">
@@ -31,6 +35,7 @@
 import ItemPanelHeader from '../component/ItemPanelHeader.vue';
 import TodoPanelByDate from './TodoPanelByDate.vue';
 import TodoPanelByMetric from './TodoPanelByMetric.vue';
+import TodoPanelByRepetition from './TodoPanelByRepetition.vue';
 import TodoPanelByCustom from './TodoPanelByCustom.vue';
 import IterationForm from '../component/form/IterationForm.vue';
 
@@ -43,7 +48,8 @@ var sortItems = [
 
 export default {
     name: 'TodoPanel',
-    components: { ItemPanelHeader, TodoPanelByMetric, TodoPanelByDate, TodoPanelByCustom, IterationForm, },
+    components: { ItemPanelHeader, TodoPanelByMetric, TodoPanelByDate, TodoPanelByRepetition,
+        TodoPanelByCustom, IterationForm, },
     props: {
         selectedDate: Date
     },
