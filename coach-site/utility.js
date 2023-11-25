@@ -50,6 +50,16 @@ export function removeItem(item, itemList) {
     }
 }
 
+export function removeItemByID(id, itemList) {
+    var findObject = (object) => object.id == id;
+    var index = itemList.findIndex(findObject);
+    if (index === -1) return false;
+    else {
+        itemList.splice(index, 1);
+        return true;
+    }
+}
+
 export function replaceItem(item, itemList) {
     var findObject = (object) => object.id == item.id;
     var index = itemList.findIndex(findObject);

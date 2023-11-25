@@ -40,6 +40,7 @@ import ItemTabs from "./components/items/ItemTabs.vue";
 import ItemTabsOG from "./components/items/ItemTabsOG.vue";
 import { today } from "../utility"
 import { useEventStore } from '@/store/eventStore'
+import { useIterationStore } from '@/store/iterationStore'
 import { useMetricStore } from '@/store/metricStore'
 import { useGoalStore } from '@/store/goalStore'
 import { useTodoStore } from '@/store/todoStore'
@@ -93,12 +94,14 @@ export default {
         }
 
         let eventStore = useEventStore();
+        let iterationStore = useIterationStore();
         let metricStore = useMetricStore();
         let goalStore = useGoalStore();
         let todoStore = useTodoStore();
         let routineStore = useRoutineStore();
 
         eventStore.initialize();
+        iterationStore.initialize();
         let metricPromise = metricStore.initialize();
         let goalPromise = goalStore.initialize();
         let todoPromise = todoStore.initialize();

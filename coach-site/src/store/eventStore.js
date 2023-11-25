@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { getEvents } from '../api/eventAPI'
-import { removeItem, replaceOrAddItem, sortAsc } from '../../utility'
+import { removeItemByID, replaceOrAddItem, sortAsc } from '../../utility'
 import { getSocketConnection } from './socket'
 
 let initialized = false;
@@ -43,9 +43,9 @@ export const useEventStore = defineStore('event', {
                     })
                     sortAsc(_this.events);
                 });
-                connection.on("RemoveEvents", events => {
-                    events.forEach(event => {
-                        removeItem(event, _this.events);
+                connection.on("RemoveEvents", eventIDs => {
+                    eventIDs.forEach(eventID => {
+                        removeItemByID(eventID, _this.events);
                     })
                     sortAsc(_this.events);
                 });

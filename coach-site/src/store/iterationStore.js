@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { getSocketConnection } from './socket'
 import { getRepetitiveTodoIterations } from '../api/todoAPI';
-import { removeItem, replaceOrAddItem, sortAsc } from '../../utility'
+import { removeItemByID, replaceOrAddItem, sortAsc } from '../../utility'
 
 let initialized = false;
 
@@ -23,46 +23,38 @@ export const useIterationStore = defineStore('iteration', {
         // async fill() {
         //     return getIterations().then(res => this.iterations = res);
         // },
-        // getIterations(startAt, endAt) {
-
-        // },
-        async getRepetitiveTodoIterations(startAt, endAt) {
-            let _this = this;
-            let iterations = await getRepetitiveTodoIterations(startAt, endAt);
-            iterations.forEach(iteration => {
-                replaceOrAddItem(iteration, _this.iterations);
-            })
-            sortAsc(this.iterations);
+        getIterations() {
             return this.iterations;
         },
-        // getRepetitiveTodoIterations(startAt, endAt) {
-        //     let _this = this;
-        //     getRepetitiveTodoIterations(startAt, endAt)
-        //     .then(_iterations => {
-        //         let iterations_this = [..._this.iterations];
-        //         _iterations.forEach(iteration => {
-        //             replaceOrAddItem(iteration, iterations_this);
-        //         })
-        //         sortAsc(iterations_this, 'startAt');
-        //         this.iterations = [...iterations_this];
-        //     });
-        //     return this.iterations;
-        // },
+        getRepetitiveTodoIterations(startAt, endAt) {
+            let _this = this;
+            getRepetitiveTodoIterations(startAt, endAt)
+            .then(_iterations => {
+                _iterations.forEach(iteration => {
+                    replaceOrAddItem(iteration, _this.iterations);
+                })
+                sortAsc(_this.iterations, 'startAt');
+            });
+            return this.iterations.filter(iteration => {
+                return (new Date(iteration.startAt)).getTime() >= startAt && (new Date(iteration.startAt)).getTime() <= endAt &&
+                       iteration.idRoutine == null && iteration.idRoutineIteration == null;
+            });
+        },
         connectSocket() {
             if (!initialized) {
-                let connection = getSocketConnection("iterationHub");
+                let connection = getSocketConnection("plannerHub");
 
                 let _this = this;
-                connection.on("UpdateIterationss", iterations => {
-                    this.initializeItems(iterations);
+                connection.on("UpdateIterations", iterations => {
+                    // this.initializeItems(iterations);
                     iterations.forEach(iteration => {
                         replaceOrAddItem(iteration, _this.iterations);
                     })
                     sortAsc(_this.iterations);
                 });
-                connection.on("RemoveIterations", iterations => {
-                    iterations.forEach(iteration => {
-                        removeItem(iteration, _this.iterations);
+                connection.on("RemoveIterations", iterationIDs => {
+                    iterationIDs.forEach(iterationID => {
+                        removeItemByID(iterationID, _this.iterations);
                     })
                     sortAsc(_this.iterations);
                 });

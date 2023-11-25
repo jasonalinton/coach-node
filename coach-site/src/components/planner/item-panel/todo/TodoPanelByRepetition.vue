@@ -2,10 +2,10 @@
     <div class="custom d-flex flex-column flex-grow-1">
         <TimeframeRadio :timeframe="timeframe" @timeframeSelected="timeframe=$event" :container="'todoPanelRepetition'"></TimeframeRadio>
         <!-- Toolbar -->
-        <div class="toolbar d-flex flex-row justify-content-between align-items-center">
+        <!-- <div class="toolbar d-flex flex-row justify-content-between align-items-center">
             <AddTaskButton @click="addNewTask"></AddTaskButton>
             <IconButton src="/icon/goal-icon.png" :width="32" :height="32" @click="show(showGoals)"></IconButton>
-        </div>
+        </div> -->
         <!-- Body -->
         <div class="d-flex flex-column flex-grow-1 justify-content-start">
             <!-- Goals -->
@@ -19,24 +19,23 @@
             </div>
             <div class="d-flex flex-column flex-grow-1 justify-content-between">
                 <!-- Pending -->
-                <ul v-if="pending" class="item-list pending">
-                    <li v-if="todos.new">
-                        <!-- New Task -->
+                <ul class="item-list pending">
+                    <!-- New Task -->
+                    <!-- <li v-if="tasks.new">
                         <div class="new-task d-flex flex-row align-items-center">
-                            <ItemCheckbox :width="40" :height="40" @onChecked="markNewTaskComplete(todos.new)"></ItemCheckbox>
+                            <ItemCheckbox :width="40" :height="40" @onChecked="markNewTaskComplete(tasks.new)"></ItemCheckbox>
                             <input id="newTask" ref="newTask" class="form-control form-control-sm" type="text" 
-                                v-model="todos.new.text"
-                                v-on:keyup.enter="addTask(todos.new)"
+                                v-model="tasks.new.text"
+                                v-on:keyup.enter="addTask(tasks.new)"
                                 v-on:keyup.esc="cancelAddTask()"
                                 autofocus/>
                         </div>
-                    </li>
+                    </li> -->
                     <li v-for="(iteration, index) in pending" v-bind:key="iteration.id" :style="{ 'z-index': -index }">
                         <ListItem :iteration="iteration" 
-                                  :isUnplanned="isUnplanned(iteration)"
-                                    @markComplete="toggleCompletion(iteration, $apollo)"
-                                    @onEdit="$emit('editIteration', iteration)"
-                                    @onDelete="deleteIteration(iteration.id, $apollo)">
+                                  @markComplete="toggleIterationCompletion(iteration.id, iteration.attemptedAt, iteration.completedAt)"
+                                  @onEdit="$emit('editIteration', iteration)"
+                                  @onDelete="deleteIteration(iteration.id)">
                         </ListItem>
                     </li>
                 </ul>
@@ -47,9 +46,9 @@
                         <li v-for="(iteration, index) in complete" v-bind:key="index" :style="{ 'z-index': -index }">
                             <ListItem class="complete" 
                                       :iteration="iteration"
-                                        @markIncomplete="toggleCompletion(iteration, $apollo)"
-                                        @onEdit="$emit('editIteration', iteration)"
-                                        @onDelete="deleteIteration(iteration.id, $apollo)">
+                                      @markIncomplete="toggleIterationCompletion(iteration.id, iteration.attemptedAt, iteration.completedAt)"
+                                      @onEdit="$emit('editIteration', iteration)"
+                                      @onDelete="deleteIteration(iteration.id)">
                             </ListItem>
                         </li>
                     </ul>
@@ -60,41 +59,36 @@
 </template>
 
 <script>
-import IconButton from '../../../controls/button/IconButton.vue'
-import AddTaskButton from '../component/AddTaskButton.vue'
-import ItemCheckbox from '../component/ItemCheckbox.vue';
+// import IconButton from '../../../controls/button/IconButton.vue'
+// import AddTaskButton from '../component/AddTaskButton.vue'
+// import ItemCheckbox from '../component/ItemCheckbox.vue';
 import ListItem from '../component/ListItem.vue'
 import { replaceItem, removeItem, today, sortAsc } from '../../../../../utility';
-import { createDefaultTask, toggleCompletion, deleteIteration } from '../../../../resolvers/todo-resolvers';
+import { createDefaultTask } from '../../../../resolvers/todo-resolvers';
 import TimeframeRadio from '../component/TimeframeRadio.vue';
 import { firstDayOfWeek, lastDayOfWeek, firstDayOfMonth, lastDayOfMonth } from '../../../../../utility/timeUtility';
+import { toggleIterationCompletion, deleteIteration } from '../../../../api/todoAPI';
 
 export default {
     name: 'TodoPanelByRepetition',
-    components: { AddTaskButton, IconButton, ListItem, ItemCheckbox, TimeframeRadio, },
+    // components: { AddTaskButton, IconButton, ListItem, ItemCheckbox, TimeframeRadio, },
+    components: { ListItem, TimeframeRadio, },
     props: {
         selectedDate: Date
     },
     created: async function() {
         let iterationStore = await import(`@/store/iterationStore`);
         this.iterationStore = iterationStore.useIterationStore();
-        let iterations = await this.iterationStore.getRepetitiveTodoIterations(this.start, this.end);
-        iterations = iterations.filter(iteration => {
-            return (new Date(iteration.startAt)).getTime() >= this.start && (new Date(iteration.startAt)).getTime() <= this.end;
-        });
-        iterations = sortAsc(iterations, 'startAt');
-        this.iterations = [...iterations];
+        this.iterationStore.getRepetitiveTodoIterations(this.start, this.end);
     },
     data: function () {
         return {
             iterationStore: undefined,
-            iterations: [],
-            todos: {
+            tasks: {
                 complete: [],
                 pending: [],
                 new: null
             },
-            // iterations: [],
             newItemID: -1,
             today: today(),
             allIterations: [],
@@ -124,18 +118,20 @@ export default {
             else
                 return null
         },
-        // iterations() {
-        //     if (this.iterationStore) {
-        //         let iterations = this.iterationStore.getRepetitiveTodoIterations(this.start, this.end);
-        //         iterations = iterations.filter(iteration => {
-        //             return (new Date(iteration.startAt)).getTime() >= this.start && (new Date(iteration.startAt)).getTime() <= this.end;
-        //         });
-        //         iterations = sortAsc(iterations, 'startAt');
-        //         return iterations;
-        //     } else {
-        //         return [];
-        //     }
-        // },
+        iterations() { 
+            if (this.iterationStore) {
+                let iterations = this.iterationStore.iterations;
+                iterations = iterations.filter(iteration => {
+                    return (new Date(iteration.startAt)).getTime() >= this.start && 
+                           (new Date(iteration.startAt)).getTime() <= this.end;
+                });
+                iterations = iterations.filter(iteration => iteration.idRoutine == null && iteration.idRoutineIteration == null);
+                iterations = sortAsc(iterations, 'startAt');
+                return iterations;
+            } else {
+                return [];
+            }
+        },
         complete() { return this.iterations.filter(iteration => iteration.attemptedAt) },
         pending() { return this.iterations.filter(iteration => !iteration.attemptedAt) },
         goals() {
@@ -149,24 +145,21 @@ export default {
         addTask,
         cancelAddTask,
         markNewTaskComplete,
-        createDefaultTask,
-        toggleCompletion,
+        toggleIterationCompletion,
         deleteIteration,
+        createDefaultTask,
         replaceItem,
         removeItem,
         show(value) {
             this.showGoals = (value) ? false : true;
             console.log(this.goals);
         },
-        isUnplanned(task) {
-            // /* Mark tasks that aren't set to specific date */
-            if (this.start.toDateString() != this.end.toDateString())
-            {
-                return new Date(task.startAt).toDateString() == this.start.toDateString() &&
-                    (task.endAt != null && new Date(task.endAt).toDateString() == this.end.toDateString())
-            }
-        }
     },
+    watch: {
+        selectedDate() {
+            this.iterationStore.getRepetitiveTodoIterations(this.start, this.end);
+        }
+    }
 }
 
 function initIteration() {
@@ -182,7 +175,7 @@ function initIteration() {
 }
 
 function addNewTask() {
-    this.todos.new = this.initIteration();
+    this.tasks.new = this.initIteration();
     this.$nextTick(() => this.$refs.newTask.focus());
 }
 
@@ -195,7 +188,7 @@ function addTask(iteration) {
 }
 
 function cancelAddTask() {
-    this.todos.new = null;
+    this.tasks.new = null;
 }
 
 function markNewTaskComplete(iteration) {
@@ -206,7 +199,7 @@ function markNewTaskComplete(iteration) {
         iteration.attemptedAt = now;
         iteration.completedAt = now;
 
-        this.todos.new = null;
+        this.tasks.new = null;
 
         this.createDefaultTask(iteration, this.$apollo);
     }
