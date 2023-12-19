@@ -5,7 +5,7 @@
             <img src="/icon/todo-icon.png" width="18" height="18"/>
             <div class="d-flex flex-column">
                 <div class="d-flex flex-row">
-                    <!-- <span class="id">{{ todo.id }}</span> -->
+                    <span class="id">{{ todo.id }}</span>
                     <span class="text">{{ todo.text }}</span>
                 </div>
                 <!-- <div class="d-flex flex-row">
@@ -16,7 +16,7 @@
         </div>
         <div v-if="repeatsShown" >
             <RepeatControl v-for="repeat in repeats" :key="repeat.id"
-                                  :repeat="repeat" :itemID="id" itemType="todo"/>
+                           :repeat="repeat" :itemID="id" itemType="todo"/>
         </div>
     </div>
 </template>

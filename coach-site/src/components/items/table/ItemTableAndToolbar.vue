@@ -16,6 +16,8 @@
                            @closeItemModal="closeItemModal" />
             <RoutineFormModal v-if="form.itemType == 'routine'" :id="form.id"
                               @closeItemModal="closeItemModal" />
+            <TodoFormModal v-if="form.itemType == 'todo'" :id="form.id"
+                              @closeItemModal="closeItemModal" />
         </div>
     </div>
 </template>
@@ -25,11 +27,12 @@ import ItemTableToolbar from './ItemTableToolbar.vue';
 import ItemTable from './ItemTable.vue';
 import GoalFormModal from '../form/goal/GoalFormModal.vue'
 import RoutineFormModal from '../form/routine/RoutineFormModal.vue'
+import TodoFormModal from '../form/todo/TodoFormModal.vue';
 import { Modal } from 'bootstrap';
 
 export default {
     name: 'ItemTableAndToolbar',
-    components: { ItemTableToolbar, ItemTable, GoalFormModal, RoutineFormModal },
+    components: { ItemTableToolbar, ItemTable, GoalFormModal, RoutineFormModal, TodoFormModal },
     props: {
       itemType: String
     },
@@ -62,7 +65,7 @@ export default {
             this.form.itemType = data.itemType;
             await this.$nextTick();
             this.modal = new Modal(this.$refs[`${data.itemType}-${data.id}-Modal`]);
-            if (data.itemType == "goal" || data.itemType == "routine") {
+            if (data.itemType == "goal" || data.itemType == "todo" || data.itemType == "routine") {
                 this.modal.show();
             } 
 
@@ -88,6 +91,14 @@ export default {
     max-width: none;
     margin-left: 50px;
     margin-right: 50px;
+}
+
+@media (max-width: 767.98px) {
+    .item .modal-xl {
+        max-width: none;
+        margin-left: 0px;
+        margin-right: 0px;
+    }
 }
 
 .item .modal-body .container {

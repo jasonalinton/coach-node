@@ -1,6 +1,6 @@
 <template>
     <div class="d-flex flex-column">
-        <span class="form-head">{{ capitalize(`${itemType}s`) }}</span>
+        <span class="form-head">{{ capitalize(title) }}</span>
         <!-- Quick Add Item -->
         <div class="d-flex justify-content-between mt-1 mb-1">
             <button class="add-btn my-auto" type="button" @click="addItemClicked">
@@ -34,10 +34,23 @@ export default {
         parentID: Number,
         parentType: String,
         repeatIDs: Array, // For routine parent type
+        isParent: Boolean,
+        isChild: Boolean
     },
     data: function() {
         return {
             newItemText: "",
+        }
+    },
+    computed: {
+        title() {
+            if (this.isParent) {
+                return "Parents";
+            } else if (this.isChild) {
+                return "Children"
+            } else {
+                return `${this.itemType}s`
+            }
         }
     },
     methods: {
@@ -48,7 +61,16 @@ export default {
 }
 
 function addItem() {
-    this.$emit("addItem", this.itemType, this.newItemText);
+    let itemType = this.itemType;
+    if (this.isParent) {
+        itemType = "parent";
+    } else if (this.isChild) {
+        itemType = "child"
+    } else {
+        itemType = `${this.itemType}s`
+    }
+
+    this.$emit("addItem", itemType, this.newItemText);
     this.newItemText = "";
 }
 

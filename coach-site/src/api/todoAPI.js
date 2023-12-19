@@ -38,6 +38,27 @@ export async function saveTodoRepeat(repeat) {
     });
 }
 
+export async function createAndMapItem(todoID, itemType, itemText) {
+    let data = { todoID, itemType, itemText };
+    
+    return fetch(`https://localhost:7104/api/Todo/CreateAndMapItemToTodo`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (!data.errorMessage) {
+            return data;
+        } else {
+            this.errorMessage = data.errorMessage;
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
+
 export async function refreshRepetitiveEvents(id, startAt, endAt, timeframeID, properties) {
     let data = { id, startAt, endAt, timeframeID, properties };
     
@@ -114,6 +135,29 @@ export async function deleteIteration(iterationID) {
     };
 
     return fetch(`https://localhost:7104/api/Todo/DeleteTodoIteration`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    })
+    .then((response) => response.json())
+    .then((data) => {
+        if (!data.errorMessage) {
+            return data;
+        } else {
+            this.errorMessage = data.errorMessage;
+        }
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+    });
+}
+
+export async function deleteOrArchiveRepeat(repeatID) {
+    let data = {
+        repeatID
+    };
+
+    return fetch(`https://localhost:7104/api/Todo/DeleteOrArchiveRepeat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)

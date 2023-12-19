@@ -1,8 +1,8 @@
 <template>
-    <div :id="`routine-form-modal-${id}`" class="modal-dialog modal-xl modal-fullscreen-md-down modal-dialog modal-dialog-centered modal-dialog-scrollable">
+    <div :id="`todo-form-modal-${id}`" class="modal-dialog modal-xl modal-fullscreen-md-down modal-dialog modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" :id="`routine-${id}-ModalLabel`">{{ (routine) ? routine.id : "" }}</h5>
+                <h5 class="modal-title" :id="`todo-${id}-ModalLabel`">{{ (todo) ? todo.id : "" }}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
@@ -16,20 +16,26 @@
                         </div>
                     </div>
                     <div class="row g-2">
-                        <div class="col-4">
+                        <div class="col-12 col-sm-4">
                             
                         </div>
-                        <div class="col-4 form-column">
-                            <FormItemList itemType="todo" :itemIDs="todoIDs"
-                                          parentType="routine" :parentID="id" :repeatIDs="repeatIDs"
+                        <div class="col-6 col-sm-4 form-column">
+                            <FormItemList itemType="todo" :itemIDs="childIDs" :isChild="true"
+                                          parentType="todo" :parentID="id" :repeatIDs="repeatIDs"
                                           @addItemClicked="addTodoClicked" @addItem="addItem"/>
                         </div>
-                        <div class="col-4 d-flex flex-column">
+                        <div class="col-6 col-sm-4 d-flex flex-column">
                             <span class="form-head">Repetition</span>
+                            <!-- Quick Add Item -->
+                            <div class="d-flex justify-content-between mt-1 mb-1">
+                                <button class="add-btn my-auto" type="button" @click="addRepeatClicked">
+                                    <img src="/icon/button/add.png" width="10" height="10"/>Add
+                                </button>
+                            </div>
                             <div>
                                 <RepeatControl v-for="repeat in repeats.value" :key="repeat.id"
-                                                    :repeat="repeat" :itemID="id" itemType="routine" :canEdit="selectedRepeatID == undefined"
-                                                    @saveRepeat="saveRepeat" @setSelectedRepeat="setSelectedRepeat" @cancelRepeatEditing="cancelRepeatEditing"/>
+                                               :repeat="repeat" :itemID="id" itemType="todo" :canEdit="selectedRepeatID == undefined"
+                                               @saveRepeat="saveRepeat" @setSelectedRepeat="setSelectedRepeat" @cancelRepeatEditing="cancelRepeatEditing"/>
                             </div>
                         </div>
                     </div>
@@ -37,8 +43,8 @@
                 <div v-if="mapper.isShown && mapper.type == 'todo'" class="container">
                     <div class="row g-2">
                         <div class="col-12">
-                            <ItemMapper itemType="todo" :selectedIDs="todoIDs" 
-                                        @close="mapper.isShown = false" @cancel="cancelMapping" @select="selectTodos"/>
+                            <ItemMapper itemType="todo" :selectedIDs="childIDs" 
+                                        @close="mapper.isShown=false" @cancel="cancelMapping" @select="selectTodos"/>
                         </div>
                     </div>
                 </div>
@@ -52,14 +58,14 @@
 </template>
 
 <script>
-import { saveRoutine, mapTodos, createAndMapItem } from '../../../../api/routineAPI';
+import { saveTodo, mapTodos, createAndMapItem } from '../../../../api/todoAPI';
 import RepeatControl from '../component/RepeatControl.vue';
 import FormItemList from '../component/FormItemList.vue';
 import ItemMapper from '../component/ItemMapper.vue'
-import { clone, replaceItem, addOrReplaceItem, sortItems } from '../../../../../utility';
+import { clone, replaceItem, addOrReplaceItem, sortItems, sortAsc } from '../../../../../utility';
 
 export default {
-    name: "RoutineFormModal",
+    name: "TodoFormModal",
     components: { RepeatControl, ItemMapper, FormItemList },
     props: {
       id: Number
@@ -67,6 +73,7 @@ export default {
     data: function() {
         return {
             store: null,
+            plannerStore: null,
             text: {
                 value: undefined,
                 oldValue: undefined,
@@ -88,31 +95,34 @@ export default {
             mapper: {
                 isShown: false,
                 type: undefined
-            }
+            },
+            test: "<u>Underline Test</u>"
         }
     },
     created: async function() {
-        let routineStore = await import(`@/store/routineStore`);
-        this.store = routineStore.useRoutineStore();
+        let todoStore = await import(`@/store/todoStore`);
+        this.store = todoStore.useTodoStore();
 
-        let routine = this.store.getItem(this.id);
-        this.setProps(routine);
+        let plannerStore = await import(`@/store/plannerStore`);
+        this.plannerStore = plannerStore.usePlannerStore();
+
+        let todo = this.store.getItem(this.id);
+        this.setProps(todo);
     },
     computed: {
-        routine() {
+        todo() {
             if (this.store) {
-                let routine = this.store.getItem(this.id);
-                this.setProps(routine);
-                return routine;
+                let todo = this.store.getItem(this.id);
+                this.setProps(todo);
+                return todo;
             } else {
                 return null;
             }
         },
-        todoIDs() {
-            if (this.routine) {
-
-            var todos = sortItems(this.routine.todos, "routine", this.id);
-            return todos.map(x => x.id);
+        childIDs() {
+            if (this.todo) {
+                var children = sortItems(this.todo.children, "todo", this.id);
+                return children.map(x => x.id);
             } else {
                 return [];
             }
@@ -126,12 +136,12 @@ export default {
         }
     },
     methods: {
-        setProps(routine) {
-            this.text.value = routine.text;
-            this.text.oldValue = routine.text;
+        setProps(todo) {
+            this.text.value = todo.text;
+            this.text.oldValue = todo.text;
             this.text.isUpdated = false;
 
-            this.repeats.value = clone(routine.repeats),
+            this.repeats.value = clone(todo.repeats),
             this.repeats.added = [];
             this.repeats.updated = [];
             this.repeats.deletedIDs = [];
@@ -153,11 +163,17 @@ export default {
         saveRepeat(repeat) {
             let _repeat = clone(repeat);
             _repeat.startRepeat = _repeat.startRepeat.value;
-            _repeat.endRepeat = _repeat.endRepeat.value;
+            _repeat.endRepeat = (_repeat.endRepeat) ? _repeat.endRepeat.value : null;
+            _repeat.startIteration = (_repeat.startIteration) ? _repeat.startIteration.value : null;
+            _repeat.endIteration = (_repeat.endIteration) ? _repeat.endIteration.value : null;
             replaceItem(_repeat, this.repeats.value);
             
-            let updatedRepeat = clone(repeat);
-            addOrReplaceItem(updatedRepeat, this.repeats.updated);
+            let savedRepeat = clone(repeat);
+            if (repeat.id > 0) {
+                addOrReplaceItem(savedRepeat, this.repeats.updated);
+            } else {
+                addOrReplaceItem(savedRepeat, this.repeats.added);
+            }
 
             this.selectedRepeatID = undefined;
         },
@@ -166,7 +182,7 @@ export default {
                 id: this.id,
                 text: this.text,
             };
-            saveRoutine(model);
+            saveTodo(model);
             this.$emit("closeItemModal");
         },
         addItem(itemType, itemText) {
@@ -175,6 +191,12 @@ export default {
         addTodoClicked() {
             this.mapper.isShown = true;
             this.mapper.type = "todo";
+        },
+        addRepeatClicked() {
+            let repeats = sortAsc(this.repeats.value, 'id');
+            let newRepeat = this.plannerStore.createRepeat();
+            newRepeat.id = (repeats.length > 0 && repeats[0].id < 0) ? repeats[0].id - 1 : -1;
+            this.repeats.value.unshift(newRepeat);
         },
         cancelMapping() {
             this.mapper.isShown = false;

@@ -1,28 +1,35 @@
 <template>
     <div>
-        <div v-if="!isEditing" class="wrapper d-flex flex-row"
+        <div v-if="!isEditing" class="wrapper d-flex flex-row justify-content-between"
              @click="onRepeatClicked">
-            <img src="/icon/calendar-day.png" width="14" height="14"/>
-            <div class="timeframe d-flex flex-column">
-                <div>
-                    <span>Every</span>
-                    <span>{{ (repeat.interval == 1) ? " " : ` ${repeat.interval} ` }}</span>
-                    <span class="blue">{{ (repeat.interval == 1) ? timeframe : `${timeframe}s` }}</span>
+            <div class="d-flex flex-row">
+                <div class="d-flex flex-column">
+                    <img src="/icon/calendar-day.png" width="14" height="14"/>
+                    <span>{{ repeat.id }}</span>
                 </div>
-                <div>
-                    <span class="blue">{{ frequency }}</span>
-                    <span> a </span>
-                    <span>{{ timeframe }}</span>
-                </div>
-                <div v-if="repeat.idTimeframe == 68 && repeat.dayIndecies.length > 0">
-                    <span>On </span>
-                    <span class="blue">{{ daysOfWeek }}</span>
-                </div>
-                <div v-if="repeat.idTimeframe == 69 && repeat.dayIndecies.length > 0">
-                    <span>On the </span>
-                    <span class="blue">{{ daysOfMonth }}</span>
+                <div class="timeframe d-flex flex-column">
+                    <div>
+                        <span>Every</span>
+                        <span>{{ (repeat.interval == 1) ? " " : ` ${repeat.interval} ` }}</span>
+                        <span class="blue">{{ (repeat.interval == 1) ? timeframe : `${timeframe}s` }}</span>
+                    </div>
+                    <div>
+                        <span class="blue">{{ frequency }}</span>
+                        <span> a </span>
+                        <span>{{ timeframe }}</span>
+                    </div>
+                    <div v-if="repeat.idTimeframe == 68 && repeat.dayIndecies.length > 0">
+                        <span>On </span>
+                        <span class="blue">{{ daysOfWeek }}</span>
+                    </div>
+                    <div v-if="repeat.idTimeframe == 69 && repeat.dayIndecies.length > 0">
+                        <span>On the </span>
+                        <span class="blue">{{ daysOfMonth }}</span>
+                    </div>
                 </div>
             </div>
+            <button class="btn-close" type="button" aria-label="close"
+                    @click.stop="deleteOrArchive"></button>
         </div>
         <div v-if="isEditing" 
              class="wrapper-edit d-flex flex-row" :class="{ 'isValid': isValid}">
@@ -107,6 +114,12 @@
                     </div>
                 </div>
                 <!-- End - Iteration -->
+                <!-- Type -->
+                <div class="d-flex flex-column">
+                    <select class="form-select panel-select" aria-label="select" v-model="updatedRepeat.idInheritance">
+                        <option v-for="inheritanceType in inheritanceTypes" v-bind:key="inheritanceType.id" :value="inheritanceType.id">{{inheritanceType.text}}</option> 
+                    </select> 
+                </div>
                 <!-- Is Event Visible -->
                 <div class="form-check">
                     <input class="form-check-input mt-1" type="checkbox" value="" id="isEventVisible" 
@@ -135,7 +148,7 @@
 
 <script>
 import TimeControl from '../../../controls/time/TimeControl.vue'
-import { clone, capitalize } from '../../../../../utility'
+import { clone, capitalize, toDateString } from '../../../../../utility'
 import { saveRoutineRepeat } from '../../../../api/routineAPI'
 import { saveTodoRepeat } from '../../../../api/todoAPI'
 
@@ -217,18 +230,35 @@ let dow = [
     },
 ]
 
+let inheritanceTypes = [
+    {
+        id: 140,
+        text: "Self"
+    },
+    {
+        id: 141,
+        text: "Children"
+    },
+    {
+        id: 142,
+        text: "Descendants"
+    },
+]
+
 export default {
     name: "RepeatControl",
     components: { TimeControl },
     props: {
         repeat: Object,
         itemID: Number,
-        itemType: String
+        itemType: String,
+        canEdit: Boolean
     },
     data: function() {
         return {
             todoStore: null,
             timeframes: clone(timeframes),
+            inheritanceTypes: clone(inheritanceTypes),
             updatedRepeat: undefined,
             todoRepeats: [],
             isEditing: false,
@@ -238,6 +268,10 @@ export default {
     created: async function() {
         let todoStore = await import(`@/store/todoStore`);
         this.todoStore = todoStore.useTodoStore();
+
+        if (this.repeat.id < 0) {
+            this.isEditing = true;
+        }
     },
     computed: {
         timeframe() {
@@ -359,9 +393,10 @@ export default {
         },
         cancel() {
             this.isEditing = false;
-            this.$emit("setSelectedRepeat", undefined);
+            this.$emit("cancelRepeatEditing", this.repeat.id);
         },
-        save
+        save,
+        deleteOrArchive
     },
     watch: {
         isEditing(value) {
@@ -394,8 +429,10 @@ function initUpdatedRepeat() {
 }
 
 function onRepeatClicked() {
-    this.isEditing = true;
-    this.$emit("setSelectedRepeat", this.repeat.id);
+    if (this.canEdit) {
+        this.isEditing = true;
+        this.$emit("setSelectedRepeat", this.repeat.id);
+    }
 }
 
 function onDayClicked(day) {
@@ -437,6 +474,7 @@ function addTime(endpoint, type) {
         idMoment = 88
     }
 
+    var dateTime = toDateString(new Date().toJSON());
     this.updatedRepeat[`${endpoint.toLowerCase()}${capitalize(type)}`] = {
             isEdited: false,
             isRemoved: false,
@@ -445,13 +483,13 @@ function addTime(endpoint, type) {
                 idEndpoint,
                 idMoment,
                 idType: 80,
-                // dateTime: toDateString(new Date().toJSON())
+                dateTime
             },
             oldValue: {
                 idEndpoint,
                 idMoment,
                 idType: 80,
-                // dateTime: toDateString(new Date().toJSON())
+                dateTime
             }
     }
 
@@ -505,7 +543,7 @@ function correctTimes() {
     let startRepeatDate = new Date(this.updatedRepeat.startRepeat.value.dateTime);
 
     let startIteration = this.updatedRepeat.startIteration;
-    if (startIteration.value) {
+    if (startIteration && startIteration.value) {
         let startIterationDate = new Date(startIteration.value.dateTime);
         startIterationDate
             .setUTCFullYear(startRepeatDate.getUTCFullYear(), startRepeatDate.getUTCMonth(), startRepeatDate.getUTCDate())
@@ -520,7 +558,7 @@ function correctTimes() {
     }
 
     let endIteration = this.updatedRepeat.endIteration;
-    if (endIteration.value) {
+    if (endIteration && endIteration.value) {
         let endIterationDate = new Date(endIteration.value.dateTime);
         endIterationDate
             .setUTCFullYear(startRepeatDate.getUTCFullYear(), startRepeatDate.getUTCMonth(), startRepeatDate.getUTCDate())
@@ -540,6 +578,8 @@ function save() {
 
     let repeat = {
         id: this.updatedRepeat.id,
+        idInheritance: this.updatedRepeat.idInheritance,
+        isOwner: true,
         itemID: this.itemID,
         itemType: this.itemType.toLowerCase(),
         idTimeframe: this.updatedRepeat.idTimeframe,
@@ -548,9 +588,9 @@ function save() {
         frequency: this.updatedRepeat.frequency,
         dayIndecies: this.updatedRepeat.dayIndecies,
         startRepeat: this.updatedRepeat.startRepeat,
-        endRepeat: this.updatedRepeat.endRepeat,
-        startIteration: this.updatedRepeat.startIteration,
-        endIteration: this.updatedRepeat.endIteration,
+        endRepeat: (this.updatedRepeat.endRepeat.value) ? this.updatedRepeat.endRepeat : null,
+        startIteration: (this.updatedRepeat.startIteration.value) ? this.updatedRepeat.startIteration : null,
+        endIteration: (this.updatedRepeat.endIteration.value) ? this.updatedRepeat.endIteration : null,
         isEventVisible: this.updatedRepeat.isEventVisible,
         isRecommended: this.updatedRepeat.isRecommended,
     };
@@ -563,6 +603,10 @@ function save() {
 
     this.$emit("saveRepeat", repeat);
     this.isEditing = false;
+}
+
+function deleteOrArchive() {
+    this.todoStore.deleteOrArchiveRepeat(this.repeat.id);
 }
 
 </script>
@@ -588,6 +632,14 @@ function save() {
 } */
 .wrapper-edit.invalid {
     border: solid 1px red;
+}
+
+button.btn-close {
+    visibility: hidden;
+}
+
+.wrapper:hover button.btn-close {
+    visibility: visible;
 }
 
 .time-control {
