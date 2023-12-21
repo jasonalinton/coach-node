@@ -11,7 +11,8 @@
 import Task from "./Task.vue";
 import { rescheduleIteration } from "../../../resolvers/todo-resolvers";
 import { unmapTaskFromRoutineEvent, scheduleTodo } from "../../../resolvers/planner-resolvers";
-// import { removeItem, replaceItem, sortAsc } from '../../../../utility';
+import { sortAsc } from '../../../../utility';
+import { startOfDay } from '../../../../utility/timeUtility';
 
 export default {
     name: "TaskList",
@@ -26,8 +27,31 @@ export default {
             showRoutineTasks: false
         }
     },
+    created: async function() {
+        let iterationStore = await import(`@/store/iterationStore`);
+        this.iterationStore = iterationStore.useIterationStore();
+        this.iterationStore.getIterationsInRange(this.startAt, this.endAt, false);
+    },
     computed: {
-        height() { return (this.minHeight) ? this.minHeight + "px" : "22px"}
+        height() { return (this.minHeight) ? this.minHeight + "px" : "22px"},
+        iterations() { 
+            if (this.iterationStore) {
+                let start = startOfDay(this.date);
+                let end = startOfDay(this.date);
+
+                let iterations = this.iterationStore.iterations;
+                iterations = iterations.filter(iteration => {
+                    return (new Date(iteration.startAt)).getTime() >= start && 
+                           (new Date(iteration.startAt)).getTime() <= end &&
+                           !iteration.isRepeat;
+                });
+                iterations = iterations.filter(iteration => iteration.idRoutine == null && iteration.idRoutineIteration == null);
+                iterations = sortAsc(iterations, 'startAt');
+                return iterations;
+            } else {
+                return [];
+            }
+        },
     },
     methods: {
         onDrop,

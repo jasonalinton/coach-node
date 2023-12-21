@@ -66,7 +66,7 @@ import ListItem from '../component/ListItem.vue'
 import { replaceItem, removeItem, today, sortAsc } from '../../../../../utility';
 import { createDefaultTask } from '../../../../resolvers/todo-resolvers';
 import TimeframeRadio from '../component/TimeframeRadio.vue';
-import { firstDayOfWeek, lastDayOfWeek, firstDayOfMonth, lastDayOfMonth } from '../../../../../utility/timeUtility';
+import { firstDayOfWeek, lastDayOfWeek, firstDayOfMonth, lastDayOfMonth, endOfDay } from '../../../../../utility/timeUtility';
 import { toggleIterationCompletion, deleteIteration } from '../../../../api/todoAPI';
 
 export default {
@@ -110,7 +110,7 @@ export default {
         },
         end() { 
             if (this.timeframe == 'day')
-                return this.selectedDate;
+                return endOfDay(this.selectedDate);
             else if (this.timeframe == 'week')
                 return lastDayOfWeek(this.selectedDate);
             else if (this.timeframe == 'month')
@@ -122,11 +122,13 @@ export default {
             if (this.iterationStore) {
                 let iterations = this.iterationStore.iterations;
                 iterations = iterations.filter(iteration => {
-                    return (new Date(iteration.startAt)).getTime() >= this.start && 
-                           (new Date(iteration.startAt)).getTime() <= this.end;
+                    return +(new Date(iteration.startAt)) == +this.start && 
+                           +endOfDay((new Date(iteration.endAt))) == +this.end &&
+                           iteration.isRepeat
                 });
                 iterations = iterations.filter(iteration => iteration.idRoutine == null && iteration.idRoutineIteration == null);
                 iterations = sortAsc(iterations, 'startAt');
+
                 return iterations;
             } else {
                 return [];

@@ -22,13 +22,10 @@ export async function getEvents(start, end) {
     });
 }
 
-export async function getIterations(start, end) {
-    let data = {
-        start: start,
-        end: end
-    };
+export async function getIterationsInRange(startAt, endAt) {
+    let data = { startAt, endAt };
 
-    return fetch(`https://localhost:7104/api/Iteration/GetIterationsInRange`, {
+    return fetch(`https://localhost:7104/api/Planner/GetIterationsInRange`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)

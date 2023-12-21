@@ -85,7 +85,8 @@ export default {
             firstDay: null,
             lastDay: null,
             plannerStore: undefined,
-            eventStore: undefined
+            eventStore: undefined,
+            iterationStore: undefined
         };
     },
     computed: {
@@ -118,6 +119,10 @@ export default {
         let eventStore = await import(`@/store/eventStore`);
         this.eventStore = eventStore.useEventStore();
         this.eventStore.getEvents(this.startAt, this.endAt, true);
+
+        let iterationStore = await import(`@/store/iterationStore`);
+        this.iterationStore = iterationStore.useIterationStore();
+        this.iterationStore.getIterationsInRange(this.startAt, this.endAt, true);
     },
     beforeMount: function () {},
     mounted: function () {
@@ -190,6 +195,7 @@ export default {
         selectedDate() {
             this.initTimeline();
             this.eventStore.getEvents(this.startAt, this.endAt, true);
+            this.iterationStore.getIterationsInRange(this.startAt, this.endAt, true);
         },
     },
 };
