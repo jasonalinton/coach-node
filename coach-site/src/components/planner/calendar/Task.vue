@@ -21,12 +21,20 @@
 
 <script>
 import { addDay } from "../../../../utility";
-import { rescheduleIteration, attemptIteration, toggleCompletion, deleteIteration } from "../../../resolvers/todo-resolvers";
 
 export default {
     name: 'Task',
     props: {
         task: Object
+    },
+    created: async function() {
+        let iterationStore = await import(`@/store/iterationStore`);
+        this.iterationStore = iterationStore.useIterationStore();
+    },
+    data: function() {
+        return {
+            iterationStore: undefined
+        }
     },
     computed: {
         isComplete() {
@@ -38,14 +46,10 @@ export default {
         }
     },
     methods: {
-        rescheduleIteration,
-        attemptIteration,
-        toggleCompletion,
         toNextDay,
         markAttempted,
         markComplete,
         markIncomplete,
-        deleteIteration,
         deleteTask,
         onDragStart,
         onDragEnd
@@ -54,11 +58,11 @@ export default {
 
 function toNextDay() {
     let nextDay = addDay(new Date(this.task.startAt));
-    this.rescheduleIteration(this.task.id, nextDay, nextDay, this.$apollo);
+    this.iterationStore.rescheduleIteration(this.task.id, nextDay, nextDay);
 }
 
 function markAttempted() {
-    this.attemptIteration(this.task.id, new Date(this.task.startAt), this.$apollo);
+    this.iterationStore.attemptIteration(this.task.id, new Date(this.task.startAt));
 }
 
 function markComplete() {
@@ -66,18 +70,18 @@ function markComplete() {
     this.task.attemptedAt = now;
     this.task.completedAt = now;
 
-    this.toggleCompletion(this.task, this.$apollo);
+    this.iterationStore.toggleCompletion(this.task.id, this.task.attemptedAt, this.task.completedAt);
 }
 
 function markIncomplete() {
     this.task.attemptedAt = null;
     this.task.completedAt = null;
 
-    this.toggleCompletion(this.task, this.$apollo);
+    this.iterationStore.toggleCompletion(this.task.id, this.task.attemptedAt, this.task.completedAt);
 }
 
 function deleteTask() {
-    this.deleteIteration(this.task.id, this.$apollo);
+    this.iterationStore.deleteIteration(this.task.id);
 }
 
 function onDragStart(ev) {

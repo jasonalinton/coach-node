@@ -67,7 +67,7 @@ import ListItem from '../component/ListItem.vue'
 import { replaceItem, removeItem, today, sortAsc } from '../../../../../utility';
 import { createDefaultTask, toggleCompletion, deleteIteration } from '../../../../resolvers/todo-resolvers';
 import TimeframeRadio from '../component/TimeframeRadio.vue';
-import { firstDayOfWeek, lastDayOfWeek, firstDayOfMonth, lastDayOfMonth } from '../../../../../utility/timeUtility';
+import { firstDayOfWeek, lastDayOfWeek, firstDayOfMonth, lastDayOfMonth, endOfDay } from '../../../../../utility/timeUtility';
 
 export default {
     name: 'TodoPanelByCustom',
@@ -75,14 +75,19 @@ export default {
     props: {
         selectedDate: Date
     },
+    created: async function() {
+        let iterationStore = await import(`@/store/iterationStore`);
+        this.iterationStore = iterationStore.useIterationStore();
+        this.iterationStore.getIterationsInRange(this.startAt, this.endAt, true);
+    },
     data: function () {
         return {
+            iterationStore: undefined,
             todos: {
                 complete: [],
                 pending: [],
                 new: null
             },
-            iterations: [],
             newItemID: -1,
             today: today(),
             allIterations: [],
@@ -104,7 +109,7 @@ export default {
         },
         end() { 
             if (this.timeframe == 'day')
-                return this.selectedDate;
+                return endOfDay(this.selectedDate);
             else if (this.timeframe == 'week')
                 return lastDayOfWeek(this.selectedDate);
             else if (this.timeframe == 'month')
@@ -112,74 +117,28 @@ export default {
             else
                 return null
         },
-        complete() { 
-            return (this.iterations) ? this.iterations.filter(iteration => iteration.attemptedAt) : [] },
-        pending() { return (this.iterations) ? this.iterations.filter(iteration => !iteration.attemptedAt) : [] },
+        iterations() { 
+            if (this.iterationStore) {
+                let iterations = this.iterationStore.iterations;
+                iterations = iterations.filter(iteration => {
+                    return +(new Date(iteration.startAt)) >= +this.start && 
+                           +endOfDay((new Date(iteration.endAt))) <= +this.end &&
+                           !iteration.isRepeat
+                });
+                iterations = iterations.filter(iteration => iteration.idRoutine == null && iteration.idRoutineIteration == null);
+                iterations = sortAsc(iterations, 'startAt');
+
+                return iterations;
+            } else {
+                return [];
+            }
+        },
+        complete() { return this.iterations.filter(iteration => iteration.attemptedAt) },
+        pending() { return this.iterations.filter(iteration => !iteration.attemptedAt) },
         goals() {
             let goals = this.iterations.map(_it => _it.todo).map(_todo => _todo.goals).flat();
             return goals;
         }
-    },
-    apollo: {
-        iterations: {
-            query() { return require('../../../../graphql/query/planner/QueryIterations.gql')},
-            variables() {
-                return {
-                    type: 'todo',
-                    startAt: this.start,
-                    endAt: this.end
-                }
-            },
-            error: function(error) {
-                this.errorMessage = 'Error occurred while loading query'
-                console.log(this.errorMessage, error);
-            },
-            update(data) { 
-                let iterations = data.iterations;
-                let _this = this;
-
-                /* Start & end date must be between timeframe */
-                iterations = iterations.filter(task => 
-                    (new Date(task.startAt).getTime() >= _this.start.getTime() & 
-                        new Date(task.endAt).getTime() >= _this.start.getTime()) &&
-                    (new Date(task.startAt).getTime() <= _this.end.getTime() & 
-                        new Date(task.endAt).getTime() <= _this.end.getTime()));
-
-                /* If timeframe is day */    
-                if (this.start.toDateString() == this.end.toDateString()) {
-                    iterations = iterations.filter(task => new Date(task.startAt).toDateString() == this.start.toDateString() &&
-                            (task.endAt != null && new Date(task.endAt).toDateString() == this.end.toDateString())); 
-                }
-
-                if (!this.showRoutineTasks)
-                    iterations = iterations.filter(_iteration => _iteration.events.length == 0 )
-                iterations = sortAsc(iterations, 'startAt');
-                return iterations;
-            },
-            subscribeToMore: [
-                {
-                    document: require('../../../../graphql/subscription/planner/IterationAdded.gql'),
-                    updateQuery: (previousResult, { subscriptionData: { data: { iterationAdded }} }) => {
-                        previousResult.iterations.splice(0, 0, iterationAdded);
-                        return { iterations: previousResult.iterations };
-                    },
-                },
-                {
-                    document: require('../../../../graphql/subscription/planner/IterationDeleted.gql'),
-                    updateQuery: (previousResult, { subscriptionData: { data: { iterationDeleted }} }) => {
-                        removeItem(iterationDeleted, previousResult.iterations);
-                        return previousResult;
-                    },
-                },
-            ]
-        },
-    },
-    mounted: function() {
-        // An error gets thrown if pollInterval is set with the query
-        this.$apollo.queries.iterations.setOptions({
-            fetchPolicy: 'cache-and-network',
-            pollInterval: 50000,
-        })
     },
     methods: {
         initIteration,
@@ -208,6 +167,14 @@ export default {
                 }
         }
     },
+    watch: {
+        selectedDate() {
+            this.iterationStore.getIterationsInRange(this.start, this.end, true);
+        },
+        timeframe() {
+            this.iterationStore.getIterationsInRange(this.start, this.end, true);
+        },
+    }
 }
 
 function initIteration() {

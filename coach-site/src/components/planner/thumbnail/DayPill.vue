@@ -10,7 +10,6 @@
 
 <script>
 import { today } from "../../../../utility";
-import { rescheduleIteration } from "../../../resolvers/todo-resolvers";
 import { unmapTaskFromRoutineEvent } from "../../../resolvers/planner-resolvers";
 
 export default {
@@ -18,11 +17,19 @@ export default {
         day: Object,
         selectedDate: String,
     },
+    created: async function() {
+        let iterationStore = await import(`@/store/iterationStore`);
+        this.iterationStore = iterationStore.useIterationStore();
+    },
+    data: function () {
+        return {
+            iterationStore: undefined,
+        }
+    },
     methods: {
         status,
         onDrop,
         unmapTaskFromRoutineEvent,
-        rescheduleIteration
     },
 }
 
@@ -50,7 +57,7 @@ function onDrop(ev) {
         if (data.parentType && data.parentType == "routineEvent") {
             this.unmapTaskFromRoutineEvent(data.id, data.parentID, new Date(this.day.date), null, null, this.$apollo);
         } else {
-            this.rescheduleIteration(data.id, new Date(this.day.date), new Date(this.day.date), this.$apollo);
+            this.iterationStore.rescheduleIteration(data.id, new Date(this.day.date), new Date(this.day.date));
         }
 
 
