@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { getEvents } from '../api/eventAPI'
+import { getEvent, getEvents } from '../api/eventAPI'
 import { removeItemByID, replaceOrAddItem, sortAsc } from '../../utility'
 import { getSocketConnection } from './socket'
 
@@ -18,6 +18,16 @@ export const useEventStore = defineStore('event', {
         },
         async fill() {
             this.events = await getEvents();
+        },
+        getEvent(id, shouldRequestServer) {
+            const _this = this;
+            if (shouldRequestServer) {
+                getEvent(id)
+                .then(event => {
+                    replaceOrAddItem(event, _this.events);
+                })
+            }
+            return this.events.find(_event => _event.id == id);
         },
         getEvents(start, end, shouldRequestServer) {
             const _this = this;
@@ -48,6 +58,31 @@ export const useEventStore = defineStore('event', {
                         removeItemByID(eventID, _this.events);
                     })
                     sortAsc(_this.events);
+                });
+
+                // Replace iteration in event
+                connection.on("UpdateIterations", iterations => {
+                    iterations.forEach(iteration => {
+                        _this.events.forEach(_event => {
+                            var containsIteration = _event.iterations.some(_iteration => _iteration.id == iteration.id);
+                            if (containsIteration) {
+                                replaceOrAddItem(iteration, _event.iterations);
+                                sortAsc(_event.iterations);
+                            }
+                        });                       
+                    });
+                });
+                // Remove iteration in event
+                connection.on("RemoveIterations", iterationIDs => {
+                    iterationIDs.forEach(iterationID => {
+                        _this.events.forEach(_event => {
+                            var containsIteration = _event.iterations.some(_iteration => _iteration.id == iterationID);
+                            if (containsIteration) {
+                                removeItemByID(iterationID, _event.iterations);
+                                sortAsc(_event.iterations);
+                            }
+                        });
+                    })
                 });
             }
         }

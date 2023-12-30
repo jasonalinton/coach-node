@@ -61,6 +61,16 @@ export const useIterationStore = defineStore('iteration', {
         rescheduleIteration(iterationID, startAt, endAt) {
             rescheduleIteration(iterationID, startAt, endAt);
         },
+        setCompletion(iterationID, attemptedAt, completedAt) {
+            let iteration = this.iterations.find(x => x.id == iterationID);
+            if (iteration) {
+                iteration.attemptedAt = (attemptedAt) ? attemptedAt.toJSON() : null;
+                iteration.completedAt = (completedAt) ? completedAt.toJSON() : null;
+
+                toggleTaskCompletion(iterationID, attemptedAt, completedAt);
+            }
+        },
+        // This is the wrong name. Technically it's not toggling, its setting the values
         toggleCompletion(iterationID, attemptedAt, completedAt) {
             toggleTaskCompletion(iterationID, attemptedAt, completedAt);
         },

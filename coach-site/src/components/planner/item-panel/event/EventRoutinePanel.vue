@@ -26,8 +26,7 @@
                     </div>
                 </li>
                 <li v-for="(iteration, index) in incompleteIterations" v-bind:key="iteration.id" :style="{ 'z-index': -index }">
-                    <ListItem :iteration="iteration" :parent="_event" :parentType="'routineEvent'" @markComplete="toggleCompletion(iteration, $apollo)" @onDelete="deleteIteration(iteration.id, $apollo)"></ListItem>
-                    <!-- <ListItem :iteration="iteration" @markComplete="markComplete" @onDelete="removeIteration"></ListItem> -->
+                    <ListItem :iteration="iteration" :parent="_event" :parentType="'routineEvent'" @onDelete="deleteIteration(iteration.id, $apollo)"></ListItem>
                 </li>
             </ul>
             <!-- Complete  -->
@@ -35,8 +34,7 @@
                 <div class="header">Completed ({{ completeIterations.length }})</div>
                 <ul v-if="completeIterations" class="item-list">
                     <li v-for="(iteration, index) in completeIterations" v-bind:key="index" :style="{ 'z-index': -index }">
-                            <ListItem class="complete" :iteration="iteration" @markIncomplete="toggleCompletion(iteration, $apollo)" @onDelete="deleteIteration(iteration.id, $apollo)"></ListItem>
-                        <!-- <ListItem class="complete" :iteration="iteration" @markIncomplete="markIncomplete" @onDelete="removeIteration"></ListItem> -->
+                            <ListItem class="complete" :iteration="iteration" @onDelete="deleteIteration(iteration.id, $apollo)"></ListItem>
                     </li>
                 </ul>
             </div>
@@ -52,7 +50,7 @@ import ItemCheckbox from '../component/ItemCheckbox.vue';
 import ListItem from '../component/ListItem.vue';
 import { toShortWeekdayString, startOfDay } from '../../../../../utility/timeUtility';
 import { replaceItem, removeItem, today, sortAsc } from '../../../../../utility';
-import { createDefaultTask, toggleCompletion, deleteIteration } from '../../../../resolvers/todo-resolvers';
+import { createDefaultTask, deleteIteration } from '../../../../resolvers/todo-resolvers';
 
 export default {
     name: 'EventRoutinePanel',
@@ -62,6 +60,7 @@ export default {
     },
     data: function () {
         return {
+            eventStore: undefined,
             iterations: { 
                 complete: [],
                 pending: [],
@@ -69,84 +68,34 @@ export default {
             },
         }
     },
+    created: async function() {
+        let eventStore = await import(`@/store/eventStore`);
+        this.eventStore = eventStore.useEventStore();
+    },
     computed: {
-        completeIterations() {
-            // return this._event.iterations.filter(iteration => iteration.attemptedAt);
-            return this.iterations.complete;
+        eventt() { 
+            if (this.eventStore) {
+                let event = this.eventStore.events.find(_event => _event.id == this._event.id);
+                return event;
+            } else {
+                return undefined;
+            }
         },
-        incompleteIterations() {
-            // return this._event.iterations.filter(iteration => !iteration.attemptedAt);
-            return this.iterations.pending;
-        }
-    },
-    created: function() {
-        this.refreshIterations(this._event);
-    },
-    apollo: {
-        eventt: {
-            query() { return require('../../../../graphql/query/planner/QueryEvent.gql')},
-            variables() {
-                return { id: this._event.id }
-            },
-            error: function(error) {
-                this.errorMessage = 'Error occurred while loading query'
-                console.log(this.errorMessage, error);
-            },
-            update(data) { 
-                this.refreshIterations(data.event);
-                return data.event;
-            },
-            subscribeToMore: [
-                {
-                    document: require('../../../../graphql/subscription/planner/EventAdded.gql'),
-                    updateQuery: (previousResult, { subscriptionData: { data: { eventAdded }} }) => {
-                        if (previousResult.event.id == eventAdded.id)
-                        return { event: previousResult.event };
-                    },
-                },
-                {
-                    document: require('../../../../graphql/subscription/planner/EventUpdated.gql'),
-                    updateQuery: (previousResult, { subscriptionData: { data: { eventUpdated }} }) => {
-                        if (previousResult.event.id == eventUpdated.id)
-                        return { event: previousResult.event };
-                    },
-                },
-                {
-                    document: require('../../../../graphql/subscription/planner/EventDeleted.gql'),
-                    updateQuery: (previousResult, { subscriptionData: { data: { eventDeleted }} }) => {
-                        if (previousResult.event.id == eventDeleted.id) {
-                            previousResult.event = null
-                        return { event: previousResult.event };
-                        }
-                    },
-                },
-                {
-                    document: require('../../../../graphql/subscription/planner/IterationUpdated.gql'),
-                    updateQuery: (previousResult, { subscriptionData: { data: { iterationUpdated }} }) => {
-                        replaceItem(iterationUpdated, previousResult.event.iterations);
-                        previousResult.event.iterations.forEach(_iteration => {
-                            if (_iteration.routineIteration != null) {
-                                replaceItem(iterationUpdated, _iteration.routineIteration.todoIterations);
-                            }
-                        })
-                        // this.refreshIterations(previousResult.event);
-                        return { event: previousResult.event };
-                    },
-                },
-                {
-                    document: require('../../../../graphql/subscription/planner/IterationDeleted.gql'),
-                    updateQuery: (previousResult, { subscriptionData: { data: { iterationDeleted }} }) => {
-                        removeItem(iterationDeleted, previousResult.event.iterations);
-                        previousResult.event.iterations.forEach(_iteration => {
-                            if (_iteration.routineIteration != null) {
-                                removeItem(iterationDeleted, _iteration.routineIteration.todoIterations);
-                            }
-                        })
-                        // this.refreshIterations(previousResult.event);
-                        return { event: previousResult.event };
-                    },
-                },
-            ]
+        completeIterations() { 
+            if (this.eventt) {
+                var complete = this.eventt.iterations.filter(task => task.attemptedAt && task.routineIterationID) 
+                return sortAsc(complete, 'id');
+            } else {
+                return [];
+            }
+        },
+        incompleteIterations() { 
+            if (this.eventt) {
+                var incomplete = this.eventt.iterations.filter(task => !task.attemptedAt && task.routineIterationID) 
+                return sortAsc(incomplete, 'id');
+            } else {
+                return [];
+            }
         },
     },
     methods: {
@@ -155,23 +104,13 @@ export default {
         addTask,
         cancelAddTask,
         markNewTaskComplete,
-        markComplete,
-        markIncomplete,
         createDefaultTask,
-        toggleCompletion,
         deleteIteration,
         replaceItem,
         removeItem,
-        removeIteration,
         today,
         toShortWeekdayString,
-        refreshIterations,
         sortAsc
-    },
-    watch: {
-        _event() {
-            this.refreshIterations(this._event);
-        }
     }
 }
 
@@ -222,33 +161,6 @@ function markNewTaskComplete(iteration) {
 
         this.createDefaultTask(iteration, this.$apollo);
     }
-}
-
-function markComplete(iteration) {
-    replaceItem(iteration, this.iterations.pending);
-    this.toggleCompletion(iteration, this.$apollo);
-}
-
-function markIncomplete(iteration) {
-    replaceItem(iteration, this.iterations.complete);
-    this.toggleCompletion(iteration, this.$apollo);
-}
-
-function removeIteration(iteration) {
-    let list = (iteration.attemptedAt) ? this.iterations.complete : this.iterations.pending;
-    removeItem(iteration, list);
-    this.deleteIteration(iteration.id, this.$apollo);
-}
-
-function refreshIterations(_event) {
-        let complete = [];
-        let pending = [];
-
-        complete = complete.concat(_event.iterations.filter(iteration => iteration.routineIteration == null && iteration.attemptedAt));
-        pending = pending.concat(_event.iterations.filter(iteration => iteration.routineIteration == null && !iteration.attemptedAt));
-
-        this.iterations.complete = sortAsc(complete, 'id');
-        this.iterations.pending = sortAsc(pending, 'id');
 }
 </script>
 

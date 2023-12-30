@@ -55,6 +55,15 @@ export default {
         isUnplanned: Boolean,
         size: String,
     },
+    data: function () {
+        return {
+            iterationStore: undefined
+        }
+    },
+    created: async function() {
+        let iterationStore = await import(`@/store/iterationStore`);
+        this.iterationStore = iterationStore.useIterationStore();
+    },
     computed: {
         checked() {
             if (this.iteration.attemptedAt) {
@@ -84,18 +93,18 @@ export default {
 }
 
 function markComplete() {
-    let now = new Date();
+    let now = new Date().toJSON();
     this.iteration.attemptedAt = now;
     this.iteration.completedAt = now;
 
-    this.$emit('markComplete', this.iteration);
+    this.iterationStore.toggleCompletion(this.iteration.id, this.iteration.attemptedAt, this.iteration.completedAt);
 }
 
 function markIncomplete() {
     this.iteration.attemptedAt = null;
     this.iteration.completedAt = null;
 
-    this.$emit('markIncomplete', this.iteration);
+    this.iterationStore.toggleCompletion(this.iteration.id, this.iteration.attemptedAt, this.iteration.completedAt);
 }
 
 function onEdit() {
