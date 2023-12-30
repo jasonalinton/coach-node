@@ -3,7 +3,7 @@ import DELETE_TODO from '../graphql/mutation/todo/DeleteTodo.gql'
 import UPDATE_TODO from '../graphql/mutation/todo/UpdateTodo.gql'
 
 import CREATE_DEFAULT_TASK from '../graphql/mutation/todo/CreateDefaultTask.gql'
-import TOGGLE_COMPLETION from '../graphql/mutation/todo/ToggleCompletion.gql'
+// import TOGGLE_COMPLETION from '../graphql/mutation/todo/ToggleCompletion.gql'
 // import RESCHEDULE_ITERATION from '../graphql/mutation/todo/RescheduleIteration.gql'
 // import ATTEMPT_ITERATION from '../graphql/mutation/todo/AttemptIteration.gql'
 import DELETE_ITERATION from '../graphql/mutation/todo/DeleteIteration.gql'
@@ -51,16 +51,16 @@ export function createDefaultTask(iteration, apollo) {
     });
 }
 
-export function toggleCompletion(iteration, apollo) {
-    apollo.mutate({
-        mutation: TOGGLE_COMPLETION,
-        variables: { 
-            idIteration: iteration.id,
-            attemptedAt: iteration.attemptedAt,
-            completedAt: iteration.completedAt
-        },
-    });
-}
+// export function toggleCompletion(iteration, apollo) {
+//     apollo.mutate({
+//         mutation: TOGGLE_COMPLETION,
+//         variables: { 
+//             idIteration: iteration.id,
+//             attemptedAt: iteration.attemptedAt,
+//             completedAt: iteration.completedAt
+//         },
+//     });
+// }
 
 // export function rescheduleIteration(id, startAt, endAt, apollo) {
 //     apollo.mutate({

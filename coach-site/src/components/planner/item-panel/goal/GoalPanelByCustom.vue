@@ -42,14 +42,14 @@
                         <!-- Incomplete (Tasks In Timeframe) -->
                         <ul>
                             <li v-for="iteration in iterationsInTimeframe(goal).filter(_itera => !_itera.attemptedAt)" :key="iteration.id" class="todo">
-                                <ListItem :iteration="iteration" :parentType="'goal'" :parent="goal" :size="'sm'" @markComplete="toggleCompletion(iteration, $apollo)"></ListItem>
+                                <ListItem :iteration="iteration" :parentType="'goal'" :parent="goal" :size="'sm'"></ListItem>
                             </li>
                         </ul>
                         <!-- Complete (Tasks In Timeframe) -->
                         <h2 @click="taskInTimeframe.completedCollapsed = !taskInTimeframe.completedCollapsed">Complete ({{ iterationsInTimeframe(goal).filter(_itera => _itera.attemptedAt).length }})</h2>
                         <ul v-show="!taskInTimeframe.completedCollapsed">
                             <li v-for="iteration in iterationsInTimeframe(goal).filter(_itera => _itera.attemptedAt)" :key="iteration.id" class="todo">
-                                <ListItem :iteration="iteration" :parentType="'goal'" :parent="goal" :size="'sm'" @markIncomplete="toggleCompletion(iteration, $apollo)"></ListItem>
+                                <ListItem :iteration="iteration" :parentType="'goal'" :parent="goal" :size="'sm'"></ListItem>
                             </li>
                         </ul>
                     </div>
@@ -64,7 +64,6 @@ import ListItem from '../component/ListItem.vue';
 import TimeframeRadio from '../component/TimeframeRadio.vue';
 import { firstDayOfWeek, lastDayOfWeek, firstDayOfMonth, lastDayOfMonth } from '../../../../../utility/timeUtility';
 import IconButton from '../../../controls/button/IconButton.vue';
-import { toggleCompletion } from '../../../../resolvers/todo-resolvers';
 
 export default {
     name: 'GoalPanelByCustom',
@@ -196,7 +195,6 @@ export default {
         })
     },
     methods: {
-        toggleCompletion,
         incompleteIterations(goal) {
             let iterations = [];
             goal.todos.forEach(_todo => {

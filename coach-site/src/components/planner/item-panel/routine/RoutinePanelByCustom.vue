@@ -51,7 +51,7 @@
 // import ItemCheckbox from '../component/ItemCheckbox.vue';
 import ListItem from '../component/ListItem.vue'
 import { replaceItem, removeItem, today, Percent } from '../../../../../utility';
-import { createDefaultTask, toggleCompletion, deleteIteration } from '../../../../resolvers/todo-resolvers';
+import { createDefaultTask, deleteIteration } from '../../../../resolvers/todo-resolvers';
 
 export default {
     name: 'RoutinePanelByCustom',
@@ -167,7 +167,6 @@ export default {
         markComplete,
         markIncomplete,
         createDefaultTask,
-        toggleCompletion,
         removeIteration,
         deleteIteration,
         replaceItem,
@@ -254,12 +253,12 @@ function markNewTaskComplete(iteration) {
     }
 }
 
-function markComplete(iteration) {
-    this.toggleCompletion(iteration, this.$apollo);
+function markComplete() {
+    
 }
 
-function markIncomplete(iteration) {
-    this.toggleCompletion(iteration, this.$apollo);
+function markIncomplete() {
+    
 }
 
 function removeIteration(iteration) {

@@ -66,7 +66,7 @@ function markAttempted() {
 }
 
 function markComplete() {
-    let now = new Date();
+    let now = new Date().toJSON();
     this.task.attemptedAt = now;
     this.task.completedAt = now;
 

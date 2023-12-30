@@ -15,7 +15,7 @@
                     </div>
                     <ul v-show="!metric.collapsed">
                         <li v-for="todo in metric.todos" :key="todo.id" class="todo">
-                            <ListItem :iteration="todo" @markComplete="markComplete" @onDelete="removeIteration"></ListItem>
+                            <ListItem :iteration="todo" @onDelete="removeIteration"></ListItem>
                         </li>
                     </ul>
                 </div>
@@ -30,7 +30,7 @@ import MetricSelector from '../component/MetricSelector.vue'
 import todoConfig from '../../../../config/items/todo-config';
 import ListItem from '../component/ListItem.vue';
 import { removeItem } from '../../../../../utility';
-import { createDefaultTask, toggleCompletion, deleteIteration } from '../../../../resolvers/todo-resolvers';
+import { createDefaultTask, deleteIteration } from '../../../../resolvers/todo-resolvers';
 
 export default {
     name: 'TodoPanelByMetric',
@@ -94,11 +94,8 @@ export default {
     },
     methods: {
         getMetricTodos,
-        markComplete,
-        markIncomplete,
         removeIteration,
         createDefaultTask,
-        toggleCompletion,
         deleteIteration
     },
     watch: {
@@ -124,14 +121,6 @@ function getMetricTodos(metric) {
     } else {
         return [];
     }
-}
-
-function markComplete(iteration) {
-    this.toggleCompletion(iteration, this.$apollo);
-}
-
-function markIncomplete(iteration) {
-    this.toggleCompletion(iteration, this.$apollo);
 }
 
 function removeIteration(iteration) {

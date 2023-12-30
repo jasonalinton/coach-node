@@ -34,7 +34,6 @@
                     <li v-for="(iteration, index) in pending" v-bind:key="iteration.id" :style="{ 'z-index': -index }">
                         <ListItem :iteration="iteration" 
                                   :isUnplanned="isUnplanned(iteration)"
-                                    @markComplete="toggleCompletion(iteration, $apollo)"
                                     @onEdit="$emit('editIteration', iteration)"
                                     @onDelete="deleteIteration(iteration.id, $apollo)">
                         </ListItem>
@@ -47,7 +46,6 @@
                         <li v-for="(iteration, index) in complete" v-bind:key="index" :style="{ 'z-index': -index }">
                             <ListItem class="complete" 
                                       :iteration="iteration"
-                                        @markIncomplete="toggleCompletion(iteration, $apollo)"
                                         @onEdit="$emit('editIteration', iteration)"
                                         @onDelete="deleteIteration(iteration.id, $apollo)">
                             </ListItem>
@@ -65,7 +63,7 @@ import AddTaskButton from '../component/AddTaskButton.vue'
 import ItemCheckbox from '../component/ItemCheckbox.vue';
 import ListItem from '../component/ListItem.vue'
 import { replaceItem, removeItem, today, sortAsc } from '../../../../../utility';
-import { createDefaultTask, toggleCompletion, deleteIteration } from '../../../../resolvers/todo-resolvers';
+import { createDefaultTask, deleteIteration } from '../../../../resolvers/todo-resolvers';
 import TimeframeRadio from '../component/TimeframeRadio.vue';
 import { firstDayOfWeek, lastDayOfWeek, firstDayOfMonth, lastDayOfMonth, endOfDay } from '../../../../../utility/timeUtility';
 
@@ -147,7 +145,6 @@ export default {
         cancelAddTask,
         markNewTaskComplete,
         createDefaultTask,
-        toggleCompletion,
         deleteIteration,
         replaceItem,
         removeItem,
