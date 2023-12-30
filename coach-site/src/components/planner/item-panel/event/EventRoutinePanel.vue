@@ -62,8 +62,6 @@ export default {
         return {
             eventStore: undefined,
             iterations: { 
-                complete: [],
-                pending: [],
                 new: null
             },
         }
