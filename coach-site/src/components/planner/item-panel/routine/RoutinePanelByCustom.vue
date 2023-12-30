@@ -28,7 +28,7 @@
                     </div> -->
                 <!-- </li> -->
                 <li v-for="(iteration, index) in pending" v-bind:key="iteration.id" :class="{ recommended: iteration.isRecommended }" :style="{ 'z-index': -index }">
-                    <ListItem :iteration="iteration" @markComplete="markComplete" @onDelete="removeIteration"></ListItem>
+                    <ListItem :iteration="iteration" @markComplete="markComplete"></ListItem>
                 </li>
             </ul>
             <!-- Complete  -->
@@ -36,7 +36,7 @@
                 <div class="header">Completed ({{ completeCount }} of {{ totalCount }}) {{ percentComplete }}%</div>
                 <ul v-if="iterations.complete" class="item-list">
                     <li v-for="(iteration, index) in complete" v-bind:key="index" :class="{ recommended: iteration.isRecommended }" :style="{ 'z-index': -index }">
-                        <ListItem class="complete" :iteration="iteration" @markIncomplete="markIncomplete" @onDelete="removeIteration"></ListItem>
+                        <ListItem class="complete" :iteration="iteration" @markIncomplete="markIncomplete"></ListItem>
                     </li>
                 </ul>
             </div>
@@ -51,7 +51,7 @@
 // import ItemCheckbox from '../component/ItemCheckbox.vue';
 import ListItem from '../component/ListItem.vue'
 import { replaceItem, removeItem, today, Percent } from '../../../../../utility';
-import { createDefaultTask, deleteIteration } from '../../../../resolvers/todo-resolvers';
+import { createDefaultTask } from '../../../../resolvers/todo-resolvers';
 
 export default {
     name: 'RoutinePanelByCustom',
@@ -167,8 +167,6 @@ export default {
         markComplete,
         markIncomplete,
         createDefaultTask,
-        removeIteration,
-        deleteIteration,
         replaceItem,
         removeItem,
         newIterations,
@@ -259,10 +257,6 @@ function markComplete() {
 
 function markIncomplete() {
     
-}
-
-function removeIteration(iteration) {
-    this.deleteIteration(iteration.id, this.$apollo);
 }
 
 function newIterations() {

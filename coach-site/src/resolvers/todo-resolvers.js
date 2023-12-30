@@ -6,7 +6,7 @@ import CREATE_DEFAULT_TASK from '../graphql/mutation/todo/CreateDefaultTask.gql'
 // import TOGGLE_COMPLETION from '../graphql/mutation/todo/ToggleCompletion.gql'
 // import RESCHEDULE_ITERATION from '../graphql/mutation/todo/RescheduleIteration.gql'
 // import ATTEMPT_ITERATION from '../graphql/mutation/todo/AttemptIteration.gql'
-import DELETE_ITERATION from '../graphql/mutation/todo/DeleteIteration.gql'
+// import DELETE_ITERATION from '../graphql/mutation/todo/DeleteIteration.gql'
 // import REFRESH_REPETITIVE_TODO from '../graphql/mutation/todo/RefreshRepetitiveTodo.gql'
 
 import { refreshItemPositions } from '../api/itemAPI'
@@ -76,12 +76,12 @@ export function createDefaultTask(iteration, apollo) {
 //     });
 // }
 
-export function deleteIteration(id, apollo) {
-    apollo.mutate({
-        mutation: DELETE_ITERATION,
-        variables: { id },
-    });
-}
+// export function deleteIteration(id, apollo) {
+//     apollo.mutate({
+//         mutation: DELETE_ITERATION,
+//         variables: { id },
+//     });
+// }
 
 // export function refreshRepetitiveTodo(idTodo, apollo) {
 //     apollo.mutate({

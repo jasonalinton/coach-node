@@ -15,7 +15,7 @@
                     </div>
                     <ul v-show="!metric.collapsed">
                         <li v-for="todo in metric.todos" :key="todo.id" class="todo">
-                            <ListItem :iteration="todo" @onDelete="removeIteration"></ListItem>
+                            <ListItem :iteration="todo"></ListItem>
                         </li>
                     </ul>
                 </div>
@@ -30,7 +30,7 @@ import MetricSelector from '../component/MetricSelector.vue'
 import todoConfig from '../../../../config/items/todo-config';
 import ListItem from '../component/ListItem.vue';
 import { removeItem } from '../../../../../utility';
-import { createDefaultTask, deleteIteration } from '../../../../resolvers/todo-resolvers';
+import { createDefaultTask } from '../../../../resolvers/todo-resolvers';
 
 export default {
     name: 'TodoPanelByMetric',
@@ -94,9 +94,7 @@ export default {
     },
     methods: {
         getMetricTodos,
-        removeIteration,
-        createDefaultTask,
-        deleteIteration
+        createDefaultTask
     },
     watch: {
         iterations() {
@@ -113,18 +111,19 @@ export default {
 
 function getMetricTodos(metric) {
     if (this.iterations) {
-        let todos = this.iterations.map(iteration => iteration.todos).flat();
-        return todos.filter(_todo => {
-            let metrics = _todo.metrics.map(_metric => _metric.text.toLowerCase());
-            return (metrics.includes(metric.toLowerCase())) ? true : false;
+        let todos = this.iterations.map(iteration => iteration.todo);
+        let filtered = todos.filter(_todo => {
+            if (_todo) {
+                let metrics = _todo.metrics.map(_metric => _metric.text.toLowerCase());
+                return (metrics.includes(metric.toLowerCase())) ? true : false;
+            } else {
+                return false;
+            }
         });
+        return filtered;
     } else {
         return [];
     }
-}
-
-function removeIteration(iteration) {
-    this.deleteIteration(iteration.id, this.$apollo);
 }
 </script>
 

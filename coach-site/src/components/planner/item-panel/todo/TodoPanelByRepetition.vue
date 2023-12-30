@@ -33,9 +33,7 @@
                     </li> -->
                     <li v-for="(iteration, index) in pending" v-bind:key="iteration.id" :style="{ 'z-index': -index }">
                         <ListItem :iteration="iteration" 
-                                  @markComplete="toggleIterationCompletion(iteration.id, iteration.attemptedAt, iteration.completedAt)"
-                                  @onEdit="$emit('editIteration', iteration)"
-                                  @onDelete="deleteIteration(iteration.id)">
+                                  @onEdit="$emit('editIteration', iteration)">
                         </ListItem>
                     </li>
                 </ul>
@@ -46,9 +44,7 @@
                         <li v-for="(iteration, index) in complete" v-bind:key="index" :style="{ 'z-index': -index }">
                             <ListItem class="complete" 
                                       :iteration="iteration"
-                                      @markIncomplete="toggleIterationCompletion(iteration.id, iteration.attemptedAt, iteration.completedAt)"
-                                      @onEdit="$emit('editIteration', iteration)"
-                                      @onDelete="deleteIteration(iteration.id)">
+                                      @onEdit="$emit('editIteration', iteration)">
                             </ListItem>
                         </li>
                     </ul>
@@ -67,7 +63,6 @@ import { replaceItem, removeItem, today, sortAsc } from '../../../../../utility'
 import { createDefaultTask } from '../../../../resolvers/todo-resolvers';
 import TimeframeRadio from '../component/TimeframeRadio.vue';
 import { firstDayOfWeek, lastDayOfWeek, firstDayOfMonth, lastDayOfMonth, endOfDay } from '../../../../../utility/timeUtility';
-import { toggleIterationCompletion, deleteIteration } from '../../../../api/todoAPI';
 
 export default {
     name: 'TodoPanelByRepetition',
@@ -147,8 +142,6 @@ export default {
         addTask,
         cancelAddTask,
         markNewTaskComplete,
-        toggleIterationCompletion,
-        deleteIteration,
         createDefaultTask,
         replaceItem,
         removeItem,

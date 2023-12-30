@@ -115,7 +115,7 @@ function onEdit() {
 }
 
 function onDelete() {
-    this.$emit('onDelete', this.iteration);
+    this.iterationStore.deleteIteration(this.iteration.id);
 }
 
 function onDragStart(ev) {

@@ -26,7 +26,7 @@
                     </div>
                 </li>
                 <li v-for="(iteration, index) in incompleteIterations" v-bind:key="iteration.id" :style="{ 'z-index': -index }">
-                    <ListItem :iteration="iteration" :parent="_event" :parentType="'routineEvent'" @onDelete="deleteIteration(iteration.id, $apollo)"></ListItem>
+                    <ListItem :iteration="iteration" :parent="_event" :parentType="'routineEvent'"></ListItem>
                 </li>
             </ul>
             <!-- Complete  -->
@@ -34,7 +34,7 @@
                 <div class="header">Completed ({{ completeIterations.length }})</div>
                 <ul v-if="completeIterations" class="item-list">
                     <li v-for="(iteration, index) in completeIterations" v-bind:key="index" :style="{ 'z-index': -index }">
-                            <ListItem class="complete" :iteration="iteration" @onDelete="deleteIteration(iteration.id, $apollo)"></ListItem>
+                            <ListItem class="complete" :iteration="iteration"></ListItem>
                     </li>
                 </ul>
             </div>
@@ -50,7 +50,7 @@ import ItemCheckbox from '../component/ItemCheckbox.vue';
 import ListItem from '../component/ListItem.vue';
 import { toShortWeekdayString, startOfDay } from '../../../../../utility/timeUtility';
 import { replaceItem, removeItem, today, sortAsc } from '../../../../../utility';
-import { createDefaultTask, deleteIteration } from '../../../../resolvers/todo-resolvers';
+import { createDefaultTask } from '../../../../resolvers/todo-resolvers';
 
 export default {
     name: 'EventRoutinePanel',
@@ -103,7 +103,6 @@ export default {
         cancelAddTask,
         markNewTaskComplete,
         createDefaultTask,
-        deleteIteration,
         replaceItem,
         removeItem,
         today,

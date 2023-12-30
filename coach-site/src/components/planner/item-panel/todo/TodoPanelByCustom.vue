@@ -34,8 +34,7 @@
                     <li v-for="(iteration, index) in pending" v-bind:key="iteration.id" :style="{ 'z-index': -index }">
                         <ListItem :iteration="iteration" 
                                   :isUnplanned="isUnplanned(iteration)"
-                                    @onEdit="$emit('editIteration', iteration)"
-                                    @onDelete="deleteIteration(iteration.id, $apollo)">
+                                    @onEdit="$emit('editIteration', iteration)">
                         </ListItem>
                     </li>
                 </ul>
@@ -46,8 +45,7 @@
                         <li v-for="(iteration, index) in complete" v-bind:key="index" :style="{ 'z-index': -index }">
                             <ListItem class="complete" 
                                       :iteration="iteration"
-                                        @onEdit="$emit('editIteration', iteration)"
-                                        @onDelete="deleteIteration(iteration.id, $apollo)">
+                                        @onEdit="$emit('editIteration', iteration)">
                             </ListItem>
                         </li>
                     </ul>
@@ -63,7 +61,7 @@ import AddTaskButton from '../component/AddTaskButton.vue'
 import ItemCheckbox from '../component/ItemCheckbox.vue';
 import ListItem from '../component/ListItem.vue'
 import { replaceItem, removeItem, today, sortAsc } from '../../../../../utility';
-import { createDefaultTask, deleteIteration } from '../../../../resolvers/todo-resolvers';
+import { createDefaultTask } from '../../../../resolvers/todo-resolvers';
 import TimeframeRadio from '../component/TimeframeRadio.vue';
 import { firstDayOfWeek, lastDayOfWeek, firstDayOfMonth, lastDayOfMonth, endOfDay } from '../../../../../utility/timeUtility';
 
@@ -145,7 +143,6 @@ export default {
         cancelAddTask,
         markNewTaskComplete,
         createDefaultTask,
-        deleteIteration,
         replaceItem,
         removeItem,
         show(value) {
