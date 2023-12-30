@@ -3,7 +3,7 @@ import UNMAP_TASK_FROM_ROUTINEEVENT from '../graphql/mutation/event/UnmapTaskFro
 import SCHEDULE_TODO from '../graphql/mutation/todo/ScheduleTodo.gql';
 import MAP_TODO_TO_EVENT from '../graphql/mutation/todo/MapTodoToEvent.gql';
 import REFRESH_REPETITIVE_ITEMS from '../graphql/mutation/item/RefreshRepetitiveItems.gql';
-import UPDATE_ITERATION from '../graphql/mutation/todo/UpdateIteration.gql';
+// import UPDATE_ITERATION from '../graphql/mutation/todo/UpdateIteration.gql';
 
 import { refreshItemPositions } from '../api/itemAPI'
 
@@ -53,12 +53,12 @@ export function refreshRepetitiveItems(apollo) {
     });
 }
 
-export function updateIteration(iteration, apollo) {
-    apollo.mutate({
-        mutation: UPDATE_ITERATION,
-        variables: { iteration },
-        update: () => {
-            refreshItemPositions();
-        }
-    });
-}
+// export function updateIteration(iteration, apollo) {
+//     apollo.mutate({
+//         mutation: UPDATE_ITERATION,
+//         variables: { iteration },
+//         update: () => {
+//             refreshItemPositions();
+//         }
+//     });
+// }

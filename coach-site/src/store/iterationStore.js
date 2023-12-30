@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { getSocketConnection } from './socket'
 import { getRepetitiveTodoIterations } from '../api/todoAPI';
-import { getIterationsInRange, rescheduleIteration, toggleTaskCompletion, 
+import { getIterationsInRange, updateIteration, rescheduleIteration, toggleTaskCompletion, 
     attemptIteration, deleteIteration } from '../api/plannerAPI'
 import { removeItemByID, replaceOrAddItem, sortAsc } from '../../utility'
 
@@ -57,6 +57,9 @@ export const useIterationStore = defineStore('iteration', {
                 return (new Date(iteration.startAt)).getTime() >= startAt && (new Date(iteration.startAt)).getTime() <= endAt &&
                        iteration.idRoutine == null && iteration.idRoutineIteration == null;
             });
+        },
+        updateIteration(iterationID, text, startAt, endAt) {
+            updateIteration(iterationID, text, startAt, endAt);
         },
         rescheduleIteration(iterationID, startAt, endAt) {
             rescheduleIteration(iterationID, startAt, endAt);

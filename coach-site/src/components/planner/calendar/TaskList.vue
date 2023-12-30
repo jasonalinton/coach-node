@@ -40,8 +40,8 @@ export default {
 
                 let iterations = this.iterationStore.iterations;
                 iterations = iterations.filter(iteration => {
-                    return (new Date(iteration.startAt)).getTime() >= start && 
-                           (new Date(iteration.startAt)).getTime() <= end &&
+                    return +new Date(iteration.startAt) >= +start && 
+                           +new Date(iteration.endAt) <= +end &&
                            !iteration.isRepeat;
                 });
                 iterations = iterations.filter(iteration => iteration.idRoutine == null && iteration.idRoutineIteration == null);

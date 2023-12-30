@@ -43,7 +43,6 @@
 import ItemCheckbox from './ItemCheckbox.vue';
 import { clone } from '../../../../../utility'
 import DateSelector from '../../../controls/select/DateSelector.vue'
-import { updateIteration } from '../../../../resolvers/planner-resolvers';
 
 /* 
 Parent Types
@@ -64,6 +63,15 @@ export default {
     name: 'ListItemForm',
     components: { 
         ItemCheckbox, DateSelector
+    },
+    data: function() {
+        return {
+            iterationStore: undefined,
+        }
+    },
+    created: async function() {
+        let iterationStore = await import(`@/store/iterationStore`);
+        this.iterationStore = iterationStore.useIterationStore();
     },
     props: {
         iteration: Object,
@@ -93,7 +101,6 @@ export default {
         markComplete,
         markIncomplete,
         save,
-        updateIteration,
         onEdit,
         onDelete,
     }
@@ -119,7 +126,8 @@ function save(iteration) {
     if (title == "") return;
     if (!iteration.startAt) return;
 
-    this.updateIteration(iteration, this.$apollo);
+    this.iterationStore.updateIteration(iteration.id, iteration.text, 
+        iteration.startAt, iteration.endAt);
 
     this.close();
 }

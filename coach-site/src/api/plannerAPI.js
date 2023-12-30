@@ -43,6 +43,27 @@ export async function getIterationsInRange(startAt, endAt) {
     });
 }
 
+export async function updateIteration(iterationID, text, startAt, endAt) {
+    let data = { iterationID, text, startAt, endAt };
+
+    return fetch(`https://localhost:7104/api/Planner/UpdateIteration`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    })
+    .then((response) => response.json())
+    .then((data) => {
+        if (!data.errorMessage) {
+            return data;
+        } else {
+            this.errorMessage = data.errorMessage;
+        }
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+    });
+}
+
 export async function rescheduleIteration(iterationID, startAt, endAt) {
     let data = { iterationID, startAt, endAt };
 

@@ -1,5 +1,6 @@
 <template>
-    <form :id="`iteration-form`" class="pb-2" v-on:submit.prevent>
+    <form v-if="iteration_updated"
+          :id="`iteration-form`" class="pb-2" v-on:submit.prevent>
         <!-- Header -->
         <div class="d-flex flew-row justify-content-between mt-2">
             <!-- Back Button -->
@@ -12,20 +13,24 @@
         <!-- Title/Text -->
         <div class="form-group mt-3">
             <input class="title textbox" type="text" ref="text" placeholder="Title"
-                    v-model.lazy.trim="iteration.text"
-                    v-on:keyup.enter="save(iteration)"
+                    v-model.lazy.trim="iteration_updated.text"
+                    v-on:keyup.enter="save"
                     spellcheck/>
         </div>
         <!-- Time -->
         <div class="form-group mt-1">
-            <DateSelector class="mt-3" :date="iteration.startAt" @onChange="iteration.startAt = $event"></DateSelector>
+            <DateSelector class="date-selector mt-3" :class="{ 'invalid': !isValid }"
+                          :date="iteration_updated.startAt" @onChange="iteration_updated.startAt = $event"></DateSelector>
             <!-- <span v-if="!iteration.startAt" class="error float-start mb-2">Iteration must have start</span> -->
-            <DateSelector class="mt-3" :date="iteration.endAt" @onChange="iteration.endAt = $event"></DateSelector>
+            <DateSelector class="date-selector mt-3" :class="{ 'invalid': !isValid }"
+                          :date="iteration_updated.endAt" @onChange="iteration_updated.endAt = $event"></DateSelector>
         </div>
         <div class="d-flex flew-row justify-content-end mt-3">
             <!-- Buttons -->
             <div class="form-group d-flex justify-content-end">
-                <button class="btn-sm btn-primary me-2" type="button" @click.prevent="save(iteration)">Save</button>
+                <button class="btn-sm btn-primary me-2" :class="{ 'btn-primary': isValid, 'btn-danger': !isValid }" type="button"
+                        :disabled="!isValid"
+                        @click.prevent="save">Save</button>
                 <button class="btn-sm btn-warning" type="button" @click.prevent="close">Cancel</button>
             </div>
         </div>
@@ -34,26 +39,72 @@
 
 <script>
 import DateSelector from "../../../../controls/select/DateSelector.vue"
-import { updateIteration } from '../../../../../resolvers/planner-resolvers';
 
 export default {
+    name: "IterationForm",
     components: { DateSelector },
     props: {
         iteration: Object
     },
+    data: function() {
+        return {
+            iterationStore: undefined,
+            iteration_updated: undefined,
+            isValid: true
+        }
+    },
+    created: async function() {
+        let iterationStore = await import(`@/store/iterationStore`);
+        this.iterationStore = iterationStore.useIterationStore();
+
+        this.initUpdatedIteration();
+    },
     methods: {
+        initUpdatedIteration,
+        validateTimes,
         save,
         close,
-        updateIteration
     },
+    watch: {
+        iteration() {
+            this.initUpdatedIteration();
+        },
+        'iteration_updated.startAt'() {
+            this.validateTimes();
+        },
+        'iteration_updated.endAt'() {
+            this.validateTimes();
+        }
+    }
 }
 
-function save(iteration) {
-    var title = iteration.text.trim();
-    if (title == "") return;
-    // if (!iteration.startAt) return;
+function initUpdatedIteration() {
+    this.iteration_updated = {
+        id: this.iteration.id,
+        text: this.iteration.text,
+        startAt: this.iteration.startAt,
+        endAt: this.iteration.endAt
+    }
+}
 
-    this.updateIteration(iteration, this.$apollo);
+function validateTimes() {
+    if (this.iteration_updated.startAt && this.iteration_updated.endAt) {
+        if (+new Date(this.iteration_updated.startAt) > +new Date(this.iteration_updated.endAt)) {
+            this.isValid = false;
+        } else if (+new Date(this.iteration_updated.startAt) <= +new Date(this.iteration_updated.endAt)) {
+            this.isValid = true;
+        }
+    } else {
+        this.isValid = true;
+    }
+}
+
+function save() {
+    var title = this.iteration_updated.text.trim();
+    if (title == "") return;
+
+    this.iterationStore.updateIteration(this.iteration_updated.id, this.iteration_updated.text, 
+        this.iteration_updated.startAt, this.iteration_updated.endAt);
 
     this.close();
 }
@@ -85,5 +136,9 @@ input {
     border-color: red
     /* outline-style: none; */
     /* -webkit-appearance: none; */
+}
+
+.date-selector.invalid {
+    border: solid 1px red;
 }
 </style>
