@@ -44,6 +44,9 @@ export const useTodoStore = defineStore('todo', {
         getItems() {
             return this.todos;
         },
+        getItemsByID(ids) {
+            return this.todos.filter(x => ids.includes(x.id));
+        },
         getItem(id) {
             return this.todos.find(x => x.id == id);
         },

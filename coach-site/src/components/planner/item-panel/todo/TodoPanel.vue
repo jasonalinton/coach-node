@@ -3,29 +3,29 @@
         <div class="col h-100">
             <!-- Header -->
             <ItemPanelHeader :title="'todos'" :sort="sort" :selectedDate="selectedDate"
-                                @onSortChange="onSortChange">
+                             @onSortChange="onSortChange">
             </ItemPanelHeader>
             <template v-if="!iteration_Form">
                 <TodoPanelByMetric v-if="sort.by=='Metric'" 
-                                :selectedDate="selectedDate"
-                                    @editIteration="iteration => iteration_Form = iteration">
+                                   :selectedDate="selectedDate"
+                                   @editIteration="iteration => iteration_Form = iteration">
                 </TodoPanelByMetric>
                 <TodoPanelByDate v-if="sort.by=='Date'" 
-                                :selectedDate="selectedDate"
-                                    @editIteration="iteration => iteration_Form = iteration">
+                                 :selectedDate="selectedDate"
+                                 @editIteration="iteration => iteration_Form = iteration">
                 </TodoPanelByDate>
                 <TodoPanelByRepetition v-if="sort.by=='Repetition'" 
                                        :selectedDate="selectedDate"
                                        @editIteration="iteration => iteration_Form = iteration">
                 </TodoPanelByRepetition>
                 <TodoPanelByCustom v-if="sort.by=='Custom'" 
-                                :selectedDate="selectedDate"
-                                    @editIteration="iteration => iteration_Form = iteration">
+                                   :selectedDate="selectedDate"
+                                   @editIteration="iteration => iteration_Form = iteration">
                 </TodoPanelByCustom>
             </template>
             <IterationForm v-if="iteration_Form" 
                            :iteration="iteration_Form"
-                               @closeForm="iteration_Form = null">
+                           @closeForm="iteration_Form = null">
             </IterationForm>
         </div>
     </div>

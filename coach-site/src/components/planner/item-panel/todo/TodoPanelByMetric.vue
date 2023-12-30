@@ -1,5 +1,6 @@
 <template>
     <div class="row g-0">
+        <TimeframeRadio :timeframe="timeframe" @timeframeSelected="timeframe=$event" :container="'todoPanelCustom'"></TimeframeRadio>
         <!-- Toolbar -->
         <div class="metric-selector-wrapper col-12 d-flex flex-column justify-content-between">
             <MetricSelector class="metric-selector" :selected="selectedMetrics"></MetricSelector>
@@ -29,14 +30,21 @@ import IconButton from '../../../controls/button/IconButton.vue'
 import MetricSelector from '../component/MetricSelector.vue'
 import todoConfig from '../../../../config/items/todo-config';
 import ListItem from '../component/ListItem.vue';
-import { removeItem } from '../../../../../utility';
+import { sortAsc } from '../../../../../utility';
 import { createDefaultTask } from '../../../../resolvers/todo-resolvers';
+import TimeframeRadio from '../component/TimeframeRadio.vue';
+import { firstDayOfWeek, lastDayOfWeek, firstDayOfMonth, lastDayOfMonth, endOfDay } from '../../../../../utility/timeUtility';
 
 export default {
     name: 'TodoPanelByMetric',
-    components: { MetricSelector, IconButton, ListItem },
+    components: { MetricSelector, IconButton, ListItem, TimeframeRadio },
+    props: {
+        selectedDate: Date
+    },
     data: function() {
         return {
+            iterationStore: undefined,
+            todoStore: undefined,
             config: todoConfig,
             selectedMetrics: {
                 physical: { selected: true},
@@ -45,47 +53,64 @@ export default {
                 social: { selected: true},
                 financial: { selected: true}
             },
+            timeframe: 'day',
             metrics: []
         }
     },
-    apollo: {
-        iterations: {
-            query() { return require('../../../../graphql/query/todo/QueryTodoIterations.gql')},
-            error: function(error) {
-                this.errorMessage = 'Error occurred while loading query'
-                console.log(this.errorMessage, error);
-            },
-            update(data) { 
-                return data.todoIterations;
-            },
-            subscribeToMore: [
-                {
-                    document: require('../../../../graphql/subscription/planner/IterationAdded.gql'),
-                    updateQuery: (previousResult, { subscriptionData: { data: { iterationAdded }} }) => {
-                        previousResult.todoIterations.splice(0, 0, iterationAdded);
-                        return previousResult;
-                    },
-                },
-                {
-                    document: require('../../../../graphql/subscription/planner/IterationDeleted.gql'),
-                    updateQuery: (previousResult, { subscriptionData: { data: { iterationDeleted }} }) => {
-                        removeItem(iterationDeleted, previousResult.todoIterations);
-                        return previousResult;
-                    },
-                },
-            ]
-        },
-    },
-    created: function() {
-    },
-    mounted: function() {
-        // An error gets thrown if pollInterval is set with the query
-        this.$apollo.queries.iterations.setOptions({
-            fetchPolicy: 'cache-and-network',
-            pollInterval: 50000,
-        })
+    created: async function() {
+        let iterationStore = await import(`@/store/iterationStore`);
+        this.iterationStore = iterationStore.useIterationStore();
+        this.iterationStore.getIterationsInRange(this.startAt, this.endAt, true);
+
+        let todoStore = await import(`@/store/todoStore`);
+        this.todoStore = todoStore.useTodoStore();
     },
     computed: {
+        start() { 
+            if (this.timeframe == 'day')
+                return this.selectedDate;
+            else if (this.timeframe == 'week')
+                return firstDayOfWeek(this.selectedDate);
+            else if (this.timeframe == 'month')
+                return firstDayOfMonth(this.selectedDate);
+            else
+                return null
+        },
+        end() { 
+            if (this.timeframe == 'day')
+                return endOfDay(this.selectedDate);
+            else if (this.timeframe == 'week')
+                return lastDayOfWeek(this.selectedDate);
+            else if (this.timeframe == 'month')
+                return lastDayOfMonth(this.selectedDate);
+            else
+                return null
+        },
+        iterations2() { 
+            if (this.iterationStore) {
+                let iterations = this.iterationStore.iterations;
+                iterations = iterations.filter(iteration => {
+                    return +(new Date(iteration.startAt)) >= +this.start && 
+                           +endOfDay((new Date(iteration.endAt))) <= +this.end &&
+                           !iteration.isRepeat
+                });
+                iterations = iterations.filter(iteration => iteration.idRoutine == null && iteration.idRoutineIteration == null);
+                iterations = sortAsc(iterations, 'startAt');
+
+                return iterations;
+            } else {
+                return [];
+            }
+        },
+        todos() {
+            if (this.todoStore) {
+                let todoIDs = this.iterations2.map(x => x.todo.id);
+                let todos = this.todoStore.getItemsByID(todoIDs);
+                return todos;
+            } else {
+                return [];
+            }
+        },
         physicalTodos() { return this.getMetricTodos('physical'); },
         emotionalTodos() { return this.getMetricTodos('emotional'); },
         mentalTodos() { return this.getMetricTodos('mental'); },
@@ -97,7 +122,7 @@ export default {
         createDefaultTask
     },
     watch: {
-        iterations() {
+        iterations2() {
             this.metrics = [
                 { id: 1, name: 'physical', todos: this.physicalTodos, selected: this.selectedMetrics.physical, collapsed: false },
                 { id: 2, name: 'emotional', todos: this.emotionalTodos, selected: this.selectedMetrics.emotional, collapsed: false },
@@ -110,20 +135,16 @@ export default {
 }
 
 function getMetricTodos(metric) {
-    if (this.iterations) {
-        let todos = this.iterations.map(iteration => iteration.todo);
-        let filtered = todos.filter(_todo => {
-            if (_todo) {
-                let metrics = _todo.metrics.map(_metric => _metric.text.toLowerCase());
-                return (metrics.includes(metric.toLowerCase())) ? true : false;
-            } else {
-                return false;
+    let iterations = [];
+    if (this.iterations2) {
+        this.todos.filter(todo => {
+            if (todo.metrics.some(_metric => _metric.text.toLowerCase() == metric))
+            {
+                iterations.push(this.iterations2.filter(x => x.todo.id == todo.id));
             }
-        });
-        return filtered;
-    } else {
-        return [];
+        })
     }
+    return iterations.flat();
 }
 </script>
 
