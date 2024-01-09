@@ -25,17 +25,35 @@
                                           @addItemClicked="addTodoClicked" @addItem="addItem"/>
                         </div>
                         <div class="col-6 col-sm-4 d-flex flex-column">
-                            <span class="form-head">Repetition</span>
-                            <!-- Quick Add Item -->
-                            <div class="d-flex justify-content-between mt-1 mb-1">
-                                <button class="add-btn my-auto" type="button" @click="addRepeatClicked">
-                                    <img src="/icon/button/add.png" width="10" height="10"/>Add
-                                </button>
-                            </div>
+                            <!-- Repetition -->
                             <div>
-                                <RepeatControl v-for="repeat in repeats.value" :key="repeat.id"
-                                               :repeat="repeat" :itemID="id" itemType="todo" :canEdit="selectedRepeatID == undefined"
-                                               @saveRepeat="saveRepeat" @setSelectedRepeat="setSelectedRepeat" @cancelRepeatEditing="cancelRepeatEditing"/>
+                                <span class="form-head">Repetition</span>
+                                <!-- Quick Add Item -->
+                                <div class="d-flex justify-content-between mt-1 mb-1">
+                                    <button class="add-btn my-auto" type="button" @click="addRepeatClicked">
+                                        <img src="/icon/button/add.png" width="10" height="10"/>Add
+                                    </button>
+                                </div>
+                                <div>
+                                    <RepeatControl v-for="repeat in repeats.value" :key="repeat.id"
+                                                   :repeat="repeat" :itemID="id" itemType="todo" :canEdit="selectedRepeatID == undefined"
+                                                   @saveRepeat="saveRepeat" @setSelectedRepeat="setSelectedRepeat" @cancelRepeatEditing="cancelRepeatEditing"/>
+                                </div>
+                            </div>
+                            <!-- Time -->
+                            <div>
+                                <span class="form-head">Time</span>
+                                <!-- Quick Add Item -->
+                                <div class="d-flex justify-content-between mt-1 mb-1">
+                                    <button class="add-btn my-auto" type="button" @click="addTimeClicked">
+                                        <img src="/icon/button/add.png" width="10" height="10"/>Add
+                                    </button>
+                                </div>
+                                <div>
+                                    <TimePairControl v-for="timePair in timePairs.value" :key="timePair.id"
+                                                     :timePair="timePair" :itemID="id" itemType="todo" :canEdit="selectedTimePairID == undefined"
+                                                     @saveTimePair="saveTimePair" @setSelectedTimePair="setSelectedTimePair" @cancelTimePairEditing="cancelTimePairEditing"/>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -60,13 +78,14 @@
 <script>
 import { saveTodo, mapTodos, createAndMapItem } from '../../../../api/todoAPI';
 import RepeatControl from '../component/RepeatControl.vue';
+import TimePairControl from '../component/TimePairControl.vue';
 import FormItemList from '../component/FormItemList.vue';
 import ItemMapper from '../component/ItemMapper.vue'
 import { clone, replaceItem, addOrReplaceItem, sortItems, sortAsc } from '../../../../../utility';
 
 export default {
     name: "TodoFormModal",
-    components: { RepeatControl, ItemMapper, FormItemList },
+    components: { RepeatControl, TimePairControl, ItemMapper, FormItemList },
     props: {
       id: Number
     },
@@ -84,6 +103,11 @@ export default {
                 added: [],
                 deletedIDs: []
             },
+            timePairs: {
+                value: [],
+                added: [],
+                deletedIDs: []
+            },
             todos: {
                 ids: [],
                 value: [],
@@ -92,6 +116,7 @@ export default {
                 removedIDs: []
             },
             selectedRepeatID: undefined,
+            selectedTimePairID: undefined,
             mapper: {
                 isShown: false,
                 type: undefined
@@ -146,9 +171,17 @@ export default {
             this.repeats.updated = [];
             this.repeats.deletedIDs = [];
 
+            this.timePairs.value = clone(todo.timePairs),
+            this.timePairs.added = [];
+            this.timePairs.updated = [];
+            this.timePairs.deletedIDs = [];
+
         },
         setSelectedRepeat(repeatID) {
             this.selectedRepeatID = repeatID;
+        },
+        setSelectedTimePair(timePairID) {
+            this.selectedTimePairID = timePairID;
         },
         selectTodos(addedIDs, removedIDs) {
             this.todos.addedIDs = [...addedIDs];
@@ -177,6 +210,21 @@ export default {
 
             this.selectedRepeatID = undefined;
         },
+        saveTimePair(timePair) {
+            let _timePair = clone(timePair);
+            _timePair.startTime = (_timePair.startTime) ? _timePair.startTime.value : null;
+            _timePair.endTime = (_timePair.endTime) ? _timePair.endTime.value : null;
+            replaceItem(_timePair, this.timePairs.value);
+            
+            let savedTimePair = clone(timePair);
+            if (timePair.id > 0) {
+                addOrReplaceItem(savedTimePair, this.timePairs.updated);
+            } else {
+                addOrReplaceItem(savedTimePair, this.timePairs.added);
+            }
+
+            this.selectedTimePairID = undefined;
+        },
         save() {
             let model = {
                 id: this.id,
@@ -191,6 +239,12 @@ export default {
         addTodoClicked() {
             this.mapper.isShown = true;
             this.mapper.type = "todo";
+        },
+        addTimeClicked() {
+            let timePairs = sortAsc(this.timePairs.value, 'id');
+            let newTimePair = this.plannerStore.createTimePair();
+            newTimePair.id = (timePairs.length > 0 && timePairs[0].id < 0) ? timePairs[0].id - 1 : -1;
+            this.timePairs.value.unshift(newTimePair);
         },
         addRepeatClicked() {
             let repeats = sortAsc(this.repeats.value, 'id');
@@ -208,6 +262,13 @@ export default {
                 this.repeats.value.splice(index, 1)
             }
             this.selectedRepeatID = undefined;
+        },
+        cancelTimePairEditing(id) {
+            if (id < 0) {
+                let index = this.timePairs.value.findIndex(x => x.id == id);
+                this.timePairs.value.splice(index, 1)
+            }
+            this.selectedTimePairID = undefined;
         }
     },
     watch: {

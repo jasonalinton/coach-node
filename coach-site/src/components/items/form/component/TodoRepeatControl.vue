@@ -413,7 +413,7 @@ function addTime(endpoint, type) {
     }
 }
 
-function setTime(time, type, endpoint) {
+function setTime(time, endpoint, type) {
     let timeModel = this.updatedRepeat[`${endpoint.toLowerCase()}${capitalize(type)}`]
     timeModel.value.dateTime = time;
     if (timeModel.oldValue.dateTime != time && timeModel.oldValue.id) {

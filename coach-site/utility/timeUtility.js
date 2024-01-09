@@ -39,6 +39,18 @@ export function toDateTimeString(dateTimeJSON) {
     return `${dateArray[0]}-${dateArray[1]}-${dateArray[2]} ${timeArray[0]}:${timeArray[1]}`;
 }
 
+export function timeModelToString(model) {
+    let date = new Date(model.dateTime);
+
+    if (model.idMoment == 87) { // Date 
+        return moment(date).format("LL"); // Ex. January 24, 1988
+    } else if (model.idMoment == 88) { // Time
+        return moment(date).format("LT"); // Ex. 7:50 AM
+    } else if (model.idMoment == 89) { // Date-Time
+        return moment(date).format("LLL"); // Ex. January 24, 1988 7:50 AM
+    }
+}
+
 export function dow(dateTime) {
    return date.format(dateTime, "ddd");
 }
@@ -74,6 +86,10 @@ export function firstDayOfWeek(dateTime) {
 
 export function lastDayOfWeek(dateTime) {
     return moment(dateTime).endOf('week').toDate();
+}
+
+export function endOfWeek(dateTime) {
+    return moment(dateTime).endOf('week').endOf('day').toDate();
 }
 
 export function firstDayOfMonth(dateTime) {

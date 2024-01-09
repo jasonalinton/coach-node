@@ -72,7 +72,7 @@ let momentTypes = [
 ]
 
 export default {
-    name: 'TimePairControl',
+    name: 'TimePairControl2',
     components: { TimeControl },
     props: {
         timePairs: Array

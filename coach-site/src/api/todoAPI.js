@@ -38,6 +38,27 @@ export async function saveTodoRepeat(repeat) {
     });
 }
 
+export async function saveTodoTimePair(timePair) {
+    let data = { timePair };
+    
+    return fetch(`https://localhost:7104/api/Todo/SaveTodoTimePair`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (!data.errorMessage) {
+            return data;
+        } else {
+            this.errorMessage = data.errorMessage;
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
+
 export async function createAndMapItem(todoID, itemType, itemText) {
     let data = { todoID, itemType, itemText };
     

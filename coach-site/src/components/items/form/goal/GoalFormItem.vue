@@ -1,12 +1,12 @@
 <template>
-    <div v-if="todo" class="wrapper d-flex flex-column">
-        <div class="todo d-flex flex-row"
+    <div v-if="goal" class="wrapper d-flex flex-column">
+        <div class="goal d-flex flex-row"
              @click="repeatsShown = !repeatsShown">
-            <img src="/icon/todo-icon.png" width="18" height="18"/>
+            <img src="/icon/goal-icon.png" width="18" height="18"/>
             <div class="d-flex flex-column">
                 <div class="d-flex flex-row">
-                    <span class="id">{{ todo.id }}</span>
-                    <span class="text">{{ todo.text }}</span>
+                    <span class="id">{{ goal.id }}</span>
+                    <span class="text">{{ goal.text }}</span>
                 </div>
                 <!-- <div class="d-flex flex-row">
                     <span class="metrics">{{ metricString }}</span>
@@ -16,25 +16,24 @@
         </div>
         <div v-if="repeatsShown" >
             <RepeatControl v-for="repeat in repeats" :key="repeat.id"
-                           :repeat="repeat" :itemID="id" itemType="todo"/>
+                           :repeat="repeat" :itemID="id" itemType="goal"/>
         </div>
     </div>
 </template>
 
 <script>
-import { useTodoStore } from "@/store/todoStore";
+import { useGoalStore } from "@/store/goalStore";
 import { clone, listToString } from "../../../../../utility";
 import RepeatControl from "../component/RepeatControl.vue";
 
 export default {
-    name: "TodoFormItem",
+    name: "GoalFormItem",
     components: { RepeatControl },
     props: {
         id: Number,
         parentID: Number,
         parentType: String,
         displayedRepeatID: Number,
-        parentRepeatIDs: Array,
         routineRepeatIDs: Array
     },
     data: function() {
@@ -44,27 +43,23 @@ export default {
         }
     },
     created: async function() {
-        this.store = useTodoStore();
+        this.store = useGoalStore();
     },
     computed: {
-        todo() {
+        goal() {
             if (this.store) {
-                let todo = this.store.getItem(this.id);
-                return todo;
+                let goal = this.store.getItem(this.id);
+                return goal;
             } else {
                 return null;
             }
         },
         metricString() {
-            return listToString(this.todo.metrics, "text");
+            return listToString(this.goal.metrics, "text");
         },
         repeats() {
-            let repeats = [];
-            if (["goal", "todo"].includes(this.parentType)) {
-                repeats = this.todo.repeats.filter(x => this.parentRepeatIDs.includes(x.id));
-            } else if (this.parentType == "routine") {
-                repeats = this.todo.repeats.filter(x => this.routineRepeatIDs.includes(x.routineRepeatID));
-            }
+            let repeats = this.goal.repeats
+                .filter(x => this.routineRepeatIDs.includes(x.routineRepeatID));
             if (repeats) {
                 return repeats.filter(x => clone(x));
             } else {
@@ -73,12 +68,7 @@ export default {
         },
         repeat() {
             if (this.displayedRepeatID) {
-                let repeat = undefined;
-                if (["goal", "todo"].includes(this.parentType)) {
-                    repeat = this.todo.repeats.find(x => x.id == this.displayedRepeatID);
-                } else if (this.parentType == "routine") {
-                    repeat = this.todo.repeats.find(x => x.routineRepeatID == this.displayedRepeatID);
-                }
+                let repeat = this.goal.repeats.find(x => x.routineRepeatID == this.displayedRepeatID);
                 if (repeat) {
                     return clone(repeat);
                 } else {

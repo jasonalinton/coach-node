@@ -156,6 +156,18 @@ export function toDateTimeString(dateTimeJSON) {
     return `${dateArray[0]}-${dateArray[1]}-${dateArray[2]} ${timeArray[0]}:${timeArray[1]}`;
 }
 
+export function timeModelToString(model) {
+    let date = new Date(model.dateTime);
+
+    if (model.idMoment == 87) { // Date
+        return moment(date).format("LL");
+    } else if (model.idMoment == 88) { // Time
+        return moment(date).format("LT");
+    } else if (model.idMoment == 89) { // Date-Time
+        return moment(date).format("LLL");
+    }
+}
+
 export function toTimezoneOffset(dateTimeJSON) {
     return dateTimeJSON.slice(19, 25);
 }
@@ -168,12 +180,16 @@ export function startOfDay(dateTime) {
     return moment(dateTime).hour(0).minute(0).second(0).millisecond(0).toDate();
 }
 
+export function endOfDay(dateTime) {
+    return moment(dateTime).endOf('day').millisecond(0).toDate();
+}
+
 export function firstDayOfWeek(dateTime) {
     return moment(dateTime).startOf('week').toDate();
 }
 
 export function lastDayOfWeek(dateTime) {
-    return moment(dateTime).endOf('week').toDate();
+    return moment(dateTime).endOf('week').millisecond(0).toDate();
 }
 
 export function firstDayOfMonth(dateTime) {
@@ -181,7 +197,7 @@ export function firstDayOfMonth(dateTime) {
 }
 
 export function lastDayOfMonth(dateTime) {
-    return moment(dateTime).endOf('month').toDate();
+    return moment(dateTime).endOf('month').millisecond(0).toDate();
 }
 
 export function year(dateTime = new Date()) {

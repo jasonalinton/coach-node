@@ -114,7 +114,7 @@
                     </div>
                 </div>
                 <!-- End - Iteration -->
-                <!-- Type -->
+                <!-- Inheritance Type -->
                 <div class="d-flex flex-column">
                     <select class="form-select panel-select" aria-label="select" v-model="updatedRepeat.idInheritance">
                         <option v-for="inheritanceType in inheritanceTypes" v-bind:key="inheritanceType.id" :value="inheritanceType.id">{{inheritanceType.text}}</option> 
@@ -495,7 +495,7 @@ function addTime(endpoint, type) {
 
 }
 
-function setTime(time, type, endpoint) {
+function setTime(time, endpoint, type) {
     let timeModel = this.updatedRepeat[`${endpoint.toLowerCase()}${capitalize(type)}`]
     timeModel.value.dateTime = time;
     if (timeModel.oldValue.dateTime != time && timeModel.oldValue.id) {
@@ -512,10 +512,10 @@ function removeTime(time) {
 
 function validateTimes() {
     this.correctTimes();
-    // If end repeat exists and end repeat is less than or equal to start repeat, invalidate
+    // If end repeat exists and end repeat is less than start repeat, invalidate
     if (this.updatedRepeat.endRepeat.value && 
-        (new Date(this.updatedRepeat.startRepeat.value.dateTime).getTime() 
-        >= new Date(this.updatedRepeat.endRepeat.value.dateTime).getTime())) {
+        (+new Date(this.updatedRepeat.startRepeat.value.dateTime) 
+        > +new Date(this.updatedRepeat.endRepeat.value.dateTime))) {
             this.isValid = false;
             this.updatedRepeat.startRepeat.isValid = false;
             this.updatedRepeat.endRepeat.isValid = false;
@@ -526,8 +526,8 @@ function validateTimes() {
     }
     // If start end iterations exists and end iteration is less than or equal to start iteration, invalidate
     if (this.updatedRepeat.startIteration.value && this.updatedRepeat.endIteration.value &&
-        (new Date(this.updatedRepeat.startIteration.value.dateTime).getTime() 
-        >= new Date(this.updatedRepeat.endIteration.value.dateTime).getTime())) {
+        (+new Date(this.updatedRepeat.startIteration.value.dateTime) 
+        >= +new Date(this.updatedRepeat.endIteration.value.dateTime))) {
             this.isValid = false;
             this.updatedRepeat.startIteration.isValid = false;
             this.updatedRepeat.endIteration.isValid = false;

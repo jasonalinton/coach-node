@@ -152,8 +152,11 @@ export default {
     },
     watch: {
         selectedDate() {
-            this.iterationStore.getRepetitiveTodoIterations(this.start, this.end);
-        }
+            this.iterationStore.getRepetitiveTodoIterations(this.start, this.end, true);
+        },
+        timeframe() {
+            this.iterationStore.getRepetitiveTodoIterations(this.start, this.end, true);
+        },
     }
 }
 

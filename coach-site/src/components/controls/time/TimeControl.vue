@@ -56,7 +56,7 @@ export default {
             this.$emit('addTime', this.endpoint, this.type);
         },
         setTime(time) {
-            this.$emit("setTime", time, this.type, this.endpoint);
+            this.$emit("setTime", time, this.endpoint, this.type);
         },
         removeTime: function() {
             this.$emit('removeTime');

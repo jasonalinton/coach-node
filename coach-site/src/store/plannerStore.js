@@ -26,7 +26,7 @@ export const usePlannerStore = defineStore('planner', {
                 routineRepeatID: null,
                 startRepeat: {
                     id: null,
-                    dateTime: today(new Date()),
+                    dateTime: today(new Date()).toISOString(),
                     type: 80,
                     endPoint: 84,
                     moment: 87,
@@ -62,6 +62,33 @@ export const usePlannerStore = defineStore('planner', {
                 routineRepeat: null,
                 todoRepeats: [],
                 positions: []
+            }
+        },
+        createTimePair() {
+            return {
+                id: null,
+                idTodo: null,
+                idParent: null,
+                idTimeType: 80,
+                idInheritance: 142,
+                idTimeframe: 63,
+                startTime: {
+                    id: null,
+                    dateTime: today(new Date()).toISOString(),
+                    idType: 81,
+                    idEndPoint: 84,
+                    idMoment: 89
+                },
+                endTime: {
+                    id: null,
+                    dateTime: today(new Date()).toISOString(),
+                    idType: 81,
+                    idEndPoint: 84,
+                    idMoment: 89
+                },
+                isOwner: true,
+                isRecommended: false,
+                isEventVisible: false,
             }
         }
     },

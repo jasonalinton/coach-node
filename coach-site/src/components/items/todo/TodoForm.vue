@@ -208,12 +208,12 @@
             @addRepeat="addRepeat"
             @updateRepeat="updateRepeat"
         ></RepeatControl2>
-        <TimePairControl
+        <TimePairControl2
             class="mt-2"
             :timePairs="item.timePairs"
             @addTimePair="addTimePair"
             @updateTimePair="updateTimePair"
-        ></TimePairControl>
+        ></TimePairControl2>
         <div class="d-flex flew-column justify-content-between mt-4">
             <!-- Is Group -->
             <div class="form-check">
@@ -279,11 +279,11 @@
 import SelectItem from "../../controls/SelectItem.vue";
 import { replaceItem, removeItem, clone } from "../../../../utility";
 import RepeatControl2 from "../../controls/time/RepeatControl2.vue";
-import TimePairControl from "../../controls/time/TimePairControl.vue";
+import TimePairControl2 from "../../controls/time/TimePairControl2.vue";
 import { refreshRepetitiveEvents } from "../../../api/todoAPI";
 
 export default {
-    components: { SelectItem, RepeatControl2, TimePairControl },
+    components: { SelectItem, RepeatControl2, TimePairControl2 },
     name: "TodoForm",
     props: {
         config: Object,

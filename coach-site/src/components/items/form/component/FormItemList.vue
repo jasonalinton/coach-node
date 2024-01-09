@@ -12,10 +12,16 @@
                    :style="{'width': 'calc(100% - 55px)'}"/>
         </div>
         <div class="d-flex flex-column">
+            <div v-if="itemType == 'goal'">
+                <GoalFormItem v-for="id in itemIDs" :key="id"
+                              :id="id" :parentID="parentID" :parentType="parentType" 
+                              :routineRepeatIDs="repeatIDs"/>
+            </div>
             <div v-if="itemType == 'todo'">
                 <TodoFormItem v-for="id in itemIDs" :key="id"
                               :id="id" :parentID="parentID" :parentType="parentType" 
-                              :routineRepeatIDs="repeatIDs"/>
+                              :routineRepeatIDs="parentType == 'routine' ? repeatIDs : []"
+                              :parentRepeatIDs="parentType == 'todo' ? repeatIDs : []"/>
             </div>
         </div>
     </div>
@@ -23,11 +29,12 @@
 
 <script>
 import { capitalize } from '../../../../../utility';
+import GoalFormItem from '../goal/GoalFormItem.vue';
 import TodoFormItem from '../todo/TodoFormItem.vue';
 
 export default {
     name: "FormItemList",
-    components: { TodoFormItem },
+    components: { GoalFormItem, TodoFormItem },
     props: {
         itemType: String,
         itemIDs: Array,

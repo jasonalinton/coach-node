@@ -65,12 +65,22 @@ function getMomentID(momentType) {
 }
 
 function getDateTimeString() {
-    if (this.type == "Date") {
-        return this.toDateString(this.time.dateTime);
-    } else if (this.type == "Time") {
-        return this.toTimeString(this.time.dateTime);
-    } else if (this.type == "DateTime") {
-        return this.toDateTimeString(this.time.dateTime);
+    let date = new Date(this.time.dateTime);
+    let dateTimeJSON = date.toJSON();
+
+    if (this.time.idMoment == 87) { // Date
+        let dateTimeArray = dateTimeJSON.split("T");
+        let dateArray = dateTimeArray[0].split("-");
+        return `${dateArray[0]}-${dateArray[1]}-${dateArray[2]}`;
+    } else if (this.time.idMoment == 88) { // Time
+        let dateTimeArray = dateTimeJSON.split("T");
+        let timeArray = dateTimeArray[1].split(":");
+        return `${timeArray[0]}:${timeArray[1]}`;
+    } else if (this.time.idMoment == 89) { // Date-Time
+        let dateTimeArray = dateTimeJSON.split("T");
+        let dateArray = dateTimeArray[0].split("-");
+        let timeArray = dateTimeArray[1].split(":");
+        return `${dateArray[0]}-${dateArray[1]}-${dateArray[2]} ${timeArray[0]}:${timeArray[1]}`;
     }
 }
 
@@ -82,13 +92,15 @@ function onChange(value) {
         }
     } else {
         if (this.type == "Date") {
-            time = value + "T00:00:00" + this.timezoneOffset;
+            let date = new Date(value + " 00:00:00");
+            time = date.toISOString();
         } else if (this.type == "Time") {
             let dateString = this.toDateString(new Date().toJSON());
-            time = `${dateString}T${value}:00${this.timezoneOffset}`;
+            let date = new Date(dateString + " " + value);
+            time = date.toISOString();
         } else if (this.type == "DateTime") {
-            let valueArray = value.split(" ");
-            time = `${valueArray[0]}T${valueArray[1]}:00${this.timezoneOffset}`;
+            let date = new Date(value);
+            time = date.toISOString();
         }
         this.dateTimeString = value;
         this.$emit("setTime", time);
