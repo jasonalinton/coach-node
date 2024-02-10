@@ -8,6 +8,9 @@
 
         <input type="radio" class="btn-check" :id="`month-${container}`" v-model="picked" value="month" />
         <label class="btn btn-outline-primary" :for="`month-${container}`">Month</label>
+
+        <input type="radio" class="btn-check" :id="`year-${container}`" v-model="picked" value="year" />
+        <label class="btn btn-outline-primary" :for="`year-${container}`">Year</label>
     </div>
 </template>
 

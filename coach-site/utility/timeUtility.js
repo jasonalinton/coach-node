@@ -77,27 +77,39 @@ export function startOfDay(dateTime) {
 }
 
 export function endOfDay(dateTime) {
-    return moment(dateTime).endOf('day').toDate();
+    return moment(dateTime).endOf('day').millisecond(0).toDate();
+}
+
+export function endOfWeek(dateTime) {
+    return moment(dateTime).endOf('week').endOf('day').millisecond(0).toDate();
+}
+
+export function endOfYear(dateTime) {
+    return moment(dateTime).endOf('year').endOf('day').millisecond(0).toDate();
 }
 
 export function firstDayOfWeek(dateTime) {
     return moment(dateTime).startOf('week').toDate();
 }
 
-export function lastDayOfWeek(dateTime) {
-    return moment(dateTime).endOf('week').toDate();
-}
-
-export function endOfWeek(dateTime) {
-    return moment(dateTime).endOf('week').endOf('day').toDate();
-}
-
 export function firstDayOfMonth(dateTime) {
     return moment(dateTime).startOf('month').toDate();
 }
 
+export function firstDayOfYear(dateTime) {
+    return moment(dateTime).startOf('year').toDate();
+}
+
+export function lastDayOfWeek(dateTime) {
+    return moment(dateTime).endOf('week').toDate();
+}
+
 export function lastDayOfMonth(dateTime) {
     return moment(dateTime).endOf('month').toDate();
+}
+
+export function lastDayOfYear(dateTime) {
+    return moment(dateTime).endOf('year').toDate();
 }
 
 export function sunday(dateTime) {

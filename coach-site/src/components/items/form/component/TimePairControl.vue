@@ -27,6 +27,18 @@
         <div v-if="isEditing" 
              class="wrapper-edit d-flex flex-row" :class="{ 'isValid': isValid}">
             <div>
+                <!-- Timeframe -->
+                <div class="d-flex flex-column">
+                    <select class="form-select panel-select" aria-label="select" v-model="updatedTimePair.idTimeframe">
+                        <option v-for="timeframe in timeframes" v-bind:key="timeframe.id" :value="timeframe.id">{{timeframe.text}}</option> 
+                    </select> 
+                </div>
+                <!-- Inheritance Type -->
+                <div class="d-flex flex-column">
+                    <select class="form-select panel-select" aria-label="select" v-model="updatedTimePair.idInheritance">
+                        <option v-for="inheritanceType in inheritanceTypes" v-bind:key="inheritanceType.id" :value="inheritanceType.id">{{inheritanceType.text}}</option> 
+                    </select> 
+                </div>
                 <!-- Times -->
                 <div class="d-flex flex-column">
                     <div class="d-flex flex-column">
@@ -42,12 +54,6 @@
                                      @addTime="addTime" @setTime="setTime" @removeTime="removeTime(updatedTimePair.endTime)"></TimeControl>
                     </div>
                 </div>
-                <!-- Inheritance Type -->
-                <!-- <div class="d-flex flex-column">
-                    <select class="form-select panel-select" aria-label="select" v-model="updatedTimePair.idInheritance">
-                        <option v-for="inheritanceType in inheritanceTypes" v-bind:key="inheritanceType.id" :value="inheritanceType.id">{{inheritanceType.text}}</option> 
-                    </select> 
-                </div> -->
                 <!-- Is Event Visible -->
                 <div class="form-check">
                     <input class="form-check-input mt-1" type="checkbox" value="" id="isEventVisible" 
@@ -120,6 +126,21 @@ let timeframes = [
     },
 ]
 
+let inheritanceTypes = [
+    {
+        id: 140,
+        text: "Self"
+    },
+    {
+        id: 141,
+        text: "Children"
+    },
+    {
+        id: 142,
+        text: "Descendants"
+    },
+]
+
 export default {
     name: "TimePairControl",
     components: { TimeControl },
@@ -133,6 +154,7 @@ export default {
         return {
             todoStore: null,
             timeframes: clone(timeframes),
+            inheritanceTypes: clone(inheritanceTypes),
             updatedTimePair: undefined,
             todoTimePairs: [],
             isEditing: false,
@@ -151,7 +173,7 @@ export default {
         timeframe() {
             let timePair = (this.isEditing) ? this.updatedTimePair : this.timePair;
             let timeframe = timeframes.find(x => x.id == timePair.idTimeframe);
-            return (timeframe) ? timeframe.text.toLowerCase() : "";
+            return (timeframe) ? timeframe.text : "";
         },
     },
     methods: {
@@ -252,7 +274,11 @@ function validateTimes() {
                 this.isValid = false;
                 this.updatedTimePair.startTime.isValid = false;
                 this.updatedTimePair.endTime.isValid = false;
-        }   
+        } else {
+            this.isValid = true;
+            this.updatedTimePair.startTime.isValid = true;
+            this.updatedTimePair.endTime.isValid = true;
+        }
     }
 }
 

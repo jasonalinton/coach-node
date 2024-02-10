@@ -62,7 +62,7 @@ import ListItem from '../component/ListItem.vue'
 import { replaceItem, removeItem, today, sortAsc } from '../../../../../utility';
 import { createDefaultTask } from '../../../../resolvers/todo-resolvers';
 import TimeframeRadio from '../component/TimeframeRadio.vue';
-import { firstDayOfWeek, lastDayOfWeek, firstDayOfMonth, lastDayOfMonth, endOfDay } from '../../../../../utility/timeUtility';
+import { firstDayOfWeek, lastDayOfWeek, firstDayOfMonth, lastDayOfMonth, startOfDay, endOfDay } from '../../../../../utility/timeUtility';
 
 export default {
     name: 'TodoPanelByRepetition',
@@ -87,7 +87,7 @@ export default {
             newItemID: -1,
             today: today(),
             allIterations: [],
-            timeframe: 'week',
+            timeframe: 'day',
             showGoals: false,
             showRoutineTasks: false
         }
@@ -118,7 +118,7 @@ export default {
                 let iterations = this.iterationStore.iterations;
                 iterations = iterations.filter(iteration => {
                     return +(new Date(iteration.startAt)) == +this.start && 
-                           +endOfDay((new Date(iteration.endAt))) == +this.end &&
+                           +startOfDay((new Date(iteration.endAt))) == +startOfDay(this.end) &&
                            iteration.isRepeat
                 });
                 iterations = iterations.filter(iteration => iteration.idRoutine == null && iteration.idRoutineIteration == null);

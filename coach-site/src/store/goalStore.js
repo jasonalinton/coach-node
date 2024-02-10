@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { getGoals } from '../api/goalAPI'
+import { getGoals, getGoalsWithTimeframe } from '../api/goalAPI'
 import { repositionItem } from '../api/itemAPI';
 import { replaceOrAddItem, sortAsc } from '../../utility';
 import { getSocketConnection } from './socket'
@@ -53,6 +53,9 @@ export const useGoalStore = defineStore('goal', {
         },
         getItem(id) {
             return this.goals.find(x => x.id == id);
+        },
+        getTimeframeItems(start, end) {
+            return getGoalsWithTimeframe(start, end);
         },
         repositionItem(parentType, itemType, goalID, metricID, newPosition) {
             repositionItem(parentType, itemType, goalID, metricID, newPosition);

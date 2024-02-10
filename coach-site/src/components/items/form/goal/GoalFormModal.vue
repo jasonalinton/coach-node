@@ -86,6 +86,7 @@ import TimePairControl from '../component/TimePairControl.vue';
 import FormItemList from '../component/FormItemList.vue';
 import ItemMapper from '../component/ItemMapper.vue';
 import { clone, replaceItem, addOrReplaceItem, sortItems, sortAsc } from '../../../../../utility';
+import { INHERITANCE } from '../../../../model/constants'
 
 export default {
     name: "GoalFormModal",
@@ -185,6 +186,11 @@ export default {
                 this.timeframes.value.push(x);
                 this.timeframes.original.push(x);
             })
+
+            this.timePairs.value = clone(goal.timePairs),
+            this.timePairs.added = [];
+            this.timePairs.updated = [];
+            this.timePairs.deletedIDs = [];
         },
         setSelectedRepeat(repeatID) {
             this.selectedRepeatID = repeatID;
@@ -299,6 +305,7 @@ export default {
         addTimeClicked() {
             let timePairs = sortAsc(this.timePairs.value, 'id');
             let newTimePair = this.plannerStore.createTimePair();
+            newTimePair.idInheritance = INHERITANCE.SELF;
             newTimePair.id = (timePairs.length > 0 && timePairs[0].id < 0) ? timePairs[0].id - 1 : -1;
             this.timePairs.value.unshift(newTimePair);
         },

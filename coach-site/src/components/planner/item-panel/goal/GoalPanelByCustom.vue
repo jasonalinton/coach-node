@@ -3,6 +3,7 @@
         <TimeframeRadio :timeframe="timeframe" @timeframeSelected="timeframe=$event" :container="'goalPanelCustom'"></TimeframeRadio>
         <!-- Body -->
         <div v-if="goals" class="d-flex flex-column" style="margin-top: 8px">
+            <!-- Header: Goals Mapped to Timeframe -->
             <div class="header d-flex flex-row justify-content-between align-items-center" @click="goalInTimeframe.allCollapsed = !goalInTimeframe.allCollapsed">
                 <h1>Goal Mapped to Timeframe</h1>
                 <IconButton v-if="!goalInTimeframe.allCollapsed" class="caret" src="/icon/icon-expanded.png" :width="24" :height="24"></IconButton>
@@ -29,23 +30,23 @@
             </ul>
         </div>
         <!-- Tasks In Timeframe -->
-        <div v-if="goals" class="d-flex flex-column" style="margin-top: 8px">
+        <!-- <div v-if="goals" class="d-flex flex-column" style="margin-top: 8px">
             <div class="header d-flex flex-row justify-content-between align-items-center" @click="taskTimeCollapsed = !taskTimeCollapsed">
                 <h1>Task Mapped to Timeframe</h1>
                 <IconButton v-if="!taskTimeCollapsed" class="caret" src="/icon/icon-expanded.png" :width="24" :height="24"></IconButton>
                 <IconButton v-if="taskTimeCollapsed" class="caret" src="/icon/icon-collapsed.png" :width="24" :height="24" ></IconButton>
             </div>
              <ul>
-                <li v-for="goal in goalsWithIterationMappedToTimeframe" :key="goal.id" class="goal">
+                <li v-for="goal in goals" :key="goal.id" class="goal">
                     <div class="d-flex flex-column">
                         <div class="goal-item">{{ goal.text }}</div>
-                        <!-- Incomplete (Tasks In Timeframe) -->
+                        Incomplete (Tasks In Timeframe)
                         <ul>
                             <li v-for="iteration in iterationsInTimeframe(goal).filter(_itera => !_itera.attemptedAt)" :key="iteration.id" class="todo">
                                 <ListItem :iteration="iteration" :parentType="'goal'" :parent="goal" :size="'sm'"></ListItem>
                             </li>
                         </ul>
-                        <!-- Complete (Tasks In Timeframe) -->
+                        Complete (Tasks In Timeframe)
                         <h2 @click="taskInTimeframe.completedCollapsed = !taskInTimeframe.completedCollapsed">Complete ({{ iterationsInTimeframe(goal).filter(_itera => _itera.attemptedAt).length }})</h2>
                         <ul v-show="!taskInTimeframe.completedCollapsed">
                             <li v-for="iteration in iterationsInTimeframe(goal).filter(_itera => _itera.attemptedAt)" :key="iteration.id" class="todo">
@@ -55,14 +56,14 @@
                     </div>
                 </li>
             </ul>
-        </div>
+        </div> -->
     </div>
 </template>
 
 <script>
 import ListItem from '../component/ListItem.vue';
 import TimeframeRadio from '../component/TimeframeRadio.vue';
-import { firstDayOfWeek, lastDayOfWeek, firstDayOfMonth, lastDayOfMonth } from '../../../../../utility/timeUtility';
+import { firstDayOfWeek, lastDayOfWeek, firstDayOfMonth, firstDayOfYear, lastDayOfMonth, lastDayOfYear } from '../../../../../utility/timeUtility';
 import IconButton from '../../../controls/button/IconButton.vue';
 
 export default {
@@ -73,6 +74,8 @@ export default {
     },
     data: function() {
         return {
+            goalStore: null,
+            goals: [],
             timeframe: 'day',
             goalInTimeframe: {
                 allCollapsed: false,
@@ -86,6 +89,12 @@ export default {
             taskTimeCollapsed: false
         }
     },
+    created: async function() {
+        let goalStore = await import(`@/store/goalStore`);
+        this.goalStore = goalStore.useGoalStore();
+
+        this.goals = await this.goalStore.getTimeframeItems(this.start, this.end);
+    },
     computed: {
         start() { 
             if (this.timeframe == 'day')
@@ -94,6 +103,8 @@ export default {
                 return firstDayOfWeek(this.selectedDate);
             else if (this.timeframe == 'month')
                 return firstDayOfMonth(this.selectedDate);
+            else if (this.timeframe == 'year')
+                return firstDayOfYear(this.selectedDate);
             else
                 return null
         },
@@ -104,9 +115,19 @@ export default {
                 return lastDayOfWeek(this.selectedDate);
             else if (this.timeframe == 'month')
                 return lastDayOfMonth(this.selectedDate);
+            else if (this.timeframe == 'year')
+                return lastDayOfYear(this.selectedDate);
             else
                 return null
         },
+        // goals() {
+        //     if (this.goalStore) {
+        //         let goals = this.goalStore.getTimeframeItems(this.start, this.end);
+        //         return goals;
+        //     } else {
+        //         return [];
+        //     }
+        // },
         /* Goals with a time-pair that is mapped to the selected timeframe */
         goalsMappedToTimeframe() {
             let _this = this;
@@ -185,8 +206,6 @@ export default {
             }
         },
     },
-    created: function() {
-    },
     mounted: function() {
         // An error gets thrown if pollInterval is set with the query
         this.$apollo.queries.goals.setOptions({
@@ -231,6 +250,12 @@ export default {
         }
     },
     watch: {
+        async timeframe() {
+            this.goals = await this.goalStore.getTimeframeItems(this.start, this.end);
+        },
+        async selectedDate() {
+            this.goals = await this.goalStore.getTimeframeItems(this.start, this.end);
+        },
     }
 }
 
