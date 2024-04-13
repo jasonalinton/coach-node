@@ -9,12 +9,72 @@ export function percent(number, decimalPlaces = 0) {
     return new Intl.NumberFormat([ ], { style: 'percent', minimumFractionDigits: decimalPlaces }).format(number);
 }
 
+export function sortAsc(array, prop) {
+    prop = prop || 'id';
+
+    return array.sort((a, b) => a[prop] - b[prop]);
+}
+
 export function sortDesc(array, prop) {
+    prop = prop || 'id';
+
     return array.sort((a, b) => b[prop] - a[prop]);
 }
 
-export function sortAsc(array, prop) {
-    return array.sort((a, b) => a[prop] - b[prop]);
+export function sortDateAsc(array, dateProp) {
+    return array.sort((a, b) => new Date(a[dateProp]) - new Date(b[dateProp]));
+}
+
+export function sortDateDesc(array, dateProp) {
+    return array.sort((a, b) => new Date(b[dateProp]) - new Date(a[dateProp]));
+}
+
+export function sortAlphaAsc(array, prop) {
+    if (prop) {
+        return array.sort((a, b) => {
+            if (a[prop].toLowerCase() < b[prop].toLowerCase()) {
+                return -1;
+            } 
+            if (a[prop].toLowerCase() > b[prop].toLowerCase()) {
+                return 1;
+            }
+            return 0;
+        });
+    } else {
+        return array.sort((a, b) => {
+            if (a.toLowerCase() < b.toLowerCase()) {
+                return -1;
+            } 
+            if (a.toLowerCase() > b.toLowerCase()) {
+                return 1;
+            }
+            return 0;
+        });
+    }
+}
+
+export function sortAlphaDesc(array, prop) {
+    if (prop) {
+        return array.sort((a, b) => {
+            if (b[prop].toLowerCase() < a[prop].toLowerCase()) {
+                return -1;
+            } 
+            if (b[prop].toLowerCase() > a[prop].toLowerCase()) {
+                return 1;
+            }
+            return 0;
+        });
+    } else {
+        return array.sort((a, b) => {
+            if (b.toLowerCase() < a.toLowerCase()) {
+                return -1;
+            } 
+            if (b.toLowerCase() > a.toLowerCase()) {
+                return 1;
+            }
+            return 0;
+        });
+    }
 }
 
 export function listToString(objectArray, property) {

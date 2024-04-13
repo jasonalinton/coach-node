@@ -1,6 +1,7 @@
 import { HubConnectionBuilder } from '@microsoft/signalr';
 
 var hubConnections = {
+    metricHub: undefined,
     goalHub: undefined,
     todoHub: undefined,
     routineHub: undefined,

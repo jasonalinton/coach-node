@@ -2,7 +2,8 @@
     <div class="item-panel-wrapper row g-0">
         <div class="col h-100" :style="{'border-left': '1px solid rgba(220, 220, 220, .5)'}">
             <div :style="{'width': '100%', 'height': '64px', 'border-bottom': '1px solid rgba(220, 220, 220, .5)'}"></div>
-            <div :style="{'width': '56px', 'height': '258px', 'padding-left': '8px', 'overflow': 'hidden'}">
+            <!-- <div :style="{'width': '56px', 'height': '258px', 'padding-left': '8px', 'overflow': 'hidden'}"> -->
+            <div :style="{'width': '56px', 'padding-left': '8px', 'overflow': 'hidden'}">
                 <div class="d-flex flex-row mb-1">
                     <img class="todo" :class="[{ active: selectedPanel == 'todo' }]" src='/icon/todo-icon.png' width="40" height="40" :style="{'margin-top': '8px'}"
                          @click="setSelectedPanel('todo')"/>
@@ -33,10 +34,16 @@
                     <div v-if="selectedPanel == 'event'">
                     <div :style="{ 'width': '12px', 'height': '40px', 'background-color': '#F4511E', 'margin-left': '3px', 'border-radius': '4px'}"></div></div>
                 </div>
+                <div class="d-flex flex-row mb-1">
+                    <img class="workout" :class="[{ active: selectedPanel == 'workout' }]" src='/icon/workout-icon.png' width="40" height="40" 
+                         @click="setSelectedPanel('workout')"/>
+                    <div v-if="selectedPanel == 'workout'">
+                    <div :style="{ 'width': '12px', 'height': '40px', 'background-color': '#F4511E', 'margin-left': '3px', 'border-radius': '4px'}"></div></div>
+                </div>
             </div>
-            <div class="d-flex flex-column">
+            <!-- <div class="d-flex flex-column">
                 <img class="icon-button m-auto mb-0" src='/icon/refresh-icon.png' width="40" height="40" @click="refreshRepetitive"/>
-            </div>
+            </div> -->
         </div>
         <div class="col-auto h-100">
             <MetricPanel v-show="selectedPanel == 'metric'" :selectedDate="selectedDate" class="item-panel"/>
@@ -45,6 +52,7 @@
             <RoutinePanel v-show="selectedPanel == 'routine'" :selectedDate="selectedDate" class="item-panel"/>
             <TaskRoutinePanel v-show="selectedPanel == 'task-routine'" :selectedDate="selectedDate" class="item-panel"/>
             <EventPanel v-show="selectedPanel == 'event'" :props="eventPanelProps" class="item-panel"/>
+            <WorkoutPanel v-show="selectedPanel == 'workout'" class="item-panel"/>
         </div>
     </div>
 </template>
@@ -56,11 +64,12 @@ import TodoPanel from './todo/TodoPanel.vue'
 import RoutinePanel from './routine/RoutinePanel.vue'
 import TaskRoutinePanel from './TaskRoutinePanel.vue'
 import EventPanel from './event/EventPanel.vue'
+import WorkoutPanel from './workout/WorkoutPanel.vue'
 import { refreshRepetitiveItems } from '../../../resolvers/planner-resolvers'
 
 export default {
     name: 'ItemPanel',
-    components: { MetricPanel, GoalPanel, TodoPanel, RoutinePanel, TaskRoutinePanel, EventPanel },
+    components: { MetricPanel, GoalPanel, TodoPanel, RoutinePanel, TaskRoutinePanel, EventPanel, WorkoutPanel },
     props: {
         selectedDate: Date,
         selectPanel: Object,
@@ -137,6 +146,11 @@ img.task-routine:hover, img.task-routine.active {
 }
 
 img.event:hover, img.event.active {
+    background-color: rgba(244, 81, 30, .08);
+    border-radius: 20px;
+}
+
+img.workout:hover, img.workout.active {
     background-color: rgba(244, 81, 30, .08);
     border-radius: 20px;
 }

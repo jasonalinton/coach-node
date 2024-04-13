@@ -24,6 +24,11 @@ export function toShortWeekdayString(dateTimeJSON) {
     return date.format(datetime, 'ddd, MMM D')
 }
 
+export function toShortTimeString(dateTimeJSON) {
+    let datetime = new Date(dateTimeJSON);
+    return date.format(datetime, 'h:m A')
+}
+
 /* Get hour portion of date */
 export function getHour(dateTimeJSON) {
     let date = new Date(dateTimeJSON);
@@ -49,6 +54,21 @@ export function timeModelToString(model) {
     } else if (model.idMoment == 89) { // Date-Time
         return moment(date).format("LLL"); // Ex. January 24, 1988 7:50 AM
     }
+}
+
+export function timeSince(dateTime, now) {
+    now = now || Date.now();
+
+    let difference = now - dateTime.getTime();
+    let hours = difference/1000/60/60;
+    let hours_floor = Math.floor(hours);
+    let minutes = (hours - hours_floor) * 60;
+    let minutes_floor = Math.floor(minutes);
+    let seconds_floor = Math.floor((minutes - minutes_floor) * 60);
+    let secondsString = (seconds_floor)
+        .toLocaleString(undefined, {minimumIntegerDigits: 2, useGrouping:false});
+
+    return `${hours_floor}:${minutes_floor}:${secondsString}`;
 }
 
 export function dow(dateTime) {
