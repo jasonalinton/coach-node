@@ -63,7 +63,7 @@ export default {
         },
         completedAt() {
             if (this.isComplete) {
-                return `${toShortWeekdayString(this.workout.iteration.completedAt)}, ${toShortTimeString(this.workout.iteration.completedAt)}`;
+                return `${toShortWeekdayString(this.workout.iteration.startAt)}, ${toShortTimeString(this.workout.iteration.startAt)}`;
             } else {
                 return undefined;
             }

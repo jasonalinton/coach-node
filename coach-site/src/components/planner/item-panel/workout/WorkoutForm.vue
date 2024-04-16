@@ -516,6 +516,39 @@ function save() {
         model.isUpdated = true;
     }
 
+    /* Set time */
+    if (model.isNew) {
+        if (this.startAt.value) {
+            model.startAt = {
+                value: this.startAt.value,
+                isUpdated: true
+            }
+            model.isUpdated = true;
+        }
+        if (this.endAt.value) {
+            model.endAt = {
+                value: this.endAt.value,
+                isUpdated: true
+            }
+            model.isUpdated = true;
+        }
+    } else {
+        if (this.startAt.value && this.startAt.value != this.startAt.oldValue) {
+            model.startAt = {
+                value: this.startAt.value,
+                isUpdated: true
+            }
+            model.isUpdated = true;
+        }
+        if (this.endAt.value && this.endAt.value != this.endAt.oldValue) {
+            model.endAt = {
+                value: this.endAt.value,
+                isUpdated: true
+            }
+            model.isUpdated = true;
+        }
+    }
+
     /* Set exercises */
     let exercises = [];
     this.exercises.value.forEach(e => {
