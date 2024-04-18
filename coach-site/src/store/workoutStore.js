@@ -89,6 +89,21 @@ export const useWorkoutStore = defineStore('workout', {
         getVariations() {
             return this.variations;
         },
+        addVariation(name, typeID, typeName) {
+            let variation_existing = this.variations.find(v => v.name == name && v.type.id == typeID);
+            if (!variation_existing) {
+                let variation_new = {
+                    name,
+                    description: undefined,
+                    type: {
+                        id: typeID,
+                        text: typeName
+                    }
+                }
+                this.variations.splice(0, 0, variation_new);
+            }
+
+        },
         getMuscleGroup(id) {
             return this.muscleGroups.find(x => x.id == id);
         },

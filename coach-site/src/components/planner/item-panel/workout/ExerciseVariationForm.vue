@@ -8,11 +8,18 @@
             <input id="name" class="textbox mb-2" type="text" ref="name"  placeholder="Variation Name"
             v-model.lazy.trim="name.value" 
             spellcheck/>
+            <!-- Description -->
             <textarea id="description" class="textarea" 
                     type="text"
                     placeholder="Variation Description"
                     v-model="description.value"
                     spellcheck></textarea>
+            <!-- Type -->
+            <div class="d-flex flex-column mt-2">
+                <select class="form-select panel-select" aria-label="select" v-model="type.value.id">
+                    <option v-for="_type in types" v-bind:key="_type.id" :value="_type.id">{{_type.text}}</option> 
+                </select> 
+            </div>
             <button type="button" class="btn btn-primary mt-2" @click="save()">Save</button>
             <!-- Muscle Groups -->
             <div class="d-flex flex-column flex-grow-1">
@@ -46,6 +53,7 @@
 <script>
 import { useWorkoutStore } from '../../../../store/workoutStore';
 import { clone } from '../../../../../utility';
+import { exerciseVariationTypes } from '../../../../model/types'
 import MuscleSelector from './MuscleSelector.vue';
 
 export default {
@@ -58,12 +66,19 @@ export default {
     data: function () {
         return {
             workoutStore: null,
+            variation: undefined,
+            types: clone(exerciseVariationTypes),
             name: {
                 value: undefined,
                 oldValue: undefined,
                 isUpdated: false
             },
             description: {
+                value: undefined,
+                oldValue: undefined,
+                isUpdated: false
+            },
+            type: {
                 value: undefined,
                 oldValue: undefined,
                 isUpdated: false
@@ -87,24 +102,44 @@ export default {
 }
 
 function setProps() {
-    if (this.exerciseVariation) {
-        this.name = clone(this.exerciseVariation.name);
-        this.description = clone(this.exerciseVariation.description);
-        this.muscleGroups = clone(this.exerciseVariation.muscleGroups);
+    if (!this.exerciseVariation) {
+        this.variation = {
+            id: undefined,
+            name:  {
+                value: "",
+                oldValue: "",
+                isUpdated: false
+            },
+            description: {
+                value: "",
+                oldValue: "",
+                isUpdated: false
+            },
+            muscleGroups: {
+                value: [],
+                oldValue: [],
+                isUpdated: false
+            },
+            type: {
+                value: {
+                    id: 148, // Default value
+                    text: "Misc"
+                },
+                oldValue: {
+                    id: 0,
+                    text: ""
+                },
+                isUpdated: false
+            }
+        };
     } else {
-        this.name = {
-            value: "",
-            oldValue: ""
-        }
-        this.description = {
-            value: "",
-            oldValue: ""
-        }
-        this.muscleGroups = {
-            value: [],
-            oldValue: []
-        }
+        this.variation = clone(this.exerciseVariation);
     }
+
+    this.name = clone(this.variation.name);
+    this.description = clone(this.variation.description);
+    this.type = clone(this.variation.type);
+    this.muscleGroups = clone(this.variation.muscleGroups);
 }
 
 function setMuscleGroups(selectedGroups) {
@@ -115,7 +150,7 @@ function setMuscleGroups(selectedGroups) {
 function save() {
     let _this = this;
     let errors = [];
-    let model = clone(this.exerciseVariation);
+    let model = clone(this.variation);
     model.isUpdated = false;
     if (model.id == undefined) {
         model.isNew = true;
@@ -148,6 +183,16 @@ function save() {
         model.description.isUpdated = false;
     }   
 
+    if (this.type.value.id) {
+        if (this.type.value.id != this.type.oldValue.id) {
+            model.type.value = this.types.find(x => x.id == this.type.value.id);
+            model.type.isUpdated = true;
+            model.isUpdated = true;
+        }
+    } else { 
+        errors.push("Variation must have a type");
+    }
+
     /* Set Muscle Groups */
     let muscleGroups = [];
     this.muscleGroups.value.forEach(mg => {
@@ -164,6 +209,8 @@ function save() {
                     isUpdated: true
                 });
                 model.isUpdated = true;
+            } else {
+                muscleGroups.push(original);
             }
         } else { // added
             muscleGroups.push({

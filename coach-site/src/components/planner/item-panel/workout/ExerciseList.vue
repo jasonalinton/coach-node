@@ -32,7 +32,6 @@
          </div>
          <ExerciseForm v-if="selectedExerciseID" 
                        :id="selectedExerciseID"
-                       @selectView="selectView"
                        @back="back"/>
      </div>
 </template>
@@ -67,7 +66,7 @@ export default {
     computed: {
         exercises() {
             if (this.workoutStore) {
-                let exercises = this.workoutStore.getExercises();
+                let exercises = clone(this.workoutStore.getExercises());
                 if (this.isSelector) {
                     exercises.forEach(e => { 
                         e.isSelected = (this.selectedIDs.includes(e.id)) ? true : false;
@@ -80,6 +79,7 @@ export default {
         }
     },
     methods: {
+        setExerciseList,
         createExercise,
         selectExercise,
         done,
@@ -87,31 +87,38 @@ export default {
     },
     watch: {
         exercises() {
-            let exerciseList = [];
-            if (this.exercises.length > 0) {
-                let exercises = sortAlphaAsc(this.exercises, "name");
-                if (this.searchTerm && this.searchTerm != "") {
-                    let _searchTerm = this.searchTerm;
-                    exercises = exercises.filter(x => x.name.toLowerCase().includes(_searchTerm))
-                }
-                let letter = exercises[0].name.charAt(0).toLowerCase();
-                let letterList = [];
-                exerciseList.push({ letter: letter.toUpperCase(), exercises: letterList });
-                exercises.forEach(e => {
-
-                    let _letter = e.name.charAt(0).toLowerCase();
-                    if (_letter == letter) {
-                        letterList.push(e);
-                    } else {
-                        letter = _letter;
-                        letterList = [ e ]
-                        exerciseList.push({ letter: letter.toUpperCase(), exercises: letterList });
-                    }
-                });
-            }
-            this.exerciseList = exerciseList;
+            this.setExerciseList();
+        },
+        searchTerm() {
+            this.setExerciseList();
         }
     }
+}
+
+function setExerciseList() {
+        let exerciseList = [];
+        if (this.exercises.length > 0) {
+            let exercises = sortAlphaAsc(this.exercises, "name");
+            if (this.searchTerm && this.searchTerm != "") {
+                let _searchTerm = this.searchTerm;
+                exercises = exercises.filter(x => x.name.toLowerCase().includes(_searchTerm))
+            }
+            let letter = exercises[0].name.charAt(0).toLowerCase();
+            let letterList = [];
+            exerciseList.push({ letter: letter.toUpperCase(), exercises: letterList });
+            exercises.forEach(e => {
+
+                let _letter = e.name.charAt(0).toLowerCase();
+                if (_letter == letter) {
+                    letterList.push(e);
+                } else {
+                    letter = _letter;
+                    letterList = [ e ]
+                    exerciseList.push({ letter: letter.toUpperCase(), exercises: letterList });
+                }
+            });
+        }
+        this.exerciseList = exerciseList;
 }
 
 function createExercise() {
@@ -130,13 +137,11 @@ function selectExercise(exercise) {
 
 function done() {
     let selectedIDs = [];
-    this.exerciseList.forEach(list => {
-        list.exercises.forEach(e => {
-            if (e.isSelected) {
-                selectedIDs.push(e.id);
-            }
-        });
-    })
+    this.exercises.forEach(e => {
+        if (e.isSelected) {
+            selectedIDs.push(e.id);
+        }
+    });
     this.$emit("setExercises", selectedIDs);
 }
 

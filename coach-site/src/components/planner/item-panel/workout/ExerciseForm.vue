@@ -42,13 +42,25 @@
                 <img class="icon-button" src="/icon/add-button.png" :width="20" :height="20" 
                 @click="selectedPanel = 'variationList'" />
             </div>
-            <div class="d-flex flex-column gap-2 mb-2">
-                <div class="variation-item d-flex flex-row" 
-                    v-for="(variation, index) in variations.value" :key="index"
-                    @click="selectVariation(variation)">
-                    <div class="image flex-shrink-0"></div>
-                    <div class="label d-flex flex-column">
-                        <div class="name">{{ variation.name.value }}</div>
+            <div class="d-flex flex-column flex-grow-1 gap-2">
+                <div v-for="(list, name, index) in variationList" :key="index">
+                    <div class="letter text-start">{{ name }}</div>
+                    <div class="d-flex flex-column gap-2">
+                        <div class="variation-item d-flex flex-row flex-grow-1" 
+                             v-for="(variation, index2) in list" :key="index2"
+                             @click="selectVariation(variation)">
+                             <div class="d-flex flex-row">
+                                 <div class="image flex-shrink-0"></div>
+                                 <div class="label d-flex flex-column">
+                                     <div class="name">{{ variation.name.value }}</div>
+                                 </div>
+                             </div>
+                            <!-- Delete Button -->
+                            <div class="button-group d-flex flex-column">
+                                <img class="icon-button" 
+                                    src='/icon/delete-button.png' width="16" height="16"/>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -59,8 +71,9 @@
                         @back="selectedPanel = 'form'"/>
         <VariationList v-if="selectedPanel == 'variationList'"
                        :exercise="exercise"
-                       :selectedIDs="variationIDs"
+                       :selectedVariations="selectedVariations"
                        @setVariations="setVariations"
+                       @saveExerciseVariation="saveExerciseVariation"
                        @back="selectedPanel = 'form'"/>
         <ExerciseVariationForm v-if="selectedPanel == 'exerciseVariationForm'"
                                :exerciseVariation="selectedVariation"
@@ -72,7 +85,7 @@
 
 <script>
 import { useWorkoutStore } from '../../../../store/workoutStore';
-import { clone, replaceOrAddItem, sortAsc } from '../../../../../utility';
+import { clone, replaceOrAddItem, sortAsc, sortAlphaAsc } from '../../../../../utility';
 import MuscleSelector from './MuscleSelector.vue';
 import VariationList from './VariationList.vue';
 import ExerciseVariationForm from './ExerciseVariationForm.vue';
@@ -117,30 +130,48 @@ export default {
         this.setProps();
     },
     computed: {
-        variationIDs() {
-            return this.variations.value.map(v => v.variationID);
+        selectedVariations() {
+            return this.variations.value.map(v => {
+                return {
+                    name: v.name.value,
+                    type: {
+                        id: v.type.value.id,
+                        text: v.type.value.text
+                    }
+                }
+            });
         },
-        // variationList() {
-        //     let variationList = {};
-        //     if (this.variations.value.length > 0) {
-        //         /* Sort variations */
-        //         let variations = sortAlphaAsc(this.variations.value, "name");
+        variationList() {
+            let variationList = {};
+            if (this.variations.value.length > 0) {
+                /* Sort variations */
+                // let variations = sortAlphaAsc(this.variations.value, "name");
+                let variations2 = clone(this.variations.value);
+                let variations = variations2.sort((a, b) => {
+                    if (a.name.value.toLowerCase() < b.name.value.toLowerCase()) {
+                        return -1;
+                    } 
+                    if (a.name.value.toLowerCase() > b.name.value.toLowerCase()) {
+                        return 1;
+                    }
+                    return 0;
+                });
 
-        //         /* Sort types */
-        //         let types = variations.map(x => x.type.text);
-        //         types = [... new Set(types)];
-        //         types = sortAlphaAsc(types);
-        //         types.forEach(type => {
-        //             variationList[type] = [];
-        //         })
+                /* Sort types */
+                let types = variations.map(x => x.type.value.text);
+                types = [... new Set(types)];
+                types = sortAlphaAsc(types);
+                types.forEach(type => {
+                    variationList[type] = [];
+                })
 
-        //         /* Create variation list object */
-        //         variations.forEach( v => {
-        //             variationList[v.type.text].push(v);
-        //         });
-        //     }
-        //     return variationList;
-        // }
+                /* Create variation list object */
+                variations.forEach( v => {
+                    variationList[v.type.value.text].push(v);
+                });
+            }
+            return variationList;
+        }
     },
     mounted() {
         this.$refs.name.focus();
@@ -192,6 +223,11 @@ function setProps() {
                 v_new.description.oldValue = v.description || "";
                 v_new.description.isUpdated = false;
 
+                v_new.type = {};
+                v_new.type.value = clone(v.type)
+                v_new.type.oldValue = clone(v.type)
+                v_new.type.isUpdated = false;
+
                 v_new.muscleGroups.value = clone(v.muscleGroups);
                 v_new.muscleGroups.oldValue = clone(v.muscleGroups);
 
@@ -227,7 +263,7 @@ function setProps() {
         this.description.value = this.exercise.description;
         this.description.oldValue = this.exercise.description;
         this.description.isUpdated = false;
-        
+                
         this.muscleGroups.value = [];
         this.muscleGroups.oldValue = [];
         
@@ -257,8 +293,8 @@ function setVariations(selectedVariations) {
     let nextID = (variations.length > 0) ? variations[0].id - 1 : -1;
     /* Map Variation */
     selectedVariations.forEach(sv => {
-        let variation_old = _this.variations.oldValue.find(x => x.variationID == sv.id);
-        let variation_value = _this.variations.value.find(x => x.variationID == sv.id);
+        let variation_old = _this.variations.oldValue.find(x => x.name.value == sv.name && x.type.value.id == sv.type.id);
+        let variation_value = _this.variations.value.find(x => x.name.value == sv.name && x.type.value.id == sv.type.id);
         if (variation_old == undefined) {
             /* Create new mapping */
             if (variation_value == undefined) {
@@ -271,14 +307,22 @@ function setVariations(selectedVariations) {
                 v_new.name.oldValue = null;
                 v_new.name.isUpdated = true;
                 
-                v_new.description.value = sv.description || null;
-                v_new.description.oldValue = sv.description || null;
-                v_new.description.isUpdated = (sv.description) ? true : false;
+                v_new.description.value = null;
+                v_new.description.oldValue = null;
+                v_new.description.isUpdated = false;
 
                 v_new.muscleGroups.value = [];
                 v_new.muscleGroups.oldValue = [];
+
+                v_new.type = {};
+                v_new.type.value = clone(sv.type)
+                v_new.type.oldValue = {
+                    id: undefined,
+                    text: undefined
+                }
+                v_new.type.isUpdated = true;
+
                 v_new.id = nextID--;
-                v_new.variationID = sv.id
                 _this.variations.value.push(v_new);
             }
         } else {
@@ -292,17 +336,28 @@ function setVariations(selectedVariations) {
     /* Unmap Variation */
     let ids_Removed = [];
     this.variations.value.forEach(v => {
-        let index = selectedVariations.findIndex(x => x.id == v.variationID);
+        let index = selectedVariations.findIndex(sv => sv.name == v.name.value && sv.type.id == v.type.value.id);
         if (index < 0) {
-            ids_Removed.push(v.variationID);
+            ids_Removed.push({
+                name: v.name.value,
+                typeID: v.type.value.id
+            });
         }
     });
-    this.variations.value = this.variations.value.filter(x => !ids_Removed.includes(x.variationID));
+    this.variations.value = this.variations.value
+        .filter(v => ids_Removed.findIndex(x => x.name == v.name.value && x.typeID == v.type.value.id) == -1);
 
     this.selectedPanel = 'form'
 }
 
 function saveExerciseVariation(variation) {
+    if (variation.type.isUpdated) {
+        this.workoutStore.addVariation(variation.name.value, variation.type.value.id, variation.type.value.text);
+    }
+    if (!variation.id) {
+        let variations = sortAsc(this.variations.value.filter(x => x.id < 1));
+        variation.id = (variations.length > 0) ? variations[0].id - 1 : -1;
+    }
     replaceOrAddItem(variation, this.variations.value);
     this.selectedPanel = 'form';
 }
@@ -391,7 +446,7 @@ async function save() {
         if (v.id < 1) {
             variations.push({
                 id: v.id,
-                variationID: v.variationID,
+                typeID: v.type.value.id,
                 name: v.name,
                 description: v.description,
                 muscleGroups: v.muscleGroups.value,
@@ -401,7 +456,7 @@ async function save() {
         } else if (v.isUpdated) {
             variations.push({
                 id: v.id,
-                variationID: v.variationID,
+                typeID: (v.type.value.id != v.type.oldValue.id) ? v.type.value.id : undefined,
                 name: v.name,
                 description: v.description,
                 muscleGroups: v.muscleGroups.value,
@@ -476,6 +531,16 @@ async function save() {
     width: 40px;
     height: 40px;
     background-color: #E25555;
+}
+
+.button-group {
+    width: 16px;
+    z-index: 5;
+    visibility: hidden;
+}
+
+.variation-view:hover .button-group {
+    visibility: visible;
 }
 
 .muscle-group {
