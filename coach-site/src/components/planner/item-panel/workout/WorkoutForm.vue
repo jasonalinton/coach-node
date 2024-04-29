@@ -245,6 +245,7 @@ function setProps() {
             this.workout.exercises.forEach(e => {
                 exercises.push({ 
                     exercise: clone(e.exercise), 
+                    position: e.position,
                     sets: {
                         value: clone(e.sets),
                         oldValue: clone(e.sets)
@@ -312,11 +313,14 @@ function setExercises(selectedIDs) {
     let exercises = this.workoutStore.getExercises();
     exercises = exercises.filter(e => selectedIDs.includes(e.id));
 
+    let position = 0;
     exercises.forEach(e => {
+        position++;
         let workoutExercise = this.exercises.value.find(we => we.exercise.id == e.id);
         if (!workoutExercise) {
             this.exercises.value.push({
                 exercise: clone(e),
+                position,
                 sets: {
                     value: [],
                     oldValue: []
@@ -333,6 +337,10 @@ function setExercises(selectedIDs) {
         }
     });
     this.exercises.value = this.exercises.value.filter(x => !ids_Removed.includes(x.exercise.id));
+
+    for (let i = 1; i <= this.exercises.value.length; i++) {
+        this.exercises.value[i-1].position = i;
+    }
 }
 
 function addDefaultSet(exerciseID) {
@@ -577,11 +585,12 @@ function save() {
                 });
                 sets.push(set);
             });
+            exercise.position = e.position;
             exercise.isAdded = true;
             exercises.push(exercise);
             model.isUpdated = true;
             exercise.sets = sets;
-        } else {
+        } else { // Exercise is updated
             /* Set sets */
             let sets = [];
             e.sets.value.forEach(s => {
@@ -658,7 +667,11 @@ function save() {
                     });
                 }
             });
-            if (sets.length > 0) {
+            let oldExercise = _this.exercises.oldValue[index];
+            if (sets.length > 0 || oldExercise.position != e.position) {
+                if (oldExercise.position != e.position) { // Set position
+                    exercise.position = e.position;
+                }
                 exercises.push(exercise);
                 exercise.sets = sets;
                 exercise.isUpdated = true;
