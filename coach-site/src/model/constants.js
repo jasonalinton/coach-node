@@ -10,3 +10,13 @@ export let INHERITANCE = {
     DESCENDANTS: 142
 };
 
+export let CONTROL = {
+    CONTROL: 105,
+    SLIDER: 106,
+    NUMBERPAD: 107,
+    COUNTER: 108,
+    TEXTBOX: 109,
+    TEXTAREA: 110,
+    TEXTBLOCK: 111,
+    DROPDOWN: 112
+};

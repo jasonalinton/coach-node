@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
-import { getMetrics } from '../api/metricAPI'
+import { getMetrics, getLogItems, logLogItem } from '../api/metricAPI'
 import { repositionItem } from '../api/itemAPI';
-import { replaceOrAddItem, sortAsc } from '../../utility';
+import { replaceOrAddItem, sortAsc, clone } from '../../utility';
 import { getSocketConnection } from './socket'
 import { useGoalStore } from '@/store/goalStore'
 import { useTodoStore } from '@/store/todoStore'
@@ -11,7 +11,8 @@ let initialized = false;
 
 export const useMetricStore = defineStore('metric', {
     state: () => ({
-        metrics: []
+        metrics: [],
+        logItems: []
     }),
     getters: {
         
@@ -48,6 +49,23 @@ export const useMetricStore = defineStore('metric', {
         },
         repositionItem(parentType, itemType, goalID, metricID, newPosition) {
             repositionItem(parentType, itemType, goalID, metricID, newPosition);
+        },
+        initializeLogItems() {
+            let _this = this;
+            getLogItems()
+            .then(logItems => {
+                _this.logItems = logItems;
+            })
+        },
+        getLogItems() {
+            return clone(this.logItems);
+        },
+        async logLogItem(model) {
+            let _this = this;
+            return logLogItem(model)
+            .then((logItem) => {
+                replaceOrAddItem(logItem, _this.logItems);
+            });
         },
         connectSocket() {
             if (!initialized) {

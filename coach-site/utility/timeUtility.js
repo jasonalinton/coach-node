@@ -160,6 +160,14 @@ export function month_short(dateTime = new Date()) {
     return date.format(dateTime, 'MMM');   
 }
 
+export function addMinutes(minutes = 1, dateTime = new Date()) {
+    return moment(dateTime).add( minutes, 'minute').toDate();   
+}
+
+export function subtractMinutes(minutes = 1, dateTime = new Date()) {
+    return moment(dateTime).add( -minutes, 'minute').toDate();   
+}
+
 export function addDay(dateTime = new Date(), days = 1) {
     return moment(dateTime).add( days, 'day').toDate();   
 }

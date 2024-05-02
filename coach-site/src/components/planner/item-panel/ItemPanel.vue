@@ -40,6 +40,12 @@
                     <div v-if="selectedPanel == 'workout'">
                     <div :style="{ 'width': '12px', 'height': '40px', 'background-color': '#F4511E', 'margin-left': '3px', 'border-radius': '4px'}"></div></div>
                 </div>
+                <div class="d-flex flex-row mb-1">
+                    <img class="inventory" :class="[{ active: selectedPanel == 'inventory' }]" src='/icon/inventory-icon.png' width="40" height="40" 
+                         @click="setSelectedPanel('inventory')"/>
+                    <div v-if="selectedPanel == 'inventory'">
+                    <div :style="{ 'width': '12px', 'height': '40px', 'background-color': '#3B99FC', 'margin-left': '3px', 'border-radius': '4px'}"></div></div>
+                </div>
             </div>
             <!-- <div class="d-flex flex-column">
                 <img class="icon-button m-auto mb-0" src='/icon/refresh-icon.png' width="40" height="40" @click="refreshRepetitive"/>
@@ -53,6 +59,7 @@
             <TaskRoutinePanel v-show="selectedPanel == 'task-routine'" :selectedDate="selectedDate" class="item-panel"/>
             <EventPanel v-show="selectedPanel == 'event'" :props="eventPanelProps" class="item-panel"/>
             <WorkoutPanel v-show="selectedPanel == 'workout'" class="item-panel"/>
+            <InventoryPanel v-show="selectedPanel == 'inventory'" class="item-panel"/>
         </div>
     </div>
 </template>
@@ -65,11 +72,13 @@ import RoutinePanel from './routine/RoutinePanel.vue'
 import TaskRoutinePanel from './TaskRoutinePanel.vue'
 import EventPanel from './event/EventPanel.vue'
 import WorkoutPanel from './workout/WorkoutPanel.vue'
+import InventoryPanel from './inventory/InventoryPanel.vue'
 import { refreshRepetitiveItems } from '../../../resolvers/planner-resolvers'
 
 export default {
     name: 'ItemPanel',
-    components: { MetricPanel, GoalPanel, TodoPanel, RoutinePanel, TaskRoutinePanel, EventPanel, WorkoutPanel },
+    components: { MetricPanel, GoalPanel, TodoPanel, RoutinePanel, TaskRoutinePanel, 
+        EventPanel, WorkoutPanel, InventoryPanel },
     props: {
         selectedDate: Date,
         selectPanel: Object,
@@ -152,6 +161,11 @@ img.event:hover, img.event.active {
 
 img.workout:hover, img.workout.active {
     background-color: rgba(244, 81, 30, .08);
+    border-radius: 20px;
+}
+
+img.inventory:hover, img.inventory.active {
+    background-color: rgba(59, 153, 252, .08);
     border-radius: 20px;
 }
 </style>

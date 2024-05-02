@@ -1,3 +1,10 @@
+export let controlTypes = [
+    {
+        id: 105,
+        text: "Control"
+    }
+]
+
 export let exerciseVariationTypes = [
     {
         id: 144,
