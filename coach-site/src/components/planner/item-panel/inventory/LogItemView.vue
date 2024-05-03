@@ -1,7 +1,17 @@
 <template>
-    <div class="d-flex flex-column">
+    <div class="log-item d-flex flex-column">
         <div class="d-flex flex-row justify-content-between">
-            <div class="name">{{ logItem.name }}</div>
+            <div class="d-flex flex-row">
+                <div class="name">{{ logItem.name }}</div>
+                <img v-if="!showAdditionalValues" 
+                     class="icon-button" :class="{ show:(value)?true:false}"
+                     src='/icon/next.png' width="16" height="16"
+                     @click.prevent="showAdditionalValues = (value) ? true : showAdditionalValues"/>
+                <img v-if="showAdditionalValues" class="icon-button" 
+                     :class="{ show:(value)?true:false}"
+                     src='/icon/icon-expanded.png' width="16" height="16"
+                     @click.prevent="showAdditionalValues = (value) ? false : showAdditionalValues"/>
+            </div>
             <div class="last-value">{{ value }}</div>
         </div>
         <div class="fields d-flex flex-column">
@@ -13,17 +23,29 @@
                        @mouseup="sliderMouseUp($event, field)">
             </template>
         </div>
+        <div v-if="value && showAdditionalValues" 
+             class="additional-values d-flex flex-column">
+            <DateTimeSelector class="date-selector mt-2"
+                              :dateTime="updatedDateTime" 
+                              @onChange="updateEntryDateTime"/>
+            <textarea id="blurb" class="textarea mt-2" 
+                      type="text"
+                      placeholder="Blurd"
+                      v-model.lazy="blurb"
+                      spellcheck></textarea>
+        </div>
     </div>
 </template>
 
 <script>
+import DateTimeSelector from '../../../controls/select/DateTimeSelector.vue'
 import { useMetricStore } from '../../../../store/metricStore';
 import { CONTROL } from '../../../../model/constants'
 import { subtractMinutes, getDurationInMinutes } from '../../../../../utility/timeUtility';
 
 export default {
     name: 'LogItemView',
-    components: {  },
+    components: { DateTimeSelector },
     props: {
         logItem: Object,
         clearValues: Number,
@@ -35,8 +57,11 @@ export default {
             CONTROL,
             fields: [],
             entryDateTime: undefined,
+            updatedDateTime: undefined,
+            blurb: "",
             hasValue: false,
             timeout: undefined,
+            showAdditionalValues: false
         }
     },
     created: function() {
@@ -104,6 +129,7 @@ export default {
             }
             this.setTimeout(this.clearMinutes);
         },
+        updateEntryDateTime,
         clear() {
             this.setProps(true);
         },
@@ -127,6 +153,23 @@ export default {
     watch: {
         clearValues() {
             this.clear();
+        },
+        showAdditionalValues(value) {
+            if (value) {
+                this.updatedDateTime = this.entryDateTime.toISOString();
+            }
+        },
+        blurb(value) {
+            let model = {
+                logItemID: this.logItem.id,
+                dateTime: this.entryDateTime,
+                reason: {
+                    value,
+                    isUpdated: true
+                },
+                isUpdated: true,
+            }
+            this.metricStore.logLogItem(model);
         }
     }
 }
@@ -150,6 +193,7 @@ function setProps(clear) {
                 let clearCutoff = subtractMinutes(this.clearMinutes);
                 if (+lastValueDateTime > +clearCutoff) {
                     field.value = lastValue.value;
+                    this.blurb = this.logItem.blurb
                     this.entryDateTime = lastValueDateTime;
                     let minutesSince = getDurationInMinutes(lastValueDateTime, new Date());
                     let minutesLeft = this.clearMinutes - minutesSince;
@@ -160,14 +204,36 @@ function setProps(clear) {
     });
     if (clear) {
         this.entryDateTime = undefined;
+        this.updatedDateTime = undefined;
+        this.blurb = "";
     }
     this.fields = fields;
+}
+
+function updateEntryDateTime(value) {
+    let model = {
+        logItemID: this.logItem.id,
+        dateTime: this.entryDateTime,
+        updatedDateTime: value,
+        fields: [],
+        isUpdated: true,
+    }
+    this.updatedDateTime = value;
+    this.entryDateTime = new Date(value);
+    this.metricStore.logLogItem(model);
 }
 
 </script>
 
 <style scoped>
+.icon-button {
+    margin: auto 0 auto 2px;
+    visibility: hidden;
+}
 
+.log-item:hover .icon-button.show {
+    visibility: visible;
+}
 
 /* The slider itself */
 .slider {

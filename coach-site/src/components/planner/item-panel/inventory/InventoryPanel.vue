@@ -77,90 +77,6 @@ export default {
                 return [];
             }
         },
-        // inventoryList() {
-        //     let inventoryList = {};
-        //     if (this.logItems.length > 0) {
-
-        //         /* Get metrics */
-        //         let metrics = this.logItems.map(x => x.metric);
-        //         metrics = [... new Set(metrics)];
-        //         metrics.forEach(metric => {
-        //             inventoryList[metric] = [];
-        //         })
-
-        //         let showSecondary = true;
-        //         let showTertiary = true;
-        //         /* Determine whether or not to show secondary & tertiary */
-        //         this.logItems.forEach(x => {
-        //             let field = x.fields[0];
-        //             let lastValue = (field.values.length-1 > 0) 
-        //                 ? field.values[field.values.length-1] : undefined;
-        //             if (lastValue) {
-        //                 let lastValueDateTime = new Date(lastValue.dateTime);
-        //                 let clearCutoff = subtractMinutes(this.clearMinutes);
-        //                 if (+lastValueDateTime < +clearCutoff) {
-        //                     if (x.isPrimary) {
-        //                         showSecondary = false;
-        //                     } else if (x.isSecondary) {
-        //                         showTertiary = false;
-        //                     }
-        //                 }
-        //             } else {
-        //                 if (x.isPrimary) {
-        //                     showSecondary = false;
-        //                 } else if (x.isSecondary) {
-        //                     showTertiary = false;
-        //                 }
-        //             }
-        //         });
-        //         this.showSecondary = showSecondary;
-        //         this.showTertiary = showTertiary;
-
-        //         // /* Create inventory list object */
-        //         // let objects = [
-        //         //     {
-        //         //         prop: 'Primary',
-        //         //         items: this.logItems.filter(item => item.isPrimary)
-        //         //     },
-        //         //     {
-        //         //         prop: 'Secondary',
-        //         //         items: this.logItems.filter(item => item.isPrimary)
-        //         //     }
-        //         // ]
-        //         // this.logItems.forEach(x => {
-        //         //     let field = x.fields[0];
-        //         //     let lastValue = (field.values.length-1 > 0) 
-        //         //         ? field.values[field.values.length-1] : undefined;
-        //         //     if (lastValue) {
-        //         //         let lastValueDateTime = new Date(lastValue.dateTime);
-        //         //         let clearCutoff = subtractMinutes(this.clearMinutes);
-        //         //         if (+lastValueDateTime < +clearCutoff) {
-        //         //             this.showSecondary = false;
-        //         //         }
-        //         //     } else {
-        //         //         this.showSecondary = false;
-        //         //     }
-
-        //         //     if (x.isPrimary && this.showPrimary) {
-        //         //         inventoryList[x.metric].push(x);
-        //         //     } else if (x.isSecondary && this.showSecondary) {
-        //         //         inventoryList[x.metric].push(x);
-        //         //     }if (x.isTertiary && this.showTertiary) {
-        //         //         inventoryList[x.metric].push(x);
-        //         //     }
-        //         // });
-        //         this.logItems.forEach(x => {
-        //             if (x.isPrimary && this.showPrimary) {
-        //                 inventoryList[x.metric].push(x);
-        //             } else if (x.isSecondary && this.showSecondary) {
-        //                 inventoryList[x.metric].push(x);
-        //             }if (x.isTertiary && this.showTertiary) {
-        //                 inventoryList[x.metric].push(x);
-        //             }
-        //         });
-        //     }
-        //     return inventoryList;
-        // }
     },
     methods: {
         setInventoryList,
@@ -201,6 +117,18 @@ function setInventoryList() {
         metrics.forEach(metric => {
             inventoryList[metric] = [];
         })
+
+        // /* Create inventory list object */
+        // let objects = [
+        //     {
+        //         prop: 'Primary',
+        //         items: this.logItems.filter(item => item.isPrimary)
+        //     },
+        //     {
+        //         prop: 'Secondary',
+        //         items: this.logItems.filter(item => item.isPrimary)
+        //     }
+        // ]
 
         /* Determine whether or not to show secondary & tertiary */
         let showSecondary = true;
@@ -275,6 +203,14 @@ function setInventoryList() {
 }
 
 function clearValues() {
+    /* Reset display values */
+    this.showPrimary = true;
+    this.showSecondary = false;
+    this.showTertiary = false;
+    this.primaryToggled = undefined;
+    this.secondaryToggled = undefined;
+    this.tertiaryToggled = undefined;
+
     this.clear++;
 }
 
