@@ -29,6 +29,16 @@ export function toShortTimeString(dateTimeJSON) {
     return date.format(datetime, 'h:mm A')
 }
 
+export function toUTCTimestamp(dateTimeJSON) {
+    let datetime = new Date(dateTimeJSON);
+    return moment(datetime).unix();
+}
+
+export function timezoneTimestamp(datetime) {
+    datetime = new Date(datetime.getTime() - datetime.getTimezoneOffset() * 60000);
+    return datetime.getTime() / 1000;
+}
+
 /* Get hour portion of date */
 export function getHour(dateTimeJSON) {
     let date = new Date(dateTimeJSON);
@@ -54,6 +64,21 @@ export function timeModelToString(model) {
     } else if (model.idMoment == 89) { // Date-Time
         return moment(date).format("LLL"); // Ex. January 24, 1988 7:50 AM
     }
+}
+
+export function jsonToDateTimeString(jsonDateTime) {
+    let date = new Date(jsonDateTime);
+    return moment(date).format("M/D/YY h:mm A"); // Ex. 1/24/88 7:50 AM
+}
+
+export function jsonToLongDateTimeString(jsonDateTime) {
+    let date = new Date(jsonDateTime);
+    return moment(date).format("LLL"); // Ex. January 24, 1988 7:50 AM
+}
+
+export function jsonToShortDateTimeString(jsonDateTime) {
+    let date = new Date(jsonDateTime);
+    return moment(date).format("MMM D, h:mm A"); // Ex. Jan 24, 7:50 AM
 }
 
 export function timeSince(dateTime, now) {

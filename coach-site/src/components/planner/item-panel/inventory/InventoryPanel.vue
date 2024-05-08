@@ -1,7 +1,7 @@
 <template>
     <div class="row g-0 h-100">
         <div class="col h-100 d-flex flex-column">
-            <div class="inventory d-flex flex-column flex-grow-1">
+            <div class="inventory d-flex flex-column flex-grow-1 overflow-hidden">
                 <div class="head align-content-center">
                     <span class="label">Inventory</span>
                     <div class="d-flex flex-row justify-content-end pe-2">
@@ -19,7 +19,7 @@
                              @click.prevent="tertiaryToggled = (tertiaryToggled == undefined) ? !showTertiary : !tertiaryToggled"/>
                     </div>
                 </div>
-                <div class="body d-flex flex-column flex-grow-1">
+                <div class="body d-flex flex-column flex-grow-1" :class="{ hide: selectedPanel != 'list'}">
                     <div v-for="(list, metric, index) in inventoryList" :key="index"
                          class="metric mb-2">
                          <div v-if="list.length > 0">
@@ -28,10 +28,14 @@
                                           v-for="(logItem, index2) in list" :key="index2"
                                           :logItem="logItem"
                                           :clearValues="clear"
-                                          :clearMinutes="clearMinutes"/>
+                                          :clearMinutes="clearMinutes"
+                                          @selectLogItem="selectLogItem"/>
                          </div>
                     </div>
                 </div>
+                <LogItemHistory v-if="selectedPanel == 'logItemHistory'"
+                                :logItemID="selectedLogItemID"
+                                @back="back"/>
             </div>
         </div>
     </div>
@@ -39,6 +43,7 @@
 
 <script>
 import LogItemView from './LogItemView.vue';
+import LogItemHistory from './LogItemHistory.vue'
 import { useMetricStore } from '../../../../store/metricStore';
 import { CONTROL } from '../../../../model/constants'
 import { clone } from '../../../../../utility';
@@ -46,13 +51,15 @@ import { subtractMinutes } from '../../../../../utility/timeUtility';
 
 export default {
     name: 'InventoryPanel',
-    components: { LogItemView },
+    components: { LogItemView, LogItemHistory },
     props: {
         
     },
     data: function () {
         return {
             metricStore: undefined,
+            selectedPanel: 'list',
+            selectedLogItemID: undefined,
             inventoryList: [],
             clear: 0, // Incrementor to trigger watch value component
             clearMinutes: 15,
@@ -80,7 +87,9 @@ export default {
     },
     methods: {
         setInventoryList,
-        clearValues
+        clearValues,
+        selectLogItem,
+        back
     },
     watch: {
         logItems() {
@@ -138,12 +147,12 @@ function setInventoryList() {
             if (field.controlTypeID != CONTROL.SLIDER) {
                 return;
             }
-            let lastValue = (field.values.length-1 > 0) 
-                ? field.values[field.values.length-1] : undefined;
-            if (lastValue) {
-                let lastValueDateTime = new Date(lastValue.dateTime);
+            let lastEntry = (x.entries.length > 0) 
+                ? x.entries[x.entries.length-1] : undefined;
+            if (lastEntry) {
+                let lastEntryDateTime = new Date(lastEntry.dateTime);
                 let clearCutoff = subtractMinutes(this.clearMinutes);
-                if (+lastValueDateTime < +clearCutoff) {
+                if (+lastEntryDateTime < +clearCutoff) {
                     if (x.isPrimary) {
                         showSecondary = false;
                     } else if (x.isSecondary) {
@@ -214,15 +223,30 @@ function clearValues() {
     this.clear++;
 }
 
+function selectLogItem(id) {
+    this.selectedLogItemID = id;
+    this.selectedPanel = "logItemHistory"
+}
+
+function back() {
+    this.selectedPanel = "list";
+    this.selectedLogItemID = undefined;
+}
+
 </script>
 
 <style scoped>
 .inventory .body {
     padding: 8px;
+    overflow: scroll;
+}
+
+.body.hide {
+    display: none !important;
 }
 
 .head {
-    height: 64px;
+    min-height: 64px;
     border-bottom: 1px solid black;
 }
 

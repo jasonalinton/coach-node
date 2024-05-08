@@ -2,7 +2,8 @@
     <div class="log-item d-flex flex-column">
         <div class="d-flex flex-row justify-content-between">
             <div class="d-flex flex-row">
-                <div class="name">{{ logItem.name }}</div>
+                <div class="name"
+                     @click="$emit('selectLogItem', logItem.id)">{{ logItem.name }}</div>
                 <img v-if="!showAdditionalValues" 
                      class="icon-button" :class="{ show:(value)?true:false}"
                      src='/icon/next.png' width="16" height="16"
@@ -30,7 +31,7 @@
                               @onChange="updateEntryDateTime"/>
             <textarea id="blurb" class="textarea mt-2" 
                       type="text"
-                      placeholder="Blurd"
+                      placeholder="Blurb"
                       v-model.lazy="blurb"
                       spellcheck></textarea>
         </div>
@@ -78,15 +79,8 @@ export default {
             })
             return value;
         },
-        lastValue() {
-            let logItem = this.logItem;
-            if (logItem) {
-                if (logItem.fields.length == 1 && logItem.fields[0].name.toLowerCase() == "level") {
-                    let lastValue = logItem.fields[0].values[logItem.fields[0].values.length - 1];
-                    return lastValue.value;
-                }
-            }
-            return "";
+        lastEntry() {
+            return (this.logItem.entries) ? this.logItem.entries[this.logItem.entries.length-1] : undefined;
         },
         isLevel() {
             let logItem = this.logItem;
@@ -175,6 +169,7 @@ export default {
 }
 
 function setProps(clear) {
+    let lastEntry = (!clear && this.logItem.entries) ? this.logItem.entries[this.logItem.entries.length-1] : undefined;
     let fields = [];
     this.logItem.fields.forEach(f => {
         let field = {
@@ -185,17 +180,17 @@ function setProps(clear) {
         };
         fields.push(field);
         /* Set field value 
-           If clear is false and the last logged value is was within the clear time */
-        if (!clear) {
-            let lastValue = (f.values.length-1 > 0) ? f.values[f.values.length-1] : undefined;
+           If clear is false and the last logged value was within the clear time */
+        if (!clear && lastEntry) {
+            let lastValue = lastEntry.fieldValues.find(v => v.logItemFieldID == f.id);
             if (lastValue) {
-                let lastValueDateTime = new Date(lastValue.dateTime);
+                let lastEntryDateTime = new Date(lastEntry.dateTime);
                 let clearCutoff = subtractMinutes(this.clearMinutes);
-                if (+lastValueDateTime > +clearCutoff) {
+                if (+lastEntryDateTime > +clearCutoff) {
                     field.value = lastValue.value;
-                    this.blurb = this.logItem.blurb
-                    this.entryDateTime = lastValueDateTime;
-                    let minutesSince = getDurationInMinutes(lastValueDateTime, new Date());
+                    this.blurb = lastEntry.reason;
+                    this.entryDateTime = lastEntryDateTime;
+                    let minutesSince = getDurationInMinutes(lastEntryDateTime, new Date());
                     let minutesLeft = this.clearMinutes - minutesSince;
                     this.setTimeout(minutesLeft);
                 }
@@ -226,6 +221,10 @@ function updateEntryDateTime(value) {
 </script>
 
 <style scoped>
+.name:hover {
+    text-decoration: underline;
+}
+
 .icon-button {
     margin: auto 0 auto 2px;
     visibility: hidden;

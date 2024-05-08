@@ -53,3 +53,22 @@ export async function logLogItem(model) {
         console.error('Error:', error);
     });
 }
+
+export async function deleteLogEntry(logEntryID) {
+    return fetch(`https://localhost:7104/api/Metric/DeleteLogEntry`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ logEntryID })
+    })
+    .then((response) => response.json())
+    .then((data) => {
+        if (!data.errorMessage) {
+            return data;
+        } else {
+            this.errorMessage = data.errorMessage;
+        }
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+    });
+}

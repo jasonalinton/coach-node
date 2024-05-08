@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { getMetrics, getLogItems, logLogItem } from '../api/metricAPI'
+import { getMetrics, getLogItems, logLogItem, deleteLogEntry } from '../api/metricAPI'
 import { repositionItem } from '../api/itemAPI';
 import { replaceOrAddItem, sortAsc, clone } from '../../utility';
 import { getSocketConnection } from './socket'
@@ -60,9 +60,19 @@ export const useMetricStore = defineStore('metric', {
         getLogItems() {
             return clone(this.logItems);
         },
+        getLogItem(id) {
+            return clone(this.logItems.find(x => x.id == id));
+        },
         async logLogItem(model) {
             let _this = this;
             return logLogItem(model)
+            .then((logItem) => {
+                replaceOrAddItem(logItem, _this.logItems);
+            });
+        },
+        async deleteLogEntry(logEntryID) {
+            let _this = this;
+            return deleteLogEntry(logEntryID)
             .then((logItem) => {
                 replaceOrAddItem(logItem, _this.logItems);
             });

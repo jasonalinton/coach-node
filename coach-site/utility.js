@@ -22,11 +22,11 @@ export function sortDesc(array, prop) {
 }
 
 export function sortDateAsc(array, dateProp) {
-    return array.sort((a, b) => new Date(a[dateProp]) - new Date(b[dateProp]));
+    return array.toSorted((a, b) => new Date(a[dateProp]) - new Date(b[dateProp]));
 }
 
 export function sortDateDesc(array, dateProp) {
-    return array.sort((a, b) => new Date(b[dateProp]) - new Date(a[dateProp]));
+    return array.toSorted((a, b) => new Date(b[dateProp]) - new Date(a[dateProp]));
 }
 
 export function sortAlphaAsc(array, prop) {
