@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import { getSocketConnection } from './socket';
-import { getMealsInRange, foodSearchAutoComplete, addFoodItemToMeal } from '../api/physicalAPI';
+import { getMealsInRange, foodSearchAutoComplete, searchFoodUPC, addFoodItemToMeal } from '../api/physicalAPI';
 import { sortAsc, replaceOrAddItem, removeItemByID } from '../../utility';
 
 let initialized = false;
@@ -35,6 +35,10 @@ export const usePhysicalStore = defineStore('physical', {
         },
         async foodSearchAutoComplete(searchTerm) {
             let result = await foodSearchAutoComplete(searchTerm);
+            return result;
+        },
+        async searchFoodUPC(upc) {
+            let result = await searchFoodUPC(upc);
             return result;
         },
         async addFoodItemToMeal(model) {
