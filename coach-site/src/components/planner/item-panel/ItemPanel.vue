@@ -41,6 +41,12 @@
                     <div :style="{ 'width': '12px', 'height': '40px', 'background-color': '#3B99FC', 'margin-left': '3px', 'border-radius': '4px'}"></div></div>
                 </div>
                 <div class="d-flex flex-row mb-1">
+                    <img class="nutrition" :class="[{ active: selectedPanel == 'nutrition' }]" src='/icon/nutrition-icon.png' width="40" height="40" 
+                         @click="setSelectedPanel('nutrition')"/>
+                    <div v-if="selectedPanel == 'nutrition'">
+                    <div :style="{ 'width': '12px', 'height': '40px', 'background-color': '#F4511E', 'margin-left': '3px', 'border-radius': '4px'}"></div></div>
+                </div>
+                <div class="d-flex flex-row mb-1">
                     <img class="workout" :class="[{ active: selectedPanel == 'workout' }]" src='/icon/workout-icon.png' width="40" height="40" 
                          @click="setSelectedPanel('workout')"/>
                     <div v-if="selectedPanel == 'workout'">
@@ -59,6 +65,7 @@
             <TaskRoutinePanel v-show="selectedPanel == 'task-routine'" :selectedDate="selectedDate" class="item-panel"/>
             <EventPanel v-show="selectedPanel == 'event'" :props="eventPanelProps" class="item-panel"/>
             <InventoryPanel v-show="selectedPanel == 'inventory'" class="item-panel"/>
+            <NutritionPanel v-show="selectedPanel == 'nutrition'" class="item-panel"/>
             <WorkoutPanel v-show="selectedPanel == 'workout'" class="item-panel"/>
         </div>
     </div>
@@ -71,14 +78,15 @@ import TodoPanel from './todo/TodoPanel.vue'
 import RoutinePanel from './routine/RoutinePanel.vue'
 import TaskRoutinePanel from './TaskRoutinePanel.vue'
 import EventPanel from './event/EventPanel.vue'
-import WorkoutPanel from './workout/WorkoutPanel.vue'
 import InventoryPanel from './inventory/InventoryPanel.vue'
+import NutritionPanel from './nutrition/NutritionPanel.vue'
+import WorkoutPanel from './workout/WorkoutPanel.vue'
 import { refreshRepetitiveItems } from '../../../resolvers/planner-resolvers'
 
 export default {
     name: 'ItemPanel',
     components: { MetricPanel, GoalPanel, TodoPanel, RoutinePanel, TaskRoutinePanel, 
-        EventPanel, InventoryPanel, WorkoutPanel },
+        EventPanel, InventoryPanel, NutritionPanel, WorkoutPanel },
     props: {
         selectedDate: Date,
         selectPanel: Object,
@@ -161,6 +169,11 @@ img.event:hover, img.event.active {
 
 img.inventory:hover, img.inventory.active {
     background-color: rgba(59, 153, 252, .08);
+    border-radius: 20px;
+}
+
+img.nutrition:hover, img.nutrition.active {
+    background-color: rgba(252, 59, 59, .08);
     border-radius: 20px;
 }
 

@@ -39,8 +39,10 @@ import Planner from "./components/planner/Planner.vue";
 import ItemTabs from "./components/items/ItemTabs.vue";
 import ItemTabsOG from "./components/items/ItemTabsOG.vue";
 import { today } from "../utility"
+import { usePlannerStore } from '@/store/plannerStore'
 import { useEventStore } from '@/store/eventStore'
 import { useIterationStore } from '@/store/iterationStore'
+import { usePhysicalStore } from '@/store/physicalStore'
 import { useMetricStore } from '@/store/metricStore'
 import { useGoalStore } from '@/store/goalStore'
 import { useTodoStore } from '@/store/todoStore'
@@ -68,7 +70,8 @@ export default {
                 selectPanel: undefined,
             },
             selectedDate: today(),
-            selectedItemPanel: "todo"
+            selectedItemPanel: "todo",
+            plannerStore: undefined
         };
     },
     created: async function () {
@@ -93,8 +96,11 @@ export default {
             localStorage.setItem(`week-view-day-count`, this.dayCount);
         }
 
+        this.plannerStore = usePlannerStore();
+
         let eventStore = useEventStore();
         let iterationStore = useIterationStore();
+        let physicalStore = usePhysicalStore();
         let metricStore = useMetricStore();
         let goalStore = useGoalStore();
         let todoStore = useTodoStore();
@@ -102,6 +108,7 @@ export default {
 
         eventStore.initialize();
         iterationStore.initialize();
+        physicalStore.initialize();
         let metricPromise = metricStore.initialize();
         let goalPromise = goalStore.initialize();
         let todoPromise = todoStore.initialize();
@@ -141,6 +148,7 @@ function showPage(page) {
 }
 
 function dateChange(date) {
+    this.plannerStore.selectDate(date);
     this.selectedDate = date;
 }
 

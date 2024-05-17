@@ -3,7 +3,8 @@ import { today } from '../../utility'
 
 export const usePlannerStore = defineStore('planner', {
     state: () => ({
-        currentTime: new Date()
+        currentTime: new Date(),
+        selectedDate: today(new Date())
     }),
     getters: {
         
@@ -19,6 +20,9 @@ export const usePlannerStore = defineStore('planner', {
                     this.currentTime = new Date();
                 }, 60000);
             }, (60 - seconds) * 1000)
+        },
+        selectDate(date) {
+            this.selectedDate = new Date(date);
         },
         createRepeat() {
             return {
