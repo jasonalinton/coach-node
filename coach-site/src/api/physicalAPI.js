@@ -19,6 +19,24 @@ export async function getMealsInRange(startAt, endAt) {
     });
 }
 
+export async function getRecentFoodItems() {
+    return fetch(`https://localhost:7104/api/Physical/GetRecentFoodItems`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+    })
+    .then((response) => response.json())
+    .then((data) => {
+        if (!data.errorMessage) {
+            return data;
+        } else {
+            this.errorMessage = data.errorMessage;
+        }
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+    });
+}
+
 export async function foodSearchAutoComplete(searchTerm) {
     let data = { query: searchTerm };
 
@@ -68,6 +86,69 @@ export async function addFoodItemToMeal(model) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(model)
+    })
+    .then((response) => response.json())
+    .then((data) => {
+        if (!data.errorMessage) {
+            return data;
+        } else {
+            this.errorMessage = data.errorMessage;
+        }
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+    });
+}
+
+export async function setFoodItemConsumption(mealID, foodItemID, wasConsumed, dateTime) {
+    let data = { mealID, foodItemID, wasConsumed, dateTime };
+
+    return fetch(`https://localhost:7104/api/Physical/SetFoodItemConsumption`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    })
+    .then((response) => response.json())
+    .then((data) => {
+        if (!data.errorMessage) {
+            return data;
+        } else {
+            this.errorMessage = data.errorMessage;
+        }
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+    });
+}
+
+export async function setMealTime(mealID, startAt, endAt) {
+    let data = { mealID, startAt, endAt };
+
+    return fetch(`https://localhost:7104/api/Physical/SetMealTime`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    })
+    .then((response) => response.json())
+    .then((data) => {
+        if (!data.errorMessage) {
+            return data;
+        } else {
+            this.errorMessage = data.errorMessage;
+        }
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+    });
+}
+
+export async function removeFoodItem(mealID, foodItemID) {
+    let data = { mealID, foodItemID };
+
+    return fetch(`https://localhost:7104/api/Physical/RemoveFoodItem`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
     })
     .then((response) => response.json())
     .then((data) => {

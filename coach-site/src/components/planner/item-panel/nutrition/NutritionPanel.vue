@@ -16,12 +16,12 @@
                             <div class="d-flex flex-column">
                                 <span class="amount">{{ caloriesRecommended }}</span>
                                 <span class="label">Recommended</span>
-                                <span class="amount">{{ caloriesConsumed }}</span>
+                                <span class="amount">{{ floatString(caloriesConsumed,0) }}</span>
                                 <span class="label">Consumed</span>
                             </div>
                             <img src="/icon/nutrition/calorie-flame.png" width="33" height="45"/>
                             <div class="remaining d-flex flex-column">
-                                <span class="calorie-amount">{{ caloriesRemaining }}</span>
+                                <span class="calorie-amount">{{ floatString(caloriesRemaining,0) }}</span>
                                 <span class="calories-label">Calories</span>
                                 <span class="label">Remaining</span>
                             </div>
@@ -41,8 +41,9 @@
                             </div>
                         </div>
                     </div>
-                    <div class="meals d-flex flex-column">
-                        <MealItem v-for="meal in mealsInRange" :key="meal.id" 
+                    <div class="meals d-flex flex-column mt-4">
+                        <MealItem v-for="meal in meals" :key="meal.id" 
+                                  class="mb-2"
                                   :meal="meal" 
                                   @searchFoodItems="searchFoodItems"/>
                     </div>
@@ -61,8 +62,8 @@ import { usePlannerStore } from '@/store/plannerStore'
 import { usePhysicalStore } from '@/store/physicalStore'
 import MealItem from './MealItem.vue';
 import FoodItemSearch from './FoodItemSearch.vue';
-import { today, endOfDay, firstDayOfWeek, lastDayOfWeek } from '../../../../../utility/timeUtility';
-import { clone } from '../../../../../utility';
+import { today, endOfDay } from '../../../../../utility/timeUtility';
+import { clone, floatString } from '../../../../../utility';
 
 export default {
     name: 'NutritionPanel',
@@ -81,9 +82,8 @@ export default {
     created: function() {
         this.plannerStore = usePlannerStore();
         this.physicalStore = usePhysicalStore();
-        let start = firstDayOfWeek(this.date);
-        let end = lastDayOfWeek(this.date);
-        this.physicalStore.getMealsInRange(start, end, true);
+        let end = endOfDay(this.date);
+        this.physicalStore.getMealsInRange(this.date, end, true);
     },
     computed: {
         date() {
@@ -97,19 +97,29 @@ export default {
             return 2000;
         },
         caloriesConsumed() {
-            return 457;
+            if (this.mealsInRange) {
+                return this.mealsInRange
+                .reduce((accumulator, currentValue) => accumulator + currentValue.calories, 0,);
+            } else { 
+                return 0;
+            }
         },
         caloriesRemaining() {
-            return 1543;
+            return this.caloriesRecommended - this.caloriesConsumed;
         },
         waterRecommended() {
             return 140;
         },
         waterConsumed() {
-            return 28;
+            if (this.mealsInRange) {
+                return this.mealsInRange
+                .reduce((accumulator, currentValue) => accumulator + currentValue.water, 0,);
+            } else { 
+                return 0;
+            }
         },
         waterRemaining() {
-            return 112;
+            return this.waterRecommended - this.waterConsumed;
         },
         mealsInRange() {
             if (this.date) {
@@ -130,12 +140,15 @@ export default {
                 let data = {};
                 if (meal) {
                     data = {
-                        id: meal.id,
-                        name: meal.name,
-                        dateTime: meal.dateTime,
-                        foodItems: meal.foodItems,
-                        macros: meal.macros
-                    }
+                        ...meal
+                    };
+                    // data = {
+                    //     id: meal.id,
+                    //     name: meal.name,
+                    //     dateTime: meal.dateTime,
+                    //     foodItems: meal.foodItems,
+                    //     macros: meal.macros
+                    // }
                 } else {
                     data = {
                         id: -1 * id++,
@@ -146,7 +159,8 @@ export default {
                             carbs: 0,
                             protein: 0,
                             fat: 0
-                        }
+                        },
+                        water: 0
                     };
                 }
                 return data;
@@ -155,8 +169,15 @@ export default {
     },
     methods: {
         searchFoodItems,
-        back
+        back,
+        floatString
     },
+    watch: {
+        date() {
+            let end = endOfDay(this.date);
+            this.physicalStore.getMealsInRange(this.date, end, true);
+        }
+    }
 }
 
 function searchFoodItems(meal) {
@@ -204,7 +225,7 @@ function back() {
 
 }
 
-.label {
+.label:not(.head .label) {
     font: Helvetica;
     font-size: 8px;
     line-height: 10px;

@@ -9,6 +9,16 @@ export function percent(number, decimalPlaces = 0) {
     return new Intl.NumberFormat([ ], { style: 'percent', minimumFractionDigits: decimalPlaces }).format(number);
 }
 
+export function float(number, decimalPlaces = 2) {
+    return (Math.round(number * 100) / 100).toFixed(decimalPlaces);
+}
+
+export function floatString(number, decimalPlaces = 2) {
+    return new Intl.NumberFormat([], 
+        { minimumFractionDigits: decimalPlaces, maximumFractionDigits: decimalPlaces })
+        .format(number);
+}
+
 export function sortAsc(array, prop) {
     prop = prop || 'id';
 

@@ -4,7 +4,8 @@
             <div class="d-flex flex-row">
                 <input id="title" class="textbox" type="text" ref="text"  placeholder="Search"
                         v-model.trim.lazy="searchTerm" 
-                        spellcheck/>
+                        spellcheck
+                        @keyup.enter="search"/>
                 <input id="quantity" class="textbox ms-1" type="number" placeholder="#"
                         v-model.trim.lazy="quantity" />
             </div>
@@ -12,14 +13,26 @@
                          :options="tabs"
                          @selectOption="tab = $event"/>
         </div>
-        <div v-if="['All', 'Recent', 'Common', 'Branded'].includes(tab)" class="recents d-flex flex-column">
+        <div v-if="['Recent'].includes(tab) && recents.length > 0" 
+             class="recents d-flex flex-column">
             <span class="text-start ms-2">Recents</span>
-            <div v-for="item in recents" :key="item.id"
-                 class="item d-flex flex-row"
+            <div v-for="(item, index) in recents" :key="index"
+                    class="item d-flex flex-row align-items-center"
                  @click="addFoodItem(item, 'recent')">
+                <img :src="item.thumbURL" height="40" width="40"/>
+                <div class="d-flex flex-column flex-grow-1">
+                    <span class="name text-start">{{ item.name }}</span>
+                    <div class="serving d-flex flex-row">
+                        <span>{{ item.brandName }}</span>
+                        <span class="ms-1">{{ item.quantity }}</span>
+                        <span class="ms-1">{{ item.unit }}</span>
+                    </div>
+                </div>
+                <span class="float-end">{{ item.calories }}</span>
             </div>
         </div>
-        <div v-if="['All', 'Common'].includes(tab)" class="common d-flex flex-column">
+        <div v-if="['All', 'Common'].includes(tab) && common.length > 0"
+             class="common d-flex flex-column">
             <span class="text-start ms-2">Common</span>
             <div v-for="(item, index) in common" :key="index"
                  class="item d-flex flex-row align-items-center"
@@ -34,7 +47,8 @@
                 </div>
             </div>
         </div>
-        <div v-if="['All', 'Branded'].includes(tab)" class="branded d-flex flex-column">
+        <div v-if="['All', 'Branded'].includes(tab) && branded.length > 0" 
+             class="branded d-flex flex-column">
             <span class="text-start ms-2">Branded</span>
             <div v-for="(item, index) in branded" :key="index"
                     class="item d-flex flex-row align-items-center"
@@ -51,7 +65,8 @@
                 <span class="float-end">{{ item.nf_calories }}</span>
             </div>
         </div>
-        <div v-if="['UPC'].includes(tab)" class="upc d-flex flex-column">
+        <div v-if="['UPC'].includes(tab) && upc.length > 0" 
+             class="upc d-flex flex-column">
             <span class="text-start ms-2">UPC</span>
             <div v-for="(item, index) in upc" :key="index"
                     class="item d-flex flex-row align-items-center"
@@ -65,7 +80,7 @@
                         <span class="ms-1">{{ item.unit }}</span>
                     </div>
                 </div>
-                <span class="float-end">{{ item.nf_calories }}</span>
+                <span class="float-end">{{ item.calories }}</span>
             </div>
         </div>
     </div>
@@ -89,6 +104,7 @@ export default {
             tab: "All",
             tabs: [
                 'All',
+                'Recent',
                 'UPC',
                 'Common',
                 'Branded'
@@ -99,23 +115,40 @@ export default {
             upc: []
         }
     },
-    created: function() {
+    created: async function() {
        this.physicalStore = usePhysicalStore();
+       this.recents = await this.physicalStore.getRecentFoodItems();
     },
     methods: {
+        search,
+        clearResults,
         searchFoodItem,
         searchUPC,
         addFoodItem
     },
     watch: {
         searchTerm() {
-            if (['All','Common','Branded'].includes(this.tab)) {
-                this.searchFoodItem();
-            } else if (this.tab == "UPC") {
-                this.searchUPC();
-            }
+            this.search();
         }
     }
+}
+
+function search() {
+    if (this.searchTerm.trim() != "") {
+        if (['All','Common','Branded'].includes(this.tab)) {
+            this.searchFoodItem();
+        } else if (this.tab == "UPC") {
+            this.searchUPC();
+        }
+    } else {
+        this.clearResults();
+    }
+}
+
+function clearResults() {
+    this.common = [];
+    this.branded = [];
+    this.upc = [];
 }
 
 async function searchFoodItem() {
@@ -133,12 +166,12 @@ async function addFoodItem(foodItem, type) {
     let model = {
         mealID: (this.meal.id > 0) ? this.meal.id : undefined,
         meal: this.meal.name,
-        foodName: (type == "upc") ? foodItem.name : foodItem.food_name,
+        foodName: (['upc','recent'].includes(type)) ? foodItem.name : foodItem.food_name,
         nIXItemID: (type == "branded") ? foodItem.nix_item_id : undefined,
-        unit: (type == "upc") ? foodItem.unit : foodItem.serving_unit,
+        unit: (['upc','recent'].includes(type)) ? foodItem.unit : foodItem.serving_unit,
         quantity: this.quantity,
         dateTime: this.meal.dateTime,
-        foodItem: (type == "upc") ? foodItem : undefined
+        foodItem: (['upc','recent'].includes(type)) ? foodItem : undefined
     }
     this.physicalStore.addFoodItemToMeal(model);
     this.$emit('back');

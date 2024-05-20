@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import { getSocketConnection } from './socket';
-import { getMealsInRange, foodSearchAutoComplete, searchFoodUPC, addFoodItemToMeal } from '../api/physicalAPI';
+import { getMealsInRange, getRecentFoodItems, foodSearchAutoComplete, searchFoodUPC, 
+    addFoodItemToMeal, setMealTime, removeFoodItem } from '../api/physicalAPI';
 import { sortAsc, replaceOrAddItem, removeItemByID } from '../../utility';
 
 let initialized = false;
@@ -33,6 +34,10 @@ export const usePhysicalStore = defineStore('physical', {
                 +new Date(meal.startAt) >= startAt && +new Date(meal.startAt) <= endAt
             );
         },
+        async getRecentFoodItems() {
+            let result = await getRecentFoodItems();
+            return result;
+        },
         async foodSearchAutoComplete(searchTerm) {
             let result = await foodSearchAutoComplete(searchTerm);
             return result;
@@ -43,6 +48,12 @@ export const usePhysicalStore = defineStore('physical', {
         },
         async addFoodItemToMeal(model) {
             addFoodItemToMeal(model);
+        },
+        async setMealTime(mealID, startAt, endAt) {
+            setMealTime(mealID, startAt, endAt);
+        },
+        async removeFoodItem(mealID, foodItemID) {
+            removeFoodItem(mealID, foodItemID);
         },
         connectSocket() {
             if (!initialized) {

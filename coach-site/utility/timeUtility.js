@@ -26,7 +26,7 @@ export function toShortWeekdayString(dateTimeJSON) {
 
 export function toShortTimeString(dateTimeJSON) {
     let datetime = new Date(dateTimeJSON);
-    return date.format(datetime, 'h:mm A')
+    return date.format(datetime, 'h:mm A') // Ex. 7:50 AM
 }
 
 export function toUTCTimestamp(dateTimeJSON) {
