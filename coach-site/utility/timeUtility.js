@@ -229,3 +229,7 @@ export function getDurationInHours(startAt, endAt) {
 export function getDurationInDays(startAt, endAt) {
     return date.subtract(endAt, startAt).toDays();   
 }
+
+export function setTimeFromDate(date, timeDate) {
+    date.setHours(timeDate.getHours(), timeDate.getMinutes(), timeDate.getSeconds());
+}

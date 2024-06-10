@@ -21,6 +21,7 @@
             </div>
             <!-- Macros -->
             <div class="macros d-flex flex-column justify-content-end">
+                <!-- Recommended -->
                 <div class="recommended d-flex flex-row mb-1">
                     <div class="carbs d-flex flex-column">
                         <span >Carbs</span>
@@ -35,17 +36,28 @@
                         <span class="percent">25%</span>
                     </div>
                 </div>
-                <div class="consumed d-flex flex-row">
-                    <span class="carbs" :style="{width: `${meal.macros.carbs}%`}">{{ meal.macros.carbs }}%</span>
-                    <span class="protein" :style="{width: `${meal.macros.protein}%`}">{{ meal.macros.protein }}%</span>
-                    <span class="fat" :style="{width: `${meal.macros.fat}%`}">{{ meal.macros.fat }}%</span>
+                <!-- Consumed -->
+                <div class="consumed">
+                    <div v-if="!(carbs == 0 && protein == 0 && fat == 0)" class="d-flex flex-row">
+                        <span class="carbs" :style="{width: `${carbs}%`}">{{ carbs }}%</span>
+                        <span class="protein" :style="{width: `${protein}%`}">{{ protein }}%</span>
+                        <span class="fat" :style="{width: `${fat}%`}">{{ fat }}%</span>
+                    </div>
                 </div>
             </div>
             <!-- Water -->
             <div class="water d-flex flex-column position-relative align-items-center">
-                <div class="amount d-flex flex-row">
-                    <span class="consumed">{{ floatString(this.meal.water,0) }}</span>
-                    <span class="recommended">/{{ waterRecommeded }} oz</span>
+                <div class="amount">
+                    <div v-if="!isEditWater" class="d-flex flex-row"
+                         @click.prevent.stop="editWater">
+                        <span class="consumed">{{ floatString(this.meal.water,0) }}</span>
+                        <span class="recommended">/{{ waterRecommeded }} oz</span>
+                    </div>
+                    <input v-else class="water-quantity textbox ms-1" ref="waterQuantity" type="number" placeholder="#"
+                            v-model.trim.lazy="waterQuantity"
+                            :style="{'width': waterInputWidth}"
+                            @click.prevent.stop
+                            @blur.prevent.stop="setWater" />
                 </div>
                 <img class="droplet" src="/icon/nutrition/water-droplet.png" width="28" height="45"/>
                 <div class="percent d-flex flex-row">
@@ -85,7 +97,7 @@ import { usePhysicalStore } from '@/store/physicalStore'
 import DateTimeSelector from '../../../controls/select/DateTimeSelector.vue'
 import FoodItemTable from './FoodItemTable.vue';
 import { floatString } from '../../../../../utility';
-import { toShortTimeString } from '../../../../../utility/timeUtility';
+import { toShortTimeString, setTimeFromDate } from '../../../../../utility/timeUtility';
 
 export default {
     name: '',
@@ -100,6 +112,8 @@ export default {
             itemsExpanded: false,
             caloriesRecommeded: 400,
             waterRecommeded: 28,
+            waterQuantity: undefined,
+            isEditWater: false,
             isTimeValid: true,
             editTime: false,
             startAt: undefined,
@@ -117,11 +131,32 @@ export default {
         waterPercentage() {
             return this.floatString((this.meal.water / this.waterRecommeded) * 100, 0);
         },
+        carbs() {
+            return this.meal.macros.carbs;
+        },
+        protein() {
+            return this.meal.macros.protein;
+        },
+        fat() {
+            return this.meal.macros.fat;
+        },
+        waterInputWidth() {
+            if (this.waterQuantity < 10) {
+                return "25px";
+            } else if (this.waterQuantity < 100){
+                return "34px";
+            } else {
+                return "41px";
+            }
+        },
     },
     methods: {
         floatString,
         toShortTimeString,
+        setTimeFromDate,
         addFood,
+        editWater,
+        setWater,
         refresh,
         refreshTimes,
         setTime,
@@ -135,15 +170,14 @@ export default {
     }
 }
 
-function addFood() {
-    this.$emit('searchFoodItems', this.meal);
-}
-
 function refresh() {
     this.infoExpanded = (this.meal.foodItems.length > 0) ? true : false;
     if (!this.infoExpanded) {
         this.itemsExpanded = false;
     }
+
+    this.waterQuantity = this.meal.water;
+
     this.refreshTimes();
 }
 
@@ -160,6 +194,27 @@ function refreshTimes() {
         this.endAt = new Date(this.meal.iteration.endAt);
     } else {
         this.endAt = undefined;
+    }
+}
+
+function addFood() {
+    this.$emit('searchFoodItems', this.meal);
+}
+
+async function editWater() {
+    this.isEditWater = true;
+    await this.$nextTick();
+    this.$refs.waterQuantity.focus();
+}
+
+function setWater() {
+    this.isEditWater = false;
+
+    if (this.waterQuantity && this.waterQuantity != this.meal.water) {
+        var datetime = new Date(this.meal.dateTime);
+        this.setTimeFromDate(datetime, new Date());
+        
+        this.physicalStore.logWater(this.waterQuantity, datetime, this.meal.id);
     }
 }
 
@@ -245,9 +300,21 @@ function saveTime() {
     font-weight: 500;
 }
 
+/* Water Input - Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Water Input - Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
 .water .amount {
     position: absolute;
-    right: 22px;
+    right: 25px;
     top: -6px;
 }
 

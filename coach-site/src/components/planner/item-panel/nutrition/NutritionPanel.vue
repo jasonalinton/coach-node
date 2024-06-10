@@ -11,19 +11,20 @@
                     </div>
                 </div>
                 <div class="body d-flex flex-column flex-grow-1" :class="{ hide: selectedPanel != 'home'}">
+                    <!-- Nutrient Info -->
                     <div class="info d-flex flex-row">
                         <div class="calories d-flex flex-row">
                             <div class="d-flex flex-column">
                                 <span class="amount">{{ caloriesRecommended }}</span>
                                 <span class="label">Recommended</span>
-                                <span class="amount">{{ floatString(caloriesConsumed,0) }}</span>
+                                <span class="amount">{{ float(caloriesConsumed,0) }}</span>
                                 <span class="label">Consumed</span>
                             </div>
                             <img src="/icon/nutrition/calorie-flame.png" width="33" height="45"/>
                             <div class="remaining d-flex flex-column">
-                                <span class="calorie-amount">{{ floatString(caloriesRemaining,0) }}</span>
-                                <span class="calories-label">Calories</span>
-                                <span class="label">Remaining</span>
+                                    <span class="calorie-amount">{{ float(caloriesRemaining,0) }}</span>
+                                    <span class="calories-label">Calories</span>
+                                    <span class="label">Remaining</span>
                             </div>
                         </div>
                         <div class="water d-flex flex-row">
@@ -36,12 +37,25 @@
                             <div class="d-flex flex-column">
                                 <span class="amount">{{ waterRecommended }}</span>
                                 <span class="label">Recommended</span>
-                                <span class="amount">{{ waterConsumed }}</span>
-                                <span class="label">Consumed</span>
+                                <div v-if="!isEditWater" class="d-flex flex-column"
+                                     @click.prevent.stop="editWater">
+                                    <span class="amount">{{ waterConsumed }}</span>
+                                    <span class="label">Consumed</span>
+                                </div>
+                                <input v-else class="water-quantity textbox ms-1" ref="waterQuantity" type="number"
+                                       v-model.trim.lazy="waterQuantity"
+                                       :style="{'width': waterInputWidth}"
+                                       @keyup.enter.prevent.stop="$refs.waterQuantity.blur()"
+                                       @keyup.esc.prevent.stop="cancelEditWater"
+                                       @click.prevent.stop
+                                       @blur.prevent.stop="setWater" />
                             </div>
                         </div>
                     </div>
-                    <div class="meals d-flex flex-column mt-4">
+                    <!-- Nutrient Chart -->
+                    <NutrientChart/>
+                    <!-- Meal Items -->
+                    <div class="meals d-flex flex-column mt-1">
                         <MealItem v-for="meal in meals" :key="meal.id" 
                                   class="mb-2"
                                   :meal="meal" 
@@ -60,14 +74,15 @@
 <script>
 import { usePlannerStore } from '@/store/plannerStore'
 import { usePhysicalStore } from '@/store/physicalStore'
+import NutrientChart from './NutrientChart.vue';
 import MealItem from './MealItem.vue';
 import FoodItemSearch from './FoodItemSearch.vue';
-import { today, endOfDay } from '../../../../../utility/timeUtility';
-import { clone, floatString } from '../../../../../utility';
+import { today, endOfDay, setTimeFromDate } from '../../../../../utility/timeUtility';
+import { clone, float } from '../../../../../utility';
 
 export default {
     name: 'NutritionPanel',
-    components: { MealItem, FoodItemSearch },
+    components: { MealItem, FoodItemSearch, NutrientChart },
     props: {
         
     },
@@ -76,14 +91,16 @@ export default {
             plannerStore: undefined,
             physicalStore: undefined,
             selectedPanel: "home",
-            activeMeal: undefined
+            activeMeal: undefined,
+            waterQuantity: undefined,
+            isEditWater: false,
+            isTimeValid: true,
         }
     },
     created: function() {
         this.plannerStore = usePlannerStore();
         this.physicalStore = usePhysicalStore();
-        let end = endOfDay(this.date);
-        this.physicalStore.getMealsInRange(this.date, end, true);
+        this.refresh();
     },
     computed: {
         date() {
@@ -111,15 +128,35 @@ export default {
             return 140;
         },
         waterConsumed() {
-            if (this.mealsInRange) {
-                return this.mealsInRange
-                .reduce((accumulator, currentValue) => accumulator + currentValue.water, 0,);
+            if (this.waterInRange) {
+                return this.waterInRange
+                .reduce((accumulator, currentValue) => accumulator + currentValue.amount, 0,);
             } else { 
                 return 0;
             }
         },
         waterRemaining() {
             return this.waterRecommended - this.waterConsumed;
+        },
+        waterInputWidth() {
+            if (this.waterQuantity < 10) {
+                return "25px";
+            } else if (this.waterQuantity < 100){
+                return "34px";
+            } else {
+                return "41px";
+            }
+        },
+        waterInRange() {
+            if (this.date) {
+                let end = endOfDay(this.date);
+                let waterLogs = this.physicalStore.waterLogs;
+                waterLogs = waterLogs.filter(waterLog => 
+                +new Date(waterLog.dateTime) >= this.date && +new Date(waterLog.dateTime) <= end);
+                return clone(waterLogs);
+            } else {
+                return [];
+            }
         },
         mealsInRange() {
             if (this.date) {
@@ -142,13 +179,6 @@ export default {
                     data = {
                         ...meal
                     };
-                    // data = {
-                    //     id: meal.id,
-                    //     name: meal.name,
-                    //     dateTime: meal.dateTime,
-                    //     foodItems: meal.foodItems,
-                    //     macros: meal.macros
-                    // }
                 } else {
                     data = {
                         id: -1 * id++,
@@ -168,16 +198,25 @@ export default {
         }
     },
     methods: {
+        refresh,
         searchFoodItems,
         back,
-        floatString
+        float,
+        setTimeFromDate,
+        editWater,
+        cancelEditWater,
+        setWater,
     },
     watch: {
         date() {
-            let end = endOfDay(this.date);
-            this.physicalStore.getMealsInRange(this.date, end, true);
-        }
+            this.refresh();
+        },
     }
+}
+
+function refresh() {
+    let end = endOfDay(this.date);
+    this.physicalStore.getMealsInRange(this.date, end, true);
 }
 
 function searchFoodItems(meal) {
@@ -188,6 +227,30 @@ function searchFoodItems(meal) {
 function back() {
     if (this.selectedPanel == 'foodItemSearch') {
         this.selectedPanel = 'home';
+    }
+}
+
+async function editWater() {
+    this.isEditWater = true;
+    await this.$nextTick();
+    this.$refs.waterQuantity.focus();
+}
+
+async function cancelEditWater() {
+    this.waterQuantity = undefined;
+    await this.$nextTick();
+    this.isEditWater = false;
+}
+
+function setWater() {
+    this.isEditWater = false;
+
+    if (this.waterQuantity) {
+        var datetime = new Date(this.date);
+        this.setTimeFromDate(datetime, new Date());
+        
+        this.physicalStore.logWater(this.waterQuantity, datetime);
+        this.waterQuantity = undefined;
     }
 }
 
@@ -252,6 +315,18 @@ function back() {
 .calories .remaining {
     margin-left: 5px;
     margin-right: 5px;
+}
+
+/* Water Input - Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Water Input - Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
 }
 
 .water .remaining {

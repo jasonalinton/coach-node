@@ -1,21 +1,29 @@
 import { defineStore } from 'pinia';
 import { getSocketConnection } from './socket';
-import { getMealsInRange, getRecentFoodItems, foodSearchAutoComplete, searchFoodUPC, 
-    addFoodItemToMeal, setMealTime, removeFoodItem } from '../api/physicalAPI';
+import { getNutritionHistory, getMealsInRange, getRecentFoodItems, getWaterLogs, foodSearchAutoComplete, searchFoodUPC, 
+    addFoodItemToMeal, logWater, setMealTime, removeFoodItem } from '../api/physicalAPI';
 import { sortAsc, replaceOrAddItem, removeItemByID } from '../../utility';
 
 let initialized = false;
 
 export const usePhysicalStore = defineStore('physical', {
     state: () => ({
-        meals: []
+        meals: [],
+        mealHistories: [],
+        waterLogs: []
     }),
     getters: {
         
     },
     actions: {
         async initialize() {
+            let _this = this;
             this.connectSocket();
+            getNutritionHistory()
+            .then(result => {  
+                _this.mealHistories = result.meals;
+                _this.waterLogs = result.waterLogs;
+             });
             initialized = true;
         },
         getMealsInRange(startAt, endAt, shouldRequestServer) {
@@ -38,6 +46,10 @@ export const usePhysicalStore = defineStore('physical', {
             let result = await getRecentFoodItems();
             return result;
         },
+        async getWaterLogs() {
+            let result = await getWaterLogs();
+            return result;
+        },
         async foodSearchAutoComplete(searchTerm) {
             let result = await foodSearchAutoComplete(searchTerm);
             return result;
@@ -48,6 +60,9 @@ export const usePhysicalStore = defineStore('physical', {
         },
         async addFoodItemToMeal(model) {
             addFoodItemToMeal(model);
+        },
+        async logWater(amountFLOZ, dateTime, mealID) {
+            logWater(amountFLOZ, dateTime, mealID);
         },
         async setMealTime(mealID, startAt, endAt) {
             setMealTime(mealID, startAt, endAt);
@@ -63,12 +78,35 @@ export const usePhysicalStore = defineStore('physical', {
                 connection.on("UpdateMeals", meals => {
                     meals.forEach(meal => {
                         replaceOrAddItem(meal, _this.meals);
+                        let mealHistory = {
+                            id: meal.id,
+                            name: meal.name,
+                            dateTime: meal.dateTime,
+                            calories: meal.calories,
+                            carbs: meal.carbohydrates,
+                            protein: meal.protein,
+                            fat: meal.fat
+                        }
+                        replaceOrAddItem(mealHistory, _this.mealHistories);
                     })
                     sortAsc(_this.meals);
                 });
                 connection.on("RemoveMeals", mealIDs => {
                     mealIDs.forEach(mealID => {
                         removeItemByID(mealID, _this.meals);
+                        removeItemByID(mealID, _this.mealHistories);
+                    })
+                    sortAsc(_this.meals);
+                });
+                connection.on("UpdateWaterLogs", waterLogs => {
+                    waterLogs.forEach(waterLog => {
+                        replaceOrAddItem(waterLog, _this.waterLogs);
+                    })
+                    sortAsc(_this.waterLogs);
+                });
+                connection.on("RemoveWaterLogs", waterLogIDs => {
+                    waterLogIDs.forEach(waterLogID => {
+                        removeItemByID(waterLogID, _this.waterLogs);
                     })
                     sortAsc(_this.meals);
                 });

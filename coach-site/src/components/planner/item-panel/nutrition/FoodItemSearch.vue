@@ -13,31 +13,33 @@
                          :options="tabs"
                          @selectOption="tab = $event"/>
         </div>
+        <!-- Recents -->
         <div v-if="['Recent'].includes(tab) && recents.length > 0" 
              class="recents d-flex flex-column">
             <span class="text-start ms-2">Recents</span>
             <div v-for="(item, index) in recents" :key="index"
                     class="item d-flex flex-row align-items-center"
                  @click="addFoodItem(item, 'recent')">
-                <img :src="item.thumbURL" height="40" width="40"/>
+                <img class="align-self-start" :src="item.thumbURL" height="40" width="40"/>
                 <div class="d-flex flex-column flex-grow-1">
                     <span class="name text-start">{{ item.name }}</span>
                     <div class="serving d-flex flex-row">
                         <span>{{ item.brandName }}</span>
-                        <span class="ms-1">{{ item.quantity }}</span>
+                        <span>{{ item.quantity }}</span>
                         <span class="ms-1">{{ item.unit }}</span>
                     </div>
                 </div>
-                <span class="float-end">{{ item.calories }}</span>
+                <span class="float-end">{{ float(item.calories,0) }}</span>
             </div>
         </div>
+        <!-- Common -->
         <div v-if="['All', 'Common'].includes(tab) && common.length > 0"
              class="common d-flex flex-column">
             <span class="text-start ms-2">Common</span>
             <div v-for="(item, index) in common" :key="index"
                  class="item d-flex flex-row align-items-center"
                  @click="addFoodItem(item, 'common')">
-                <img :src="item.photoThumb" height="40" width="40"/>
+                <img class="align-self-start" :src="item.photoThumb" height="40" width="40"/>
                 <div class="d-flex flex-column flex-grow-1">
                     <span class="name text-start">{{ item.food_name }}</span>
                     <div class="serving d-flex flex-row">
@@ -47,40 +49,42 @@
                 </div>
             </div>
         </div>
+        <!-- Branded -->
         <div v-if="['All', 'Branded'].includes(tab) && branded.length > 0" 
              class="branded d-flex flex-column">
             <span class="text-start ms-2">Branded</span>
             <div v-for="(item, index) in branded" :key="index"
                     class="item d-flex flex-row align-items-center"
                  @click="addFoodItem(item, 'branded')">
-                <img :src="item.photoThumb" height="40" width="40"/>
+                <img class="align-self-start" :src="item.photoThumb" height="40" width="40"/>
                 <div class="d-flex flex-column flex-grow-1">
                     <span class="name text-start">{{ item.food_name }}</span>
                     <div class="serving d-flex flex-row">
                         <span>{{ item.brand_name }}</span>
-                        <span class="ms-1">{{ item.serving_qty }}</span>
+                        <span>{{ item.serving_qty }}</span>
                         <span class="ms-1">{{ item.serving_unit }}</span>
                     </div>
                 </div>
-                <span class="float-end">{{ item.nf_calories }}</span>
+                <span class="float-end">{{ float(item.nf_calories,0) }}</span>
             </div>
         </div>
+        <!-- UPC -->
         <div v-if="['UPC'].includes(tab) && upc.length > 0" 
              class="upc d-flex flex-column">
             <span class="text-start ms-2">UPC</span>
             <div v-for="(item, index) in upc" :key="index"
                     class="item d-flex flex-row align-items-center"
                  @click="addFoodItem(item, 'upc')">
-                <img :src="item.thumbURL" height="40" width="40"/>
+                <img class="align-self-start" :src="item.thumbURL" height="40" width="40"/>
                 <div class="d-flex flex-column flex-grow-1">
                     <span class="name text-start">{{ item.name }}</span>
                     <div class="serving d-flex flex-row">
                         <span>{{ item.brandName }}</span>
-                        <span class="ms-1">{{ item.quantity }}</span>
+                        <span>{{ item.quantity }}</span>
                         <span class="ms-1">{{ item.unit }}</span>
                     </div>
                 </div>
-                <span class="float-end">{{ item.calories }}</span>
+                <span class="float-end">{{ float(item.calories,0) }}</span>
             </div>
         </div>
     </div>
@@ -89,6 +93,8 @@
 <script>
 import { usePhysicalStore } from '../../../../store/physicalStore';
 import RadioButton from '../../../controls/button/RadioButton.vue';
+import { setTimeFromDate } from '../../../../../utility/timeUtility';
+import { float } from '../../../../../utility';
 
 export default {
     name: '',
@@ -101,7 +107,7 @@ export default {
             physicalStore: undefined,
             searchTerm: "",
             quantity: 1,
-            tab: "All",
+            tab: "Recent",
             tabs: [
                 'All',
                 'Recent',
@@ -120,6 +126,8 @@ export default {
        this.recents = await this.physicalStore.getRecentFoodItems();
     },
     methods: {
+        float,
+        setTimeFromDate,
         search,
         clearResults,
         searchFoodItem,
@@ -163,6 +171,9 @@ async function searchUPC() {
 }
 
 async function addFoodItem(foodItem, type) {
+    var datetime = new Date(this.meal.dateTime);
+    this.setTimeFromDate(datetime, new Date());
+    
     let model = {
         mealID: (this.meal.id > 0) ? this.meal.id : undefined,
         meal: this.meal.name,
@@ -170,7 +181,7 @@ async function addFoodItem(foodItem, type) {
         nIXItemID: (type == "branded") ? foodItem.nix_item_id : undefined,
         unit: (['upc','recent'].includes(type)) ? foodItem.unit : foodItem.serving_unit,
         quantity: this.quantity,
-        dateTime: this.meal.dateTime,
+        dateTime: datetime,
         foodItem: (['upc','recent'].includes(type)) ? foodItem : undefined
     }
     this.physicalStore.addFoodItemToMeal(model);
@@ -185,8 +196,8 @@ async function addFoodItem(foodItem, type) {
 }
 
 .item {
-    height: 56px;
-    padding: 8px 12px;
+    min-height: 56px;
+    padding: 8px 8px;
     cursor: default;
     margin-bottom: 2px;
 }
@@ -205,7 +216,7 @@ async function addFoodItem(foodItem, type) {
     margin: auto 0 auto 6px;
     font-size: 16px;
     line-height: 18px;
-    white-space: nowrap;
+    /* white-space: nowrap; */
     text-overflow: ellipsis;
     overflow: hidden;
     text-transform: capitalize;
