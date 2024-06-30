@@ -144,7 +144,7 @@ function createNutrientChart() {
     const chart = createChart('nutrient-chart',  chartOptions);
     this.chart = chart;
 
-    this.calorieSeries = chart.addLineSeries({
+    this.calorieSeries = chart.addHistogramSeries({
         priceScaleId: 'left',
         color: '#EA8919',
         lastValueVisible: false,
@@ -160,7 +160,7 @@ function createNutrientChart() {
     };
     this.calorieSeries.createPriceLine(calPriceLine);
 
-    this.waterSeries = chart.addLineSeries({
+    this.waterSeries = chart.addHistogramSeries({
         priceScaleId: 'right',
         color: '#3B99FC',
         lastValueVisible: false,
