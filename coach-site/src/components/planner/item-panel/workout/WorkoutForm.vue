@@ -3,18 +3,20 @@
         <div class="workout-view d-flex flex-column flex-grow-1 justify-content-between" 
              :class="{ hide: selectedPanel != 'form', 'is-active': isActive }">
              <div class="d-flex flex-column">
-                 <div class="label d-flex flex-row mb-2">
-                     <img class="icon-button mb-2"
-                             src='/icon/previous.png' width="20" height="20"
-                             @click.prevent="$emit('back')"/>
-                     <span>Exercises</span>
-                     <img class="icon-button" src="/icon/add-button.png" :width="20" :height="20" 
-                          @click="selectExercises" />
+                <div class="top d-flex flex-column sticky-top">
+                    <div class="label d-flex flex-row mb-2">
+                        <img class="icon-button mb-2"
+                                src='/icon/previous.png' width="20" height="20"
+                                @click.prevent="$emit('back')"/>
+                        <span>Exercises</span>
+                        <img class="icon-button" src="/icon/add-button.png" :width="20" :height="20" 
+                            @click="selectExercises" />
+                    </div>
+                    <input id="name" class="textbox mb-2" type="text" ref="text"  placeholder="Workout Name"
+                            v-model.lazy.trim="name.value" 
+                            spellcheck/>
+                    <button type="button" class="btn btn-primary mb-2" @click="save()">Save</button>
                  </div>
-                 <input id="name" class="textbox mb-2" type="text" ref="text"  placeholder="Workout Name"
-                        v-model.lazy.trim="name.value" 
-                        spellcheck/>
-                 <button type="button" class="btn btn-primary mb-2" @click="save()">Save</button>
                  <div class="d-flex flex-column">
                      <ExerciseItem class="mb-2" v-for="exercise in exercises.value" :key="exercise.id"
                                    :exercise="exercise"
@@ -704,6 +706,7 @@ function save() {
 <style scoped>
 .workout-view {
     padding: 12px;
+    padding-top: 0px;
 }
 
 .workout-view.is-active {
@@ -712,6 +715,11 @@ function save() {
 
 .hide {
     display: none !important;
+}
+
+.top {
+    padding-top: 12px;
+    background-color: white;
 }
 
 .label {

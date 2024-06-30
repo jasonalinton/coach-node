@@ -1,6 +1,6 @@
 <template>
     <div class="food-item-search d-flex flex-column flex-grow-1 overflow-scroll">
-        <div class="mt-2 ms-2 me-2">
+        <div class="pt-2 ms-2 me-2 sticky-top head">
             <div class="d-flex flex-row">
                 <input id="title" class="textbox" type="text" ref="text"  placeholder="Search"
                         v-model.trim.lazy="searchTerm" 
@@ -193,6 +193,10 @@ async function addFoodItem(foodItem, type) {
 <style scoped>
 #quantity {
     width: 60px;
+}
+
+.head {
+    background-color: white;
 }
 
 .item {

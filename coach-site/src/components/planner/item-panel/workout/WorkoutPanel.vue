@@ -1,6 +1,6 @@
 <template>
     <div class="row g-0 h-100">
-        <div class="col h-100 d-flex flex-column">
+        <div class="workout-panel col h-100 d-flex flex-column flex-grow-1 overflow-hidden">
             <!-- Header -->
             <ItemPanelHeader :title="title" :sort="sort" :selectedDate="selectedDate"
                              @onSortChange="onSortChange">

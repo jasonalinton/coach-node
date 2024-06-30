@@ -1,5 +1,5 @@
 <template>
-    <div class="d-flex flex-column flex-grow-1">
+    <div class="d-flex flex-column flex-grow-1 overflow-scroll">
         <div class="workout-list d-flex flex-column flex-grow-1" :class="{ hide: selectedPanel != 'list'}">
             <div class="label d-flex flex-row mb-2">
                 <img class="icon-button"
