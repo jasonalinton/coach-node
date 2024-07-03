@@ -19,9 +19,13 @@ export function toTimeString(dateTimeJSON) {
     return `${timeArray[0]}:${timeArray[1]}`;
 }
 
-export function toShortWeekdayString(dateTimeJSON) {
+export function toShortWeekdayString(dateTimeJSON, withoutComma) {
     let datetime = new Date(dateTimeJSON);
-    return date.format(datetime, 'ddd, MMM D')
+    if (withoutComma) {
+        return date.format(datetime, 'ddd MMM D') // Ex Tue Jul 2
+    } else {
+        return date.format(datetime, 'ddd, MMM D') // Ex Tue, Jul 2
+    }
 }
 
 export function toShortTimeString(dateTimeJSON) {

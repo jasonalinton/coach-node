@@ -1,3 +1,25 @@
+export let TIMEFRAME = {
+    MILLISECOND: 39,
+    SECOND: 40,
+    MINUTE: 41,
+    HOUR: 42,
+    DAY: 43,
+    WORKDAY: 44,
+    WEEKDAY: 45,
+    WEEKENDDAY: 46,
+    WEEKEND: 47,
+    WEEK: 48,
+    MONTH: 49,
+    SEASON: 50,
+    QUARTER: 51,
+    TRIMESTER: 52,
+    BIMESTER: 53,
+    SEMESTER: 54,
+    YEAR: 55,
+    MILESTONE: 56,
+    LIFE: 57
+};
+
 export let MOMENT = {
     DATE: 87,
     TIME: 88,

@@ -1,6 +1,6 @@
 <template>
     <div class="row g-0 h-100">
-        <div class="col h-100">
+        <div class="col h-100 d-flex flex-column flex-grow-1 overflow-hidden">
             <!-- Header -->
             <ItemPanelHeader :title="'todos'" :sort="sort" :selectedDate="selectedDate"
                              @onSortChange="onSortChange">
@@ -22,6 +22,10 @@
                                    :selectedDate="selectedDate"
                                    @editIteration="iteration => iteration_Form = iteration">
                 </TodoPanelByCustom>
+                <TodoPanelDefault v-if="sort.by=='Default'" 
+                                    :selectedDate="selectedDate"
+                                    @editIteration="iteration => iteration_Form = iteration">
+                </TodoPanelDefault>
             </template>
             <IterationForm v-if="iteration_Form" 
                            :iteration="iteration_Form"
@@ -37,6 +41,7 @@ import TodoPanelByDate from './TodoPanelByDate.vue';
 import TodoPanelByMetric from './TodoPanelByMetric.vue';
 import TodoPanelByRepetition from './TodoPanelByRepetition.vue';
 import TodoPanelByCustom from './TodoPanelByCustom.vue';
+import TodoPanelDefault from './TodoPanelDefault.vue';
 import IterationForm from '../component/form/IterationForm.vue';
 
 var sortItems = [
@@ -44,12 +49,13 @@ var sortItems = [
     { id: 2, text: "Date" },
     { id: 3, text: "Repetition" },
     { id: 4, text: "Custom" },
+    { id: 5, text: "Default" },
 ];
 
 export default {
     name: 'TodoPanel',
     components: { ItemPanelHeader, TodoPanelByMetric, TodoPanelByDate, TodoPanelByRepetition,
-        TodoPanelByCustom, IterationForm, },
+        TodoPanelByCustom, TodoPanelDefault, IterationForm, },
     props: {
         selectedDate: Date
     },
