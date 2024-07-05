@@ -116,6 +116,10 @@ export function toTimezoneOffset(dateTimeJSON) {
     return dateTimeJSON.slice(19, 25);
 }
 
+export function isToday(dateTime) {
+    return +today(new Date()) == +moment(dateTime).startOf('day').toDate();
+}
+
 export function today(dateTime) {
     return moment(dateTime).startOf('day').toDate();
 }

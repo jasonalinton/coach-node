@@ -11,24 +11,28 @@
                 <!-- Today -->
                 <div class="d-flex flex-column">
                     <div class="d-flex flex-row">
-                        <span class="timeframe">Today</span>
+                        <span v-if="isToday" class="timeframe">Today</span>
+                        <span v-if="!isToday" class="timeframe">Day</span>
                         <span class="dash">-</span>
                         <span class="date">{{ date }}</span>
                     </div>
-                    <ul v-if="todayPending.length > 0" class="item-list pending">
+                    <ul class="item-list pending">
                         <li v-for="(vm, index) in todayPending" v-bind:key="vm.id" :style="{ 'z-index': -index }">
-                            <HierarchicalListItem :viewModel="vm" />
+                            <HierarchicalListItem :viewModel="vm"
+                                                  @onEdit="$emit('editIteration', $event)" />
                         </li>
                     </ul>
                 </div>
                 <!-- Week -->
-                <div class="d-flex flex-column">
+                <div v-if="weekPending.length > 0" class="d-flex flex-column">
                     <div class="d-flex flex-row">
                         <span class="timeframe">Week</span>
                     </div>
-                    <ul v-if="weekPending" class="item-list pending">
+                    <ul class="item-list pending">
                         <li v-for="(vm, index) in weekPending" v-bind:key="vm.id" :style="{ 'z-index': -index }">
-                            <HierarchicalListItem :viewModel="vm" />
+                            <HierarchicalListItem :viewModel="vm"
+                                                  :level="2"
+                                                  @onEdit="$emit('editIteration', $event)" />
                         </li>
                     </ul>
                 </div>
@@ -36,25 +40,36 @@
             </div>
             <!-- Complete  -->
             <div class="complete d-flex flex-column">
-                <div class="header">Completed ({{ complete.length }})</div>
-                <!-- Today -->
-                <div class="d-flex flex-column">
+                <div class="header float-start">Completed ({{ completeCount }})</div>
+                <!-- Today - Complete -->
+                <div v-if="todayComplete.length > 0" class="d-flex flex-column">
                     <div class="d-flex flex-row">
-                        <span class="timeframe">Today</span>
+                        <span v-if="isToday" class="timeframe">Today</span>
+                        <span v-if="!isToday" class="timeframe">Day</span>
                         <span class="dash">-</span>
                         <span class="date">{{ date }}</span>
                     </div>
-                    <ul v-if="todayComplete.length > 0" class="item-list">
+                    <ul class="item-list">
                         <li v-for="(vm, index) in todayComplete" v-bind:key="vm.id" :style="{ 'z-index': -index }">
-                            <HierarchicalListItem :viewModel="vm" />
+                            <HierarchicalListItem :viewModel="vm"
+                                                  :level="2"
+                                                  @onEdit="$emit('editIteration', $event)" />
                         </li>
                     </ul>
                 </div>
-                <!-- <ul v-if="complete" class="item-list">
-                    <li v-for="(iteration, index) in complete" v-bind:key="index" :style="{ 'z-index': -index }">
-                        <HierarchicalListItem class="complete" />
-                    </li>
-                </ul> -->
+                <!-- Week - Complete -->
+                <div v-if="weekComplete.length > 0" class="d-flex flex-column">
+                    <div class="d-flex flex-row">
+                        <span class="timeframe">Week</span>
+                    </div>
+                    <ul class="item-list pending">
+                        <li v-for="(vm, index) in weekComplete" v-bind:key="vm.id" :style="{ 'z-index': -index }">
+                            <HierarchicalListItem :viewModel="vm"
+                                                  :level="2"
+                                                  @onEdit="$emit('editIteration', $event)" />
+                        </li>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
@@ -64,26 +79,25 @@
 import AddTaskButton from '../component/AddTaskButton.vue'
 // import IconButton from '../../../controls/button/IconButton.vue'
 import HierarchicalListItem from '../component/HierarchicalListItem.vue'
-import { sortAsc, clone } from '../../../../../utility';
-import { toShortWeekdayString, startOfDay, firstDayOfWeek, lastDayOfWeek, firstDayOfMonth, lastDayOfMonth } from '../../../../../utility/timeUtility';
+import { sortAsc, sortTrueOnBottom, clone } from '../../../../../utility';
+import { toShortWeekdayString, isToday, startOfDay, firstDayOfWeek, lastDayOfWeek, firstDayOfMonth, lastDayOfMonth } from '../../../../../utility/timeUtility';
 import { TIMEFRAME } from '../../.././../model/constants';
 
 export default {
     name: 'TodoPanelDefault',
     components: { AddTaskButton, HierarchicalListItem },
     props: {
-        selectedDate: Date
+        selectedDate: Date,
+        showRepeat: Boolean,
+        showTimeline: Boolean,
+        showRecommended: Boolean,
+        showHierarchy: Boolean,
     },
     data: function () {
         return {
             iterationStore: undefined,
             todoStore: undefined,
-            TIMEFRAME: clone(TIMEFRAME),
-            // VMs: {
-            //     today: [],
-            //     week: [],
-            //     month: []
-            // }
+            TIMEFRAME: clone(TIMEFRAME)
         }
     },
     created: async function() {
@@ -102,7 +116,10 @@ export default {
             return firstDayOfWeek(firstDayOfMonth(this.selectedDate));
         },
         end() { 
-            return lastDayOfMonth(this.selectedDate);
+            return lastDayOfWeek(lastDayOfMonth(this.selectedDate));
+        },
+        isToday() {
+            return isToday(this.selectedDate);
         },
         iterations() { 
             if (this.iterationStore) {
@@ -110,19 +127,21 @@ export default {
                 iterations = iterations.filter(iteration => {
                     return +(new Date(iteration.startAt)) >= +this.start && 
                            +(new Date(iteration.endAt)) <= +this.end &&
-                           iteration.isRepeat && // Is repetitive
                            iteration.eventID == null // Not in an event
                 });
                 iterations = iterations.filter(iteration => iteration.idRoutine == null && iteration.routineIterationID == null);
                 iterations = sortAsc(iterations, 'startAt');
+                if (!this.showRepeat) {
+                    iterations = iterations.filter(x => !x.isRepeat)
+                }
+                if (!this.showRecommended) {
+                    iterations = iterations.filter(x => !x.isRecommended)
+                }
 
                 return iterations;
             } else {
                 return [];
             }
-        },
-        viewModels() {
-            return this.refreshViewModels();
         },
         todayPending() {
             if (this.iterations.length > 0) {
@@ -145,11 +164,18 @@ export default {
                 return [];
             }
         },
-        complete() { return this.iterations.filter(iteration => iteration.attemptedAt) },
-        pending() { return this.iterations.filter(iteration => !iteration.attemptedAt) },
+        weekComplete() {
+            if (this.iterations.length > 0) {
+                return this.getViewModels(this.TIMEFRAME.WEEK, true);
+            } else {
+                return [];
+            }
+        },
+        completeCount() {
+            return this.todayComplete.length + this.weekComplete.length;
+        }
     },
     methods: {
-        refreshViewModels,
         addNewTask() {},
         getViewModels(timeframe, isComplete) {
             let _this = this;
@@ -180,22 +206,26 @@ export default {
             } else {
                 iterations = iterations.filter(iteration => !iteration.attemptedAt);
             }
+            iterations = sortTrueOnBottom(iterations, "isRecommended");
+            iterations = sortTrueOnBottom(iterations, "isRepeat");
             iterations.forEach(iteration => {
                 let vm = undefined;
                 if (iteration.isRepeat) {
-                    vm = viewModels.find(_vm => _vm.todo.id == iteration.todo.id && _vm.repeatID == iteration.RepeatID);
+                    vm = viewModels.find(_vm => _vm.todoID == iteration.todo.id && _vm.repeatID == iteration.RepeatID);
                 } else {
-                    vm = viewModels.find(_vm => _vm.todo.id == iteration.todo.id);
+                    vm = viewModels.find(_vm => _vm.todoID == iteration.todo.id);
                 }
                 if (vm == undefined) {
                     vm = {
                         id: iteration.id,
                         timeframeID: undefined,
                         todoID: iteration.todo.id,
-                        todo: iteration.todo,
+                        // todo: iteration.todo,
                         text: iteration.todo.text,
                         children: [],
                         iterationIDs: [],
+                        // completeIDs: [],
+                        // incompleteIDs: [],
                         iterations: [],
                         isChild: false,
                         repeatID: undefined,
@@ -206,6 +236,11 @@ export default {
                 viewModels.push(vm);
                 vm.iterationIDs.push(iteration.id);
                 vm.iterations.push(iteration);
+                // if (iteration.attemptedAt) {
+                //     vm.completeIDs.push(iteration.id);
+                // } else {
+                //     vm.incompleteIDs.push(iteration.id);
+                // }
 
                 if (iteration.isRepeat) {
                     let todo = _this.todoStore.getItem(vm.todoID);
@@ -217,84 +252,30 @@ export default {
                 }
             });
 
-            viewModels.forEach(vm => {
-                let todo = _this.todoStore.getItem(vm.todoID); 
-                todo.children.forEach(_child => {
-                    let child = undefined;
-                    if (vm.repeatID != undefined) {
-                        child = viewModels.find(x => x.todo.id == _child.id && x.repeatID == vm.repeatID);
-                    } else {
-                        child = viewModels.find(x => x.todo.id == _child.id);
-                    }
-                    if (child != undefined) {
-                        child.isChild = true;
-                        vm.children.push(child);
-                    }
+            if (_this.showHierarchy) {
+                viewModels.forEach(vm => {
+                    let todo = _this.todoStore.getItem(vm.todoID); 
+                    todo.children.forEach(_child => {
+                        let child = undefined;
+                        if (vm.repeatID != undefined) {
+                            child = viewModels.find(x => x.todoID == _child.id && x.repeatID == vm.repeatID);
+                        } else {
+                            child = viewModels.find(x => x.todoID == _child.id);
+                        }
+                        if (child != undefined) {
+                            child.isChild = true;
+                            vm.children.push(child);
+                        }
+                    });
                 });
-            });
-
-            let hierarchalVMs = viewModels.filter(x => x.isRepeatOwner || x.repeatID == undefined);
-            return hierarchalVMs;
+    
+                let hierarchalVMs = viewModels.filter(x => x.isRepeatOwner || x.repeatID == undefined || !x.isChild);
+                return hierarchalVMs;
+            } else {
+                return viewModels;
+            }
         },
     },
-}
-
-function refreshViewModels() {
-    let repeatIDs = this.iterations.filter(x => x.isRepeat).map(x => x.repeatID);
-    let viewModels = [];
-
-    this.iterations.forEach(iteration => {
-        let vm = undefined;
-        if (iteration.isRepeat) {
-            vm = viewModels.find(_vm => _vm.todo.id == iteration.todo.id && _vm.repeatID == iteration.RepeatID);
-        } else {
-            vm = viewModels.find(_vm => _vm.todo.id == iteration.todo.id);
-        }
-        if (vm == undefined) {
-            vm = {
-                timeframeID: undefined,
-                todoID: iteration.todo.id,
-                todo: iteration.todo,
-                text: iteration.todo.text,
-                children: [],
-                iterationIDs: [],
-                isChild: false,
-                repeatID: undefined,
-                isRepeatOwner: false,
-                isRepeatChild: false
-            };
-        }
-        viewModels.push(vm);
-        vm.iterationIDs.push(iteration.id);
-
-        if (iteration.isRepeat) {
-            let todo = this.todoStore.getItem(vm.todoID);
-            let repeat = todo.repeats.find(x => x.id == iteration.repeatID);
-            vm.repeatID = repeat.id;
-            vm.timeframeID = repeat.idTimeframe;
-            vm.isRepeatOwner = (repeat.ownerID == vm.todoID);
-            vm.isRepeatChild = (repeat.parentID != null && repeatIDs.includes(repeat.id));
-        }
-    });
-
-    viewModels.forEach(vm => {
-        let todo = this.todoStore.getItem(vm.todoID); 
-        todo.children.forEach(_child => {
-            let child = undefined;
-            if (vm.repeatID != undefined) {
-                child = viewModels.find(x => x.todo.id == _child.id && x.repeatID == vm.repeatID);
-            } else {
-                child = viewModels.find(x => x.todo.id == _child.id);
-            }
-            if (child != undefined) {
-                child.isChild = true;
-                vm.children.push(child);
-            }
-        });
-    });
-
-    let hierarchalVMs = viewModels.filter(x => x.isRepeatOwner || x.repeatID == undefined);
-    return hierarchalVMs;
 }
 
 </script>
@@ -317,7 +298,8 @@ span.date {
     font-weight: 500;
 }
 span.dash {
-    margin: 0 2px;
+    margin: 0 4px;
+    line-height: 21px;
 }
 
 ul {
@@ -329,10 +311,24 @@ ul {
     text-align: start;
 }
 
+.item-list {
+    margin-bottom: 8px;
+    z-index: 2;
+}
+
+.item-list li {
+    position: relative;
+}
+
 
 .complete {
     /* position: absolute; */
     bottom: 0;
+}
+
+.header {
+    color: #565656;
+    margin-bottom: 8px;
 }
 
 </style>
