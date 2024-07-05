@@ -4,13 +4,31 @@
              :class="[{ complete: checked, unplanned: isUnplanned, recommended: iteration.isRecommended }]"
              :style="{ 'font-size': fontSize }"
              draggable @dragstart="onDragStart($event)" @dragend="onDragEnd($event)">
-            <ItemCheckbox class="checkbox align-self-start" 
-                          :checked="checked" 
-                            @onChecked="markComplete" 
-                            @onUnchecked="markIncomplete"
-                            @onDelete="onDelete">
-            </ItemCheckbox>
-            <span class="flex-fill">{{ iteration.text }}</span>
+            <div class="d-flex flex-row align-items-center flex-grow-1 justify-content-between">
+                <div class="d-flex flex-row">
+                    <ItemCheckbox class="checkbox align-self-start" 
+                                  :style="{ 'padding-left': `${(level-2)*padding}px` }"
+                                  :checked="checked" 
+                                  @onChecked="markComplete" 
+                                  @onUnchecked="markIncomplete"
+                                  @onDelete="onDelete">
+                    </ItemCheckbox>
+                    <div class="d-flex flex-row align-items-center"
+                         @click="toggleChildren">
+                        <div v-if="isParent" class="caret d-flex flex-row me-2">
+                            <img v-if="!showChildren" class="caret-right" 
+                                 src='/icon/caret-right.png' width="5" height="8"/>
+                            <img v-if="showChildren" class="caret-down" 
+                                 src='/icon/caret-down.png' width="8" height="5"/>
+                        </div>
+                        <span class="flex-fill">{{ iteration.text }}</span>
+                    </div>           
+
+                </div>
+                <img v-if="viewModel.repeatID" 
+                     class="icon-button" 
+                     src='/icon/repeat.png' width="12" height="12"/>
+            </div>
             <div class="button-group d-flex flex-column justify-content-between">
                 <!-- <img class="icon-button" src='/icon/add-button.png' width="16" height="16"/> -->
                 <img class="icon-button" 
@@ -21,11 +39,17 @@
                         @click="onDelete"/>
             </div>
         </div>
+        <div v-if="showChildren" class="children d-flex flex-column">
+            <HierarchicalListItem v-for="vm in viewModel.children" :key="vm.id"
+                                  :viewModel="vm"
+                                  :level="level+1"/> 
+        </div>
     </div>
 </template>
 
 <script>
 import ItemCheckbox from './ItemCheckbox.vue';
+import HierarchicalListItem from '../component/HierarchicalListItem.vue'
 import { clone } from '../../../../../utility'
 
 /* 
@@ -46,10 +70,12 @@ Parent Types
 export default {
     name: 'HierarchicalListItem',
     components: { 
-        ItemCheckbox
+        ItemCheckbox,
+        HierarchicalListItem
     },
     props: {
         viewModel: Object,
+        level: Number,
         parent: Object,
         parentType: String,
         isUnplanned: Boolean,
@@ -58,7 +84,9 @@ export default {
     data: function () {
         return {
             iterationStore: undefined,
-            iteration: undefined
+            iteration: undefined,
+            showChildren: false,
+            padding: 12
         }
     },
     created: async function() {
@@ -82,7 +110,21 @@ export default {
             } else {
                 return "14px"
             }
-        }
+        },
+        isParent() {
+            return this.viewModel.children.length > 0;
+        },
+        // percentComplete() {
+        //     if (this.isParent) {
+        //         let iterations = [];
+        //         let count = 1;
+        //         this.vm.children.forEach(child => {
+
+        //         });
+        //     } else {
+        //         return null
+        //     }
+        // }
     },
     methods: {
         markComplete,
@@ -90,7 +132,19 @@ export default {
         onEdit,
         onDelete,
         onDragStart,
-        onDragEnd
+        onDragEnd,
+        toggleChildren
+    },
+    watch: {
+        viewModel() {
+            this.iteration = this.viewModel.iterations[0];
+        }
+    }
+}
+
+function toggleChildren() {
+    if (this.isParent) {
+        this.showChildren = !this.showChildren;
     }
 }
 
@@ -169,6 +223,10 @@ function onDragEnd(ev) {
     bottom: 0;
 } */
 
+.caret {
+    min-width: 8px;
+}
+
 .checkbox:hover {
     background-color: rgba(248, 248, 248, 1);
     border-radius: 24px;
@@ -204,13 +262,21 @@ function onDragEnd(ev) {
     /* box-shadow: 0px -3px 5px 2px rgba(0,0,0,.5); */
 }
 
+/* I removed this because it was taking long to implement
+   (shadow on bottom when clicked) */
 .iteration:active:hover {
-    box-shadow: 0px -3px 5px 2px rgba(0,0,0,.5);
+    /* box-shadow: 0px -3px 5px 2px rgba(0,0,0,.5); */
+    background-color: #D8D8D8;
 }
 
 .iteration span {
     /* height: 14px;
     line-height: 15px; */
     line-height: 22px;
+}
+
+.children {
+    /* padding-left: 12px; */
+    z-index: 2;
 }
 </style>

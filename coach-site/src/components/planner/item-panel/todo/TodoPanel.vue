@@ -4,6 +4,20 @@
             <!-- Header -->
             <ItemPanelHeader :title="'todos'" :sort="sort" :selectedDate="selectedDate"
                              @onSortChange="onSortChange">
+                <div class="d-flex flex-row justify-content-end pe-2 mt-auto">
+                    <img class="header-button me-1" :class="{ active: showRepeat }"
+                        src='/icon/repeat.png' width="16" height="16"
+                        @click.prevent="showRepeat = !showRepeat"/>
+                    <img class="header-button me-1" :class="{ active: showTimeline }"
+                        src='/icon/timeline.png' width="16" height="16"
+                        @click.prevent="showTimeline = !showTimeline"/>
+                    <img class="header-button me-1" :class="{ active: showRecommended }"
+                        src='/icon/thumbs-up.png' width="16" height="16"
+                        @click.prevent="showRecommended = !showRecommended"/>
+                    <img class="header-button me-1" :class="{ active: showHierarchy }"
+                        src='/icon/hierarchy.png' width="16" height="16"
+                        @click.prevent="showHierarchy = !showHierarchy"/>
+                </div>
             </ItemPanelHeader>
             <template v-if="!iteration_Form">
                 <TodoPanelByMetric v-if="sort.by=='Metric'" 
@@ -24,6 +38,10 @@
                 </TodoPanelByCustom>
                 <TodoPanelDefault v-if="sort.by=='Default'" 
                                     :selectedDate="selectedDate"
+                                    :showRepeat="showRepeat"
+                                    :showTimeline="showTimeline"
+                                    :showRecommended="showRecommended"
+                                    :showHierarchy="showHierarchy"
                                     @editIteration="iteration => iteration_Form = iteration">
                 </TodoPanelDefault>
             </template>
@@ -65,7 +83,11 @@ export default {
                 by: 'Metric',
                 items: sortItems,
             },
-            iteration_Form: null
+            iteration_Form: null,
+            showRepeat: true,
+            showTimeline: false,
+            showRecommended: true,
+            showHierarchy: true
         }
     },
     created: function() {
@@ -88,5 +110,13 @@ function onSortChange(sortBy) {
 </script>
 
 <style scoped>
+
+.header-button:hover {
+    background-color: rgba(60, 64, 67, .08);
+}
+
+.header-button.active {
+    background-color: rgba(60, 64, 67, .2);
+}
 
 </style>

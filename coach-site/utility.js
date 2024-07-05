@@ -87,6 +87,30 @@ export function sortAlphaDesc(array, prop) {
     }
 }
 
+export function sortTrueOnTop(array, prop) {
+    return array.sort((a,b) => {
+        if (!a[prop] && b[prop]) {
+            return 1;
+        } else if (a[prop] && !b[prop]) {
+            return -1;
+        } else {
+            return 0;
+        }
+    })
+}
+
+export function sortTrueOnBottom(array, prop) {
+    return array.sort((a,b) => {
+        if (!a[prop] && b[prop]) {
+            return -1;
+        } else if (a[prop] && !b[prop]) {
+            return 1;
+        } else {
+            return 0;
+        }
+    })
+}
+
 export function listToString(objectArray, property) {
     let string = "";
     let index = 0;

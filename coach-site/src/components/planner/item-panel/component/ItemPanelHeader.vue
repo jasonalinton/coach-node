@@ -8,17 +8,18 @@
                         <option v-for="sortItem in sortItems" v-bind:key="sortItem.id" :value="sortItem.text">{{sortItem.text}}</option> 
                     </select>
                 </div>
-                <IconButton src="/icon/hierarchy-icon.png" :width="40" :height="40"></IconButton>
+                <!-- <IconButton src="/icon/hierarchy-icon.png" :width="40" :height="40"></IconButton> -->
+                <slot></slot>
             </div>
         </div>
     </div>
 </template>
 
 <script>
-import IconButton from '../../../controls/button/IconButton.vue';
+// import IconButton from '../../../controls/button/IconButton.vue';
 
 export default {
-    components: { IconButton },
+    components: {  },
     name: 'ItemPanelHeader',
     props: {
         title: String,
