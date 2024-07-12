@@ -68,8 +68,9 @@
                 </div>
             </div>
             <div v-if="!mapper.isShown" class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @click="createTask">Create Task</button>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" @click="save()">Save</button>
+                <button type="button" class="btn btn-primary" @click="save">Save</button>
             </div>
         </div>
     </div>
@@ -232,6 +233,9 @@ export default {
             };
             saveTodo(model);
             this.$emit("closeItemModal");
+        },
+        createTask() {
+            this.store.createTask(this.id);
         },
         addItem(itemType, itemText) {
             createAndMapItem(this.id, itemType, itemText);
