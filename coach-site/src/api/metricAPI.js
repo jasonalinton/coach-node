@@ -35,6 +35,24 @@ export async function getLogItems() {
     });
 }
 
+export async function migrateItemMappings() {
+    return fetch(`https://localhost:7104/api/Metric/MigrateItemMappings`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+    })
+    .then((response) => response.json())
+    .then((data) => {
+        if (!data.errorMessage) {
+            return data;
+        } else {
+            this.errorMessage = data.errorMessage;
+        }
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+    });
+}
+
 export async function logLogItem(model) {
     return fetch(`https://localhost:7104/api/Metric/LogLogItem`, {
         method: 'POST',
