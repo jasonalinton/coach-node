@@ -120,6 +120,12 @@
                         <option v-for="inheritanceType in inheritanceTypes" v-bind:key="inheritanceType.id" :value="inheritanceType.id">{{inheritanceType.text}}</option> 
                     </select> 
                 </div>
+                <!-- Points -->
+                <div class="points d-flex flex-row align-items-center mt-1">
+                    <span class="me-1">Points</span>
+                    <input class="form-control form-control-sm me-1" type="number" min="1" v-model="updatedRepeat.points"
+                            :style="{'width': '41px'}" required/>
+                </div>
                 <!-- Is Event Visible -->
                 <div class="form-check">
                     <input class="form-check-input mt-1" type="checkbox" value="" id="isEventVisible" 
@@ -584,6 +590,7 @@ function save() {
         itemType: this.itemType.toLowerCase(),
         idTimeframe: this.updatedRepeat.idTimeframe,
         idType: this.updatedRepeat.idType,
+        points: this.updatedRepeat.points,
         interval: this.updatedRepeat.interval,
         frequency: this.updatedRepeat.frequency,
         dayIndecies: this.updatedRepeat.dayIndecies,

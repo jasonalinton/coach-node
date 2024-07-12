@@ -49,6 +49,7 @@ export const usePlannerStore = defineStore('planner', {
                 type: 80,
                 timeframe: 63,
                 moment: 0,
+                points: null,
                 position: null,
                 isRecommended: false,
                 isEventVisible: false,
@@ -75,7 +76,8 @@ export const usePlannerStore = defineStore('planner', {
                 idParent: null,
                 idTimeType: 80,
                 idInheritance: 142,
-                idTimeframe: 63,
+                idTimeframe: 43,
+                points: null,
                 startTime: {
                     id: null,
                     dateTime: today(new Date()).toISOString(),
