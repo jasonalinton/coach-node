@@ -11,11 +11,11 @@
                     <div>
                         <span class="blue">{{ timeframe }}</span>
                     </div>
-                    <div>
+                    <div v-if="timePair.startTime">
                         <span class="start-label">Start</span>
                         <span>{{ timeModelToString(timePair.startTime) }}</span>
                     </div>
-                    <div>
+                    <div v-if="timePair.endTime">
                         <span class="end-label">End</span>
                         <span>{{ timeModelToString(timePair.endTime) }}</span>
                     </div>
@@ -29,7 +29,7 @@
             <div>
                 <!-- Timeframe -->
                 <div class="d-flex flex-column">
-                    <select class="form-select panel-select" aria-label="select" v-model="updatedTimePair.idTimeframe">
+                    <select class="form-select panel-select" aria-label="select" v-model="updatedTimePair.idTimeframe" @change="setTimeframe">
                         <option v-for="timeframe in timeframes" v-bind:key="timeframe.id" :value="timeframe.id">{{timeframe.text}}</option> 
                     </select> 
                 </div>
@@ -44,13 +44,13 @@
                     <div class="d-flex flex-column">
                         <TimeControl class="time-control" :class="{ 'invalid': !updatedTimePair.startTime.isValid}"
                                      label="Start" :time="updatedTimePair.startTime.value" 
-                                     title="Start" endpoint="Start" type="time" :canRemove="false" :isSet="!updatedTimePair.startTime.isRemoved"
+                                     title="Start" endpoint="Start" type="date" :canRemove="false" :isSet="!updatedTimePair.startTime.isRemoved"
                                      @addTime="addTime" @setTime="setTime" @removeTime="removeTime(updatedTimePair.startTime)"></TimeControl>
                     </div>
                     <div class="d-flex flex-column">
                         <TimeControl class="time-control" :class="{ 'invalid': !updatedTimePair.endTime.isValid}"
                                      label="End" :time="updatedTimePair.endTime.value" 
-                                     title="End" endpoint="End" type="time" :isSet="!updatedTimePair.endTime.isRemoved"
+                                     title="End" endpoint="End" type="date" :isSet="!updatedTimePair.endTime.isRemoved"
                                      @addTime="addTime" @setTime="setTime" @removeTime="removeTime(updatedTimePair.endTime)"></TimeControl>
                     </div>
                 </div>
@@ -86,60 +86,9 @@ import { clone, toDateString } from '../../../../../utility'
 import { MOMENT } from '../../../../model/constants'
 import { saveGoalTimePair } from '../../../../api/goalAPI'
 import { saveTodoTimePair } from '../../../../api/todoAPI'
-import { timeModelToString } from '../../../../../utility/timeUtility'
-
-let timeframes = [
-    {
-        id: 63,
-        text: "Day",
-        isActive: true
-    },
-    {
-        id: 68,
-        text: "Week",
-        isActive: true
-    },
-    {
-        id: 69,
-        text: "Month",
-        isActive: true
-    },
-    {
-        id: 72,
-        text: "Tri",
-        isActive: false
-    },
-    {
-        id: 74,
-        text: "Semi",
-        isActive: false
-    },
-    {
-        id: 75,
-        text: "Year",
-        isActive: false
-    },
-    {
-        id: 77,
-        text: "Life",
-        isActive: false
-    },
-]
-
-let inheritanceTypes = [
-    {
-        id: 140,
-        text: "Self"
-    },
-    {
-        id: 141,
-        text: "Children"
-    },
-    {
-        id: 142,
-        text: "Descendants"
-    },
-]
+import { timeModelToString, firstDayOfWeek, lastDayOfWeek, firstDayOfMonth, lastDayOfMonth, endOfDay } from '../../../../../utility/timeUtility'
+import { TIMEFRAME } from '../../../../model/constants'
+import { timeframes, inheritanceTypes } from '../../../../model/types'
 
 export default {
     name: "TimePairControl",
@@ -153,6 +102,7 @@ export default {
     data: function() {
         return {
             todoStore: null,
+            TIMEFRAME: clone(TIMEFRAME),
             timeframes: clone(timeframes),
             inheritanceTypes: clone(inheritanceTypes),
             updatedTimePair: undefined,
@@ -179,6 +129,7 @@ export default {
     methods: {
         initUpdatedTimePair,
         onTimePairClicked,
+        setTimeframe,
         timeModelToString,
         addTime,
         setTime,
@@ -196,7 +147,7 @@ export default {
             if (value == true) {
                 this.initUpdatedTimePair();
             }
-        }
+        },
     }
 }
 
@@ -213,6 +164,35 @@ function initUpdatedTimePair() {
         };
     });
     this.validateTimes();
+}
+
+function setTimeframe() {
+    let value = this.updatedTimePair.idTimeframe;
+    let start = this.updatedTimePair.startTime.value;
+    let end = this.updatedTimePair.endTime.value;
+    if (value == this.TIMEFRAME.DAY) {
+        if (start) {
+            end.dateTime = start.dateTime.toISOString();
+        } else if (end) {
+            start.dateTime = end.dateTime.toISOString();
+        }
+    } else if (value == this.TIMEFRAME.WEEK) {
+        if (start) {
+            start.dateTime = firstDayOfWeek(start.dateTime).toISOString();
+            end.dateTime = endOfDay(lastDayOfWeek(start.dateTime)).toISOString();
+        } else if (end) {
+            start.dateTime = firstDayOfWeek(end.dateTime).toISOString();
+            end.dateTime = endOfDay(lastDayOfWeek(end.dateTime)).toISOString();
+        }
+    } else if (value == this.TIMEFRAME.MONTH) {
+        if (start) {
+            start.dateTime = firstDayOfMonth(start.dateTime).toISOString();
+            end.dateTime = endOfDay(lastDayOfMonth(start.dateTime)).toISOString();
+        } else if (end) {
+            start.dateTime = firstDayOfMonth(end.dateTime).toISOString();
+            end.dateTime = endOfDay(lastDayOfMonth(end.dateTime)).toISOString();
+        }
+    }
 }
 
 function onTimePairClicked() {
@@ -253,13 +233,44 @@ function addTime(endpoint) {
 }
 
 function setTime(time, endpoint) {
-    let timeModel = this.updatedTimePair[`${endpoint.toLowerCase()}Time`]
+    endpoint = endpoint.toLowerCase();
+    let timeModel = this.updatedTimePair[`${endpoint}Time`]
     timeModel.value.dateTime = time;
     if (timeModel.oldValue.dateTime != time && timeModel.oldValue.id) {
         timeModel.isEdited = true;
     } else {
         timeModel.isEdited = false;
     }
+
+    let start = this.updatedTimePair.startTime.value;
+    let end = this.updatedTimePair.endTime.value;
+    if (this.updatedTimePair.idTimeframe) {
+        if (this.updatedTimePair.idTimeframe == this.TIMEFRAME.DAY) {
+            if (endpoint == "start") {
+                end.dateTime = time;
+            } else if (endpoint == "end") {
+                start.dateTime = time;
+            }
+        } else if (this.updatedTimePair.idTimeframe == this.TIMEFRAME.WEEK) {
+            if (endpoint == "start") {
+                start.dateTime = firstDayOfWeek(new Date(time)).toISOString();
+                end.dateTime = endOfDay(lastDayOfWeek(new Date(time))).toISOString();
+            } else if (endpoint == "end") {
+                start.dateTime = firstDayOfWeek(new Date(time)).toISOString();
+                end.dateTime = endOfDay(lastDayOfWeek(new Date(time))).toISOString();
+            }
+        } else if (this.updatedTimePair.idTimeframe == this.TIMEFRAME.MONTH) {
+            if (endpoint == "start") {
+                start.dateTime = firstDayOfMonth(new Date(time)).toISOString();
+                end.dateTime = endOfDay(lastDayOfMonth(new Date(time))).toISOString();
+            } else if (endpoint == "end") {
+                start.dateTime = firstDayOfMonth(new Date(time)).toISOString();
+                end.dateTime = endOfDay(lastDayOfMonth(new Date(time))).toISOString();
+            }
+        }
+
+    }
+
     this.validateTimes();
 }
 

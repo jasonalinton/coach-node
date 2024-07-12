@@ -56,6 +56,10 @@ export default {
     watch: {
         momentID() {
             this.dateTimeString = this.getDateTimeString();
+        },
+        'time.dateTime'() {
+            this.dateTimeString = this.getDateTimeString();
+            this.timezoneOffset = this.toTimezoneOffset(this.time.dateTime);
         }
     }
 }

@@ -59,6 +59,7 @@ export function toDateTimeString(dateTimeJSON) {
 }
 
 export function timeModelToString(model) {
+    if (!model) return "";
     let date = new Date(model.dateTime);
 
     if (model.idMoment == 87) { // Date 
