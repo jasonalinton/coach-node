@@ -52,6 +52,11 @@
                             </div>
                         </div>
                     </div>
+                    <!-- Protein -->
+                    <div class="protein d-flex flex-row mt-1">
+                        <span>Protein</span>
+                        <span class="ms-2">{{ float(proteinConsumed,0) }}</span>
+                    </div>
                     <!-- Nutrient Chart -->
                     <NutrientChart/>
                     <!-- Meal Items -->
@@ -108,6 +113,14 @@ export default {
                 return this.plannerStore.selectedDate;
             } else {
                 return today(new Date());
+            }
+        },
+        proteinConsumed() {
+            if (this.mealsInRange) {
+                return this.mealsInRange
+                .reduce((accumulator, currentValue) => accumulator + currentValue.protein, 0,);
+            } else { 
+                return 0;
             }
         },
         caloriesRecommended() {
