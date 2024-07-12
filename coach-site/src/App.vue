@@ -21,7 +21,7 @@
                     @selectEvent="selectEvent">
             </Planner>
             <ItemTabs v-show="navbar.selectedPage == 'items'"></ItemTabs>
-            <ItemTabsOG v-show="navbar.selectedPage == 'itemsOG'"></ItemTabsOG>
+            <ItemTabsOG v-if="navbar.selectedPage == 'itemsOG'"></ItemTabsOG>
         </div>
         <div class="grid-right-panel">
             <ItemPanel :selectedDate="selectedDate"
