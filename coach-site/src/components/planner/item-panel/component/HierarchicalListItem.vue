@@ -13,17 +13,19 @@
                                   @onUnchecked="markIncomplete"
                                   @onDelete="onDelete">
                     </ItemCheckbox>
-                    <div class="d-flex flex-row align-items-center"
-                         @click="toggleChildren">
-                        <div v-if="isParent" class="caret d-flex flex-row me-2">
-                            <img v-if="!showChildren" class="caret-right" 
-                                 src='/icon/caret-right.png' width="5" height="8"/>
-                            <img v-if="showChildren" class="caret-down" 
-                                 src='/icon/caret-down.png' width="8" height="5"/>
-                        </div>
-                        <span class="flex-fill">{{ iteration.text }}</span>
-                    </div>           
-
+                    <div class="d-flex" :class="{ 'flex-column': iteration.points}">
+                        <span v-if="iteration.points" class="points">{{ iteration.points }} pts</span>
+                        <div class="d-flex flex-row align-items-center"
+                             @click="toggleChildren">
+                            <div v-if="isParent" class="caret d-flex flex-row me-2">
+                                <img v-if="!showChildren" class="caret-right" 
+                                     src='/icon/caret-right.png' width="5" height="8"/>
+                                <img v-if="showChildren" class="caret-down" 
+                                     src='/icon/caret-down.png' width="8" height="5"/>
+                            </div>
+                            <span class="text flex-fill">{{ iteration.text }}</span>
+                        </div>           
+                    </div>
                 </div>
                 <img v-if="viewModel.repeatID" 
                      class="icon-button" 
@@ -227,6 +229,10 @@ function onDragEnd(ev) {
     min-width: 8px;
 }
 
+.checkbox {
+    margin: auto 0;
+}
+
 .checkbox:hover {
     background-color: rgba(248, 248, 248, 1);
     border-radius: 24px;
@@ -269,7 +275,12 @@ function onDragEnd(ev) {
     background-color: #D8D8D8;
 }
 
-.iteration span {
+.iteration .points {
+    font-size: 10px;
+    color: #747474;
+}
+
+.iteration .text {
     /* height: 14px;
     line-height: 15px; */
     line-height: 22px;

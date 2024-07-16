@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { getTodos, createTask, deleteOrArchiveRepeat } from '../api/todoAPI';
+import { getTodos, createTask, refreshRepetitionForRepeat, deleteFutureRepetitionsForRepeat, deleteOrArchiveRepeat } from '../api/todoAPI';
 import { repositionItem } from '../api/itemAPI';
 import { replaceOrAddItem, sortAsc } from '../../utility';
 import { getSocketConnection } from './socket'
@@ -55,6 +55,12 @@ export const useTodoStore = defineStore('todo', {
         },
         repositionItem(parentType, itemType, goalID, metricID, newPosition) {
             repositionItem(parentType, itemType, goalID, metricID, newPosition);
+        },
+        refreshRepetitionForRepeat(id, repeatID) {
+            refreshRepetitionForRepeat(id, repeatID);
+        },
+        deleteFutureRepetitionsForRepeat(id, repeatID) {
+            deleteFutureRepetitionsForRepeat(id, repeatID);
         },
         deleteOrArchiveRepeat(repeatID) {
             deleteOrArchiveRepeat(repeatID);

@@ -37,7 +37,9 @@
                                 <div>
                                     <RepeatControl v-for="repeat in repeats.value" :key="repeat.id"
                                                    :repeat="repeat" :itemID="id" itemType="todo" :canEdit="selectedRepeatID == undefined"
-                                                   @saveRepeat="saveRepeat" @setSelectedRepeat="setSelectedRepeat" @cancelRepeatEditing="cancelRepeatEditing"/>
+                                                   @saveRepeat="saveRepeat" @setSelectedRepeat="setSelectedRepeat" @cancelRepeatEditing="cancelRepeatEditing"
+                                                   @refreshRepetition="refreshRepetitionForRepeat"
+                                                   @deleteFutureRepetitions="deleteFutureRepetitionsForRepeat"/>
                                 </div>
                             </div>
                             <!-- Time -->
@@ -273,7 +275,13 @@ export default {
                 this.timePairs.value.splice(index, 1)
             }
             this.selectedTimePairID = undefined;
-        }
+        },
+        refreshRepetitionForRepeat(repeatID) {
+            this.store.refreshRepetitionForRepeat(this.id, repeatID)
+        },
+        deleteFutureRepetitionsForRepeat(repeatID) {
+            this.store.deleteFutureRepetitionsForRepeat(this.id, repeatID)
+        },
     },
     watch: {
         'text.value'(value) {

@@ -61,8 +61,8 @@ export const useIterationStore = defineStore('iteration', {
                        iteration.idRoutine == null && iteration.idRoutineIteration == null;
             });
         },
-        updateIteration(iterationID, text, startAt, endAt) {
-            updateIteration(iterationID, text, startAt, endAt);
+        updateIteration(iterationID, text, points, startAt, endAt) {
+            updateIteration(iterationID, text, points, startAt, endAt);
         },
         rescheduleIteration(iterationID, startAt, endAt) {
             rescheduleIteration(iterationID, startAt, endAt);

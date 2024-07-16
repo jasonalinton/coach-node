@@ -10,7 +10,10 @@
                             @onUnchecked="markIncomplete"
                             @onDelete="onDelete">
             </ItemCheckbox>
-            <span class="flex-fill">{{ iteration.text }}</span>
+            <div class="d-flex flex-fill" :class="{ 'flex-column': iteration.points}">
+                <span v-if="iteration.points" class="points">{{ iteration.points }} pts</span>        
+                <span class="text">{{ iteration.text }}</span>
+            </div>
             <div class="button-group d-flex flex-column justify-content-between">
                 <!-- <img class="icon-button" src='/icon/add-button.png' width="16" height="16"/> -->
                 <img class="icon-button" 
@@ -167,6 +170,10 @@ function onDragEnd(ev) {
     bottom: 0;
 } */
 
+.checkbox {
+    margin: auto 0;
+}
+
 .checkbox:hover {
     background-color: rgba(248, 248, 248, 1);
     border-radius: 24px;
@@ -206,7 +213,12 @@ function onDragEnd(ev) {
     box-shadow: 0px -3px 5px 2px rgba(0,0,0,.5);
 }
 
-.iteration span {
+.iteration .points {
+    font-size: 10px;
+    color: #747474;
+}
+
+.iteration .text {
     /* height: 14px;
     line-height: 15px; */
     line-height: 22px;

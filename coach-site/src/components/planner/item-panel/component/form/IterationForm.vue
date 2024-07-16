@@ -10,6 +10,8 @@
                         @click.prevent="close"/>
             </div>
         </div>
+        <!-- ID -->
+        <span class="mt-1 float-start">{{ iteration.id }}</span>
         <!-- Title/Text -->
         <div class="form-group mt-3">
             <input class="title textbox" type="text" ref="text" placeholder="Title"
@@ -17,9 +19,15 @@
                     v-on:keyup.enter="save"
                     spellcheck/>
         </div>
+        <!-- Points -->
+        <div class="points d-flex flex-row align-items-center mt-1">
+            <span class="me-1">Points</span>
+            <input class="form-control form-control-sm me-1" type="number" min="1" v-model="iteration_updated.points"
+                    :style="{'width': '41px'}" required/>
+        </div>
         <!-- Time -->
         <div class="form-group mt-1">
-            <DateSelector class="date-selector mt-3" :class="{ 'invalid': !isValid }"
+            <DateSelector class="date-selector mt-1" :class="{ 'invalid': !isValid }"
                           :date="iteration_updated.startAt" @onChange="iteration_updated.startAt = $event"></DateSelector>
             <!-- <span v-if="!iteration.startAt" class="error float-start mb-2">Iteration must have start</span> -->
             <DateSelector class="date-selector mt-3" :class="{ 'invalid': !isValid }"
@@ -82,6 +90,7 @@ function initUpdatedIteration() {
     this.iteration_updated = {
         id: this.iteration.id,
         text: this.iteration.text,
+        points: this.iteration.points,
         startAt: this.iteration.startAt,
         endAt: this.iteration.endAt
     }
@@ -103,7 +112,7 @@ function save() {
     var title = this.iteration_updated.text.trim();
     if (title == "") return;
 
-    this.iterationStore.updateIteration(this.iteration_updated.id, this.iteration_updated.text, 
+    this.iterationStore.updateIteration(this.iteration_updated.id, this.iteration_updated.text, this.iteration_updated.points, 
         this.iteration_updated.startAt, this.iteration_updated.endAt);
 
     this.close();
@@ -128,6 +137,18 @@ input {
 
 .title {
     padding-top: 10px;
+}
+
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
 }
 
 .error {

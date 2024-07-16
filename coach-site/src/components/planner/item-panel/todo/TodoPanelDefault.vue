@@ -43,11 +43,17 @@
                 <div class="header float-start">Completed ({{ completeCount }})</div>
                 <!-- Today - Complete -->
                 <div v-if="todayComplete.length > 0" class="d-flex flex-column">
-                    <div class="d-flex flex-row">
-                        <span v-if="isToday" class="timeframe">Today</span>
-                        <span v-if="!isToday" class="timeframe">Day</span>
-                        <span class="dash">-</span>
-                        <span class="date">{{ date }}</span>
+                    <div class="d-flex flex-row justify-content-between">
+                        <div class="d-flex flex-row">
+                            <span v-if="isToday" class="timeframe">Today</span>
+                            <span v-if="!isToday" class="timeframe">Day</span>
+                            <span class="dash">-</span>
+                            <span class="date">{{ date }}</span>
+                        </div>
+                        <!-- Points -->
+                        <div class="d-flex flex-row">
+                            <span class="points">{{ todayPoints.text }}</span>
+                        </div>
                     </div>
                     <ul class="item-list">
                         <li v-for="(vm, index) in todayComplete" v-bind:key="vm.id" :style="{ 'z-index': -index }">
@@ -156,6 +162,26 @@ export default {
             } else {
                 return [];
             }
+        },
+        todayPoints() {
+            let complete = 0;
+            let incomplete = 0;
+            this.todayPending.forEach(x => {
+                x.iterations.forEach(y => {
+                    if (y.points) {
+                        incomplete += y.points
+                    }
+                })
+            });
+            this.todayComplete.forEach(x => {
+                x.iterations.forEach(y => {
+                    if (y.points) {
+                        complete += y.points
+                    }
+                })
+            });
+            let total = complete + incomplete;
+            return { complete, incomplete, total, text: `${complete}/${total}` };
         },
         weekPending() {
             if (this.iterations.length > 0) {
@@ -302,6 +328,10 @@ span.dash {
     line-height: 21px;
 }
 
+span.points {
+    font-size: 14px;
+}
+
 ul {
     font-size: 14px;
     color: #3C4043;
@@ -329,6 +359,10 @@ ul {
 .header {
     color: #565656;
     margin-bottom: 8px;
+}
+
+.points {
+    margin-right: 24px;
 }
 
 </style>

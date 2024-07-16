@@ -1,6 +1,7 @@
 <template>
     <div>
         <div v-if="!isEditing" class="wrapper d-flex flex-row justify-content-between"
+             :class="{ 'archived': isArchived}"
              @click="onRepeatClicked">
             <div class="d-flex flex-row">
                 <div class="d-flex flex-column">
@@ -143,9 +144,15 @@
                     </label>
                 </div>
                 <!-- Buttons -->
-                <div class="d-flex justify-content-end">
-                    <button class="btn btn-sm btn-link" type="button" @click="save">Save</button>
-                    <button class="btn btn-sm btn-link" type="button" @click="cancel">Cancel</button>
+                <div class="d-flex flex-row justify-content-between">
+                    <div class="d-flex justify-content-start">
+                        <button class="btn btn-sm btn-link" type="button" @click="refreshRepetition">Refresh</button>
+                        <button class="btn btn-sm btn-link" type="button" @click="deleteFutureRepetitions">Delete Future</button>
+                    </div>
+                    <div class="d-flex justify-content-end">
+                        <button class="btn btn-sm btn-link" type="button" @click="save">Save</button>
+                        <button class="btn btn-sm btn-link" type="button" @click="cancel">Cancel</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -154,7 +161,7 @@
 
 <script>
 import TimeControl from '../../../controls/time/TimeControl.vue'
-import { clone, capitalize, toDateString } from '../../../../../utility'
+import { clone, capitalize, toDateString, today } from '../../../../../utility'
 import { saveRoutineRepeat } from '../../../../api/routineAPI'
 import { saveTodoRepeat } from '../../../../api/todoAPI'
 
@@ -280,6 +287,16 @@ export default {
         }
     },
     computed: {
+        // If end date has passed repeat is considered archived
+        isArchived() {
+            if (this.repeat.endDate) {
+                let endDate = new Date(this.repeat.endDate);
+                if (+endDate < +today()) {
+                    return true;
+                }
+            }
+            return false;
+        },
         timeframe() {
             let repeat = (this.isEditing) ? this.updatedRepeat : this.repeat;
             let timeframe = timeframes.find(x => x.id == repeat.idTimeframe).text;
@@ -402,7 +419,9 @@ export default {
             this.$emit("cancelRepeatEditing", this.repeat.id);
         },
         save,
-        deleteOrArchive
+        deleteOrArchive,
+        refreshRepetition,
+        deleteFutureRepetitions
     },
     watch: {
         isEditing(value) {
@@ -590,7 +609,7 @@ function save() {
         itemType: this.itemType.toLowerCase(),
         idTimeframe: this.updatedRepeat.idTimeframe,
         idType: this.updatedRepeat.idType,
-        points: this.updatedRepeat.points,
+        points: this.updatedRepeat.points || null,
         interval: this.updatedRepeat.interval,
         frequency: this.updatedRepeat.frequency,
         dayIndecies: this.updatedRepeat.dayIndecies,
@@ -616,6 +635,16 @@ function deleteOrArchive() {
     this.todoStore.deleteOrArchiveRepeat(this.repeat.id);
 }
 
+function refreshRepetition() {
+    this.$emit('refreshRepetition', this.repeat.id);
+    this.isEditing = false;
+}
+
+function deleteFutureRepetitions() {
+    this.$emit('deleteFutureRepetitions', this.repeat.id);
+    this.isEditing = false;
+}
+
 </script>
 
 <style scoped>
@@ -628,6 +657,10 @@ function deleteOrArchive() {
 
 .wrapper:hover {
     background-color: #EFF6FC;
+}
+
+.archived {
+    background-color: lightpink;
 }
 
 .wrapper-edit {

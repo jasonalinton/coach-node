@@ -43,8 +43,8 @@ export async function getIterationsInRange(startAt, endAt) {
     });
 }
 
-export async function updateIteration(iterationID, text, startAt, endAt) {
-    let data = { iterationID, text, startAt, endAt };
+export async function updateIteration(iterationID, text, points, startAt, endAt) {
+    let data = { iterationID, text, points, startAt, endAt };
 
     return fetch(`https://localhost:7104/api/Planner/UpdateIteration`, {
         method: 'POST',

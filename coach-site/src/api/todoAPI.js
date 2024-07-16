@@ -101,6 +101,47 @@ export async function createAndMapItem(todoID, itemType, itemText) {
     });
 }
 
+export async function refreshRepetitionForRepeat(id, repeatID) {
+    let data = { id, repeatID };
+    
+    return fetch(`https://localhost:7104/api/Todo/RefreshRepetitionForTodo`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (!data.errorMessage) {
+            return data;
+        } else {
+            this.errorMessage = data.errorMessage;
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
+
+export async function deleteFutureRepetitionsForRepeat(id, repeatID) {
+    let data = { id, repeatID };
+    
+    return fetch(`https://localhost:7104/api/Todo/DeleteFutureRepetitionsForTodo`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (!data.errorMessage) {
+            return data;
+        } else {
+            this.errorMessage = data.errorMessage;
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
 export async function refreshRepetitiveEvents(id, startAt, endAt, timeframeID, properties) {
     let data = { id, startAt, endAt, timeframeID, properties };
     

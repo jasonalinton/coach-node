@@ -2,13 +2,14 @@
     <div class="routine-event d-flex flex-column flex-grow-1">
         <!-- Header -->
         <div class="head d-flex flex-column px-3 pt-2">
-            <span class="title text-start">{{ toShortWeekdayString(_event.startAt) }}</span>
-            <span class="date text-start">{{ _event.text }}</span>
-        </div>
-        <!-- Toolbar -->
-        <div class="toolbar d-flex flex-row justify-content-between align-items-center">
-            <AddTaskButton @click="addNewTask"></AddTaskButton>
-            <IconButton src="/icon/goal-icon.png" :width="32" :height="32"></IconButton>
+            <span class="label text-start">{{ _event.text }}</span>
+            <div class="d-flex flex-row">
+                <span v-if="isToday" class="timeframe">Today</span>
+                <span v-if="!isToday" class="timeframe">Day</span>
+                <span class="dash">-</span>
+                <span class="date">{{ date }}</span>
+            </div>
+            <span class="points text-start mt-1">{{ points.text }}</span>
         </div>
         <!-- Body -->
         <div v-if="_event" class="d-flex flex-column flex-grow-1 justify-content-between">
@@ -44,23 +45,24 @@
 </template>
 
 <script>
-import IconButton from '../../../controls/button/IconButton.vue';
-import AddTaskButton from '../component/AddTaskButton.vue';
+// import IconButton from '../../../controls/button/IconButton.vue';
+// import AddTaskButton from '../component/AddTaskButton.vue';
 import ItemCheckbox from '../component/ItemCheckbox.vue';
 import ListItem from '../component/ListItem.vue';
-import { toShortWeekdayString, startOfDay } from '../../../../../utility/timeUtility';
+import { toShortWeekdayString, startOfDay, isToday } from '../../../../../utility/timeUtility';
 import { replaceItem, removeItem, today, sortAsc } from '../../../../../utility';
 import { createDefaultTask } from '../../../../resolvers/todo-resolvers';
 
 export default {
     name: 'EventRoutinePanel',
-    components: { ItemCheckbox, ListItem, AddTaskButton, IconButton },
+    components: { ItemCheckbox, ListItem },
     props: {
         _event: Object
     },
     data: function () {
         return {
             eventStore: undefined,
+            iterationStore: undefined,
             iterations: { 
                 new: null
             },
@@ -69,6 +71,9 @@ export default {
     created: async function() {
         let eventStore = await import(`@/store/eventStore`);
         this.eventStore = eventStore.useEventStore();
+
+        let iterationStore = await import(`@/store/iterationStore`);
+        this.iterationStore = iterationStore.useIterationStore();
     },
     computed: {
         eventt() { 
@@ -81,7 +86,7 @@ export default {
         },
         completeIterations() { 
             if (this.eventt) {
-                var complete = this.eventt.iterations.filter(task => task.attemptedAt && task.routineIterationID) 
+                var complete = this.eventt.iterations.filter(task => task.attemptedAt && task.routineIterationID)
                 return sortAsc(complete, 'id');
             } else {
                 return [];
@@ -94,6 +99,34 @@ export default {
             } else {
                 return [];
             }
+        },
+        date() {
+            if (this.eventt) {
+                return toShortWeekdayString(this.eventt.startAt, true);
+            }
+            return "";
+        },
+        isToday() {
+            if (this.eventt) {
+                return isToday(this.eventt.startAt);
+            }
+            return undefined
+        },
+        points() {
+            let complete = 0;
+            let incomplete = 0;
+            this.incompleteIterations.forEach(x => {
+                if (x.points) {
+                    incomplete += x.points
+                }
+            });
+            this.completeIterations.forEach(x => {
+                if (x.points) {
+                    complete += x.points
+                }
+            });
+            let total = complete + incomplete;
+            return { complete, incomplete, total, text: `${complete}/${total}` };
         },
     },
     methods: {
@@ -171,6 +204,29 @@ function markNewTaskComplete(iteration) {
     padding: 8px;
     z-index: 3;
     background-color: white;
+}
+
+span.timeframe {
+    /* padding-left: 20px; */
+    color: #3B99FC;
+    font-size: 14px;
+    font-weight: 500;
+}
+span.date {
+    font-size: 14px;
+    font-weight: 500;
+}
+span.dash {
+    margin: 0 4px;
+    line-height: 21px;
+}
+span.label {
+    font-size: 18px;
+    /* font-weight: 500; */
+}
+
+span.points {
+    font-size: 14px;
 }
 
 .item-list {
