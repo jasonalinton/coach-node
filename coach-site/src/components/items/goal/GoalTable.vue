@@ -84,8 +84,9 @@
 </template>
 
 <script>
-import { listToString, replaceItem, removeItem, sortAsc } from '../../../../utility';
-import { addPropertyToCache, updatePropertyInCache, deletePropertyInCache } from '../../../resolvers/resolve.js'
+import { listToString, sortAsc } from '../../../../utility';
+// import { listToString, replaceItem, removeItem, sortAsc } from '../../../../utility';
+// import { addPropertyToCache, updatePropertyInCache, deletePropertyInCache } from '../../../resolvers/resolve.js'
 import { saveGoalPositions } from '../../../resolvers/goal-resolvers.js'
 import TodoTableView from '../todo/TodoTableView.vue';
 
@@ -130,32 +131,32 @@ export default {
                 this.errorMessage = JSON.parse(JSON.stringify(error))
                 console.log(this.errorMessage, error);
             },
-            subscribeToMore: [
-                {
-                    document: require('../../../graphql/subscription/goal/GoalAdded.gql'),
-                    updateQuery: (previousResult, { subscriptionData: { data: { goalAdded }} }) => {
-                        previousResult.items.goals.splice(0, 0, goalAdded);
-                        addPropertyToCache(goalAdded, 'goals', ['metrics', 'todos', 'routines'], previousResult);
-                        return previousResult;
-                    },
-                },
-                {
-                    document: require('../../../graphql/subscription/goal/GoalUpdated.gql'),
-                    updateQuery: (previousResult, { subscriptionData: { data: { goalUpdated }} }) => {
-                        replaceItem(goalUpdated, previousResult.items.goals);
-                        updatePropertyInCache(goalUpdated, 'goals', ['metrics', 'todos', 'routines'], previousResult);
-                        return previousResult;
-                    },
-                },
-                {
-                    document: require('../../../graphql/subscription/goal/GoalDeleted.gql'),
-                    updateQuery: (previousResult, { subscriptionData: { data: { goalDeleted }} }) => {
-                        removeItem(goalDeleted, previousResult.items.goals);
-                        deletePropertyInCache(goalDeleted, 'goals', ['metrics', 'todos', 'routines'], previousResult);
-                        return previousResult;
-                    },
-                },
-            ]
+            // subscribeToMore: [
+            //     {
+            //         document: require('../../../graphql/subscription/goal/GoalAdded.gql'),
+            //         updateQuery: (previousResult, { subscriptionData: { data: { goalAdded }} }) => {
+            //             previousResult.items.goals.splice(0, 0, goalAdded);
+            //             addPropertyToCache(goalAdded, 'goals', ['metrics', 'todos', 'routines'], previousResult);
+            //             return previousResult;
+            //         },
+            //     },
+            //     {
+            //         document: require('../../../graphql/subscription/goal/GoalUpdated.gql'),
+            //         updateQuery: (previousResult, { subscriptionData: { data: { goalUpdated }} }) => {
+            //             replaceItem(goalUpdated, previousResult.items.goals);
+            //             updatePropertyInCache(goalUpdated, 'goals', ['metrics', 'todos', 'routines'], previousResult);
+            //             return previousResult;
+            //         },
+            //     },
+            //     {
+            //         document: require('../../../graphql/subscription/goal/GoalDeleted.gql'),
+            //         updateQuery: (previousResult, { subscriptionData: { data: { goalDeleted }} }) => {
+            //             removeItem(goalDeleted, previousResult.items.goals);
+            //             deletePropertyInCache(goalDeleted, 'goals', ['metrics', 'todos', 'routines'], previousResult);
+            //             return previousResult;
+            //         },
+            //     },
+            // ]
         },
     },
     mounted: function() {

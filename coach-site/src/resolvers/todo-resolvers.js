@@ -9,6 +9,7 @@ import CREATE_DEFAULT_TASK from '../graphql/mutation/todo/CreateDefaultTask.gql'
 // import DELETE_ITERATION from '../graphql/mutation/todo/DeleteIteration.gql'
 // import REFRESH_REPETITIVE_TODO from '../graphql/mutation/todo/RefreshRepetitiveTodo.gql'
 
+
 import { refreshItemPositions } from '../api/itemAPI'
 
 export function addTodo(todo, apollo) {
@@ -18,6 +19,7 @@ export function addTodo(todo, apollo) {
         update: () => {
             console.log("Todo added");
             refreshItemPositions();
+
         }
     });
 }

@@ -33,8 +33,9 @@
 </template>
 
 <script>
-import { listToString, replaceItem } from '../../../../utility';
-import { updatePropertyInCache,  } from '../../../resolvers/resolve.js'
+import { listToString } from '../../../../utility';
+// import { listToString, replaceItem } from '../../../../utility';
+// import { updatePropertyInCache,  } from '../../../resolvers/resolve.js'
 
 export default {
     name: 'MetricTable',
@@ -61,16 +62,16 @@ export default {
                 this.errorMessage = JSON.parse(JSON.stringify(error))
                 console.log(this.errorMessage, error);
             },
-            subscribeToMore: [
-                {
-                    document: require('../../../graphql/subscription/metric/MetricUpdated.gql'),
-                    updateQuery: (previousResult, { subscriptionData: { data: { metricUpdated }} }) => {
-                        replaceItem(metricUpdated, previousResult.items.todos);
-                        updatePropertyInCache(metricUpdated, 'metrics', ['goals', 'todos', 'routines'], previousResult);
-                        return previousResult;
-                    },
-                },
-            ]
+            // subscribeToMore: [
+            //     {
+            //         document: require('../../../graphql/subscription/metric/MetricUpdated.gql'),
+            //         updateQuery: (previousResult, { subscriptionData: { data: { metricUpdated }} }) => {
+            //             replaceItem(metricUpdated, previousResult.items.todos);
+            //             updatePropertyInCache(metricUpdated, 'metrics', ['goals', 'todos', 'routines'], previousResult);
+            //             return previousResult;
+            //         },
+            //     },
+            // ]
         },
     },
     mounted: function() {

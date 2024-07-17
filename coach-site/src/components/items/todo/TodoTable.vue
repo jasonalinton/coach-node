@@ -40,8 +40,9 @@
 </template>
 
 <script>
-import { listToString, replaceItem, removeItem } from '../../../../utility';
-import { addPropertyToCache, updatePropertyInCache, deletePropertyInCache } from '../../../resolvers/resolve.js'
+import { listToString } from '../../../../utility';
+// import { listToString, replaceItem, removeItem } from '../../../../utility';
+// import { addPropertyToCache, updatePropertyInCache, deletePropertyInCache } from '../../../resolvers/resolve.js'
 
 export default {
     name: 'TodoTable',
@@ -68,40 +69,40 @@ export default {
                 this.errorMessage = JSON.parse(JSON.stringify(error))
                 console.log(this.errorMessage, error);
             },
-            subscribeToMore: [
-                {
-                    document: require('../../../graphql/subscription/todo/TodoAdded.gql'),
-                    updateQuery: (previousResult, { subscriptionData: { data: { todoAdded }} }) => {
-                        previousResult.items.todos.splice(0, 0, todoAdded);
-                        addPropertyToCache(todoAdded, 'todos', ['metrics', 'goals', 'routines'], previousResult);
-                        return previousResult;
-                    },
-                },
-                {
-                    document: require('../../../graphql/subscription/todo/TodoUpdated.gql'),
-                    updateQuery: (previousResult, { subscriptionData: { data: { todoUpdated }} }) => {
-                        replaceItem(todoUpdated, previousResult.items.todos);
-                        updatePropertyInCache(todoUpdated, 'todos', ['metrics', 'goals', 'routines'], previousResult);
-                        return previousResult;
-                    },
-                },
-                {
-                    document: require('../../../graphql/subscription/todo/TodoDeleted.gql'),
-                    updateQuery: (previousResult, { subscriptionData: { data: { todoDeleted }} }) => {
-                        removeItem(todoDeleted, previousResult.items.todos);
-                        deletePropertyInCache(todoDeleted, 'todos', ['metrics', 'goals', 'routines'], previousResult);
-                        return previousResult;
-                    },
-                },
-            ]
+            // subscribeToMore: [
+            //     {
+            //         document: require('../../../graphql/subscription/todo/TodoAdded.gql'),
+            //         updateQuery: (previousResult, { subscriptionData: { data: { todoAdded }} }) => {
+            //             previousResult.items.todos.splice(0, 0, todoAdded);
+            //             addPropertyToCache(todoAdded, 'todos', ['metrics', 'goals', 'routines'], previousResult);
+            //             return previousResult;
+            //         },
+            //     },
+            //     {
+            //         document: require('../../../graphql/subscription/todo/TodoUpdated.gql'),
+            //         updateQuery: (previousResult, { subscriptionData: { data: { todoUpdated }} }) => {
+            //             replaceItem(todoUpdated, previousResult.items.todos);
+            //             updatePropertyInCache(todoUpdated, 'todos', ['metrics', 'goals', 'routines'], previousResult);
+            //             return previousResult;
+            //         },
+            //     },
+            //     {
+            //         document: require('../../../graphql/subscription/todo/TodoDeleted.gql'),
+            //         updateQuery: (previousResult, { subscriptionData: { data: { todoDeleted }} }) => {
+            //             removeItem(todoDeleted, previousResult.items.todos);
+            //             deletePropertyInCache(todoDeleted, 'todos', ['metrics', 'goals', 'routines'], previousResult);
+            //             return previousResult;
+            //         },
+            //     },
+            // ]
         },
     },
     mounted: function() {
         // An error gets thrown if pollInterval is set with the query
-        this.$apollo.queries.items.setOptions({
-            fetchPolicy: 'cache-and-network',
-            pollInterval: 50000,
-        })
+        // this.$apollo.queries.items.setOptions({
+        //     fetchPolicy: 'cache-and-network',
+        //     pollInterval: 50000,
+        // })
     },
     methods: {
         columnData,

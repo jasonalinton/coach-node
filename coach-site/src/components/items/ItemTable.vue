@@ -85,10 +85,10 @@ export default {
         });
 
         // An error gets thrown if pollInterval is set with the query
-        this.$apollo.queries.items.setOptions({
-            fetchPolicy: 'cache-and-network',
-            pollInterval: 50000,
-        })
+        // this.$apollo.queries.items.setOptions({
+        //     fetchPolicy: 'cache-and-network',
+        //     pollInterval: 50000,
+        // })
     },
     methods: {
         columnData,
