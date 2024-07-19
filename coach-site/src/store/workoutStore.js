@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { getWorkoutInfo, getWorkouts, getExercises, 
-    saveExercise, saveWorkout, copyAndStartWorkout, logSet, completeWorkout } from '../api/workoutAPI'
+    saveExercise, saveWorkout, copyAndStartWorkout, logSet, completeWorkout, repositionExercise } from '../api/workoutAPI'
 import { replaceOrAddItem, removeItemByID, sortAsc } from '../../utility';
 import { getSocketConnection } from './socket'
 
@@ -13,9 +13,14 @@ export const useWorkoutStore = defineStore('workout', {
         variations: [],
         muscleGroups: [],
         muscles: [],
+        dragged: {
+            exerciseID: undefined,
+        },
     }),
     getters: {
-        
+        getDragged() {
+            return this.dragged;
+        }
     },
     actions: {
         async initialize() {
@@ -129,6 +134,15 @@ export const useWorkoutStore = defineStore('workout', {
         },
         async completeWorkout(workoutID, startAt, endAt, createEvent) {
             return completeWorkout(workoutID, startAt, endAt, createEvent);
+        },
+        async repositionExercise(workoutID, exerciseID, position) {
+            repositionExercise(workoutID, exerciseID, position);
+        },
+        setDraggedProps(exerciseID) {
+            this.dragged.exerciseID = exerciseID;
+        },
+        clearDraggedProps() {
+            this.dragged.exerciseID = undefined;
         },
         connectSocket() {
             if (!initialized) {

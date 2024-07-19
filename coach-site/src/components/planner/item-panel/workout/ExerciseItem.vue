@@ -1,7 +1,14 @@
 <template>
-    <div class="exercise-item d-flex flex-column" :class="{ 'complete': isExerciseComplete }">
+    <div class="exercise-item d-flex flex-column" 
+         :class="[{ 'complete': isExerciseComplete }, dragPosition]"
+         ref="item"
+         draggable @dragenter.prevent
+         @dragstart="onDragStart($event)" @dragend="onDragEnd($event)"
+         @drop="onDrop($event)" @dragover="onDragOver($event)" @dragleave="onDragLeave($event)">
         <div class="d-flex flex-row flex-grow-1 justify-content-between position-relative">
             <div class="d-flex flex-row overflow-hidden">
+                <!-- <input class="form-control form-control-sm me-1" type="number" v-model="exercise.position"
+                       :style="{'width': '35px'}"/> -->
                 <span class="image flex-shrink-0"></span>
                 <div class="label d-flex flex-column">
                     <span class="name">{{ exercise.exercise.name }}</span>
@@ -55,6 +62,7 @@
 
 <script>
 import ExerciseSetForm from './ExerciseSetForm.vue';
+import { useWorkoutStore } from '../../../../store/workoutStore';
 
 export default {
     name: 'ExerciseItem',
@@ -66,16 +74,19 @@ export default {
     },
     data: function () {
         return {
+            workoutStore: undefined,
             setsShown: false,
             showOptions: false,
             showReps: false,
             showWeight: false,
             showHoldSeconds: false,
             showTimeSeconds: false,
-            editingSetID: undefined
+            editingSetID: undefined,
+            dragPosition: ""
         }
     },
     created: function() {
+        this.workoutStore = useWorkoutStore();
         let _this = this;
         if (this.exercise.sets.value.length == 0) {
             this.$emit("addDefaultSet", this.exercise.exercise.id);
@@ -158,8 +169,63 @@ export default {
                 this.$emit("addDefaultSet", this.exercise.exercise.id);
             }
             this.setsShown = !this.setsShown;
-        }
+        },
+        onDragStart,
+        onDragOver,
+        onDrop,
+        onDragLeave,
+        onDragEnd
     },
+}
+
+function onDragStart(ev) {
+    console.log("Drag Started");
+    ev.target.classList.add("drag");
+    ev.dataTransfer.dropEffect = 'move';
+    ev.dataTransfer.effectAllowed = 'move';
+
+    this.workoutStore.setDraggedProps(this.exercise.exercise.id);
+}
+
+function onDragOver(ev) {
+    ev.preventDefault();
+    this.dragPosition = "";
+
+    if (!ev.currentTarget.classList.contains("drag")) {
+        ev.preventDefault();
+
+        var rect = this.$refs.item.getBoundingClientRect();
+        var offset = ev.clientY - rect.y;
+        var percent = offset / rect.height;
+
+        if ((percent < .50)) {
+            this.dragPosition = "before";
+        } else {
+            this.dragPosition = "after";
+        }
+    }
+}
+
+function onDrop(ev) {
+    ev.preventDefault();
+
+    var dragged = this.workoutStore.getDragged;
+    var position = (this.dragPosition == "before") ? this.exercise.position : this.exercise.position + 1;
+    
+    this.$emit('repositionExercise', dragged.exerciseID, position);
+    
+    this.dragPosition = "";
+}
+
+function onDragLeave() {
+    this.dragPosition = "";
+}
+
+function onDragEnd(ev) {
+    ev.target.classList.remove("drag");
+    this.dragPosition = "";
+
+    this.workoutStore.clearDraggedProps();
 }
 
 </script>
@@ -227,5 +293,13 @@ export default {
 
 .exercise-item:hover .button-group {
     visibility: visible;
+}
+
+.before {
+    border-top: 1px solid black !important;
+}
+
+.after {
+    border-bottom: 1px solid black !important;
 }
 </style>

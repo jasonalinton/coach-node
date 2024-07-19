@@ -26,7 +26,8 @@
                                    @addSet="addSet"
                                    @deleteSet="deleteSet"
                                    @addVariation="addVariation($event)"
-                                   @removeVariation="removeVariation($event)"/>
+                                   @removeVariation="removeVariation($event)"
+                                   @repositionExercise="repositionExercise"/>
                  </div>
                  <!-- Settings -->
                  <span class="text-start"
@@ -219,6 +220,7 @@ export default {
         setIterationTime,
         validateTimes,
         deleteWorkout,
+        repositionExercise,
         save,
     },
     watch: {
@@ -481,6 +483,10 @@ function deleteWorkout() {
 
      this.workoutStore.saveWorkout(model)
         .then(() => this.$emit('back'));
+}
+
+function repositionExercise(exerciseID, position) {
+    this.workoutStore.repositionExercise(this.id, exerciseID, position)
 }
 
 function save() {

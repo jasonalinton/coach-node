@@ -1,5 +1,5 @@
 <template>
-     <div class="d-flex flex-column flex-grow-1">
+     <div class="d-flex flex-column flex-grow-1 overflow-scroll">
          <div class="exercise-list d-flex flex-column" :class="{ hide: selectedExerciseID}">
              <div class="label d-flex flex-row flex-grow-1 mb-2">
                  <img class="icon-button"

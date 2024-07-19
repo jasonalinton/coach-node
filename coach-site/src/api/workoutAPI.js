@@ -152,3 +152,24 @@ export async function completeWorkout(workoutID, startAt, endAt, createEvent) {
         console.error('Error:', error);
     });
 }
+
+export async function repositionExercise(workoutID, exerciseID, position) {
+    let data = { workoutID, exerciseID, position };
+
+    return fetch(`https://localhost:7104/api/Physical/RepositionExercise`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    })
+    .then((response) => response.json())
+    .then((data) => {
+        if (!data.errorMessage) {
+            return data;
+        } else {
+            this.errorMessage = data.errorMessage;
+        }
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+    });
+}
