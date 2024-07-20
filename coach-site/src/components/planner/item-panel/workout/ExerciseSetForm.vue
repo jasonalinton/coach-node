@@ -1,15 +1,11 @@
 <template>
      <div class="exercise-set-view d-flex flex-column flex-grow-1" :class="{ complete: isComplete }">
-        <div v-if="!showVariationSelector && variationString" class="d-flex flex-row">
+        <div v-if="!showVariationSelector && variationString" class="d-flex flex-row"
+             @click="showVariationSelector = true">
             <span class="variations text-start">{{variationString}}</span>
-            <!-- <div class="variations d-flex flex-row">
-                <span v-for="variation in set.variations" :key="variation.id">
-                {{ variation.name }}
-                </span>
-            </div> -->
         </div>
-        <div v-if="showVariationSelector" class="d-flex flex-row">
-            <!-- <span class="done" @click="showVariationSelector = false">Done</span> -->
+        <div v-if="showVariationSelector" class="d-flex flex-row"
+             @mouseleave="showVariationSelector = false">
             <div class="variations picks d-flex flex-row">
                 <span v-for="variation in potentialVariations" :key="variation.id"
                       :class="{ selected: variationIDs.includes(variation.id)}"
@@ -250,12 +246,12 @@ export default {
         blur(e) {
             if (!e.relatedTarget || !e.relatedTarget.classList.contains("prop")) {
                 this.doneEditing();
+                this.$emit('saveWorkout');
             }
         },
         doneEditing() {
             this.isEditing = false;
             this.$emit('setEditingID', undefined);
-
         },
         variationClicked(variationID) {
             if (this.variationIDs.includes(variationID)) {

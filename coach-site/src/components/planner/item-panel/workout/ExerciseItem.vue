@@ -53,7 +53,8 @@
                                  @deleteSet="deleteSet"
                                  @setEditingID="editingSetID = $event"
                                  @addVariation="$emit('addVariation', $event)"
-                                 @removeVariation="$emit('removeVariation', $event)"/>
+                                 @removeVariation="$emit('removeVariation', $event)"
+                                 @saveWorkout="$emit('saveWorkout')"/>
             </div>
             <!-- <button type="button" class="btn btn-sm btn-success mt-2" @click="addSet()">Add Set</button> -->
         </div>

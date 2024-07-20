@@ -63,10 +63,10 @@ export async function saveWorkout(model) {
     })
     .then((response) => response.json())
     .then((data) => {
-        if (!data.errorMessage) {
-            return data;
+        if (!data.status.errorCode) {
+            return data.result;
         } else {
-            this.errorMessage = data.errorMessage;
+            console.error('Error:', data.status.errorMessage);
         }
     })
     .catch((error) => {

@@ -15,7 +15,6 @@
                     <input id="name" class="textbox mb-2" type="text" ref="text"  placeholder="Workout Name"
                             v-model.lazy.trim="name.value" 
                             spellcheck/>
-                    <button type="button" class="btn btn-primary mb-2" @click="save()">Save</button>
                  </div>
                  <div class="d-flex flex-column">
                      <ExerciseItem class="mb-2" v-for="exercise in exercises.value" :key="exercise.id"
@@ -27,7 +26,8 @@
                                    @deleteSet="deleteSet"
                                    @addVariation="addVariation($event)"
                                    @removeVariation="removeVariation($event)"
-                                   @repositionExercise="repositionExercise"/>
+                                   @repositionExercise="repositionExercise"
+                                   @saveWorkout="save"/>
                  </div>
                  <!-- Settings -->
                  <span class="text-start"
@@ -45,6 +45,8 @@
                          <input type="checkbox" id="is-template" v-model="isTemplate.value" />
                          <label class="ms-1" for="is-template">Is Template</label>
                      </div>
+                     <!-- Save -->
+                    <button type="button" class="btn btn-primary mb-2" @click="save()">Save</button>
                      <!-- Delete -->
                      <button v-if="!settings.confimDelete" type="button" class="btn btn-danger mb-2" @click="settings.confimDelete = true">Delete</button>
                      <!-- Delete Confirmation -->
@@ -345,6 +347,8 @@ function setExercises(selectedIDs) {
     for (let i = 1; i <= this.exercises.value.length; i++) {
         this.exercises.value[i-1].position = i;
     }
+
+    this.save();
 }
 
 function addDefaultSet(exerciseID) {
@@ -388,11 +392,15 @@ function addSet(exerciseID) {
         set_New.isAdded = true;
         exercise.sets.value.push(set_New);
     }
+
+    this.save();
 }
 
 function deleteSet({setID, exerciseID}) {
     let exercise = this.exercises.value.find(e => e.exercise.id == exerciseID);
     removeItemByID(setID, exercise.sets.value);
+    
+    this.save();
 }
 
 function addVariation({setID, variationID, exerciseID}) {
@@ -404,12 +412,16 @@ function addVariation({setID, variationID, exerciseID}) {
         id: variationID,
         name: variation.name
     });
+
+    this.save();
 }
 
 function removeVariation({setID, variationID, exerciseID}) {
     let exercise = this.exercises.value.find(x => x.exercise.id == exerciseID);
     let set = exercise.sets.value.find(x => x.id == setID);
     set.variations = set.variations.filter(x => x.id != variationID);
+
+    this.save();
 }
 
 function stopWorkout() {
@@ -703,8 +715,10 @@ function save() {
         model.isUpdated = true;
     }
 
-    this.workoutStore.saveWorkout(model)
+    if (model.isUpdated || model.isNew) {
+        this.workoutStore.saveWorkout(model)
         // .then(() => this.$emit('back'));
+    }
 }
 
 </script>
