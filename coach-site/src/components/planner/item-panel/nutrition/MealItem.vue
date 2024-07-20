@@ -81,7 +81,8 @@
                                         :dateTime="endAt.toJSON()" @onChange="setTime($event, 'end')"/>
                     <!-- Time Buttons -->
                     <div class="d-flex flex-row mt-2">
-                        <button type="button" class="btn btn-sm btn-primary mb-1" @click="saveTime">Done</button>
+                        <button type="button" class="btn btn-sm btn-primary mb-1" @click="setTimeNow">Now</button>
+                        <button type="button" class="btn btn-sm btn-primary mb-1 ms-1" @click="saveTime">Done</button>
                         <button type="button" class="btn btn-sm btn-warning mb-1 ms-1" @click="refreshTimes">Cancel</button>
                     </div>
                 </div>
@@ -97,7 +98,7 @@ import { usePhysicalStore } from '@/store/physicalStore'
 import DateTimeSelector from '../../../controls/select/DateTimeSelector.vue'
 import FoodItemTable from './FoodItemTable.vue';
 import { floatString } from '../../../../../utility';
-import { toShortTimeString, setTimeFromDate } from '../../../../../utility/timeUtility';
+import { toShortTimeString, setTimeFromDate, addMinutes } from '../../../../../utility/timeUtility';
 
 export default {
     name: '',
@@ -160,6 +161,7 @@ export default {
         refresh,
         refreshTimes,
         setTime,
+        setTimeNow,
         validateTimes,
         saveTime
     },
@@ -222,11 +224,20 @@ function setTime(value, endpoint) {
     if (value) {
         if (endpoint == "start") {
             this.startAt = new Date(value);
+            this.endAt = addMinutes(15, this.startAt);
         } else if (endpoint == "end") {
             this.endAt = new Date(value);
         }
         this.validateTimes();
     }
+}
+
+function setTimeNow() {
+    this.startAt = new Date(this.meal.dateTime);
+    this.setTimeFromDate(this.startAt, new Date());
+    this.endAt = addMinutes(15, this.startAt);
+    
+    this.validateTimes();
 }
 
 function validateTimes() {
