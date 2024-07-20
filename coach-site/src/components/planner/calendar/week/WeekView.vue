@@ -22,7 +22,7 @@
                 </div>
             </div>
             <div class="body d-flex h-100 overflow-scroll">
-                <div class="hour-labels overflow-scroll"
+                <div class="hour-labels overflow-hidden"
                      :style="{ 'min-width': `${hour.labelWidth}px`, height: 'fit-content' }">
                     <div v-for="(h, index) in hour.hours"
                          :key="index"
@@ -33,7 +33,7 @@
                     </div>
                 </div>
                 <div v-if="dayModels.length > 0"
-                     class="hour-blocks d-flex w-100 overflow-scroll"
+                     class="hour-blocks d-flex w-100 overflow-hidden"
                      ref="hourBlocks"
                      :style="{ height: 'fit-content' }"
                         @scroll="onScroll">

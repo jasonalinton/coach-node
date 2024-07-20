@@ -4,7 +4,8 @@
             <div class="d-flex flex-row">
                 <div class="d-flex flex-row">
                     <IconButton class="icon menu-button float-left" src="/icon/menu-button.png" :width="48" :height="48"></IconButton>
-                    <img class="icon calendar-button float-left" src="/icon/planner-icon.png" :width="36" :height="36"/>
+                    <img class="icon calendar-button float-left" src="/icon/planner-icon.png" :width="36" :height="36"
+                         @click="$emit('toggleLeftPanel')"/>
                     <a class="navbar-brand float-left" href="#">Inventory Planner</a>
                 </div>
                 <div class="d-flex flex-row">
@@ -85,7 +86,7 @@ export default {
 }
 
 .menu-button {
-    margin: 0 12px;
+    margin-right: 12px;
 }
 
 select {

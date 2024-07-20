@@ -3,14 +3,11 @@
         <div id="left-and-body" class="col h-100">
             <div class="left-wrapper row h-100 g-0">
                 <div class="col d-flex flex-row h-100">
-                    <div class="left" :class="{open: showLeft}">
-                        <LeftPanel @dateChange="dateChange"></LeftPanel>
-                    </div>
                     <div class="body overflow-auto h-100">
                         <WeekView v-if="selectedView=='weekView'" 
                                   :dayCount="dayCount" 
                                   :selectedDate="selectedDate" 
-                                    @selectEvent="$emit('selectEvent', $event)"></WeekView>
+                                  @selectEvent="$emit('selectEvent', $event)"></WeekView>
                         <MonthView v-if="selectedView=='monthView'" :today="today" :selectedDate="selectedDate"></MonthView>
                     </div>
                 </div>
@@ -22,13 +19,12 @@
 <script>
 import Split from 'split.js'
 import WeekView from './calendar/week/WeekView.vue';
-import LeftPanel from './left-panel/LeftPanel.vue';
 import MonthView from './calendar/month/MonthView.vue';
 import { today } from "../../../utility";
 
 export default {
     name: "Planner",
-    components: { WeekView, LeftPanel, MonthView },
+    components: { WeekView, MonthView },
     props: {
         dayCount: Number,
         selectedView: String,
@@ -38,31 +34,17 @@ export default {
         return {
             split: null,
             selectedPage: "items",
-            showLeft: true,
             today: today(),
         }
     },
     mounted: function() {
 
     },
-    // apollo: {
-    //     events: {
-    //         query() { return require('../../graphql/query/planner/QueryEvents.gql')},
-    //         error: function(error) {
-    //             this.errorMessage = 'Error occurred while loading event query'
-    //             console.log(this.errorMessage, error);
-    //         },
-    //         update(data) {
-    //             return data.events;
-    //         }
-    //     },
-    // },
     created: function() {
 
     },
     methods: {
         initSplit,
-        dateChange
     },
     watch: {
         dayCount(value) {
@@ -83,10 +65,6 @@ function initSplit() {
         minSize: [296, 296],
         onDragEnd: (sizes) => localStorage.setItem(`planner-split-sizes`, JSON.stringify(sizes))
     });
-}
-
-function dateChange(date) {
-    this.$emit('dateChange', date);
 }
 </script>
 

@@ -1,16 +1,22 @@
 <template>
-    <div id="app" :class="['grid-container', (selectedItemPanel) ? 'show-item-panel' : 'hide-item-panel']">
-        <div class="nav-bar">
+    <div id="app" :class="['grid-container', leftPanelVisibility, itemPanelVisibility]">
+        <div class="nav-bar overflow-scroll">
             <PlannerNavbar
                 :dayCount="navbar.week.dayCount" 
                 :selectedView="navbar.selectedView" 
                 :selectedPage="navbar.selectedPage"
                 @dayCountChange="dayCountChange"
                 @viewChange="viewChange"
-                @showPage="showPage">
+                @showPage="showPage"
+                @toggleLeftPanel="toggleLeftPanel">
             </PlannerNavbar>
         </div>
-        <div class="grid-body" ref="gridBody">
+        <div class="grid-left-panel">
+            <LeftPanel :isShown="showLeft" 
+                       @dateChange="dateChange"
+                       @togglePanel="toggleLeftPanel"/>
+        </div>
+        <div class="grid-body overflow-scroll">
             <Planner 
                 v-show="navbar.selectedPage == 'planner'" 
                     :selectedPage="navbar.selectedPage"
@@ -34,6 +40,7 @@
 
 <script>
 import PlannerNavbar from "./components/nav/PlannerNavbar.vue";
+import LeftPanel from "./components/planner/left-panel/LeftPanel.vue";
 import ItemPanel from './components/planner/item-panel/ItemPanel.vue';
 import Planner from "./components/planner/Planner.vue";
 import ItemTabs from "./components/items/ItemTabs.vue";
@@ -52,6 +59,7 @@ export default {
     name: "App",
     components: {
         PlannerNavbar,
+        LeftPanel,
         ItemPanel,
         Planner,
         ItemTabs,
@@ -71,7 +79,8 @@ export default {
             },
             selectedDate: today(),
             selectedItemPanel: "todo",
-            plannerStore: undefined
+            plannerStore: undefined,
+            showLeft: true
         };
     },
     created: async function () {
@@ -121,7 +130,16 @@ export default {
             routineStore.initializeItems();
         });
     },
+    computed: {
+        leftPanelVisibility() {
+            return (this.showLeft) ? `show-left-panel` : 'hide-left-panel'
+        },
+        itemPanelVisibility() {
+            return (this.selectedItemPanel) ? 'show-item-panel' : 'hide-item-panel'
+        },
+    },
     methods: {
+        toggleLeftPanel,
         dayCountChange,
         viewChange,
         showPage,
@@ -135,6 +153,10 @@ export default {
     },
 };
 
+function toggleLeftPanel() {
+    this.showLeft = !this.showLeft;
+}
+
 function dayCountChange(count) {
     this.navbar.week.dayCount = count;
 }
@@ -144,6 +166,12 @@ function viewChange(view) {
 }
 
 function showPage(page) {
+    if (page == 'planner') {
+        this.showLeft = true;
+    }
+    if (page == 'items') {
+        this.showLeft = false;
+    }
     this.navbar.selectedPage = page;
 }
 
@@ -177,12 +205,20 @@ body {
     grid-template-rows: 64px auto;
 }
 
-.show-item-panel {
-    grid-template-columns: 272px auto 352px;
+.show-left-panel.show-item-panel {
+    grid-template-columns: 242px auto 352px;
 }
 
-.hide-item-panel {
-    grid-template-columns: 272px auto 57px;
+.show-left-panel.hide-item-panel {
+    grid-template-columns: 242px auto 57px;
+}
+
+.hide-left-panel.show-item-panel {
+    grid-template-columns: 0px auto 352px;
+}
+
+.hide-left-panel.hide-item-panel {
+    grid-template-columns: 0px auto 57px;
 }
 
 .nav-bar {
@@ -191,13 +227,20 @@ body {
     grid-column: 1 / span 2;
 }
 
+.grid-left-panel {
+    grid-row: 2;
+    grid-column: 1;
+    overflow-y: hidden;
+    height: 100%
+}
+
 .grid-body {
     height: 100%;
     width: 100%;
     overflow: hidden;
     /* background-color: darkgoldenrod; */
     grid-row: 2;
-    grid-column: 1 / span 2;
+    grid-column: 2;
 }
 
 .grid-right-panel {
