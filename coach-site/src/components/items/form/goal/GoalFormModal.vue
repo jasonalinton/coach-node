@@ -25,9 +25,18 @@
                             
                         </div>
                         <div class="col-6 col-sm-4 form-column">
+                            <!-- Parents -->
+                            <FormItemList itemType="goal" :itemIDs="parentIDs" :isParent="true"
+                                          parentType="goal" :parentID="id" :repeatIDs="repeatIDs"
+                                          @addItemClicked="addItemClicked" @addItem="addItem"/>
+                            <!-- Children -->
                             <FormItemList itemType="goal" :itemIDs="childIDs" :isChild="true"
                                           parentType="goal" :parentID="id" :repeatIDs="repeatIDs"
-                                          @addItemClicked="addChildClicked" @addItem="addItem"/>
+                                          @addItemClicked="addItemClicked" @addItem="addItem"/>
+                            <!-- Todos -->
+                            <FormItemList itemType="todo" :itemIDs="todoIDs"
+                                          parentType="goal" :parentID="id" :repeatIDs="repeatIDs"
+                                          @addItemClicked="addItemClicked" @addItem="addItem"/>
                         </div>
                         <div class="col-6 col-sm-4 d-flex flex-column">
                             <div>
@@ -61,16 +70,23 @@
                         </div>
                     </div>
             </div>
-            <div v-if="mapper.isShown && mapper.type == 'children'" class="container">
+            <div v-if="mapper.isShown" class="container">
                 <div class="row g-2">
                     <div class="col-12">
-                        <ItemMapper itemType="goal" :selectedIDs="childIDs" 
-                                    @close="mapper.isShown=false" @cancel="cancelMapping" @select="selectChildren"/>
+                        <ItemMapper v-if="mapper.type == 'parent'"
+                                    itemType="goal" :selectedIDs="parentIDs" 
+                                    @close="mapper.isShown=false" @cancel="cancelMapping" @select="(x,y) => selectItems('parent', x, y)"/>
+                        <ItemMapper v-if="mapper.type == 'child'"
+                                    itemType="goal" :selectedIDs="childIDs" 
+                                    @close="mapper.isShown=false" @cancel="cancelMapping" @select="(x,y) => selectItems('child', x, y)"/>
+                        <ItemMapper v-if="mapper.type == 'todo'"
+                                    itemType="todo" :selectedIDs="todoIDs"
+                                    @close="mapper.isShown=false" @cancel="cancelMapping" @select="(x,y) => selectItems('todo', x, y)"/>
                     </div>
                 </div>
             </div>  
         </div>
-        <div class="modal-footer">
+        <div v-if="!mapper.isShown" class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             <button type="button" class="btn btn-primary" @click="save()">Save changes</button>
         </div>
@@ -79,7 +95,7 @@
 </template>
 
 <script>
-import { saveGoal, mapChildren, createAndMapItem } from '../../../../api/goalAPI';
+import { saveGoal } from '../../../../api/goalAPI';
 import TimeframeControl from '../component/TimeframeControl.vue';
 import RepeatControl from '../component/RepeatControl.vue';
 import TimePairControl from '../component/TimePairControl.vue';
@@ -154,10 +170,26 @@ export default {
                 return null;
             }
         },
+        parentIDs() {
+            if (this.goal) {
+                var parents = sortItems(this.goal.parents, "goal", this.id);
+                return parents.map(x => x.id);
+            } else {
+                return [];
+            }
+        },
         childIDs() {
             if (this.goal) {
                 var children = sortItems(this.goal.children, "goal", this.id);
                 return children.map(x => x.id);
+            } else {
+                return [];
+            }
+        },
+        todoIDs() {
+            if (this.goal) {
+                var todos = sortItems(this.goal.todos, "goal", this.id);
+                return todos.map(x => x.id);
             } else {
                 return [];
             }
@@ -238,15 +270,11 @@ export default {
                     this.timeframes.addedIDs.splice(index_ID, 1);
             }
         },
-        selectChildren(addedIDs, removedIDs) {
-            this.children.addedIDs = [...addedIDs];
-            this.children.removedIDs = [...removedIDs];
-
-            mapChildren(this.id, addedIDs, removedIDs);
+        selectItems(itemType, addedIDs, removedIDs) {
+            this.store.mapItems(this.id, itemType, addedIDs, removedIDs);
 
             this.mapper.isShown = false;
             this.mapper.type = undefined;
-
         },
         saveRepeat(repeat) {
             let _repeat = clone(repeat);
@@ -290,11 +318,11 @@ export default {
             this.$emit("closeItemModal");
         },
         addItem(itemType, itemText) {
-            createAndMapItem(this.id, itemType, itemText);
+            this.store.createAndMapItem(this.id, itemType, itemText);
         },
-        addChildClicked() {
+        addItemClicked(itemType) {
             this.mapper.isShown = true;
-            this.mapper.type = "children";
+            this.mapper.type = itemType;
         },
         addRepeatClicked() {
             let repeats = sortAsc(this.repeats.value, 'id');

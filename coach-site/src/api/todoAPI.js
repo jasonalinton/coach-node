@@ -89,11 +89,11 @@ export async function createAndMapItem(todoID, itemType, itemText) {
         body: JSON.stringify(data)
     })
     .then(response => response.json())
-    .then(data => {
-        if (!data.errorMessage) {
-            return data;
+    .then((data) => {
+        if (!data.status.errorCode) {
+            return data.result;
         } else {
-            this.errorMessage = data.errorMessage;
+            console.error('Error:', data.status.errorMessage);
         }
     })
     .catch(error => {

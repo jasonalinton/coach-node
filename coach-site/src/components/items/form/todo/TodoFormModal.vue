@@ -96,7 +96,7 @@
 </template>
 
 <script>
-import { saveTodo, createAndMapItem } from '../../../../api/todoAPI';
+import { saveTodo } from '../../../../api/todoAPI';
 import RepeatControl from '../component/RepeatControl.vue';
 import TimePairControl from '../component/TimePairControl.vue';
 import FormItemList from '../component/FormItemList.vue';
@@ -270,7 +270,7 @@ export default {
             this.store.createTask(this.id);
         },
         addItem(itemType, itemText) {
-            createAndMapItem(this.id, itemType, itemText);
+            this.store.createAndMapItem(this.id, itemType, itemText);
         },
         addItemClicked(itemType) {
             this.mapper.isShown = true;

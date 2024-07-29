@@ -77,3 +77,45 @@ export async function saveGoalTimePair(timePair) {
         console.error('Error:', error);
     });
 }
+
+export async function createAndMapItem(goalID, itemType, itemText) {
+    let data = { goalID, itemType, itemText };
+    
+    return fetch(`https://localhost:7104/api/Goal/CreateAndMapItemToGoal`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then((data) => {
+        if (!data.status.errorCode) {
+            return data.result;
+        } else {
+            console.error('Error:', data.status.errorMessage);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
+
+export async function mapItems(goalID, itemType, addedIDs, removedIDs) {
+    let data = { goalID, itemType, addedIDs, removedIDs };
+    
+    return fetch(`https://localhost:7104/api/Goal/MapItemsToGoal`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then((data) => {
+        if (!data.status.errorCode) {
+            return data.result;
+        } else {
+            console.error('Error:', data.status.errorMessage);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
