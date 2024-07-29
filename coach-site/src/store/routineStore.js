@@ -55,10 +55,10 @@ export const useRoutineStore = defineStore('routine', {
 
                 let _this = this;
                 connection.on("UpdateRoutines", routines => {
-                    this.initializeItems(routines);
                     routines.forEach(routine => {
                         replaceOrAddItem(routine, _this.routines);
                     })
+                    this.initializeItems(routines);
                     sortAsc(_this.routines);
                 });
             }

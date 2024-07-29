@@ -101,6 +101,27 @@ export async function createAndMapItem(todoID, itemType, itemText) {
     });
 }
 
+export async function mapItems(todoID, itemType, addedIDs, removedIDs) {
+    let data = { todoID, itemType, addedIDs, removedIDs };
+    
+    return fetch(`https://localhost:7104/api/Todo/MapItemsToTodo`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then((data) => {
+        if (!data.status.errorCode) {
+            return data.result;
+        } else {
+            console.error('Error:', data.status.errorMessage);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
+
 export async function refreshRepetitionForRepeat(id, repeatID) {
     let data = { id, repeatID };
     

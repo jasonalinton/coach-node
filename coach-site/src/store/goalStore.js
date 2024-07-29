@@ -66,10 +66,10 @@ export const useGoalStore = defineStore('goal', {
 
                 let _this = this;
                 connection.on("UpdateGoals", goals => {
-                    this.initializeItems(goals);
                     goals.forEach(goal => {
                         replaceOrAddItem(goal, _this.goals);
                     })
+                    this.initializeItems(goals);
                     sortAsc(_this.goals);
                 });
             }

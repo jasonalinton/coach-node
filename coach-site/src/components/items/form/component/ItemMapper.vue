@@ -1,6 +1,7 @@
 <template>
     <div class="d-flex flex-column">
-        <div v-for="item in items" :key="item.id"
+        <input class="search textbox mb-2" type="text" placeholder="Search" v-model="searchTerm" />
+        <div v-for="item in itemList" :key="item.id"
             class="d-flex flex-row" :class="{ selected: item.isSelected }"
             @click="itemClicked(item)">
             <span class="id">{{ item.id }}</span>
@@ -28,9 +29,11 @@ export default {
         return {
             store: null,
             items: [],
+            itemList: [],
             originalIDs: [],
             addedIDs: [],
-            removedIDs: []
+            removedIDs: [],
+            searchTerm: ""
         }
     },
     created: async function() {
@@ -39,6 +42,7 @@ export default {
         this.store = useStore();
 
         this.setItems();
+        this.setItemList();
     },
     methods: {
         setItems() {
@@ -52,6 +56,13 @@ export default {
                 });
             });
             this.items = items;
+        },
+        setItemList() {
+            if (this.searchTerm != "") {
+                this.itemList = this.items.filter(x => x.text.toLowerCase().includes(this.searchTerm.toLowerCase()))
+            } else {
+                this.itemList = this.items;
+            }
         },
         itemClicked(item) {
             item.isSelected = !item.isSelected;
@@ -78,6 +89,11 @@ export default {
             this.$emit("select", this.addedIDs, this.removedIDs);
         }
     },
+    watch: {
+        searchTerm() {
+            this.setItemList();
+        }
+    }
 }
 </script>
 

@@ -74,7 +74,7 @@ function addItem() {
     } else if (this.isChild) {
         itemType = "child"
     } else {
-        itemType = `${this.itemType}s`
+        itemType = this.itemType
     }
 
     this.$emit("addItem", itemType, this.newItemText);
@@ -82,7 +82,16 @@ function addItem() {
 }
 
 function addItemClicked() {
-    this.$emit('addItemClicked');
+    let itemType = this.itemType;
+    if (this.isParent) {
+        itemType = "parent";
+    } else if (this.isChild) {
+        itemType = "child"
+    } else {
+        itemType = this.itemType
+    }
+
+    this.$emit('addItemClicked', itemType);
 }
 </script>
 

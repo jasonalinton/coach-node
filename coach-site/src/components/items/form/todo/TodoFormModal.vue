@@ -19,10 +19,20 @@
                         <div class="col-12 col-sm-4">
                             
                         </div>
+                        <!-- Item Mapping -->
                         <div class="col-6 col-sm-4 form-column">
+                            <!-- Parents -->
+                            <FormItemList itemType="todo" :itemIDs="parentIDs" :isParent="true"
+                                          parentType="todo" :parentID="id" :repeatIDs="repeatIDs"
+                                          @addItemClicked="addItemClicked" @addItem="addItem"/>
+                            <!-- Children -->
                             <FormItemList itemType="todo" :itemIDs="childIDs" :isChild="true"
                                           parentType="todo" :parentID="id" :repeatIDs="repeatIDs"
-                                          @addItemClicked="addTodoClicked" @addItem="addItem"/>
+                                          @addItemClicked="addItemClicked" @addItem="addItem"/>
+                            <!-- Goals -->
+                            <FormItemList itemType="goal" :itemIDs="goalIDs" :isChild="false"
+                                          parentType="todo" :parentID="id" :repeatIDs="repeatIDs"
+                                          @addItemClicked="addItemClicked" @addItem="addItem"/>
                         </div>
                         <div class="col-6 col-sm-4 d-flex flex-column">
                             <!-- Repetition -->
@@ -60,11 +70,18 @@
                         </div>
                     </div>
                 </div>
-                <div v-if="mapper.isShown && mapper.type == 'todo'" class="container">
+                <div v-if="mapper.isShown" class="container">
                     <div class="row g-2">
                         <div class="col-12">
-                            <ItemMapper itemType="todo" :selectedIDs="childIDs" 
-                                        @close="mapper.isShown=false" @cancel="cancelMapping" @select="selectTodos"/>
+                            <ItemMapper v-if="mapper.type == 'parent'" 
+                                        itemType="todo" :selectedIDs="parentIDs" 
+                                        @close="mapper.isShown=false" @cancel="cancelMapping" @select="(x,y) => selectItems('parent', x, y)"/>
+                            <ItemMapper v-if="mapper.type == 'child'" 
+                                        itemType="todo" :selectedIDs="childIDs" 
+                                        @close="mapper.isShown=false" @cancel="cancelMapping" @select="(x,y) => selectItems('child', x, y)"/>
+                            <ItemMapper v-if="mapper.type == 'goal'" 
+                                        itemType="goal" :selectedIDs="goalIDs" 
+                                        @close="mapper.isShown=false" @cancel="cancelMapping" @select="(x,y) => selectItems('goal', x, y)"/>
                         </div>
                     </div>
                 </div>
@@ -79,7 +96,7 @@
 </template>
 
 <script>
-import { saveTodo, mapTodos, createAndMapItem } from '../../../../api/todoAPI';
+import { saveTodo, createAndMapItem } from '../../../../api/todoAPI';
 import RepeatControl from '../component/RepeatControl.vue';
 import TimePairControl from '../component/TimePairControl.vue';
 import FormItemList from '../component/FormItemList.vue';
@@ -147,10 +164,26 @@ export default {
                 return null;
             }
         },
+        parentIDs() {
+            if (this.todo) {
+                var parents = sortItems(this.todo.parents, "todo", this.id);
+                return parents.map(x => x.id);
+            } else {
+                return [];
+            }
+        },
         childIDs() {
             if (this.todo) {
                 var children = sortItems(this.todo.children, "todo", this.id);
                 return children.map(x => x.id);
+            } else {
+                return [];
+            }
+        },
+        goalIDs() {
+            if (this.todo) {
+                var goals = sortItems(this.todo.goals, "todo", this.id);
+                return goals.map(x => x.id);
             } else {
                 return [];
             }
@@ -186,11 +219,8 @@ export default {
         setSelectedTimePair(timePairID) {
             this.selectedTimePairID = timePairID;
         },
-        selectTodos(addedIDs, removedIDs) {
-            this.todos.addedIDs = [...addedIDs];
-            this.todos.removedIDs = [...removedIDs];
-
-            mapTodos(this.id, addedIDs, removedIDs);
+        selectItems(itemType, addedIDs, removedIDs) {
+            this.store.mapItems(this.id, itemType, addedIDs, removedIDs);
 
             this.mapper.isShown = false;
             this.mapper.type = undefined;
@@ -242,9 +272,9 @@ export default {
         addItem(itemType, itemText) {
             createAndMapItem(this.id, itemType, itemText);
         },
-        addTodoClicked() {
+        addItemClicked(itemType) {
             this.mapper.isShown = true;
-            this.mapper.type = "todo";
+            this.mapper.type = itemType;
         },
         addTimeClicked() {
             let timePairs = sortAsc(this.timePairs.value, 'id');

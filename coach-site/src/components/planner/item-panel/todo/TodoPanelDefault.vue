@@ -255,6 +255,7 @@ export default {
                         iterations: [],
                         isChild: false,
                         repeatID: undefined,
+                        repeatParentID: undefined,
                         isRepeatOwner: false,
                         isRepeatChild: false
                     };
@@ -271,10 +272,18 @@ export default {
                 if (iteration.isRepeat) {
                     let todo = _this.todoStore.getItem(vm.todoID);
                     let repeat = todo.repeats.find(x => x.id == iteration.repeatID);
-                    vm.repeatID = repeat.id;
-                    vm.timeframeID = repeat.idTimeframe;
-                    vm.isRepeatOwner = (repeat.ownerID == vm.todoID);
-                    vm.isRepeatChild = (repeat.parentID != null && repeatIDs.includes(repeat.id));
+                    if (repeat)
+                    {
+                        vm.repeatID = repeat.id;
+                        vm.repeatParentID = repeat.parentID;
+                        vm.timeframeID = repeat.idTimeframe;
+                        vm.isRepeatOwner = (repeat.ownerID == vm.todoID);
+                        vm.isRepeatChild = (repeat.parentID != null && repeatIDs.includes(repeat.id));
+                    }
+                    else
+                    {
+                        console.log(`Not repeat for todo, ${todo.text}`)
+                    }
                 }
             });
 
@@ -282,20 +291,23 @@ export default {
                 viewModels.forEach(vm => {
                     let todo = _this.todoStore.getItem(vm.todoID); 
                     todo.children.forEach(_child => {
-                        let child = undefined;
+                        let children = [];
                         if (vm.repeatID != undefined) {
-                            child = viewModels.find(x => x.todoID == _child.id && x.repeatID == vm.repeatID);
+                            children = viewModels.filter(x => x.todoID == _child.id 
+                                && (x.repeatID == vm.repeatID || x.repeatParentID == vm.repeatID));
                         } else {
-                            child = viewModels.find(x => x.todoID == _child.id);
+                            children = viewModels.filter(x => x.todoID == _child.id);
                         }
-                        if (child != undefined) {
+                        children.forEach(child => {
                             child.isChild = true;
                             vm.children.push(child);
-                        }
+                        })
+                        // if (child != undefined) {
+                        // }
                     });
                 });
     
-                let hierarchalVMs = viewModels.filter(x => x.isRepeatOwner || x.repeatID == undefined || !x.isChild);
+                let hierarchalVMs = viewModels.filter(x => (x.isRepeatOwner && !x.isChild) || x.repeatID == undefined || !x.isChild);
                 return hierarchalVMs;
             } else {
                 return viewModels;

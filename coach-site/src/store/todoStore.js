@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { getTodos, createTask, refreshRepetitionForRepeat, deleteFutureRepetitionsForRepeat, deleteOrArchiveRepeat } from '../api/todoAPI';
+import { getTodos, createTask, mapItems, refreshRepetitionForRepeat, deleteFutureRepetitionsForRepeat, deleteOrArchiveRepeat } from '../api/todoAPI';
 import { repositionItem } from '../api/itemAPI';
 import { replaceOrAddItem, sortAsc } from '../../utility';
 import { getSocketConnection } from './socket'
@@ -53,6 +53,9 @@ export const useTodoStore = defineStore('todo', {
         createTask(todoID) {
             createTask(todoID);
         },
+        mapItems(todoID, itemType, addedIDs, removedIDs) {
+            mapItems(todoID, itemType, addedIDs, removedIDs);
+        },
         repositionItem(parentType, itemType, goalID, metricID, newPosition) {
             repositionItem(parentType, itemType, goalID, metricID, newPosition);
         },
@@ -71,10 +74,10 @@ export const useTodoStore = defineStore('todo', {
 
                 let _this = this;
                 connection.on("UpdateTodos", todos => {
-                    this.initializeItems(todos);
                     todos.forEach(todo => {
                         replaceOrAddItem(todo, _this.todos);
                     });
+                    this.initializeItems(todos);
                     sortAsc(_this.todos);
                 });
             }

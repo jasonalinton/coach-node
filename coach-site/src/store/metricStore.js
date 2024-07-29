@@ -83,10 +83,10 @@ export const useMetricStore = defineStore('metric', {
 
                 let _this = this;
                 connection.on("UpdateMetrics", metrics => {
-                    this.initializeItems(metrics);
                     metrics.forEach(metric => {
                         replaceOrAddItem(metric, _this.metrics);
                     })
+                    this.initializeItems(metrics);
                     sortAsc(_this.metrics);
                 });
             }
