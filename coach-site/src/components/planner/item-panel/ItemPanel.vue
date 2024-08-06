@@ -66,7 +66,9 @@
             <EventPanel v-show="selectedPanel == 'event'" :props="eventPanelProps" class="item-panel"/>
             <InventoryPanel v-show="selectedPanel == 'inventory'" class="item-panel"/>
             <NutritionPanel v-show="selectedPanel == 'nutrition'" class="item-panel"/>
-            <WorkoutPanel v-show="selectedPanel == 'workout'" class="item-panel"/>
+            <WorkoutPanel v-show="selectedPanel == 'workout'" class="item-panel"
+                          :selectedWorkoutID="workoutPanelProps.selectedWorkoutID"
+                          @selectWorkout="selectWorkout"/>
         </div>
     </div>
 </template>
@@ -82,6 +84,8 @@ import InventoryPanel from './inventory/InventoryPanel.vue'
 import NutritionPanel from './nutrition/NutritionPanel.vue'
 import WorkoutPanel from './workout/WorkoutPanel.vue'
 import { refreshRepetitiveItems } from '../../../resolvers/planner-resolvers'
+import { EVENTTYPE } from '../../../model/constants'
+import { getWorkoutIDFromEvent } from '../../../api/workoutAPI'
 
 export default {
     name: 'ItemPanel',
@@ -94,7 +98,10 @@ export default {
     },
     data: function() {
         return {
-            eventPanelProps: { }
+            eventPanelProps: { },
+            workoutPanelProps: { 
+                selectedWorkoutID: undefined
+            }
         }
     },
     created: function() {
@@ -108,16 +115,23 @@ export default {
     },
     methods: {
         refreshRepetitive,
-        setSelectedPanel
+        setSelectedPanel,
+        selectWorkout
     },
     watch: {
         selectedPanel(value) {
             localStorage.setItem(`selected-item-panel`, value);
         },
-        selectPanel(value) {
+        async selectPanel(value) {
             if (value && value.panel && value.panel == 'event') {
-                this.$emit('setSelectedPanel', 'event');
-                this.eventPanelProps = value.props;
+                if (value.props._event.type.id == EVENTTYPE.WORKOUT) { // If event type is workout
+                    this.$emit('setSelectedPanel', 'workout');
+                    let workoutID = await getWorkoutIDFromEvent(value.props._event.id);
+                    this.selectWorkout(workoutID);
+                } else { 
+                    this.$emit('setSelectedPanel', 'event');
+                    this.eventPanelProps = value.props;
+                }
             }
         }
     }
@@ -130,7 +144,12 @@ function refreshRepetitive(){
 function setSelectedPanel(type) {
     this.$emit('setSelectedPanel', (this.selectedPanel != type) ? type : undefined)
 }
+
+function selectWorkout(workoutID) {
+    this.workoutPanelProps.selectedWorkoutID = workoutID;
+}
 </script>
+
 <style scoped>
 .item-panel-wrapper { 
     height: 100%;

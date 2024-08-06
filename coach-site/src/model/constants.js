@@ -42,3 +42,23 @@ export let CONTROL = {
     TEXTBLOCK: 111,
     DROPDOWN: 112
 };
+
+export let EVENTTYPE = {
+    EVENTTYPE: 122,
+    EVENT: 123,
+    ALLDAY: 124,
+    TODO: 125,
+    TASK: 126,
+    ROUTINE: 127,
+    ROUTINE2: 128,
+    TASKROUTINE: 129,
+    SUBTYPE: 130,
+    SLEEP: 131,
+    BRIEFING: 132,
+    MEAL: 133,
+    WORKOUT: 134,
+    LOG: 135,
+    INVENTORY: 136,
+    TIME: 137,
+    REPETITIVE: 138
+};

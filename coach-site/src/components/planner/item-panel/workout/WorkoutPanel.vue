@@ -9,7 +9,9 @@
                                    @selectView="selectView"
                                    @back="back"/>
             <WorkoutList v-if="activePanel == 'workoutList'"
+                         :selectedID="selectedWorkoutID"
                          @setPanelHeader="setPanelHeader"
+                         @selectWorkout="selectWorkout"
                          @back="back"/>
             <WorkoutForm v-if="activePanel == 'workoutForm'"
                          :workout="workoutView.workout"
@@ -39,7 +41,8 @@ export default {
     name: 'WorkoutPanel',
     components: { ItemPanelHeader, WorkoutList, WorkoutForm, WorkoutPanelDashboard, ExerciseList },
     props: {
-        selectedDate: Date
+        selectedDate: Date,
+        selectedWorkoutID: Number
     },
     data: function () {
         return {
@@ -74,8 +77,14 @@ export default {
         onSortChange,
         selectView,
         setPanelHeader,
+        selectWorkout,
         back
     },
+    watch: {
+        selectedWorkoutID() {
+           this.selectView({ panel: 'workoutList' });
+        }
+    }
 }
 
 function onSortChange(sortBy) {
@@ -84,8 +93,9 @@ function onSortChange(sortBy) {
 }
 
 function selectView(value) {
-    // this.lastPanel = this.activePanel;
-    this.panelQueue.push(this.activePanel);
+    if (this.activePanel != value.panel) {
+        this.panelQueue.push(this.activePanel);
+    }
     this.activePanel = value.panel;
 
     if (value && value.panel && value.panel == 'dashboard') {
@@ -106,13 +116,13 @@ function setPanelHeader(props) {
     this.title = props.text;
 }
 
-function back() {
-    // this.activePanel = this.lastPanel
+function selectWorkout(workoutID) {
+    this.back();
+    this.$emit('selectWorkout', workoutID);
+}
 
+function back() {
     this.activePanel = this.panelQueue.pop();
-    // if (this.activePanel == "dashboard") {
-    //     this.panelQueue.push(this.activePanel);
-    // }
 }
 </script>
 

@@ -14,7 +14,7 @@
                     <WorkoutItem v-for="workout in actives" :key="workout.id"
                                  :workout="workout"
                                  class="mb-2"
-                                 @selectWorkout="selectWorkout($event.id)"></WorkoutItem>
+                                 @selectWorkout="$emit('selectWorkout', $event.id)"></WorkoutItem>
                 </div>
             </div>
             <span class="text-start mt-1">Templates</span>
@@ -22,20 +22,20 @@
                 <WorkoutItem v-for="workout in templates" :key="workout.id"
                              :workout="workout"
                              class="mb-2"
-                             @selectWorkout="selectWorkout($event.id)"></WorkoutItem>
+                             @selectWorkout="$emit('selectWorkout', $event.id)"></WorkoutItem>
             </div>
             <span class="text-start mt-1">Recent</span>
             <div class="d-flex flex-column">
                 <WorkoutItem v-for="workout in recents" :key="workout.id"
                              :workout="workout"
                              class="mb-2"
-                             @selectWorkout="selectWorkout($event.id)"></WorkoutItem>
+                             @selectWorkout="$emit('selectWorkout', $event.id)"></WorkoutItem>
             </div>
         </div>
         <WorkoutForm v-if="selectedPanel == 'workoutForm'"
                      :id="selectedWorkoutID"
                      @setPanelHeader="$emit('setPanelHeader', $event)"
-                     @back="selectedPanel = 'list'"/>
+                     @back="$emit('selectWorkout')"/>
     </div>
 </template>
 
@@ -46,7 +46,9 @@ import WorkoutForm from './WorkoutForm.vue';
 export default {
     name: 'WorkoutList',
     components: { WorkoutItem, WorkoutForm },
-    props: {},
+    props: {
+        selectedID: Number,
+    },
     data: function () {
         return {
             workoutStore: undefined,
@@ -57,6 +59,8 @@ export default {
     created: async function () {
         let workoutStore = await import(`@/store/workoutStore`);
         this.workoutStore = workoutStore.useWorkoutStore();
+
+        this.selectWorkout(this.selectedID)
     },
     computed: {
         workouts() {
@@ -87,11 +91,22 @@ export default {
             this.selectedPanel = "workoutForm";
         },
         selectWorkout(id) {
-            this.selectedWorkoutID = id;
-            this.selectedPanel = "workoutForm"
-            this.$emit('setPanelHeader', { text: 'Workout' } );
+            if (id) {
+                this.selectedWorkoutID = id;
+                this.selectedPanel = "workoutForm"
+                this.$emit('setPanelHeader', { text: 'Workout' } );
+            } else {
+                this.selectedWorkoutID = undefined;
+                this.selectedPanel = "list";
+                this.$emit('setPanelHeader', { text: 'Workout List' } );
+            }
         }
     },
+    watch: {
+        selectedID(value) {
+            this.selectWorkout(value);
+        }
+    }
 }
 
 </script>
