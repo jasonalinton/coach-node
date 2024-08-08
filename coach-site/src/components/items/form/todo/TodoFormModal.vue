@@ -96,7 +96,6 @@
 </template>
 
 <script>
-import { saveTodo } from '../../../../api/todoAPI';
 import RepeatControl from '../component/RepeatControl.vue';
 import TimePairControl from '../component/TimePairControl.vue';
 import FormItemList from '../component/FormItemList.vue';
@@ -263,7 +262,7 @@ export default {
                 id: this.id,
                 text: this.text,
             };
-            saveTodo(model);
+            this.store.saveTodo(model);
             this.$emit("closeItemModal");
         },
         createTask() {

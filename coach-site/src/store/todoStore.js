@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { getTodos, createTask, mapItems, refreshRepetitionForRepeat, createAndMapItem,
+import { getTodos, saveTodo, createTask, mapItems, refreshRepetitionForRepeat, createAndMapItem,
     deleteFutureRepetitionsForRepeat, deleteOrArchiveRepeat } from '../api/todoAPI';
 import { repositionItem } from '../api/itemAPI';
 import { replaceOrAddItem, sortAsc } from '../../utility';
@@ -50,6 +50,9 @@ export const useTodoStore = defineStore('todo', {
         },
         getItem(id) {
             return this.todos.find(x => x.id == id);
+        },
+        saveTodo(model) {
+            saveTodo(model);
         },
         createTask(todoID) {
             createTask(todoID);
