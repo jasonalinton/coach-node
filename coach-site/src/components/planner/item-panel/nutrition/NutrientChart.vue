@@ -4,7 +4,7 @@
 
 <script>
 import { usePhysicalStore } from '@/store/physicalStore'
-import { sortDateAsc, startOfDay } from '../../../../../utility';
+import { sortDateAsc, startOfDay, addMonth } from '../../../../../utility';
 import { createChart  } from "lightweight-charts";
 
 export default {
@@ -39,6 +39,9 @@ export default {
         this.createNutrientChart();
     },
     computed: {
+        startDate() {
+            return addMonth(new Date(), -2);
+        },
         mealHistories() {
             if (this.physicalStore) {
                 let mealHistories = [];
@@ -47,10 +50,9 @@ export default {
                     let nutrients = undefined;
                     meals = this.sortDateAsc(meals, 'dateTime');
                     let date = new Date(1970, 0, 1);
-                    let startDate = new Date(2024, 0, 1);
                     meals.forEach(meal => {
                         let mealDate = this.startOfDay(new Date(meal.dateTime));
-                        if (+mealDate < +startDate) {
+                        if (+mealDate < +this.startDate) {
                             return;
                         } else if (+date == +mealDate) {
                             nutrients.calories += meal.calories;
@@ -82,10 +84,9 @@ export default {
                     let amount = 0;
                     waterLogs = this.sortDateAsc(waterLogs, 'dateTime');
                     let date = new Date(1970, 0, 1);
-                    let startDate = new Date(2024, 0, 1);
                     waterLogs.forEach(water => {
                         let waterDate = this.startOfDay(new Date(water.dateTime));
-                        if (+waterDate < +startDate) {
+                        if (+waterDate < +this.startDate) {
                             return;
                         } else if (+date == +waterDate) {
                             waterHistories[waterHistories.length-1].amount += water.amount;
@@ -144,7 +145,7 @@ function createNutrientChart() {
     const chart = createChart('nutrient-chart',  chartOptions);
     this.chart = chart;
 
-    this.calorieSeries = chart.addHistogramSeries({
+    this.calorieSeries = chart.addLineSeries({
         priceScaleId: 'left',
         color: '#EA8919',
         lastValueVisible: false,
@@ -160,7 +161,7 @@ function createNutrientChart() {
     };
     this.calorieSeries.createPriceLine(calPriceLine);
 
-    this.waterSeries = chart.addHistogramSeries({
+    this.waterSeries = chart.addLineSeries({
         priceScaleId: 'right',
         color: '#3B99FC',
         lastValueVisible: false,
