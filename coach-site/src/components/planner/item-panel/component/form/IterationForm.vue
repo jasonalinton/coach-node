@@ -123,7 +123,7 @@ function close() {
 }
 </script>
 
-<style>
+<style scoped>
 form {
     padding-left: 12px;
     padding-right: 12px;
@@ -135,9 +135,9 @@ input {
     background-color: white;
 }
 
-.title {
+/* .title {
     padding-top: 10px;
-}
+} */
 
 /* Chrome, Safari, Edge, Opera */
 input::-webkit-outer-spin-button,

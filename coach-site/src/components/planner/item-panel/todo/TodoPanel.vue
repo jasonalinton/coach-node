@@ -111,6 +111,10 @@ function onSortChange(sortBy) {
 
 <style scoped>
 
+.header-button {
+    border-radius: 8px;
+}
+
 .header-button:hover {
     background-color: rgba(60, 64, 67, .08);
 }

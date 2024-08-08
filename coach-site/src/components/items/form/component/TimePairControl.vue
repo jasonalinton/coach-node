@@ -28,7 +28,7 @@
              class="wrapper-edit d-flex flex-row" :class="{ 'isValid': isValid}">
             <div>
                 <!-- Timeframe -->
-                <div class="d-flex flex-column">
+                <div class="d-flex flex-column mb-1">
                     <select class="form-select panel-select" aria-label="select" v-model="updatedTimePair.idTimeframe" @change="setTimeframe">
                         <option v-for="timeframe in timeframes" v-bind:key="timeframe.id" :value="timeframe.id">{{timeframe.text}}</option> 
                     </select> 

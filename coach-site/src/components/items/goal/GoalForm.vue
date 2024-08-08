@@ -406,6 +406,7 @@ form {
 </style>
 
 <style>
+
 .control-label {
     font-size: 12px;
     padding: 2px 8px;
@@ -429,7 +430,7 @@ form {
     /* padding-top: 4px; */
     /* color: #343434; */
     color: #212529;
-    background-color: #F5F5F5;
+    /*background-color: #F5F5F5; */
 }
 
 .textarea {

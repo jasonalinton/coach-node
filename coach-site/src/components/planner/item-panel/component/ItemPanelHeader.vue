@@ -56,7 +56,6 @@ function onSortChange() {
 h1 {
     text-transform: uppercase;
     text-align: start;
-    padding-left: 8px;
     margin-left: 8px;
     font-size: 16px;
     line-height: 16px;
