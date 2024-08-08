@@ -1,7 +1,7 @@
 <template>
     <div class="event position-relative d-flex w-100"
          :class="[size, flexDirection, successStatus]"
-         :style="{ 'top': `${top}px`, 'height': `${height}px`, 'z-index': 1}"
+         :style="{ 'top': `${top}px`, 'height': `${height}px`, 'z-index': 1, 'background-color': color}"
             @click="$emit('selectEvent', _event)"
             @drop="onDrop($event)" @dragover.prevent @dragenter.prevent>
          <div class="title">
@@ -18,6 +18,7 @@
 import { getDurationInMinutes, getTimeString } from '../../../../../utility/timeUtility';
 import { sortDesc } from '../../../../../utility';
 import { mapIterationToEvent, unmapTaskFromRoutineEvent, mapTodoToEvent } from '../../../../resolvers/planner-resolvers'
+import { EVENTTYPE } from '../../../../model/constants';
 
 export default {
     name: "Event",
@@ -62,7 +63,9 @@ export default {
         iterations() {
             let iterations = [];
             iterations = iterations.concat(this.routineTodoIterations).concat(this.todoIterations);
-            iterations = iterations.filter(x => x.text != this._event.text);
+            if (this._event.type.id == EVENTTYPE.ROUTINE) {
+                iterations = iterations.filter(x => x.text != this._event.text);
+            }
             return sortDesc(iterations, 'id');
         },
         complete() {
@@ -86,6 +89,15 @@ export default {
                 return 'fail';
             else
                 return '';
+        },
+        color() {
+            if (this._event.type.id == EVENTTYPE.ROUTINE) {
+                return "#4C6EF5";
+            } else if (this._event.type.id == EVENTTYPE.WORKOUT) {
+                return "#F54C70";
+            } else {
+                return "#039BE5";
+            }
         }
     },
     methods: {
@@ -123,7 +135,7 @@ function onDrop(ev) {
 .event {
     border: 1px white solid;
     border-radius: 3px;
-    background-color: #039BE5;
+    /* background-color: #039BE5; */
     padding-left: 8px;
     color: white;
     min-height: 16px;
