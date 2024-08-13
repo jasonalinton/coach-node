@@ -12,7 +12,8 @@
             <span>Skills</span>
         </div>
         <div class="muscle card">
-            <span>Muscles</span></div>
+            <span>Muscles</span>
+        </div>
     </div>
 </template>
 
