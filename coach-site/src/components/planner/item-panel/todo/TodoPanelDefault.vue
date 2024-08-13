@@ -2,7 +2,7 @@
     <div class="default d-flex flex-column flex-grow-1 overflow-scroll">
         <!-- Toolbar -->
         <div class="toolbar d-flex flex-row justify-content-between align-items-center">
-            <AddTaskButton @click="addNewTask"></AddTaskButton>
+            <AddTaskButton @click="initNewTask"></AddTaskButton>
             <!-- <IconButton src="/icon/goal-icon.png" :width="32" :height="32" @click="show(showGoals)"></IconButton> -->
         </div>
         <div class="d-flex flex-column flex-grow-1">
@@ -17,6 +17,17 @@
                         <span class="date">{{ date }}</span>
                     </div>
                     <ul class="item-list pending">
+                        <li v-if="newTaskText != undefined">
+                            <!-- New Task -->
+                            <div class="new-task d-flex flex-row align-items-center">
+                                <ItemCheckbox :width="40" :height="40" @onChecked="addTask(true)"></ItemCheckbox>
+                                <input id="newTask" ref="newTask" class="form-control form-control-sm" type="text" 
+                                    v-model="newTaskText"
+                                    v-on:keyup.enter="addTask"
+                                    v-on:keyup.esc="newTaskText = undefined"
+                                    autofocus/>
+                            </div>
+                        </li>
                         <li v-for="(vm, index) in todayPending" v-bind:key="vm.id" :style="{ 'z-index': -index }">
                             <HierarchicalListItem :viewModel="vm"
                                                   @onEdit="$emit('editIteration', $event)" />
@@ -84,6 +95,7 @@
 <script>
 import AddTaskButton from '../component/AddTaskButton.vue'
 // import IconButton from '../../../controls/button/IconButton.vue'
+import ItemCheckbox from '../component/ItemCheckbox.vue';
 import HierarchicalListItem from '../component/HierarchicalListItem.vue'
 import { sortAsc, sortTrueOnBottom, clone } from '../../../../../utility';
 import { toShortWeekdayString, isToday, startOfDay, firstDayOfWeek, lastDayOfWeek, firstDayOfMonth, lastDayOfMonth } from '../../../../../utility/timeUtility';
@@ -91,7 +103,7 @@ import { TIMEFRAME } from '../../.././../model/constants';
 
 export default {
     name: 'TodoPanelDefault',
-    components: { AddTaskButton, HierarchicalListItem },
+    components: { AddTaskButton, ItemCheckbox, HierarchicalListItem },
     props: {
         selectedDate: Date,
         showRepeat: Boolean,
@@ -103,7 +115,8 @@ export default {
         return {
             iterationStore: undefined,
             todoStore: undefined,
-            TIMEFRAME: clone(TIMEFRAME)
+            TIMEFRAME: clone(TIMEFRAME),
+            newTaskText: undefined
         }
     },
     created: async function() {
@@ -202,7 +215,17 @@ export default {
         }
     },
     methods: {
-        addNewTask() {},
+        initNewTask() {
+            this.newTaskText = "";
+            this.$nextTick(() => this.$refs.newTask.focus());
+        },
+        addTask(isComplete) {
+            let text = this.newTaskText.trim();
+            if (text != "") {
+                this.todoStore.createDefaultTask(text, isComplete);
+                this.newTaskText = undefined;
+            }
+        },
         getViewModels(timeframe, isComplete) {
             let _this = this;
             let start;
@@ -362,6 +385,12 @@ ul {
     position: relative;
 }
 
+.new-task {
+    background-color: white;
+    position: relative;
+    z-index: 1;
+    padding-right: 12px;
+}
 
 .complete {
     /* position: absolute; */

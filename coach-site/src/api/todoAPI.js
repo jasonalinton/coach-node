@@ -45,11 +45,11 @@ export async function saveTodoRepeat(repeat) {
         body: JSON.stringify(data)
     })
     .then(response => response.json())
-    .then(data => {
-        if (!data.errorMessage) {
-            return data;
+    .then((data) => {
+        if (data.status.success) {
+            return data.result;
         } else {
-            this.errorMessage = data.errorMessage;
+            console.error('Error:', data.status.errorMessage);
         }
     })
     .catch(error => {
@@ -66,11 +66,32 @@ export async function saveTodoTimePair(timePair) {
         body: JSON.stringify(data)
     })
     .then(response => response.json())
-    .then(data => {
-        if (!data.errorMessage) {
-            return data;
+    .then((data) => {
+        if (data.status.success) {
+            return data.result;
         } else {
-            this.errorMessage = data.errorMessage;
+            console.error('Error:', data.status.errorMessage);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
+
+export async function createDefaultTask(text, isComplete) {
+    let data = { text, isComplete };
+    
+    return fetch(`https://localhost:7104/api/Todo/CreateDefaultTask`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then((data) => {
+        if (data.status.success) {
+            return data.result;
+        } else {
+            console.error('Error:', data.status.errorMessage);
         }
     })
     .catch(error => {
@@ -87,11 +108,11 @@ export async function createTask(todoID) {
         body: JSON.stringify(data)
     })
     .then(response => response.json())
-    .then(data => {
-        if (!data.errorMessage) {
-            return data;
+    .then((data) => {
+        if (data.status.success) {
+            return data.result;
         } else {
-            this.errorMessage = data.errorMessage;
+            console.error('Error:', data.status.errorMessage);
         }
     })
     .catch(error => {
@@ -276,21 +297,19 @@ export async function deleteIteration(iterationID) {
 }
 
 export async function deleteOrArchiveRepeat(repeatID) {
-    let data = {
-        repeatID
-    };
+    let data = { repeatID };
 
     return fetch(`https://localhost:7104/api/Todo/DeleteOrArchiveRepeat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
     })
-    .then((response) => response.json())
+    .then(response => response.json())
     .then((data) => {
-        if (!data.errorMessage) {
-            return data;
+        if (data.status.success) {
+            return data.result;
         } else {
-            this.errorMessage = data.errorMessage;
+            console.error('Error:', data.status.errorMessage);
         }
     })
     .catch((error) => {
