@@ -78,8 +78,8 @@ export async function saveTodoTimePair(timePair) {
     });
 }
 
-export async function createDefaultTask(text, isComplete) {
-    let data = { text, isComplete };
+export async function createDefaultTask(text, isComplete, datetime) {
+    let data = { text, isComplete, datetime };
     
     return fetch(`https://localhost:7104/api/Todo/CreateDefaultTask`, {
         method: 'POST',
@@ -151,7 +151,28 @@ export async function mapItems(todoID, itemType, addedIDs, removedIDs) {
     })
     .then(response => response.json())
     .then((data) => {
-        if (!data.status.errorCode) {
+        if (data.status.success) {
+            return data.result;
+        } else {
+            console.error('Error:', data.status.errorMessage);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
+
+export async function mapTypes(todoID, addedIDs, removedIDs) {
+    let data = { todoID, addedIDs, removedIDs };
+    
+    return fetch(`https://localhost:7104/api/Todo/MapTypesToTodo`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then((data) => {
+        if (data.status.success) {
             return data.result;
         } else {
             console.error('Error:', data.status.errorMessage);

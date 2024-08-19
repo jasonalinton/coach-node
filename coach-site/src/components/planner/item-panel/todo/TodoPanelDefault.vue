@@ -23,7 +23,7 @@
                                 <ItemCheckbox :width="40" :height="40" @onChecked="addTask(true)"></ItemCheckbox>
                                 <input id="newTask" ref="newTask" class="form-control form-control-sm" type="text" 
                                     v-model="newTaskText"
-                                    v-on:keyup.enter="addTask"
+                                    v-on:keyup.enter="addTask(false)"
                                     v-on:keyup.esc="newTaskText = undefined"
                                     autofocus/>
                             </div>
@@ -222,7 +222,8 @@ export default {
         addTask(isComplete) {
             let text = this.newTaskText.trim();
             if (text != "") {
-                this.todoStore.createDefaultTask(text, isComplete);
+                let date = startOfDay(this.selectedDate)
+                this.todoStore.createDefaultTask(text, isComplete, date);
                 this.newTaskText = undefined;
             }
         },
