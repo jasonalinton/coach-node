@@ -403,9 +403,6 @@ form {
     visibility: hidden;
     opacity: .8;
 }
-</style>
-
-<style>
 
 .control-label {
     font-size: 12px;

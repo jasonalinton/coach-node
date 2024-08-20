@@ -260,4 +260,74 @@ body {
 @import url('https://fonts.googleapis.com/css2?family=Varela+Round&display=swap');
 
 /* @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@500;700&family=Varela+Round&display=swap'); */
+
+
+.control-label {
+    font-size: 12px;
+    padding: 2px 8px;
+    color: rgba(0, 0, 0, .55);
+}
+
+.textbox {
+    height: 28px;
+}
+
+.textbox, .textarea {
+    width: 100%;
+    font-size: 14px;
+    line-height: 14px;
+    padding: 2px 8px;
+    /* padding-top: 4px; */
+    /* color: #343434; */
+    color: #212529;
+}
+
+.textarea {
+    padding: 8px;
+}
+
+.textbox:not(.accissible), .textarea:not(.accissible) {
+    outline-style: none;
+    -webkit-appearance: none;
+    border: 1px solid rgba(0, 0, 0, .00);
+    resize: none;
+}
+
+.textbox:not(.accissible):focus, .textarea:not(.accissible):focus {
+    border: 1px solid #039BE5;
+    transition-property: border-color;
+    transition-duration: 0.15s;
+    transition-timing-function: ease-in-out;
+    transition-delay: 0s;
+    resize: vertical;
+}
+
+.textbox:not(.accissible):hover:not(:focus), .textarea:not(.accissible):hover:not(:focus) {
+    /* border: 1px solid rgba(0, 0, 0, .08); */
+    border: 1px solid rgba(0, 0, 0, .2);
+    resize: vertical;
+}
+
+.add-btn {
+    width: 50px;
+    height: 28px;
+    line-height: 28px;
+    padding-left: 5px;
+    border: none;
+    font-size: 12px;
+    background-color: transparent;
+}
+
+.add-btn:hover {
+    background-color: #DEECF9;
+}
+
+.add-btn img {
+    margin-right: 5px;
+    vertical-align: initial;
+}
+
+.add.textbox {
+    border: none;
+}
 </style>

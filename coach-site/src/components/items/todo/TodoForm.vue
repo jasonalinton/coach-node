@@ -609,9 +609,7 @@ form {
     visibility: hidden;
     opacity: 0.8;
 }
-</style>
 
-<style>
 .control-label {
     font-size: 12px;
     padding: 2px 8px;
