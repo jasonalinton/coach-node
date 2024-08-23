@@ -2,22 +2,57 @@
     <div :id="`todo-form-modal-${id}`" class="modal-dialog modal-xl modal-fullscreen-md-down modal-dialog modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" :id="`todo-${id}-ModalLabel`">{{ (todo) ? todo.id : "" }}</h5>
+                <h5 class="modal-title" :id="`todo-${id}-ModalLabel`"> Todo {{ (todo) ? todo.id : "" }}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div>
+
             </div>
             <div class="modal-body">
                 <div v-if="!mapper.isShown" class="container-fluid">
                     <div class="row g-2">
                         <div class="col-12">
-                            <input id="text" class="textbox" type="text" placeholder="Title"
-                                v-model.lazy.trim="text.value" 
-                                v-on:keyup.enter="save()"
-                                spellcheck/>
+                            <div class="d-flex flex-column">
+                                <input id="text" class="textbox" type="text" placeholder="Title"
+                                    v-model.lazy.trim="text.value" 
+                                    v-on:keyup.enter="save()"
+                                    spellcheck/>
+                                <div class="toolbar d-flex flex-row mt-1">
+                                    <div class="metrics d-flex flex-row">
+                                        <span class="metric">Physical</span>
+                                        <span class="metric">Social</span>
+                                        <span class="metric">Mental</span>
+                                        <span class="metric">Emotional</span>
+                                        <span class="metric">Financial</span>
+                                    </div>
+                                    <!-- <select class="form-select form-select-sm" multiple size="4" aria-label="multiple select" v-model="ids"> 
+                                        <option v-for="item in items" v-bind:key="item.id" :value="item.id">{{item.text}}</option> 
+                                    </select> -->
+                                    <!-- <div class="points d-flex flex-row">
+                                        <label :for="`todo-${id}-points`">Points</label>
+                                        <input :id="`todo-${id}-points`" class="form-control form-control-sm"/>
+                                    </div> -->
+                                    <div class="form-group">
+                                        <label class="float-start" :for="`todo-${id}-points`">Points</label>
+                                        <input type="email" class="form-control form-control-sm" :id="`todo-${id}-points`"
+                                               v-model="points.value">
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="row g-2">
+                    <div class="row g-2 pt-2">
                         <div class="col-12 col-sm-4">
-                            
+                            <div class="d-flex flex-column">
+                                <div class="header d-flex flex-column">
+                                    <div class="d-flex flex-row justify-content-between">
+                                        <span class="text-start">Description</span>
+                                        <img class="mt-auto mb-auto me-2" src="/icon/caret-right.png" width="5" height="8"/>
+                                    </div>
+                                    <hr/>
+                                </div>
+                                <textarea v-model="description"></textarea>
+                            </div>
                         </div>
                         <!-- Item Mapping -->
                         <div class="col-6 col-sm-4 form-column">
@@ -117,6 +152,11 @@ export default {
                 oldValue: undefined,
                 isUpdated: false
             },
+            points: {
+                value: undefined,
+                oldValue: undefined,
+                isUpdated: false
+            },
             repeats: {
                 value: [],
                 added: [],
@@ -163,6 +203,14 @@ export default {
                 return null;
             }
         },
+        description: {
+            get() {
+                return (this.todo && this.todo.description) ? this.todo.description : undefined
+            },
+            set() {
+
+            }
+        },
         parentIDs() {
             if (this.todo) {
                 var parents = sortItems(this.todo.parents, "todo", this.id);
@@ -193,13 +241,28 @@ export default {
             } else {
                 return [];
             }
-        }
+        },
+        // selectTypeIDs: {
+        //     get() {
+        //         if (this.todo) {
+        //             return this.todo.types.map(x => x.id);
+        //         }
+        //         return [];
+        //     },
+        //     set(value) {
+
+        //     }
+        // }
     },
     methods: {
         setProps(todo) {
             this.text.value = todo.text;
             this.text.oldValue = todo.text;
             this.text.isUpdated = false;
+
+            this.points.value = todo.points;
+            this.points.oldValue = todo.points;
+            this.points.isUpdated = false;
 
             this.repeats.value = clone(todo.repeats),
             this.repeats.added = [];
@@ -325,6 +388,19 @@ export default {
 </script>
 
 <style scoped>
+.modal-header {
+    padding: 4px 16px 0 26px;
+    border-bottom: none;
+}
+
+.modal-body {
+    padding-top: 0px;
+}
+
+.modal-tital {
+    font-size: 1rem;
+}
+
 #text {
     height: 52px;
     font-size: 32px;
@@ -339,5 +415,38 @@ export default {
     text-align: start;
     width: 100%;
     display: inline-block;
+}
+
+.toolbar {
+    height: 60px;
+    background-color: #F5F5F5;
+}
+
+.toolbar .metric {
+    font-size: 20px;
+    padding: 8px;
+    margin: auto 0 auto 0;
+}
+
+.header {
+    font-size: 20px;
+    line-height: 24px;
+    font-weight: 500;
+}
+
+.header:hover {
+    color: #005A9E;
+}
+
+.header:hover hr{
+    background-color: #005A9E;
+}
+
+hr {
+    margin: 3px 0 4px 0;
+}
+
+.points {
+    height: 30px;
 }
 </style>

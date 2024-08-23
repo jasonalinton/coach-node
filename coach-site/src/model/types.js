@@ -1,3 +1,30 @@
+export let todoTypes = [
+    {
+        id: 7,
+        text: "Task"
+    },
+    {
+        id: 153,
+        text: "Sleep"
+    },
+    {
+        id: 154,
+        text: "Briefing"
+    },
+    {
+        id: 155,
+        text: "Meal"
+    },
+    {
+        id: 156,
+        text: "Workout"
+    },
+    {
+        id: 157,
+        text: "Log"
+    },
+]
+
 export let timeframes = [
     {
         id: 43,
