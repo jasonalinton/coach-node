@@ -112,7 +112,6 @@ export default {
         let iterationStore = await import(`@/store/iterationStore`);
         this.iterationStore = iterationStore.useIterationStore();
         this.iterationStore.getIterationsInRange(this.startAt, this.endAt, true);
-        this.iterationStore.getAllIterationsInRange(this.startAt.toISOString(), this.endAt.toISOString(), true);
     },
     beforeMount: function () {},
     mounted: function () {
@@ -141,7 +140,6 @@ export default {
             this.initTimeline();
             this.eventStore.getEvents(this.startAt, this.endAt, true);
             this.iterationStore.getIterationsInRange(this.startAt, this.endAt, true);
-            this.iterationStore.getAllIterationsInRange(this.startAt.toISOString(), this.endAt.toISOString(), true);
         },
     },
 };
