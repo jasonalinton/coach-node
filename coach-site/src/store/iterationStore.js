@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { getSocketConnection } from './socket'
 import { getRepetitiveTodoIterations } from '../api/todoAPI';
-import { getIterationsInRange, updateIteration, rescheduleIteration, toggleTaskCompletion, 
+import { getIterationsInRange, getAllIterationsInRange, updateIteration, rescheduleIteration, toggleTaskCompletion, 
     attemptIteration, deleteIteration } from '../api/plannerAPI'
 import { removeItemByID, replaceOrAddItem, sortAsc } from '../../utility'
 
@@ -9,7 +9,8 @@ let initialized = false;
 
 export const useIterationStore = defineStore('iteration', {
     state: () => ({
-        iterations: []
+        iterations: [],
+        allIterations: []
     }),
     getters: {
         
@@ -46,6 +47,19 @@ export const useIterationStore = defineStore('iteration', {
                 return (new Date(iteration.startAt)).getTime() >= startAt && (new Date(iteration.startAt)).getTime() <= endAt &&
                        iteration.idRoutine == null && iteration.idRoutineIteration == null;
             });
+        },
+        getAllIterationsInRange(startAt, endAt, shouldRequestServer) {
+            let _this = this;
+            if (shouldRequestServer) {
+                getAllIterationsInRange(startAt, endAt)
+                .then(_iterations => {
+                    _iterations.forEach(iteration => {
+                        replaceOrAddItem(iteration, _this.allIterations);
+                    })
+                    sortAsc(_this.allIterations, 'startAt');
+                });
+            }
+            return this.allIterations;
         },
         getRepetitiveTodoIterations(startAt, endAt) {
             let _this = this;
@@ -95,12 +109,14 @@ export const useIterationStore = defineStore('iteration', {
                     // this.initializeItems(iterations);
                     iterations.forEach(iteration => {
                         replaceOrAddItem(iteration, _this.iterations);
+                        replaceOrAddItem(iteration, _this.allIterations);
                     })
                     sortAsc(_this.iterations);
                 });
                 connection.on("RemoveIterations", iterationIDs => {
                     iterationIDs.forEach(iterationID => {
                         removeItemByID(iterationID, _this.iterations);
+                        removeItemByID(iterationID, _this.allIterations);
                     })
                     sortAsc(_this.iterations);
                 });

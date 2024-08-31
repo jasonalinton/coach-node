@@ -1,28 +1,32 @@
 <template>
     <div class="left-panel d-flex flex-column mt-1 overflow-scroll" :class="{close:!isShown}">
         <ThumbnailCalendar :initialDate="firstDay" @dateChange="dateChange" />
+        <TimeframePoints :selectedDate="selectedDate" />
         <AvatarPanel/>
     </div>
 </template>
 
 <script>
 import ThumbnailCalendar from '../thumbnail/ThumbnailCalendar.vue'
-import moment from 'moment';
-import { addMonth } from '../../../../utility/timeUtility';
+import TimeframePoints from '../../points/TimeframePoints.vue';
 import AvatarPanel from '../../avatar/AvatarPanel.vue';
+import moment from 'moment';
+// import { addMonth } from '../../../../utility/timeUtility';
 
 export default {
     name: 'LeftPanel',
-    components: { ThumbnailCalendar, AvatarPanel },
+    components: { ThumbnailCalendar, AvatarPanel, TimeframePoints },
     props: {
         isShown: {
             default: true,
             type: Boolean
         },
+        selectedDate: Date
     },
     data: function() {
         return {
-            firstDay: addMonth(moment().date(1).hour(0).minute(0).second(0).millisecond(0).toDate(), -2)
+            // firstDay: addMonth(moment().date(1).hour(0).minute(0).second(0).millisecond(0).toDate(), -2) // 2 months ago
+            firstDay: moment().date(1).hour(0).minute(0).second(0).millisecond(0).toDate(),
             // firstDay: moment().startOf().toDate()
         }
     },

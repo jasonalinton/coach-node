@@ -23,7 +23,7 @@ export default {
     data: function() {
         return {
             date: this.initialDate,
-            monthCount: 3,
+            monthCount: 1,
             selectedDate: today().toLocaleString(),
         }
     },

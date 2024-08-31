@@ -19,6 +19,7 @@
                              :taskList="taskList(day)">
                               <!--  :minHeight="maxTasks * 22"> -->
                     </TaskList>
+                    <DayPoints :date="day.date"/>
                 </div>
             </div>
             <div class="body d-flex h-100 overflow-scroll">
@@ -54,14 +55,15 @@
 <script>
 import date from "date-and-time";
 import TaskList from "../TaskList.vue";
+import DayPoints from "../DayPoints.vue";
 import HourBlocks from "../event/HourBlocks.vue";
 import { replaceItem, removeItem } from "../../../../../utility";
 import { getHoursObjectArray } from "../../../../../utility/plannerUtility";
-import { firstDayOfWeek, lastDayOfWeek, firstDayOfMonth, lastDayOfMonth, addDay } from "../../../../../utility/timeUtility";
+import { firstDayOfWeek, lastDayOfWeek, addDay } from "../../../../../utility/timeUtility";
 
 export default {
     name: "WeekView",
-    components: { TaskList, HourBlocks },
+    components: { TaskList, DayPoints, HourBlocks },
     props: {
         dayCount: Number,
         selectedDate: Date,
@@ -90,19 +92,6 @@ export default {
         };
     },
     computed: {
-        queryVariables() {
-            return {
-                startAt: firstDayOfWeek(firstDayOfMonth(this.selectedDate)),
-                endAt: lastDayOfMonth(addDay(this.selectedDate, this.dayCount)),
-            }
-        },
-        currentTime() {
-            if (this.plannerStore) {
-                return this.plannerStore.currentTime;
-            } else {
-                return new Date();
-            }
-        },
         startAt() {
             return firstDayOfWeek(this.selectedDate);
             // return firstDayOfWeek(firstDayOfMonth(this.selectedDate));
@@ -123,57 +112,13 @@ export default {
         let iterationStore = await import(`@/store/iterationStore`);
         this.iterationStore = iterationStore.useIterationStore();
         this.iterationStore.getIterationsInRange(this.startAt, this.endAt, true);
+        this.iterationStore.getAllIterationsInRange(this.startAt.toISOString(), this.endAt.toISOString(), true);
     },
     beforeMount: function () {},
     mounted: function () {
         this.width = this.$refs.weekView.clientWidth;
         this.initTimeline();
         this.initHours();
-    },
-    apollo: {
-        tasks: {
-            query() {
-                return require("../../../../graphql/query/planner/QueryIterations.gql");
-            },
-            variables() { return this.queryVariables },
-            error: function (error) {
-                this.errorMessage = "Error occurred while loading event query";
-                console.log(this.errorMessage, error);
-            },
-            update(data) {
-                this.dayModels.forEach((model) => {
-                    /* Get tasks in correct date range */
-                    let tasks = data.iterations.filter(_task => 
-                        new Date(_task.startAt).toDateString() == model.dateString &&
-                        (_task.endAt == null || new Date(_task.endAt).toDateString() == model.dateString));
-
-                    /* Get tasks that aren't in events */
-                    tasks = tasks.filter(_task => _task.events.length == 0);
-                    model.tasks.length = 0;
-                    model.tasks.push(...tasks);
-                });
-
-                return data.iterations;
-            },
-            subscribeToMore: [
-                {
-                    document: require('../../../../graphql/subscription/planner/IterationAdded.gql'),
-                    variables() { return this.queryVariables },
-                    updateQuery: (previousResult, { subscriptionData: { data: { iterationAdded }} }) => {
-                        previousResult.iterations.splice(0, 0, iterationAdded);
-                        return { iterations: previousResult.iterations };
-                    },
-                },
-                {
-                    document: require('../../../../graphql/subscription/planner/IterationDeleted.gql'),
-                    variables() { return this.queryVariables },
-                    updateQuery: (previousResult, { subscriptionData: { data: { iterationDeleted }} }) => {
-                        removeItem(iterationDeleted, previousResult.iterations);
-                        return { iterations: previousResult.iterations };
-                    },
-                },
-            ],
-        },
     },
     methods: {
         initHours,
@@ -196,6 +141,7 @@ export default {
             this.initTimeline();
             this.eventStore.getEvents(this.startAt, this.endAt, true);
             this.iterationStore.getIterationsInRange(this.startAt, this.endAt, true);
+            this.iterationStore.getAllIterationsInRange(this.startAt.toISOString(), this.endAt.toISOString(), true);
         },
     },
 };

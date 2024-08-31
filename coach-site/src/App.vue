@@ -13,6 +13,7 @@
         </div>
         <div class="grid-left-panel">
             <LeftPanel :isShown="showLeft" 
+                       :selectedDate="selectedDate"
                        @dateChange="dateChange"
                        @togglePanel="toggleLeftPanel"/>
         </div>

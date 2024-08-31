@@ -30,12 +30,33 @@ export async function getIterationsInRange(startAt, endAt) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
     })
-    .then((response) => response.json())
+    .then(response => response.json())
     .then((data) => {
-        if (!data.errorMessage) {
-            return data;
+        if (data.status.success) {
+            return data.result;
         } else {
-            this.errorMessage = data.errorMessage;
+            console.error('Error:', data.status.errorMessage);
+        }
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+    });
+}
+
+export async function getAllIterationsInRange(startAt, endAt) {
+    let data = { startAt, endAt };
+
+    return fetch(`https://localhost:7104/api/Planner/GetAllIterationsInRange`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then((data) => {
+        if (data.status.success) {
+            return data.result;
+        } else {
+            console.error('Error:', data.status.errorMessage);
         }
     })
     .catch((error) => {

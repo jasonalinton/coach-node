@@ -1,6 +1,6 @@
 <template>
     <div>
-        <img src="avatar/Avatar (Blue Underwear).jpg" width="150"/>
+        <img src="avatar/Avatar (Blue Underwear).jpg" width="140"/>
     </div>
 </template>
 
