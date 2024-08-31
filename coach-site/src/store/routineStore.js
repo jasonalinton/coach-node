@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { getRoutines } from '../api/routineAPI'
+import { getRoutines, refreshRepetitionForRepeat } from '../api/routineAPI'
 import { repositionItem } from '../api/itemAPI';
 import { replaceOrAddItem, sortAsc } from '../../utility';
 import { getSocketConnection } from './socket'
@@ -48,6 +48,9 @@ export const useRoutineStore = defineStore('routine', {
         },
         repositionItem(parentType, itemType, goalID, metricID, newPosition) {
             repositionItem(parentType, itemType, goalID, metricID, newPosition);
+        },
+        refreshRepetitionForRepeat(id, repeatID) {
+            refreshRepetitionForRepeat(id, repeatID);
         },
         connectSocket() {
             if (!initialized) {

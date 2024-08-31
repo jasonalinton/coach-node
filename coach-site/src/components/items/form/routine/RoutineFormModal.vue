@@ -28,8 +28,9 @@
                             <span class="form-head">Repetition</span>
                             <div>
                                 <RepeatControl v-for="repeat in repeats.value" :key="repeat.id"
-                                                    :repeat="repeat" :itemID="id" itemType="routine" :canEdit="selectedRepeatID == undefined"
-                                                    @saveRepeat="saveRepeat" @setSelectedRepeat="setSelectedRepeat" @cancelRepeatEditing="cancelRepeatEditing"/>
+                                               :repeat="repeat" :itemID="id" itemType="routine" :canEdit="selectedRepeatID == undefined"
+                                               @refreshRepetition="refreshRepetitionForRepeat"
+                                               @saveRepeat="saveRepeat" @setSelectedRepeat="setSelectedRepeat" @cancelRepeatEditing="cancelRepeatEditing"/>
                             </div>
                         </div>
                     </div>
@@ -186,7 +187,10 @@ export default {
                 this.repeats.value.splice(index, 1)
             }
             this.selectedRepeatID = undefined;
-        }
+        },
+        refreshRepetitionForRepeat(repeatID) {
+            this.store.refreshRepetitionForRepeat(this.id, repeatID)
+        },
     },
     watch: {
         'text.value'(value) {
