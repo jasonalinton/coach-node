@@ -260,18 +260,18 @@ export default {
             iterations = sortTrueOnBottom(iterations, "isRepeat");
             iterations.forEach(iteration => {
                 let vm = undefined;
+                let todo = _this.todoStore.getItem(iteration.todoID);
                 if (iteration.isRepeat) {
-                    vm = viewModels.find(_vm => _vm.todoID == iteration.todo.id && _vm.repeatID == iteration.RepeatID);
+                    vm = viewModels.find(_vm => _vm.todoID == iteration.todoID && _vm.repeatID == iteration.RepeatID);
                 } else {
-                    vm = viewModels.find(_vm => _vm.todoID == iteration.todo.id);
+                    vm = viewModels.find(_vm => _vm.todoID == iteration.todoID);
                 }
                 if (vm == undefined) {
                     vm = {
                         id: iteration.id,
                         timeframeID: undefined,
-                        todoID: iteration.todo.id,
-                        // todo: iteration.todo,
-                        text: iteration.todo.text,
+                        todoID: iteration.todoID,
+                        text: todo.text,
                         children: [],
                         iterationIDs: [],
                         // completeIDs: [],
