@@ -29,7 +29,7 @@ export default {
                 let start = startOfDay(this.date);
                 let end = endOfDay(this.date);
 
-                let iterations = this.iterationStore.allIterations;
+                let iterations = this.iterationStore.iterations;
                 iterations = iterations.filter(iteration => {
                     return +new Date(iteration.startAt) >= +start && 
                            +new Date(iteration.endAt) <= +end
