@@ -1,27 +1,69 @@
+export let metrics = [
+    {
+        id: 1,
+        text: "Physcial"
+    },
+    {
+        id: 2,
+        text: "Social"
+    },
+    {
+        id: 3,
+        text: "Mental"
+    },
+    {
+        id: 4,
+        text: "Emotional"
+    },
+    {
+        id: 5,
+        text: "Financial"
+    },
+]
+
 export let todoTypes = [
     {
-        id: 7,
-        text: "Task"
+        id: 9,
+        text: "Reminder"
     },
     {
-        id: 153,
-        text: "Sleep"
+        id: 10,
+        text: "Tally"
     },
     {
-        id: 154,
-        text: "Briefing"
+        id: 11,
+        text: "Inverse"
     },
     {
-        id: 155,
-        text: "Meal"
+        id: 12,
+        text: "Errand"
+    },
+]
+
+export let mediums = [
+    {
+        id: 28,
+        text: "Mobile"
     },
     {
-        id: 156,
-        text: "Workout"
+        id: 29,
+        text: "Computer"
     },
     {
-        id: 157,
-        text: "Log"
+        id: 30,
+        text: "Travel"
+    },
+    {
+        id: 31,
+        text: "Brick & Mortar"
+    },
+    {
+        id: 32,
+        text: "Home"
+    },
+    {
+        id: 33,
+        text: "Any"
     },
 ]
 
@@ -151,5 +193,43 @@ export let exerciseVariationTypes = [
     {
         id: 148,
         text: "Misc"
+    },
+]
+
+export let todoActivityTypes = [
+    {
+        id: 157,
+        text: "Log",
+        color: "#3B99FC"
+    },
+    {
+        id: 153,
+        text: "Sleep",
+        color: undefined
+    },
+    {
+        id: 154,
+        text: "Briefing",
+        color: undefined
+    },
+    {
+        id: 155,
+        text: "Meal",
+        color: "#FC3B3B",
+    },
+    {
+        id: 156,
+        text: "Workout",
+        color: "#F4511E"
+    },
+    {
+        id: 158,
+        text: "Exercise",
+        color: "#F4511E"
+    },
+    {
+        id: 159,
+        text: "Water",
+        color: undefined
     },
 ]

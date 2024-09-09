@@ -63,6 +63,51 @@ export const useTodoStore = defineStore('todo', {
         createAndMapItem(todoID, itemType, itemText) {
             createAndMapItem(todoID, itemType, itemText);
         },
+        saveText(todoID, text) {
+            let model = {
+                id: todoID,
+                text: {
+                    value: text
+                }
+            };
+            saveTodo(model);
+        },
+        saveDescription(todoID, description) {
+            let model = {
+                id: todoID,
+                description: {
+                    value: description
+                }
+            };
+            saveTodo(model);
+        },
+        savePoints(todoID, points) {
+            let model = {
+                id: todoID,
+                points: {
+                    value: points
+                }
+            };
+            saveTodo(model);
+        },
+        saveType(todoID, typeID) {
+            let model = {
+                id: todoID,
+                typeID: {
+                    value: typeID
+                }
+            };
+            saveTodo(model);
+        },
+        saveMedium(todoID, mediumID) {
+            let model = {
+                id: todoID,
+                mediumID: {
+                    value: mediumID
+                }
+            };
+            saveTodo(model);
+        },
         mapItems(todoID, itemType, addedIDs, removedIDs) {
             mapItems(todoID, itemType, addedIDs, removedIDs);
         },

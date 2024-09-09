@@ -2,7 +2,8 @@
     <div :id="`todo-form-modal-${id}`" class="modal-dialog modal-xl modal-fullscreen-md-down modal-dialog modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" :id="`todo-${id}-ModalLabel`"> Todo {{ (todo) ? todo.id : "" }}</h5>
+                <span class="me-2">Todo {{ (todo) ? todo.id : "" }}</span>
+                <span class="activity-type" :style="{ 'background-color': activityTypeColor || 'lightskyblue' }">{{ activityType }}</span>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div>
@@ -13,29 +14,42 @@
                     <div class="row g-2">
                         <div class="col-12">
                             <div class="d-flex flex-column">
-                                <input id="text" class="textbox" type="text" placeholder="Title"
-                                    v-model.lazy.trim="text.value" 
-                                    v-on:keyup.enter="save()"
-                                    spellcheck/>
+                                <!-- Text -->
+                                <div class="text-wrapper">
+                                    <input id="text" class="textbox" type="text" placeholder="Title"
+                                        v-model.lazy.trim="text.value" 
+                                        spellcheck/>
+                                </div>
+                                <!-- Toolbar -->
                                 <div class="toolbar d-flex flex-row mt-1">
+                                    <!-- Metrics -->
                                     <div class="metrics d-flex flex-row">
-                                        <span class="metric">Physical</span>
-                                        <span class="metric">Social</span>
-                                        <span class="metric">Mental</span>
-                                        <span class="metric">Emotional</span>
-                                        <span class="metric">Financial</span>
+                                        <span v-for="metric in metrics" :key="metric.id"
+                                              class="metric" :class="{ 'active': hasMetric(metric.id)}"
+                                              @click="toggleMetric(metric.id)">{{ metric.text }}</span>
                                     </div>
-                                    <!-- <select class="form-select form-select-sm" multiple size="4" aria-label="multiple select" v-model="ids"> 
-                                        <option v-for="item in items" v-bind:key="item.id" :value="item.id">{{item.text}}</option> 
-                                    </select> -->
-                                    <!-- <div class="points d-flex flex-row">
-                                        <label :for="`todo-${id}-points`">Points</label>
-                                        <input :id="`todo-${id}-points`" class="form-control form-control-sm"/>
-                                    </div> -->
-                                    <div class="form-group">
-                                        <label class="float-start" :for="`todo-${id}-points`">Points</label>
-                                        <input type="email" class="form-control form-control-sm" :id="`todo-${id}-points`"
-                                               v-model="points.value">
+                                    <!-- Points -->
+                                    <div class="input-wrrapper d-flex flex-row">
+                                        <label class="me-1" :for="`todo-${id}-points`">Points</label>
+                                        <input type="number" class="form-control form-control-sm" :id="`todo-${id}-points`"
+                                               :value="points.value"
+                                               @blur="points.value = $event.target.value">
+                                    </div>
+                                    <!-- Type -->
+                                    <div class="input-wrrapper d-flex flex-row">
+                                        <label class="me-1" :for="`todo-${id}-type`">Type</label>
+                                        <select :id="`todo-${id}-type`" class="form-select form-select-sm" aria-label="select" v-model="typeID.value"> 
+                                            <option :value="null">None</option> 
+                                            <option v-for="todoType in todoTypes" v-bind:key="todoType.id" :value="todoType.id">{{todoType.text}}</option> 
+                                        </select>
+                                    </div>
+                                    <!-- Meduim -->
+                                    <div class="input-wrrapper d-flex flex-row">
+                                        <label class="me-1" :for="`todo-${id}-type`">Meduim</label>
+                                        <select :id="`todo-${id}-type`" class="form-select form-select-sm" aria-label="select" v-model="mediumID.value"> 
+                                            <option :value="null">None</option> 
+                                            <option v-for="medium in mediums" v-bind:key="medium.id" :value="medium.id">{{medium.text}}</option> 
+                                        </select>
                                     </div>
                                 </div>
                             </div>
@@ -43,6 +57,7 @@
                     </div>
                     <div class="row g-2 pt-2">
                         <div class="col-12 col-sm-4">
+                            <!-- Description -->
                             <div class="d-flex flex-column">
                                 <div class="header d-flex flex-column">
                                     <div class="d-flex flex-row justify-content-between">
@@ -51,7 +66,9 @@
                                     </div>
                                     <hr/>
                                 </div>
-                                <textarea v-model="description"></textarea>
+                                <textarea class="textarea" 
+                                          v-model.lazy.trim="description.value"
+                                          spellcheck></textarea>
                             </div>
                         </div>
                         <!-- Item Mapping -->
@@ -136,6 +153,7 @@ import TimePairControl from '../component/TimePairControl.vue';
 import FormItemList from '../component/FormItemList.vue';
 import ItemMapper from '../component/ItemMapper.vue'
 import { clone, replaceItem, addOrReplaceItem, sortItems, sortAsc } from '../../../../../utility';
+import { metrics, todoTypes, mediums, todoActivityTypes } from '../../../../model/types';
 
 export default {
     name: "TodoFormModal",
@@ -147,7 +165,16 @@ export default {
         return {
             store: null,
             plannerStore: null,
+            metrics: clone(metrics),
+            todoTypes: clone(todoTypes),
+            mediums: clone(mediums),
+            todoActivityTypes: clone(todoActivityTypes),
             text: {
+                value: undefined,
+                oldValue: undefined,
+                isUpdated: false
+            },
+            description: {
                 value: undefined,
                 oldValue: undefined,
                 isUpdated: false
@@ -155,6 +182,21 @@ export default {
             points: {
                 value: undefined,
                 oldValue: undefined,
+                isUpdated: false
+            },
+            typeID: {
+                value: undefined,
+                oldValue: undefined,
+                isUpdated: false
+            },
+            mediumID: {
+                value: undefined,
+                oldValue: undefined,
+                isUpdated: false
+            },
+            metricIDs: {
+                value: [],
+                oldValue: [],
                 isUpdated: false
             },
             repeats: {
@@ -180,7 +222,6 @@ export default {
                 isShown: false,
                 type: undefined
             },
-            test: "<u>Underline Test</u>"
         }
     },
     created: async function() {
@@ -201,14 +242,6 @@ export default {
                 return todo;
             } else {
                 return null;
-            }
-        },
-        description: {
-            get() {
-                return (this.todo && this.todo.description) ? this.todo.description : undefined
-            },
-            set() {
-
             }
         },
         parentIDs() {
@@ -242,17 +275,24 @@ export default {
                 return [];
             }
         },
-        // selectTypeIDs: {
-        //     get() {
-        //         if (this.todo) {
-        //             return this.todo.types.map(x => x.id);
-        //         }
-        //         return [];
-        //     },
-        //     set(value) {
-
-        //     }
-        // }
+        activityType() {
+            if (this.todo && this.todo.activityTypeID)  {
+                let activityType = this.todoActivityTypes.find(x => x.id == this.todo.activityTypeID);
+                if (activityType) {
+                    return activityType.text;
+                }
+            }
+            return undefined;
+        },
+        activityTypeColor() {
+            if (this.todo && this.todo.activityTypeID)  {
+                let activityType = this.todoActivityTypes.find(x => x.id == this.todo.activityTypeID);
+                if (activityType) {
+                    return activityType.color;
+                }
+            }
+            return undefined;
+        }
     },
     methods: {
         setProps(todo) {
@@ -260,9 +300,25 @@ export default {
             this.text.oldValue = todo.text;
             this.text.isUpdated = false;
 
+            this.description.value = todo.description;
+            this.description.oldValue = todo.description;
+            this.description.isUpdated = false;
+
             this.points.value = todo.points;
             this.points.oldValue = todo.points;
             this.points.isUpdated = false;
+
+            this.typeID.value = todo.typeID;
+            this.typeID.oldValue = todo.typeID;
+            this.typeID.isUpdated = false;
+
+            this.mediumID.value = todo.mediumID;
+            this.mediumID.oldValue = todo.mediumID;
+            this.mediumID.isUpdated = false;
+
+            this.metricIDs.value = clone(todo.metricIDs),
+            this.metricIDs.oldValue = clone(todo.metricIDs),
+            this.metricIDs.isUpdated = false;
 
             this.repeats.value = clone(todo.repeats),
             this.repeats.added = [];
@@ -328,6 +384,54 @@ export default {
             this.store.saveTodo(model);
             this.$emit("closeItemModal");
         },
+        saveText() {
+            if (this.id > 0) {
+                if (this.text.value.trim() != "" && this.text.value != this.text.oldValue) {
+                    this.store.saveText(this.id, this.text.value);
+                }
+            }
+        },
+        saveDescription() {
+            if (this.id > 0) {
+                if (this.description.value.trim() != "" && this.description.value != this.description.oldValue) {
+                    this.store.saveDescription(this.id, this.description.value);
+                }
+            }
+        },
+        savePoints() {
+            if (this.id > 0) {
+                if (this.points.value.trim() != "" && this.points.value != this.points.oldValue) {
+                    this.store.savePoints(this.id, this.points.value);
+                }
+            }
+        },
+        saveType() {
+            if (this.id > 0) {
+                if (this.typeID.value != this.typeID.oldValue) {
+                    this.store.saveType(this.id, this.typeID.value);
+                }
+            }
+        },
+        saveMedium() {
+            if (this.id > 0) {
+                if (this.mediumID.value != this.mediumID.oldValue) {
+                    this.store.saveMedium(this.id, this.mediumID.value);
+                }
+            }
+        },
+        toggleMetric(metricID) {
+            if (!this.metricIDs.value.includes(metricID)) { // Add metric
+                this.metricIDs.value.push(metricID);
+                this.store.mapItems(this.id, "metric", [metricID], []);
+            } else { // Remove metric
+                let index = this.metricIDs.value.indexOf(metricID);
+                this.metricIDs.value.splice(index, 1);
+                this.store.mapItems(this.id, "metric", [], [metricID]);
+            }
+        },
+        hasMetric(metricID) {
+            return (this.metricIDs.value.includes(metricID)) ? true : false;
+        },
         createTask() {
             this.store.createTask(this.id);
         },
@@ -379,10 +483,43 @@ export default {
         'text.value'(value) {
             if (value != this.text.oldValue) {
                 this.text.isUpdated = true;
+                this.saveText();
             } else {
                 this.isUpdated = false;
             }
-        }
+        },
+        'description.value'(value) {
+            if (value != this.description.oldValue) {
+                this.description.isUpdated = true;
+                this.saveDescription();
+            } else {
+                this.isUpdated = false;
+            }
+        },
+        'points.value'(value) {
+            if (value != this.points.oldValue) {
+                this.points.isUpdated = true;
+                this.savePoints();
+            } else {
+                this.isUpdated = false;
+            }
+        },
+        'typeID.value'(value) {
+            if (value != this.typeID.oldValue) {
+                this.typeID.isUpdated = true;
+                this.saveType();
+            } else {
+                this.isUpdated = false;
+            }
+        },
+        'mediumID.value'(value) {
+            if (value != this.mediumID.oldValue) {
+                this.mediumID.isUpdated = true;
+                this.saveMedium();
+            } else {
+                this.isUpdated = false;
+            }
+        },
     }
 }
 </script>
@@ -394,16 +531,38 @@ export default {
 }
 
 .modal-body {
-    padding-top: 0px;
+    padding: 0px;
 }
 
 .modal-tital {
     font-size: 1rem;
 }
 
+.btn-close {
+    width: 6px;
+    height: 6px;
+}
+
+.activity-type {
+    border-radius: 4px;
+    color: white;
+    padding: 0 4px;
+    font-size: 14px;
+}
+
+.text-wrapper {
+    padding-left: 16px;
+    padding-right: 16px;
+}
+
 #text {
     height: 52px;
     font-size: 32px;
+}
+
+.input-wrrapper {
+    height: 31px;
+    line-height: 31px;
 }
 
 .form-column {
@@ -426,6 +585,12 @@ export default {
     font-size: 20px;
     padding: 8px;
     margin: auto 0 auto 0;
+    border: solid 1px transparent;
+}
+
+.toolbar .metric.active {
+    border: solid 1px black;
+    border-radius: 10px;
 }
 
 .header {
