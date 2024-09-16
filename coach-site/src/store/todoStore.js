@@ -1,8 +1,8 @@
 import { defineStore } from 'pinia'
-import { getTodos, saveTodo, createDefaultTask, createTask, mapItems, mapTypes, refreshRepetitionForRepeat, createAndMapItem,
+import { getTodos, saveTodo, deleteTodo, createDefaultTask, createTask, mapItems, mapTypes, refreshRepetitionForRepeat, createAndMapItem,
     deleteFutureRepetitionsForRepeat, deleteOrArchiveRepeat } from '../api/todoAPI';
 import { repositionItem } from '../api/itemAPI';
-import { replaceOrAddItem, sortAsc } from '../../utility';
+import { replaceOrAddItem, removeItemByID, sortAsc } from '../../utility';
 import { getSocketConnection } from './socket'
 import { useMetricStore } from '@/store/metricStore'
 import { useGoalStore } from '@/store/goalStore'
@@ -53,6 +53,9 @@ export const useTodoStore = defineStore('todo', {
         },
         saveTodo(model) {
             saveTodo(model);
+        },
+        deleteTodo(todoID) {
+            deleteTodo(todoID);
         },
         createTask(todoID) {
             createTask(todoID);
@@ -137,6 +140,12 @@ export const useTodoStore = defineStore('todo', {
                     });
                     this.initializeItems(todos);
                     sortAsc(_this.todos);
+                });
+                connection.on("RemoveTodos", todoIDs => {
+                    todoIDs.forEach(todoID => {
+                        removeItemByID(todoID, _this.todos);
+                    })
+                    sortAsc(_this.iterations);
                 });
             }
         }

@@ -29,6 +29,13 @@
                                       @showItems="showItems"/>
 
         </template>
+        <td>
+            <div class="d-flex justufy-content-center">
+                <button class="delete-btn btn btn-secondary btn-sm float-end" type="button" @click.prevent.stop="$emit('deleteItem')">
+                    <i class="far fa-trash-alt"></i>
+                </button>
+            </div>
+        </td>
     </tr>
 </template>
 

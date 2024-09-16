@@ -24,11 +24,32 @@ export async function saveTodo(data) {
         body: JSON.stringify(data)
     })
     .then(response => response.json())
-    .then(data => {
-        if (!data.errorMessage) {
-            return data;
+    .then((data) => {
+        if (data.status.success) {
+            return data.result;
         } else {
-            this.errorMessage = data.errorMessage;
+            console.error('Error:', data.status.errorMessage);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
+
+export async function deleteTodo(todoID) {
+    let data = { id: todoID };
+
+    return fetch(`https://localhost:7104/api/Todo/DeleteTodo`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then((data) => {
+        if (data.status.success) {
+            return data.result;
+        } else {
+            console.error('Error:', data.status.errorMessage);
         }
     })
     .catch(error => {

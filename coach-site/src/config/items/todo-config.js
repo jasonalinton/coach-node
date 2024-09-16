@@ -1,4 +1,4 @@
-import { addTodo, updateTodo, deleteTodo } from '../../resolvers/todo-resolvers';
+import { addTodo } from '../../resolvers/todo-resolvers';
 import { today, formatDate } from '../../../utility/timeUtility'
 
 let config = {
@@ -217,8 +217,6 @@ let config = {
         iterations: [],
     },
     addItem: addTodo,
-    updateItem: updateTodo,
-    deleteItem: deleteTodo,
     query: {
         name: "todos",
         document: require('../../graphql/query/todo/QueryTodos.gql'),

@@ -13,6 +13,8 @@
                        :style="{ 'min-width': `${column.setWidth}px`, 'max-width': `${column.setWidth}px`}">
                        {{ column.text }}
                    </th>
+                   <!-- Action buttons -->
+                   <th></th>
                </thead>
                <tbody>
                    <template v-for="(item) in items">
@@ -23,9 +25,10 @@
                                      :states="states(item)"
                                      @showItems="showItems"
                                      @repositionItem="repositionItem"
-                                     @openItemForm="$emit('openItemForm', $event)"/>
+                                     @openItemForm="$emit('openItemForm', $event)"
+                                     @deleteItem="deleteItem(item.id)"/>
                        <tr :key="item.id + 1000000" class="child-row">
-                           <td :colspan="columns.length">
+                           <td :colspan="columns.length + 1">
                                <ItemTable v-if="options.dropItems.items.parents && states(item).text || states(item).parents"
                                           :itemType="itemType"
                                           property="parents"
@@ -129,6 +132,41 @@ export default {
         }
     },
     inject: [ 'level', 'levelPadding', 'parentItem', 'isParent', 'isChild'],
+    data: function() {
+        return {
+            errorMessage: null,
+            isLoading: false,
+            itemTableVM: null,
+            tableWidth: this.width,
+            shownItems: [],
+            store: null,
+            metricStore: undefined,
+            goalStore: undefined,
+            routineStore: undefined,
+            todoStore: undefined,
+            itemTableStore: undefined,
+        }
+    },
+    created: async function() {
+        let itemTableStore = await import(`@/store/itemTableStore`);
+        this.itemTableStore = itemTableStore.useItemTableStore();
+        
+        let metricStore = await import(`@/store/metricStore`);
+        this.metricStore = metricStore.useMetricStore();
+        
+        let goalStore = await import(`@/store/goalStore`);
+        this.goalStore = goalStore.useGoalStore();
+        
+        let routineStore = await import(`@/store/routineStore`);
+        this.routineStore = routineStore.useRoutineStore();
+        
+        let todoStore = await import(`@/store/todoStore`);
+        this.todoStore = todoStore.useTodoStore();
+        
+        let storeObject = await import(`@/store/${this.itemType}Store`);
+        let useStore = storeObject[`use${this.itemTypeCapitalized}Store`];
+        this.store = useStore();
+    },
     computed: {
         itemTypeCapitalized() { return capitalize(this.itemType); },
         width() { return (this.itemTableStore) ? this.itemTableStore.containerWidth : 0 },
@@ -187,41 +225,6 @@ export default {
             }
         }
     },
-    data: function() {
-        return {
-            errorMessage: null,
-            isLoading: false,
-            itemTableVM: null,
-            tableWidth: this.width,
-            shownItems: [],
-            store: null,
-            metricStore: undefined,
-            goalStore: undefined,
-            routineStore: undefined,
-            todoStore: undefined,
-            itemTableStore: undefined,
-        }
-    },
-    created: async function() {
-        let itemTableStore = await import(`@/store/itemTableStore`);
-        this.itemTableStore = itemTableStore.useItemTableStore();
-        
-        let metricStore = await import(`@/store/metricStore`);
-        this.metricStore = metricStore.useMetricStore();
-        
-        let goalStore = await import(`@/store/goalStore`);
-        this.goalStore = goalStore.useGoalStore();
-        
-        let routineStore = await import(`@/store/routineStore`);
-        this.routineStore = routineStore.useRoutineStore();
-        
-        let todoStore = await import(`@/store/todoStore`);
-        this.todoStore = todoStore.useTodoStore();
-        
-        let storeObject = await import(`@/store/${this.itemType}Store`);
-        let useStore = storeObject[`use${this.itemTypeCapitalized}Store`];
-        this.store = useStore();
-    },
     methods: {
         setColumnWidths,
         refreshShownItems,
@@ -239,7 +242,8 @@ export default {
             return item.positions
                 .find(x => x.parentType == parent.itemType && x.parentID == (parent.id || null)).position;
         },
-        repositionItem
+        repositionItem,
+        deleteItem,
     }
 }
 
@@ -319,43 +323,11 @@ function repositionItem(item, sibling, isBefore) {
     }
 }
 
-// function initializeMove(item) {
-//    item = this.items.find(x => x.id == 127);
-//    this.move.item = item;
-//    this.move.index = 0;
-// }
-
-// function moveUp(item) {
-//     // this.move.index--;
-
-//     console.log("Move up")
-
-//     item = this.items.find(x => x.id == 127);
-
-//     var index = this.items.findIndex(x => x.id == item.id);
-//     if (index > 0) {
-//         this.items.splice(index, 1);
-//         this.items.splice(index - 1, 0, item);
-//     }
-// }
-
-// function moveDown(item) {
-//     // this.move.index--;
-
-//     console.log("Move down")
-//     item = this.items.find(x => x.id == 127);
-
-//     var index = this.items.findIndex(x => x.id == item.id);
-//     if (index < this.items.length - 1) {
-//         this.items.splice(index, 1);
-//         this.items.splice(index + 1, 0, item);
-//     }
-// }
-
-// function completeMove(item) {
-//     this.move.item = item;
-//     this.move.index = 0;
-// }
+function deleteItem(id) {
+    if (this.itemType == "todo") {
+        this.todoStore.deleteTodo(id);
+    }
+}
 </script>
 
 <style scoped>
