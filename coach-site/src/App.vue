@@ -331,4 +331,8 @@ body {
 .add.textbox {
     border: none;
 }
+
+.background {
+    background-color: white;
+}
 </style>

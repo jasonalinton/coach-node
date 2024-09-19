@@ -5,10 +5,16 @@
             <!-- <div :style="{'width': '56px', 'height': '258px', 'padding-left': '8px', 'overflow': 'hidden'}"> -->
             <div :style="{'width': '56px', 'padding-left': '8px', 'overflow': 'hidden'}">
                 <div class="d-flex flex-row mb-1">
-                    <img class="todo" :class="[{ active: selectedPanel == 'todo' }]" src='/icon/todo-icon.png' width="40" height="40" :style="{'margin-top': '8px'}"
+                    <img class="dashboard" :class="[{ active: selectedPanel == 'dashboard' }]" src='/icon/dashboard-icon.png' width="40" height="40" :style="{'margin-top': '8px'}"
+                         @click="setSelectedPanel('dashboard')"/>
+                    <div v-if="selectedPanel == 'dashboard'">
+                    <div :style="{ 'width': '12px', 'height': '40px', 'background-color': '#4285F4', 'margin-left': '3px', 'margin-top': '8px', 'border-radius': '4px'}"></div></div>
+                </div>
+                <div class="d-flex flex-row mb-1">
+                    <img class="todo" :class="[{ active: selectedPanel == 'todo' }]" src='/icon/todo-icon.png' width="40" height="40"
                          @click="setSelectedPanel('todo')"/>
                     <div v-if="selectedPanel == 'todo'">
-                    <div :style="{ 'width': '12px', 'height': '40px', 'background-color': '#4285F4', 'margin-left': '3px', 'margin-top': '8px', 'border-radius': '4px'}"></div></div>
+                    <div :style="{ 'width': '12px', 'height': '40px', 'background-color': '#4285F4', 'margin-left': '3px', 'border-radius': '4px'}"></div></div>
                 </div>
                 <div class="d-flex flex-row mb-1">
                     <img class="routine" :class="[{ active: selectedPanel == 'routine' }]" src='/icon/routine-icon.png' width="40" height="40"
@@ -22,12 +28,12 @@
                     <div v-if="selectedPanel == 'goal'">
                     <div :style="{ 'width': '12px', 'height': '40px', 'background-color': '#9013FE', 'margin-left': '3px', 'border-radius': '4px'}"></div></div>
                 </div>
-                <div class="d-flex flex-row mb-1">
+                <!-- <div class="d-flex flex-row mb-1">
                     <img class="task-routine" :class="[{ active: selectedPanel == 'task-routine' }]" src='/icon/task-routine-icon.png' width="40" height="40" 
                          @click="setSelectedPanel('task-routine')"/>
                     <div v-if="selectedPanel == 'task-routine'">
                     <div :style="{ 'width': '12px', 'height': '40px', 'background-color': '#F4511E', 'margin-left': '3px', 'border-radius': '4px'}"></div></div>
-                </div>
+                </div> -->
                 <div class="d-flex flex-row mb-1">
                     <img class="event" :class="[{ active: selectedPanel == 'event' }]" src='/icon/task-routine-icon.png' width="40" height="40" 
                          @click="setSelectedPanel('event')"/>
@@ -58,6 +64,7 @@
             </div> -->
         </div>
         <div class="col-auto h-100">
+            <DashboardPanel v-show="selectedPanel == 'dashboard'" :selectedDate="selectedDate" class="item-panel"/>
             <MetricPanel v-show="selectedPanel == 'metric'" :selectedDate="selectedDate" class="item-panel"/>
             <GoalPanel v-show="selectedPanel == 'goal'" :selectedDate="selectedDate" class="item-panel"></GoalPanel>
             <TodoPanel v-show="selectedPanel == 'todo'" :selectedDate="selectedDate" class="item-panel"/>
@@ -74,6 +81,7 @@
 </template>
 
 <script>
+import DashboardPanel from './dashboard/DashboardPanel.vue'
 import MetricPanel from './MetricPanel.vue'
 import GoalPanel from './goal/GoalPanel.vue'
 import TodoPanel from './todo/TodoPanel.vue'
@@ -89,7 +97,7 @@ import { getWorkoutIDFromEvent } from '../../../api/workoutAPI'
 
 export default {
     name: 'ItemPanel',
-    components: { MetricPanel, GoalPanel, TodoPanel, RoutinePanel, TaskRoutinePanel, 
+    components: { DashboardPanel, MetricPanel, GoalPanel, TodoPanel, RoutinePanel, TaskRoutinePanel, 
         EventPanel, InventoryPanel, NutritionPanel, WorkoutPanel },
     props: {
         selectedDate: Date,
@@ -161,13 +169,18 @@ function selectWorkout(workoutID) {
     overflow-y: scroll;
 }
 
-img.goal:hover, img.goal.active {
-    background-color: rgba(66, 133, 244, .08);
+img.dashboard:hover, img.dashboard.active {
+    background-color: rgba(76, 110, 245, .08);
     border-radius: 20px;
 }
 
 img.todo:hover, img.todo.active {
     background-color: rgba(76, 110, 245, .08);
+    border-radius: 20px;
+}
+
+img.goal:hover, img.goal.active {
+    background-color: rgba(66, 133, 244, .08);
     border-radius: 20px;
 }
 
