@@ -121,6 +121,10 @@ export function isToday(dateTime) {
     return +today(new Date()) == +moment(dateTime).startOf('day').toDate();
 }
 
+export function isSameDate(date1, date2) {
+    return +moment(date1).startOf('day').toDate() == +moment(date2).startOf('day').toDate();
+}
+
 export function today(dateTime) {
     return moment(dateTime).startOf('day').toDate();
 }
@@ -172,6 +176,21 @@ export function sunday(dateTime) {
 
 export function saturday(dateTime) {
     return moment(dateTime).weekday(6).toDate();
+}
+
+// Ex. 2, 31
+export function getDate(dateTime = new Date()) {
+    return date.format(dateTime, 'D');   
+}
+
+// Ex. Fri, Sun
+export function getDayOfWeekShort(dateTime = new Date()) {
+    return date.format(dateTime, 'ddd');   
+}
+
+// Ex. Sep, Oct
+export function getMonthShort(dateTime = new Date()) {
+    return date.format(dateTime, 'MMM');   
 }
 
 export function year(dateTime = new Date()) {

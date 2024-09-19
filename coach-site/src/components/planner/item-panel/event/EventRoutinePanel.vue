@@ -62,7 +62,6 @@ export default {
     data: function () {
         return {
             eventStore: undefined,
-            iterationStore: undefined,
             iterations: { 
                 new: null
             },
@@ -71,9 +70,6 @@ export default {
     created: async function() {
         let eventStore = await import(`@/store/eventStore`);
         this.eventStore = eventStore.useEventStore();
-
-        let iterationStore = await import(`@/store/iterationStore`);
-        this.iterationStore = iterationStore.useIterationStore();
     },
     computed: {
         eventt() { 
