@@ -22,7 +22,7 @@
                 </div>
             </div>
             <button class="btn-close" type="button" aria-label="close"
-                    @click.stop="deleteOrArchive"></button>
+                    @click.stop="deleteTimePair"></button>
         </div>
         <div v-if="isEditing" 
              class="wrapper-edit d-flex flex-row" :class="{ 'isValid': isValid}">
@@ -30,6 +30,7 @@
                 <!-- Timeframe -->
                 <div class="d-flex flex-column mb-1">
                     <select class="form-select panel-select" aria-label="select" v-model="updatedTimePair.idTimeframe" @change="setTimeframe">
+                        <option :value="null">None</option> 
                         <option v-for="timeframe in timeframes" v-bind:key="timeframe.id" :value="timeframe.id">{{timeframe.text}}</option> 
                     </select> 
                 </div>
@@ -38,6 +39,12 @@
                     <select class="form-select panel-select" aria-label="select" v-model="updatedTimePair.idInheritance">
                         <option v-for="inheritanceType in inheritanceTypes" v-bind:key="inheritanceType.id" :value="inheritanceType.id">{{inheritanceType.text}}</option> 
                     </select> 
+                </div>
+                <!-- Points -->
+                <div class="points d-flex flex-row align-items-center mt-1">
+                    <span class="me-1">Points</span>
+                    <input class="form-control form-control-sm me-1" type="number" min="1" v-model="updatedTimePair.points"
+                            :style="{'width': '41px'}" required/>
                 </div>
                 <!-- Times -->
                 <div class="d-flex flex-column">
@@ -140,7 +147,7 @@ export default {
             this.$emit("cancelTimePairEditing", this.timePair.id);
         },
         save,
-        deleteOrArchive
+        deleteTimePair
     },
     watch: {
         isEditing(value) {
@@ -268,7 +275,16 @@ function setTime(time, endpoint) {
                 end.dateTime = endOfDay(lastDayOfMonth(new Date(time))).toISOString();
             }
         }
-
+    } else {
+        if (endpoint == "start" && end.dateTime) {
+            if (+new Date(end.dateTime) < +new Date(time)) {
+                end.dateTime = time;
+            }
+        } else if (endpoint == "end" && start.dateTime) {
+            if (+new Date(start.dateTime) > +new Date(time)) {
+                start.dateTime = time;
+            }
+        } 
     }
 
     this.validateTimes();
@@ -300,6 +316,7 @@ function save() {
         idTimeType: this.updatedTimePair.idTimeType,
         idInheritance: this.updatedTimePair.idInheritance,
         idTimeframe: this.updatedTimePair.idTimeframe,
+        points: this.updatedTimePair.points || null,
         startTime: (this.updatedTimePair.startTime.value) ? this.updatedTimePair.startTime : null,
         endTime: (this.updatedTimePair.endTime.value) ? this.updatedTimePair.endTime : null,
         isOwner: true,
@@ -319,8 +336,12 @@ function save() {
     this.isEditing = false;
 }
 
-function deleteOrArchive() {
-    this.todoStore.deleteOrArchiveTimePair(this.timePair.id);
+function deleteTimePair() {
+    if (this.itemType.toLowerCase() == "goal") {
+        this.goalStore.deleteTimePair(this.timePair.id);
+    } else if (this.itemType.toLowerCase() == "todo") {
+        this.todoStore.deleteTimePair(this.timePair.id);
+    }
 }
 
 </script>

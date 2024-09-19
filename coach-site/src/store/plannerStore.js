@@ -75,8 +75,9 @@ export const usePlannerStore = defineStore('planner', {
                 idTodo: null,
                 idParent: null,
                 idTimeType: 80,
-                idInheritance: 142,
-                idTimeframe: 43,
+                idInheritance: 140,
+                // idTimeframe: 43,
+                idTimeframe: null,
                 points: null,
                 startTime: {
                     id: null,

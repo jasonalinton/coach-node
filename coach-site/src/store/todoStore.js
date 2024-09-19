@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { getTodos, saveTodo, deleteTodo, createDefaultTask, createTask, mapItems, mapTypes, refreshRepetitionForRepeat, createAndMapItem,
-    deleteFutureRepetitionsForRepeat, deleteOrArchiveRepeat } from '../api/todoAPI';
+    deleteFutureRepetitionsForRepeat, deleteOrArchiveRepeat, deleteTodoTimePair } from '../api/todoAPI';
 import { repositionItem } from '../api/itemAPI';
 import { replaceOrAddItem, removeItemByID, sortAsc } from '../../utility';
 import { getSocketConnection } from './socket'
@@ -129,6 +129,9 @@ export const useTodoStore = defineStore('todo', {
         deleteOrArchiveRepeat(repeatID) {
             deleteOrArchiveRepeat(repeatID);
         },
+        deleteTimePair(id) {
+            deleteTodoTimePair(id);
+        },
         connectSocket() {
             if (!initialized) {
                 let connection = getSocketConnection("todoHub");
@@ -145,7 +148,7 @@ export const useTodoStore = defineStore('todo', {
                     todoIDs.forEach(todoID => {
                         removeItemByID(todoID, _this.todos);
                     })
-                    sortAsc(_this.iterations);
+                    sortAsc(_this.todos);
                 });
             }
         }

@@ -99,6 +99,27 @@ export async function saveTodoTimePair(timePair) {
     });
 }
 
+export async function deleteTodoTimePair(id) {
+    let data = { id };
+    
+    return fetch(`https://localhost:7104/api/Todo/DeleteTodoTimePair`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then((data) => {
+        if (data.status.success) {
+            return data.result;
+        } else {
+            console.error('Error:', data.status.errorMessage);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
+
 export async function createDefaultTask(text, isComplete, datetime) {
     let data = { text, isComplete, datetime };
     
