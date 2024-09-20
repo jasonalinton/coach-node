@@ -1,7 +1,9 @@
+import { URL } from "./api";
+
 export async function getEvent(id) {
     let data = { id };
 
-    return fetch(`https://localhost:7104/api/Event/GetEvent`, {
+    return fetch(`${URL}/api/Event/GetEvent`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
@@ -25,7 +27,7 @@ export async function getEvents(start, end) {
         end: end
     };
 
-    return fetch(`https://localhost:7104/api/Event/GetEventsInRange`, {
+    return fetch(`${URL}/api/Event/GetEventsInRange`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)

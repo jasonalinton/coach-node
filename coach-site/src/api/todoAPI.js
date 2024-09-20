@@ -1,5 +1,8 @@
+import { URL } from "./api";
+
+
 export async function getTodos() {
-    return fetch(`https://localhost:7104/api/Todo/GetTodos`, {
+    return fetch(`${URL}/api/Todo/GetTodos`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         // body: JSON.stringify(data)
@@ -18,7 +21,7 @@ export async function getTodos() {
 }
 
 export async function saveTodo(data) {
-    return fetch(`https://localhost:7104/api/Todo/SaveTodo`, {
+    return fetch(`${URL}/api/Todo/SaveTodo`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
@@ -39,7 +42,7 @@ export async function saveTodo(data) {
 export async function deleteTodo(todoID) {
     let data = { id: todoID };
 
-    return fetch(`https://localhost:7104/api/Todo/DeleteTodo`, {
+    return fetch(`${URL}/api/Todo/DeleteTodo`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
@@ -60,7 +63,7 @@ export async function deleteTodo(todoID) {
 export async function saveTodoRepeat(repeat) {
     let data = { repeat };
     
-    return fetch(`https://localhost:7104/api/Todo/SaveTodoRepeat`, {
+    return fetch(`${URL}/api/Todo/SaveTodoRepeat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
@@ -81,7 +84,7 @@ export async function saveTodoRepeat(repeat) {
 export async function saveTodoTimePair(timePair) {
     let data = { timePair };
     
-    return fetch(`https://localhost:7104/api/Todo/SaveTodoTimePair`, {
+    return fetch(`${URL}/api/Todo/SaveTodoTimePair`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
@@ -102,7 +105,7 @@ export async function saveTodoTimePair(timePair) {
 export async function deleteTodoTimePair(id) {
     let data = { id };
     
-    return fetch(`https://localhost:7104/api/Todo/DeleteTodoTimePair`, {
+    return fetch(`${URL}/api/Todo/DeleteTodoTimePair`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
@@ -123,7 +126,7 @@ export async function deleteTodoTimePair(id) {
 export async function createDefaultTask(text, isComplete, datetime) {
     let data = { text, isComplete, datetime };
     
-    return fetch(`https://localhost:7104/api/Todo/CreateDefaultTask`, {
+    return fetch(`${URL}/api/Todo/CreateDefaultTask`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
@@ -144,7 +147,7 @@ export async function createDefaultTask(text, isComplete, datetime) {
 export async function createTask(todoID) {
     let data = { todoID };
     
-    return fetch(`https://localhost:7104/api/Todo/CreateTaskForTodo`, {
+    return fetch(`${URL}/api/Todo/CreateTaskForTodo`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
@@ -165,7 +168,7 @@ export async function createTask(todoID) {
 export async function createAndMapItem(todoID, itemType, itemText) {
     let data = { todoID, itemType, itemText };
     
-    return fetch(`https://localhost:7104/api/Todo/CreateAndMapItemToTodo`, {
+    return fetch(`${URL}/api/Todo/CreateAndMapItemToTodo`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
@@ -186,7 +189,7 @@ export async function createAndMapItem(todoID, itemType, itemText) {
 export async function mapItems(todoID, itemType, addedIDs, removedIDs) {
     let data = { todoID, itemType, addedIDs, removedIDs };
     
-    return fetch(`https://localhost:7104/api/Todo/MapItemsToTodo`, {
+    return fetch(`${URL}/api/Todo/MapItemsToTodo`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
@@ -207,7 +210,7 @@ export async function mapItems(todoID, itemType, addedIDs, removedIDs) {
 export async function mapTypes(todoID, addedIDs, removedIDs) {
     let data = { todoID, addedIDs, removedIDs };
     
-    return fetch(`https://localhost:7104/api/Todo/MapTypesToTodo`, {
+    return fetch(`${URL}/api/Todo/MapTypesToTodo`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
@@ -228,7 +231,7 @@ export async function mapTypes(todoID, addedIDs, removedIDs) {
 export async function refreshRepetitionForRepeat(id, repeatID) {
     let data = { id, repeatID };
     
-    return fetch(`https://localhost:7104/api/Todo/RefreshRepetitionForTodo`, {
+    return fetch(`${URL}/api/Todo/RefreshRepetitionForTodo`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
@@ -249,7 +252,7 @@ export async function refreshRepetitionForRepeat(id, repeatID) {
 export async function deleteFutureRepetitionsForRepeat(id, repeatID) {
     let data = { id, repeatID };
     
-    return fetch(`https://localhost:7104/api/Todo/DeleteFutureRepetitionsForTodo`, {
+    return fetch(`${URL}/api/Todo/DeleteFutureRepetitionsForTodo`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
@@ -269,7 +272,7 @@ export async function deleteFutureRepetitionsForRepeat(id, repeatID) {
 export async function refreshRepetitiveEvents(id, startAt, endAt, timeframeID, properties) {
     let data = { id, startAt, endAt, timeframeID, properties };
     
-    return fetch(`https://localhost:7104/api/Todo/RefreshRepetitiveEventsForTodo`, {
+    return fetch(`${URL}/api/Todo/RefreshRepetitiveEventsForTodo`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
@@ -293,7 +296,7 @@ export async function getRepetitiveTodoIterations(start, end) {
         endAt: end
     };
 
-    return fetch(`https://localhost:7104/api/Todo/GetRepetitiveTodoIterations`, {
+    return fetch(`${URL}/api/Todo/GetRepetitiveTodoIterations`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
@@ -318,7 +321,7 @@ export async function toggleIterationCompletion(iterationID, attemptedAt, comple
         completedAt
     };
 
-    return fetch(`https://localhost:7104/api/Todo/ToggleTodoIterationCompletion`, {
+    return fetch(`${URL}/api/Todo/ToggleTodoIterationCompletion`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
@@ -341,7 +344,7 @@ export async function deleteIteration(iterationID) {
         iterationID
     };
 
-    return fetch(`https://localhost:7104/api/Todo/DeleteTodoIteration`, {
+    return fetch(`${URL}/api/Todo/DeleteTodoIteration`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
@@ -362,7 +365,7 @@ export async function deleteIteration(iterationID) {
 export async function deleteOrArchiveRepeat(repeatID) {
     let data = { repeatID };
 
-    return fetch(`https://localhost:7104/api/Todo/DeleteOrArchiveRepeat`, {
+    return fetch(`${URL}/api/Todo/DeleteOrArchiveRepeat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)

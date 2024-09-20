@@ -80,7 +80,7 @@ export default {
     data: function () {
         return {
             sort: {
-                by: 'Metric',
+                by: 'Default',
                 items: sortItems,
             },
             iteration_Form: null,

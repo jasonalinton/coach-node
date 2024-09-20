@@ -1,10 +1,12 @@
+import { URL } from "./api";
+
 export async function getEvents(start, end) {
     let data = {
         start: start,
         end: end
     };
 
-    return fetch(`https://localhost:7104/api/Event/GetEventsInRange`, {
+    return fetch(`${URL}/api/Event/GetEventsInRange`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
@@ -25,7 +27,7 @@ export async function getEvents(start, end) {
 export async function getIterationsInRange(startAt, endAt) {
     let data = { startAt, endAt };
 
-    return fetch(`https://localhost:7104/api/Planner/GetIterationsInRange`, {
+    return fetch(`${URL}/api/Planner/GetIterationsInRange`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
@@ -46,7 +48,7 @@ export async function getIterationsInRange(startAt, endAt) {
 export async function getAllIterationsInRange(startAt, endAt) {
     let data = { startAt, endAt };
 
-    return fetch(`https://localhost:7104/api/Planner/GetAllIterationsInRange`, {
+    return fetch(`${URL}/api/Planner/GetAllIterationsInRange`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
@@ -67,7 +69,7 @@ export async function getAllIterationsInRange(startAt, endAt) {
 export async function updateIteration(iterationID, text, points, startAt, endAt) {
     let data = { iterationID, text, points, startAt, endAt };
 
-    return fetch(`https://localhost:7104/api/Planner/UpdateIteration`, {
+    return fetch(`${URL}/api/Planner/UpdateIteration`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
@@ -88,7 +90,7 @@ export async function updateIteration(iterationID, text, points, startAt, endAt)
 export async function rescheduleIteration(iterationID, startAt, endAt) {
     let data = { iterationID, startAt, endAt };
 
-    return fetch(`https://localhost:7104/api/Planner/RescheduleIteration`, {
+    return fetch(`${URL}/api/Planner/RescheduleIteration`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
@@ -109,7 +111,7 @@ export async function rescheduleIteration(iterationID, startAt, endAt) {
 export async function toggleTaskCompletion(iterationID, attemptedAt, completedAt) {
     let data = { iterationID, attemptedAt, completedAt };
 
-    return fetch(`https://localhost:7104/api/Planner/ToggleTaskCompletion`, {
+    return fetch(`${URL}/api/Planner/ToggleTaskCompletion`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
@@ -130,7 +132,7 @@ export async function toggleTaskCompletion(iterationID, attemptedAt, completedAt
 export async function attemptIteration(iterationID, attemptedAt) {
     let data = { iterationID, attemptedAt };
 
-    return fetch(`https://localhost:7104/api/Planner/AttemptIteration`, {
+    return fetch(`${URL}/api/Planner/AttemptIteration`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
@@ -151,7 +153,7 @@ export async function attemptIteration(iterationID, attemptedAt) {
 export async function deleteIteration(iterationID) {
     let data = { iterationID };
 
-    return fetch(`https://localhost:7104/api/Planner/DeleteIteration`, {
+    return fetch(`${URL}/api/Planner/DeleteIteration`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)

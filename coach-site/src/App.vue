@@ -71,7 +71,7 @@ export default {
             navbar: {
                 selectedView: 'weekView',
                 week: {
-                    dayCount: 5,
+                    dayCount: 7,
                 },
                 selectedPage: 'planner',
             },
@@ -96,14 +96,14 @@ export default {
         if (selectedView_Store) {
             this.navbar.selectedView = selectedView_Store;
         } else {
-            localStorage.setItem(`selected-planner-view`, this.selectedView);
+            localStorage.setItem(`selected-planner-view`, this.navbar.selectedView);
         }
 
         let dayCount_Store = localStorage.getItem(`week-view-day-count`);
         if (dayCount_Store) {
             this.navbar.week.dayCount = Number(dayCount_Store);
         } else {
-            localStorage.setItem(`week-view-day-count`, this.dayCount);
+            localStorage.setItem(`week-view-day-count`, this.navbar.week.dayCount);
         }
 
         this.plannerStore = usePlannerStore();

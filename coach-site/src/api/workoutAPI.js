@@ -1,5 +1,7 @@
+import { URL } from "./api";
+
 export async function getWorkoutInfo() {
-    return fetch(`https://localhost:7104/api/Physical/GetWorkoutInfo`, {
+    return fetch(`${URL}/api/Physical/GetWorkoutInfo`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         // body: JSON.stringify(data)
@@ -18,7 +20,7 @@ export async function getWorkoutInfo() {
 }
 
 export async function getWorkouts() {
-    return fetch(`https://localhost:7104/api/Physical/GetWorkouts`, {
+    return fetch(`${URL}/api/Physical/GetWorkouts`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         // body: JSON.stringify(data)
@@ -37,7 +39,7 @@ export async function getWorkouts() {
 }
 
 export async function getExercises() {
-    return fetch(`https://localhost:7104/api/Physical/GetExercises`, {
+    return fetch(`${URL}/api/Physical/GetExercises`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         // body: JSON.stringify(data)
@@ -58,7 +60,7 @@ export async function getExercises() {
 export async function getWorkoutIDFromEvent(eventID) {
     let data = { eventID };
 
-    return fetch(`https://localhost:7104/api/Physical/GetWorkoutIDFromEvent`, {
+    return fetch(`${URL}/api/Physical/GetWorkoutIDFromEvent`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
@@ -77,7 +79,7 @@ export async function getWorkoutIDFromEvent(eventID) {
 }
 
 export async function saveWorkout(model) {
-    return fetch(`https://localhost:7104/api/Physical/SaveWorkout`, {
+    return fetch(`${URL}/api/Physical/SaveWorkout`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(model)
@@ -96,7 +98,7 @@ export async function saveWorkout(model) {
 }
 
 export async function saveExercise(model) {
-    return fetch(`https://localhost:7104/api/Physical/SaveExercise`, {
+    return fetch(`${URL}/api/Physical/SaveExercise`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(model)
@@ -116,7 +118,7 @@ export async function saveExercise(model) {
 
 export async function copyAndStartWorkout(workoutID) {
     let data = { workoutID };
-    return fetch(`https://localhost:7104/api/Physical/CopyAndStartWorkout`, {
+    return fetch(`${URL}/api/Physical/CopyAndStartWorkout`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
@@ -136,7 +138,7 @@ export async function copyAndStartWorkout(workoutID) {
 
 export async function logSet(setID, completedAt) {
     let data = { setID, completedAt };
-    return fetch(`https://localhost:7104/api/Physical/LogSet`, {
+    return fetch(`${URL}/api/Physical/LogSet`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
@@ -156,7 +158,7 @@ export async function logSet(setID, completedAt) {
 
 export async function completeWorkout(workoutID, startAt, endAt, createEvent) {
     let data = { workoutID, startAt, endAt, createEvent };
-    return fetch(`https://localhost:7104/api/Physical/CompleteWorkout`, {
+    return fetch(`${URL}/api/Physical/CompleteWorkout`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
@@ -177,7 +179,7 @@ export async function completeWorkout(workoutID, startAt, endAt, createEvent) {
 export async function repositionExercise(workoutID, exerciseID, position) {
     let data = { workoutID, exerciseID, position };
 
-    return fetch(`https://localhost:7104/api/Physical/RepositionExercise`, {
+    return fetch(`${URL}/api/Physical/RepositionExercise`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)

@@ -1,5 +1,7 @@
+import { URL } from "./api";
+
 export async function getNutritionHistory() {
-    return fetch(`https://localhost:7104/api/Physical/GetNutritionHistory`, {
+    return fetch(`${URL}/api/Physical/GetNutritionHistory`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
     })
@@ -19,7 +21,7 @@ export async function getNutritionHistory() {
 export async function getMealsInRange(startAt, endAt) {
     let data = { startAt, endAt };
 
-    return fetch(`https://localhost:7104/api/Physical/GetMealsInRange`, {
+    return fetch(`${URL}/api/Physical/GetMealsInRange`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
@@ -38,7 +40,7 @@ export async function getMealsInRange(startAt, endAt) {
 }
 
 export async function getRecentFoodItems() {
-    return fetch(`https://localhost:7104/api/Physical/GetRecentFoodItems`, {
+    return fetch(`${URL}/api/Physical/GetRecentFoodItems`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
     })
@@ -56,7 +58,7 @@ export async function getRecentFoodItems() {
 }
 
 export async function getWaterLogs() {
-    return fetch(`https://localhost:7104/api/Physical/GetWaterLogs`, {
+    return fetch(`${URL}/api/Physical/GetWaterLogs`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
     })
@@ -76,7 +78,7 @@ export async function getWaterLogs() {
 export async function foodSearchAutoComplete(searchTerm) {
     let data = { query: searchTerm };
 
-    return fetch(`https://localhost:7104/api/Physical/FoodSearchAutoComplete`, {
+    return fetch(`${URL}/api/Physical/FoodSearchAutoComplete`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
@@ -97,7 +99,7 @@ export async function foodSearchAutoComplete(searchTerm) {
 export async function searchFoodUPC(upc) {
     let data = { upc };
 
-    return fetch(`https://localhost:7104/api/Physical/SearchFoodUPC`, {
+    return fetch(`${URL}/api/Physical/SearchFoodUPC`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
@@ -118,7 +120,7 @@ export async function searchFoodUPC(upc) {
 export async function addFoodItemToMeal(model) {
     // let data = { model };
 
-    return fetch(`https://localhost:7104/api/Physical/AddFoodItemToMeal`, {
+    return fetch(`${URL}/api/Physical/AddFoodItemToMeal`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(model)
@@ -139,7 +141,7 @@ export async function addFoodItemToMeal(model) {
 export async function setFoodItemConsumption(mealID, foodItemID, wasConsumed, dateTime) {
     let data = { mealID, foodItemID, wasConsumed, dateTime };
 
-    return fetch(`https://localhost:7104/api/Physical/SetFoodItemConsumption`, {
+    return fetch(`${URL}/api/Physical/SetFoodItemConsumption`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
@@ -160,7 +162,7 @@ export async function setFoodItemConsumption(mealID, foodItemID, wasConsumed, da
 export async function logWater(amountFLOZ, dateTime, mealID) {
     let data = {amountFLOZ, dateTime, mealID };
 
-    return fetch(`https://localhost:7104/api/Physical/LogWater`, {
+    return fetch(`${URL}/api/Physical/LogWater`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
@@ -181,7 +183,7 @@ export async function logWater(amountFLOZ, dateTime, mealID) {
 export async function setMealTime(mealID, startAt, endAt) {
     let data = { mealID, startAt, endAt };
 
-    return fetch(`https://localhost:7104/api/Physical/SetMealTime`, {
+    return fetch(`${URL}/api/Physical/SetMealTime`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
@@ -202,7 +204,7 @@ export async function setMealTime(mealID, startAt, endAt) {
 export async function removeFoodItem(mealID, foodItemID) {
     let data = { mealID, foodItemID };
 
-    return fetch(`https://localhost:7104/api/Physical/RemoveFoodItem`, {
+    return fetch(`${URL}/api/Physical/RemoveFoodItem`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)

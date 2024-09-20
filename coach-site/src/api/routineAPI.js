@@ -1,7 +1,7 @@
-// import axios from "axios";
+import { URL } from "./api";
 
 export async function getRoutines() {
-    return fetch(`https://localhost:7104/api/Routine/GetRoutines`, {
+    return fetch(`${URL}/api/Routine/GetRoutines`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         // body: JSON.stringify(data)
@@ -20,7 +20,7 @@ export async function getRoutines() {
 }
 
 export async function saveRoutine(data) {
-    return fetch(`https://localhost:7104/api/Routine/SaveRoutine`, {
+    return fetch(`${URL}/api/Routine/SaveRoutine`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
@@ -41,7 +41,7 @@ export async function saveRoutine(data) {
 export async function saveRoutineRepeat(repeat) {
     let data = { repeat };
     
-    return fetch(`https://localhost:7104/api/Routine/SaveRoutineRepeat`, {
+    return fetch(`${URL}/api/Routine/SaveRoutineRepeat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
@@ -62,7 +62,7 @@ export async function saveRoutineRepeat(repeat) {
 export async function mapTodos(routineID, addedIDs, removedIDs) {
     let data = { routineID, addedIDs, removedIDs };
     
-    return fetch(`https://localhost:7104/api/Routine/MapTodosToRoutine`, {
+    return fetch(`${URL}/api/Routine/MapTodosToRoutine`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
@@ -83,7 +83,7 @@ export async function mapTodos(routineID, addedIDs, removedIDs) {
 export async function createAndMapItem(routineID, itemType, itemText) {
     let data = { routineID, itemType, itemText };
     
-    return fetch(`https://localhost:7104/api/Routine/CreateAndMapItemToRoutine`, {
+    return fetch(`${URL}/api/Routine/CreateAndMapItemToRoutine`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
@@ -104,7 +104,7 @@ export async function createAndMapItem(routineID, itemType, itemText) {
 export async function refreshRepetitionForRepeat(id, repeatID) {
     let data = { id, repeatID };
     
-    return fetch(`https://localhost:7104/api/Routine/RefreshRepetitionForRoutine`, {
+    return fetch(`${URL}/api/Routine/RefreshRepetitionForRoutine`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
@@ -125,7 +125,7 @@ export async function refreshRepetitionForRepeat(id, repeatID) {
 export async function refreshRepetitiveEvents(id, startAt, endAt, timeframeID, properties) {
     let data = { id, startAt, endAt, timeframeID, properties };
     
-    return fetch(`https://localhost:7104/api/Routine/RefreshRepetitiveEventsForRoutine`, {
+    return fetch(`${URL}/api/Routine/RefreshRepetitiveEventsForRoutine`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)

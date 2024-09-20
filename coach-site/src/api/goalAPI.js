@@ -1,5 +1,7 @@
+import { URL } from "./api";
+
 export async function getGoals() {
-    return fetch(`https://localhost:7104/api/Goal/GetGoals`, {
+    return fetch(`${URL}/api/Goal/GetGoals`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         // body: JSON.stringify(data)
@@ -20,7 +22,7 @@ export async function getGoals() {
 export async function getGoalsWithTimeframe(start, end) {
     let data = { start, end };
 
-    return fetch(`https://localhost:7104/api/Goal/GetGoalsWithTimeframe`, {
+    return fetch(`${URL}/api/Goal/GetGoalsWithTimeframe`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
@@ -39,7 +41,7 @@ export async function getGoalsWithTimeframe(start, end) {
 }
 
 export async function saveGoal(data) {
-    return fetch(`https://localhost:7104/api/Goal/SaveGoal`, {
+    return fetch(`${URL}/api/Goal/SaveGoal`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
@@ -60,7 +62,7 @@ export async function saveGoal(data) {
 export async function saveGoalTimePair(timePair) {
     let data = { timePair };
     
-    return fetch(`https://localhost:7104/api/Goal/SaveGoalTimePair`, {
+    return fetch(`${URL}/api/Goal/SaveGoalTimePair`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
@@ -81,7 +83,7 @@ export async function saveGoalTimePair(timePair) {
 export async function createAndMapItem(goalID, itemType, itemText) {
     let data = { goalID, itemType, itemText };
     
-    return fetch(`https://localhost:7104/api/Goal/CreateAndMapItemToGoal`, {
+    return fetch(`${URL}/api/Goal/CreateAndMapItemToGoal`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
@@ -102,7 +104,7 @@ export async function createAndMapItem(goalID, itemType, itemText) {
 export async function mapItems(goalID, itemType, addedIDs, removedIDs) {
     let data = { goalID, itemType, addedIDs, removedIDs };
     
-    return fetch(`https://localhost:7104/api/Goal/MapItemsToGoal`, {
+    return fetch(`${URL}/api/Goal/MapItemsToGoal`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)

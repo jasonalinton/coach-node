@@ -1,3 +1,4 @@
+import { URL } from "./api";
 import { capitalize } from "../../utility";
 
 export async function repositionItem(parentType, itemType, parentID, itemID, newPosition) {
@@ -8,7 +9,7 @@ export async function repositionItem(parentType, itemType, parentID, itemID, new
     itemType = capitalize(itemType);
     parentType = capitalize(parentType);
 
-    return fetch(`https://localhost:7104/api/${parentType}/Reposition${itemType}In${parentType}`, {
+    return fetch(`${URL}/api/${parentType}/Reposition${itemType}In${parentType}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
@@ -27,7 +28,7 @@ export async function repositionItem(parentType, itemType, parentID, itemID, new
 }
 
 export async function refreshItemPositions() {
-    await fetch(`https://localhost:7104/api/Goal/SetItemPositions`, {
+    await fetch(`${URL}/api/Goal/SetItemPositions`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
     })
@@ -35,7 +36,7 @@ export async function refreshItemPositions() {
         console.error('Error:', error);
     });
 
-    await fetch(`https://localhost:7104/api/Todo/SetItemPositions`, {
+    await fetch(`${URL}/api/Todo/SetItemPositions`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
     })

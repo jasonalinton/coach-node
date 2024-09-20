@@ -1,3 +1,4 @@
+import { URL } from '../api/api';
 import { HubConnectionBuilder } from '@microsoft/signalr';
 
 var hubConnections = {
@@ -11,7 +12,7 @@ var hubConnections = {
 export function getSocketConnection(hubName) {
     if (hubConnections[hubName] == undefined) {
         let connection = new HubConnectionBuilder()
-            .withUrl(`https://localhost:7104/${hubName}`, {
+            .withUrl(`${URL}/${hubName}`, {
                  withCredentials: false,
                  timeout: 120000,
                 })

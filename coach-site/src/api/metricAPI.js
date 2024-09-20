@@ -1,5 +1,7 @@
+import { URL } from "./api";
+
 export async function getMetrics() {
-    return fetch(`https://localhost:7104/api/Metric/GetMetrics`, {
+    return fetch(`${URL}/api/Metric/GetMetrics`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         // body: JSON.stringify(data)
@@ -18,7 +20,7 @@ export async function getMetrics() {
 }
 
 export async function getLogItems() {
-    return fetch(`https://localhost:7104/api/Metric/GetLogItems`, {
+    return fetch(`${URL}/api/Metric/GetLogItems`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
     })
@@ -36,7 +38,7 @@ export async function getLogItems() {
 }
 
 export async function migrateItemMappings() {
-    return fetch(`https://localhost:7104/api/Metric/MigrateItemMappings`, {
+    return fetch(`${URL}/api/Metric/MigrateItemMappings`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
     })
@@ -54,7 +56,7 @@ export async function migrateItemMappings() {
 }
 
 export async function logLogItem(model) {
-    return fetch(`https://localhost:7104/api/Metric/LogLogItem`, {
+    return fetch(`${URL}/api/Metric/LogLogItem`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(model)
@@ -73,7 +75,7 @@ export async function logLogItem(model) {
 }
 
 export async function deleteLogEntry(logEntryID) {
-    return fetch(`https://localhost:7104/api/Metric/DeleteLogEntry`, {
+    return fetch(`${URL}/api/Metric/DeleteLogEntry`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ logEntryID })
