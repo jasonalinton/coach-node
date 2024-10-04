@@ -125,6 +125,14 @@ export function isSameDate(date1, date2) {
     return +moment(date1).startOf('day').toDate() == +moment(date2).startOf('day').toDate();
 }
 
+// Is the nextDate on the same day as the date?
+export function isNextDay(date, nextDate) {
+    let hum = moment(date).startOf('day').add(1, 'day').toDate();
+    let him = moment(nextDate).startOf('day').toDate();
+    let huh = +hum == +him;
+    return huh;
+}
+
 export function today(dateTime) {
     return moment(dateTime).startOf('day').toDate();
 }

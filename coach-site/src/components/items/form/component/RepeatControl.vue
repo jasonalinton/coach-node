@@ -162,6 +162,7 @@
 <script>
 import TimeControl from '../../../controls/time/TimeControl.vue'
 import { clone, capitalize, toDateString, today } from '../../../../../utility'
+import { isNextDay, addDay } from '../../../../../utility/timeUtility'
 import { saveRoutineRepeat } from '../../../../api/routineAPI'
 import { saveTodoRepeat } from '../../../../api/todoAPI'
 
@@ -570,9 +571,9 @@ function correctTimes() {
     let startIteration = this.updatedRepeat.startIteration;
     if (startIteration && startIteration.value) {
         let startIterationDate = new Date(startIteration.value.dateTime);
-        startIterationDate
-            .setUTCFullYear(startRepeatDate.getUTCFullYear(), startRepeatDate.getUTCMonth(), startRepeatDate.getUTCDate())
-        startIteration.value.dateTime = startIterationDate.toISOString();
+        let isStartNextDay = isNextDay(new Date(), new Date(startIteration.value.dateTime.slice(0, -1))); // Used to correct timezone errors when re-setting date portion
+        startIterationDate.setUTCFullYear(startRepeatDate.getUTCFullYear(), startRepeatDate.getUTCMonth(), startRepeatDate.getUTCDate())
+        startIteration.value.dateTime = (isStartNextDay) ? addDay(startIterationDate.toISOString()) : startIterationDate.toISOString();
         if (startIteration.oldValue.id &&
             new Date(startIteration.value.dateTime).getTime() 
             != new Date(startIteration.oldValue.dateTime).getTime()) {
@@ -585,9 +586,9 @@ function correctTimes() {
     let endIteration = this.updatedRepeat.endIteration;
     if (endIteration && endIteration.value) {
         let endIterationDate = new Date(endIteration.value.dateTime);
-        endIterationDate
-            .setUTCFullYear(startRepeatDate.getUTCFullYear(), startRepeatDate.getUTCMonth(), startRepeatDate.getUTCDate())
-        endIteration.value.dateTime = endIterationDate.toISOString();
+        let isEndNextDay = isNextDay(new Date(), new Date(endIteration.value.dateTime.slice(0, -1))); // Used to correct timezone errors when re-setting date portion
+        endIterationDate.setUTCFullYear(startRepeatDate.getUTCFullYear(), startRepeatDate.getUTCMonth(), startRepeatDate.getUTCDate())
+        endIteration.value.dateTime = (isEndNextDay) ? addDay(endIterationDate).toISOString() : endIterationDate.toISOString();
         if (endIteration.oldValue.id &&
             new Date(endIteration.value.dateTime).getTime() 
             != new Date(endIteration.oldValue.dateTime).getTime()) {
