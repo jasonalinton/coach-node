@@ -4,15 +4,21 @@
         <!-- Body -->
         <div v-if="goals" class="d-flex flex-column" style="margin-top: 8px">
             <!-- Header: Goals Mapped to Timeframe -->
-            <div class="header d-flex flex-row justify-content-between align-items-center" @click="goalInTimeframe.allCollapsed = !goalInTimeframe.allCollapsed">
+            <!-- <div class="header d-flex flex-row justify-content-between align-items-center" @click="goalInTimeframe.allCollapsed = !goalInTimeframe.allCollapsed">
                 <h1>Goal Mapped to Timeframe</h1>
                 <IconButton v-if="!goalInTimeframe.allCollapsed" class="caret" src="/icon/icon-expanded.png" :width="24" :height="24"></IconButton>
                 <IconButton v-if="goalInTimeframe.allCollapsed" class="caret" src="/icon/icon-collapsed.png" :width="24" :height="24" ></IconButton>
-            </div>
+            </div> -->
              <ul v-show="!goalInTimeframe.allCollapsed">
                 <li v-for="goal in goalsMappedToTimeframe" :key="goal.id" class="goal">
                     <div class="d-flex flex-column">
-                        <div class="goal-item">{{ goal.text }}</div>
+                        <!-- <div class="goal-item">{{ goal.text }}</div> -->
+                        <h1>{{ goal.text }}</h1>
+                        <ul>
+                            <li v-for="todo in getTodoQueue(goal)" :key="todo.id" class="todo">
+                                <TodoItem :todo="todo" :parentType="'goal'" :parent="goal" :size="'sm'"></TodoItem>
+                            </li>
+                        </ul>
                         <ul>
                             <li v-for="iteration in incompleteIterations(goal)" :key="iteration.id" class="todo">
                                 <ListItem :iteration="iteration" :parentType="'goal'" :parent="goal" :size="'sm'"></ListItem>
@@ -29,46 +35,19 @@
                 </li>
             </ul>
         </div>
-        <!-- Tasks In Timeframe -->
-        <!-- <div v-if="goals" class="d-flex flex-column" style="margin-top: 8px">
-            <div class="header d-flex flex-row justify-content-between align-items-center" @click="taskTimeCollapsed = !taskTimeCollapsed">
-                <h1>Task Mapped to Timeframe</h1>
-                <IconButton v-if="!taskTimeCollapsed" class="caret" src="/icon/icon-expanded.png" :width="24" :height="24"></IconButton>
-                <IconButton v-if="taskTimeCollapsed" class="caret" src="/icon/icon-collapsed.png" :width="24" :height="24" ></IconButton>
-            </div>
-             <ul>
-                <li v-for="goal in goals" :key="goal.id" class="goal">
-                    <div class="d-flex flex-column">
-                        <div class="goal-item">{{ goal.text }}</div>
-                        Incomplete (Tasks In Timeframe)
-                        <ul>
-                            <li v-for="iteration in iterationsInTimeframe(goal).filter(_itera => !_itera.attemptedAt)" :key="iteration.id" class="todo">
-                                <ListItem :iteration="iteration" :parentType="'goal'" :parent="goal" :size="'sm'"></ListItem>
-                            </li>
-                        </ul>
-                        Complete (Tasks In Timeframe)
-                        <h2 @click="taskInTimeframe.completedCollapsed = !taskInTimeframe.completedCollapsed">Complete ({{ iterationsInTimeframe(goal).filter(_itera => _itera.attemptedAt).length }})</h2>
-                        <ul v-show="!taskInTimeframe.completedCollapsed">
-                            <li v-for="iteration in iterationsInTimeframe(goal).filter(_itera => _itera.attemptedAt)" :key="iteration.id" class="todo">
-                                <ListItem :iteration="iteration" :parentType="'goal'" :parent="goal" :size="'sm'"></ListItem>
-                            </li>
-                        </ul>
-                    </div>
-                </li>
-            </ul>
-        </div> -->
     </div>
 </template>
 
 <script>
 import ListItem from '../component/ListItem.vue';
+import TodoItem from '../component/TodoItem.vue';
 import TimeframeRadio from '../component/TimeframeRadio.vue';
 import { firstDayOfWeek, lastDayOfWeek, firstDayOfMonth, firstDayOfYear, lastDayOfMonth, lastDayOfYear } from '../../../../../utility/timeUtility';
-import IconButton from '../../../controls/button/IconButton.vue';
+// import IconButton from '../../../controls/button/IconButton.vue';
 
 export default {
     name: 'GoalPanelByCustom',
-    components: { ListItem, TimeframeRadio, IconButton },
+    components: { ListItem, TodoItem, TimeframeRadio },
     props: {
         selectedDate: Date
     },
@@ -76,7 +55,7 @@ export default {
         return {
             goalStore: null,
             goals: [],
-            timeframe: 'day',
+            timeframe: 'month',
             goalInTimeframe: {
                 allCollapsed: false,
                 completedCollapsed: true,
@@ -188,31 +167,6 @@ export default {
             });
         },
     },
-    apollo: {
-        goals: {
-            query() { return require('../../../../graphql/query/goal/QueryGoalsByDate.gql')},
-            variables() {
-                return {
-                    startAt: this.start,
-                    endAt: this.end
-                }
-            },
-            update(data) {
-                return data.goalsByDate;
-            },
-            error: function(error) {
-                this.errorMessage = 'Error occurred while loading query'
-                console.log(this.errorMessage, error);
-            }
-        },
-    },
-    mounted: function() {
-        // An error gets thrown if pollInterval is set with the query
-        this.$apollo.queries.goals.setOptions({
-            fetchPolicy: 'cache-and-network',
-            pollInterval: 30000,
-        })
-    },
     methods: {
         incompleteIterations(goal) {
             let iterations = [];
@@ -246,7 +200,26 @@ export default {
                 // .filter(_iter => !_iter.attemptedAt);
 
             return iterations;
-
+        },
+        getTodoQueue(goal) {
+            let _this = this;
+            let todos = [];
+            goal.todos.forEach(todo => {
+                let children = _this.getTodoChildren(todo);
+                todos = todos.concat(children);
+                todos.push(todo);
+            });
+            return todos;
+        },
+        getTodoChildren(todo) {
+            let _this = this;
+            let todos = [];
+            todo.children.forEach(child => {
+                let children = _this.getTodoChildren(child);
+                todos = todos.concat(children);
+                todos.push(child);
+            });
+            return todos;
         }
     },
     watch: {

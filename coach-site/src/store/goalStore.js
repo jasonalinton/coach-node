@@ -55,7 +55,16 @@ export const useGoalStore = defineStore('goal', {
             return this.goals.find(x => x.id == id);
         },
         getTimeframeItems(start, end) {
-            return getGoalsWithTimeframe(start, end);
+            let _this = this;
+            return getGoalsWithTimeframe(start, end)
+                .then(goals => {
+                    goals.forEach(goal => {
+                        replaceOrAddItem(goal, _this.goals);
+                    })
+                    this.initializeItems(goals);
+                    sortAsc(_this.goals);
+                    return goals;
+                });
         },
         repositionItem(parentType, itemType, goalID, metricID, newPosition) {
             repositionItem(parentType, itemType, goalID, metricID, newPosition);
