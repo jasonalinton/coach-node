@@ -12,6 +12,7 @@
                     <button class="btn btn-sm" type="button" @click="$emit('showPage', 'planner')">Planner</button>
                     <button class="btn btn-sm" type="button" @click="$emit('showPage', 'items')">Items</button>
                     <button class="btn btn-sm" type="button" @click="$emit('showPage', 'itemsOG')">ItemsOG</button>
+                    <button class="btn btn-sm" type="button" @click="$emit('showPage', 'physical')">Physical</button>
                 </div>
             </div>
             <div v-if="selectedPage == 'planner'" class="d-flex flex-row me-5">
