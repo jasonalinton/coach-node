@@ -25,12 +25,14 @@
                             </li>
                         </ul>
                         <!-- Complete (Goal In Timeframe) -->
-                        <h2 @click="goalInTimeframe.completedCollapsed = !goalInTimeframe.completedCollapsed">Complete ({{ iterationsInTimeframe(goal).filter(_itera => _itera.attemptedAt).length }})</h2>
-                        <ul v-show="!goalInTimeframe.completedCollapsed">
-                            <li v-for="iteration in completeIterations(goal)" :key="iteration.id" class="todo">
-                                <ListItem :iteration="iteration" :parentType="'goal'" :parent="goal" :size="'sm'"></ListItem>
-                            </li>
-                        </ul>
+                        <div v-if="iterationsInTimeframe(goal).filter(_itera => _itera.attemptedAt).length > 0" class="d-flex flex-column">
+                            <h2 @click="goalInTimeframe.completedCollapsed = !goalInTimeframe.completedCollapsed">Complete ({{ iterationsInTimeframe(goal).filter(_itera => _itera.attemptedAt).length }})</h2>
+                            <ul v-show="!goalInTimeframe.completedCollapsed">
+                                <li v-for="iteration in completeIterations(goal)" :key="iteration.id" class="todo">
+                                    <ListItem :iteration="iteration" :parentType="'goal'" :parent="goal" :size="'sm'"></ListItem>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
                 </li>
             </ul>
