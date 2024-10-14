@@ -1,5 +1,0 @@
-mutation refreshRepetitiveTodo($idTodo: Int!) {
-  refreshRepetitiveTodo(idTodo: $idTodo) {
-    id
-  }
-}

@@ -1,5 +1,0 @@
-subscription iterationDeleted {
-  iterationDeleted {
-    id
-  }
-}
