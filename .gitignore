@@ -131,3 +131,6 @@ pnpm-debug.log*
 /live/
 
 .db
+
+# Except
+!/coach-site/dist
