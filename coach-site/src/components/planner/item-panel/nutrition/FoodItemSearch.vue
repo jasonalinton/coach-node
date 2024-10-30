@@ -181,7 +181,7 @@ async function addFoodItem(foodItem, type) {
         nIXItemID: (type == "branded") ? foodItem.nix_item_id : undefined,
         unit: (['upc','recent'].includes(type)) ? foodItem.unit : foodItem.serving_unit,
         quantity: this.quantity,
-        dateTime: datetime,
+        dateString: datetime.toLocaleString(),
         foodItem: (['upc','recent'].includes(type)) ? foodItem : undefined
     }
     this.physicalStore.addFoodItemToMeal(model);
