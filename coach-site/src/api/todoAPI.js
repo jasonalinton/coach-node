@@ -144,8 +144,8 @@ export async function createDefaultTask(text, isComplete, datetime) {
     });
 }
 
-export async function createTask(todoID) {
-    let data = { todoID };
+export async function createTask(todoID, datetime) {
+    let data = { todoID, datetime };
     
     return fetch(`${URL}/api/Todo/CreateTaskForTodo`, {
         method: 'POST',

@@ -433,7 +433,7 @@ export default {
             return (this.metricIDs.value.includes(metricID)) ? true : false;
         },
         createTask() {
-            this.store.createTask(this.id);
+            this.store.createTask(this.id, this.plannerStore.selectedDate);
         },
         addItem(itemType, itemText) {
             this.store.createAndMapItem(this.id, itemType, itemText);

@@ -57,8 +57,8 @@ export const useTodoStore = defineStore('todo', {
         deleteTodo(todoID) {
             deleteTodo(todoID);
         },
-        createTask(todoID) {
-            createTask(todoID);
+        createTask(todoID, date) {
+            createTask(todoID, date);
         },
         createDefaultTask(text, isComplete, datetime) {
             createDefaultTask(text, isComplete, datetime);
