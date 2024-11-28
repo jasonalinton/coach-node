@@ -3,7 +3,7 @@
         <div class="col h-100">
             <!-- Header -->
             <ItemPanelHeader :title="'routine'" :sort="sort" @onSortChange="onSortChange"></ItemPanelHeader>
-            <RoutinePanelByCustom v-if="sort.by=='Ordered'" :selectedDate="selectedDate"> </RoutinePanelByCustom>
+            <RoutinePanelByCustom v-if="sort.by=='Ordered'"> </RoutinePanelByCustom>
         </div>
     </div>
 </template>
@@ -23,7 +23,6 @@ export default {
     name: 'RoutinePanel',
     components: { ItemPanelHeader, RoutinePanelByCustom, },
     props: {
-        selectedDate: Date
     },
     data: function () {
         return {

@@ -59,14 +59,13 @@ import DayPoints from "../DayPoints.vue";
 import HourBlocks from "../event/HourBlocks.vue";
 import { replaceItem, removeItem } from "../../../../../utility";
 import { getHoursObjectArray } from "../../../../../utility/plannerUtility";
-import { firstDayOfWeek, lastDayOfWeek, addDay } from "../../../../../utility/timeUtility";
+import { firstDayOfWeek, lastDayOfWeek, addDay, today } from "../../../../../utility/timeUtility";
 
 export default {
     name: "WeekView",
     components: { TaskList, DayPoints, HourBlocks },
     props: {
         dayCount: Number,
-        selectedDate: Date,
     },
     data: function () {
         return {
@@ -92,6 +91,12 @@ export default {
         };
     },
     computed: {
+        selectedDate() {
+            if (this.plannerStore) {
+                return this.plannerStore.selectedDate;
+            }
+            return today;
+        },
         startAt() {
             return firstDayOfWeek(this.selectedDate);
             // return firstDayOfWeek(firstDayOfMonth(this.selectedDate));
@@ -101,22 +106,20 @@ export default {
         }
     },
     created: async function() {
-        let plannerStore = await import(`@/store/plannerStore`);
-        this.plannerStore = plannerStore.usePlannerStore();
-        this.plannerStore.startClock();
-
         let eventStore = await import(`@/store/eventStore`);
         this.eventStore = eventStore.useEventStore();
-        this.eventStore.getEvents(this.startAt, this.endAt, true);
 
         let iterationStore = await import(`@/store/iterationStore`);
         this.iterationStore = iterationStore.useIterationStore();
-        this.iterationStore.getIterationsInRange(this.startAt, this.endAt, true);
+
+        let plannerStore = await import(`@/store/plannerStore`);
+        this.plannerStore = plannerStore.usePlannerStore();
+        this.plannerStore.startClock();
     },
     beforeMount: function () {},
     mounted: function () {
         this.width = this.$refs.weekView.clientWidth;
-        this.initTimeline();
+        // this.initTimeline();
         this.initHours();
     },
     methods: {

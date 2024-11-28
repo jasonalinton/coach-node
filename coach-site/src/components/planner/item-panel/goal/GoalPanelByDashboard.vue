@@ -24,6 +24,7 @@
 </template>
 
 <script>
+import { today } from '../../../../../utility/timeUtility';
 
 export default {
     name: 'GoalPanelByDefault',
@@ -33,17 +34,27 @@ export default {
     },
     data: function () {
         return {
+            plannerStore: undefined,
             goalStore: null,
             mainGoalIDs: [ 48, 211, 182, 232, 6 ],
             skillGoalIDs: [ 211, 6, 233, 234 ],
         }
     },
     created: async function() {
+        let plannerStore = await import(`@/store/plannerStore`);
+        this.plannerStore = plannerStore.usePlannerStore();
+
         let goalStore = await import(`@/store/goalStore`);
         this.goalStore = goalStore.useGoalStore();
 
     },
     computed: {
+        selectedDate() {
+            if (this.plannerStore) {
+                return this.plannerStore.selectedDate;
+            }
+            return today;
+        },
         mainGoals() {
             let goals = [];
             if (this.goalStore) {

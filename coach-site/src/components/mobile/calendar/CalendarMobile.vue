@@ -7,9 +7,9 @@
                 <div class="year">{{ year }}</div>
             </div>
             <div class="buttons d-flex flex-row">
-                <icon-button :src="`icon/previous.png`" :width="22" :height="22" @click="$emit('previous')"/>
+                <icon-button :src="`icon/previous.png`" :width="22" :height="22" @click="previous"/>
                 <button class="today" type="button" @click="goToday">Today</button>
-                <icon-button :src="`icon/next.png`" :width="22" :height="22" @click="$emit('next')"/>
+                <icon-button :src="`icon/next.png`" :width="22" :height="22" @click="next"/>
             </div>
         </div>
         <!-- Week Labels -->
@@ -18,7 +18,7 @@
         </div>
         <!-- Days -->
         <div v-for="(week, weekIndex) in weeks" :key="weekIndex" class="week d-flex flex-row">
-            <DayPill v-for="(day, dayIndex) in week.days" :key="dayIndex" :day="day" :date="day.date"/>
+            <DayPillMobile v-for="(day, dayIndex) in week.days" :key="dayIndex" :day="day" :date="day.date" />
         </div>
     </div>
 </template>
@@ -29,7 +29,7 @@ import moment from 'moment'
 import { month_long, year_long, addMonth, subtractMonth, today } from "../../../../utility";
 import { addDay, firstDayOfMonth, getDurationInDays, lastDayOfMonth, lastDayOfWeek, sunday } from "../../../../utility/timeUtility";
 import IconButton from '../../controls/button/IconButton.vue';
-import DayPill from './DayPill.vue';
+import DayPillMobile from './DayPillMobile.vue';
 
 const daysOfWeek = [
     { id: 1, text: 'Sunday', altText: 'S'},
@@ -42,15 +42,15 @@ const daysOfWeek = [
 ]
 
 export default {
-    components: { IconButton, DayPill },
-    name: 'CalendarMonth',
+    components: { IconButton, DayPillMobile },
+    name: 'MobileCalendar',
     props: {
-        initialDate: Date,
+        
     },
     data: function() {
         return {
             plannerStore: undefined,
-            indexDate: undefined,
+            initialDate: undefined,
             weeks: [],
             days: [],
             month: "",
@@ -66,7 +66,7 @@ export default {
         let plannerStore = await import(`@/store/plannerStore`);
         this.plannerStore = plannerStore.usePlannerStore();
 
-        this.indexDate = this.initialDate;
+        this.initialDate = this.plannerStore.selectedDate;
 
         this.initCalendar();
     },
@@ -91,24 +91,6 @@ export default {
             return dayCount / 7;
         },
     },
-    apollo: {
-        iterationCompletions: {
-            query() { return require('../../../graphql/query/planner/QueryIterationCompletions.gql')},
-            variables() {
-                return {
-                    start: this.firstDate,
-                    end: this.lastDate
-                }
-            },
-            error: function(error) {
-                this.errorMessage = 'Error occurred while loading query'
-                console.log(this.errorMessage, error);
-            },
-            update(data) { 
-                return data.iterationCompletions
-            },
-        },
-    },
     methods: {
         initCalendar,
         refreshCalendar,
@@ -117,15 +99,13 @@ export default {
         goToday,
         addMonth,
         subtractMonth,
-        assignIterationCompletions
+        previous,
+        next
     },
     watch: {
-        iterationCompletions(value) {
-            this.assignIterationCompletions(value);
-        },
         initialDate() {
-            this.initCalendar();
-        }
+            this.refreshCalendar();
+        } 
     }
 }
 
@@ -163,19 +143,6 @@ function initCalendar() {
         }
         this.weeks.push(week);
     }
-
-    if (this.iterationCompletions) {
-        this.assignIterationCompletions(this.iterationCompletions)
-    }
-}
-
-function assignIterationCompletions(iterationCompletions) {
-    let days = this.weeks.map(_week => _week.days).flat();
-
-    days.forEach(_day => {
-        let iterationCompletion = iterationCompletions.find(_value => (new Date(_value.datetime)).toLocaleString() == _day.date);
-        _day.iterationCompletion = (iterationCompletion) ? iterationCompletion : { status: 'pending' }
-    })
 }
 
 function refreshCalendar() {
@@ -184,7 +151,15 @@ function refreshCalendar() {
 
 function goToday() {
     this.plannerStore.selectDate(this.today);
-    this.refreshCalendar(this.today);
+    this.initialDate = this.plannerStore.selectedDate;
+}
+
+function previous() {
+    this.initialDate = subtractMonth(this.initialDate);
+}
+
+function next() {
+    this.initialDate = addMonth(this.initialDate);
 }
 
 </script>

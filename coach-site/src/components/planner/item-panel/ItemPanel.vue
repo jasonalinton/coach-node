@@ -64,12 +64,12 @@
             </div> -->
         </div>
         <div class="col-auto h-100">
-            <DashboardPanel v-show="selectedPanel == 'dashboard'" :selectedDate="selectedDate" class="item-panel"/>
-            <MetricPanel v-show="selectedPanel == 'metric'" :selectedDate="selectedDate" class="item-panel"/>
-            <GoalPanel v-show="selectedPanel == 'goal'" :selectedDate="selectedDate" class="item-panel"></GoalPanel>
-            <TodoPanel v-show="selectedPanel == 'todo'" :selectedDate="selectedDate" class="item-panel"/>
-            <RoutinePanel v-show="selectedPanel == 'routine'" :selectedDate="selectedDate" class="item-panel"/>
-            <TaskRoutinePanel v-show="selectedPanel == 'task-routine'" :selectedDate="selectedDate" class="item-panel"/>
+            <DashboardPanel v-show="selectedPanel == 'dashboard'" class="item-panel"/>
+            <MetricPanel v-show="selectedPanel == 'metric'" class="item-panel"/>
+            <GoalPanel v-show="selectedPanel == 'goal'" class="item-panel"></GoalPanel>
+            <TodoPanel v-show="selectedPanel == 'todo'" class="item-panel"/>
+            <RoutinePanel v-show="selectedPanel == 'routine'" class="item-panel"/>
+            <TaskRoutinePanel v-show="selectedPanel == 'task-routine'" class="item-panel"/>
             <EventPanel v-show="selectedPanel == 'event'" :props="eventPanelProps" class="item-panel"/>
             <InventoryPanel v-show="selectedPanel == 'inventory'" class="item-panel"/>
             <NutritionPanel v-show="selectedPanel == 'nutrition'" class="item-panel"/>
@@ -100,7 +100,6 @@ export default {
     components: { DashboardPanel, MetricPanel, GoalPanel, TodoPanel, RoutinePanel, TaskRoutinePanel, 
         EventPanel, InventoryPanel, NutritionPanel, WorkoutPanel },
     props: {
-        selectedDate: Date,
         selectPanel: Object,
         selectedPanel: String
     },

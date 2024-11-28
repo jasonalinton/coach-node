@@ -1,26 +1,25 @@
 <template>
     <div class="day pill d-flex flex-column position-relative" 
-         :class="[day.pointInTime, (isSelected) ? 'selected' : '', status(day.iterationCompletion)]"  
-         @click="selectDate(day.date)"
-         @drop="onDrop($event)" @dragover.prevent @dragenter.prevent>
+         :class="[day.pointInTime, isSelected ? 'selected' : '']"
+            @click="selectDate(day.date)">
         <span>{{ day.day }}</span>
         <span class="status position-absolute"></span>
     </div>  
 </template>
 
 <script>
-import { today } from "../../../../utility";
-import { unmapTaskFromRoutineEvent } from "../../../resolvers/planner-resolvers";
+import { today } from '../../../../utility';
 
 export default {
+    name: "DayPillMobile",
     props: {
         day: Object,
     },
     created: async function() {
-        let plannerStore = await import(`@/store/plannerStore`);
-        this.plannerStore = plannerStore.usePlannerStore();
         let iterationStore = await import(`@/store/iterationStore`);
         this.iterationStore = iterationStore.useIterationStore();
+        let plannerStore = await import(`@/store/plannerStore`);
+        this.plannerStore = plannerStore.usePlannerStore();
     },
     data: function () {
         return {
@@ -36,53 +35,19 @@ export default {
             if (this.plannerStore) {
                 return this.plannerStore.selectedDate;
             }
-            return today();
+            return today;
         },
         isSelected() {
             return +this.date == +this.selectedDate;
         }
     },
     methods: {
-        selectDate,
-        status,
-        onDrop,
-        unmapTaskFromRoutineEvent,
+        selectDate
     },
 }
 
 function selectDate(date) {
     this.plannerStore.selectDate(date);
-}
-
-function status(iterationCompletion) {
-    if ((new Date(iterationCompletion.datetime).getTime() > today().getTime()))
-        return 'pending'
-    else if (iterationCompletion.percentComplete >= 90)
-        return 'success';
-    else if (iterationCompletion.percentComplete >= 50 && iterationCompletion.percentComplete < 90)
-        return 'close';
-    else if (iterationCompletion.percentComplete < 50)
-        return 'fail';
-    else
-        return '';
-}
-
-function onDrop(ev) {
-    ev.preventDefault();
-    
-    let data = ev.dataTransfer.getData("text");
-    data = JSON.parse(data);
-
-    if (data.type && data.type == "task") {
-        /* If routine event, first unmap task from event and routine iteration */
-        if (data.parentType && data.parentType == "routineEvent") {
-            this.unmapTaskFromRoutineEvent(data.id, data.parentID, new Date(this.day.date), null, null, this.$apollo);
-        } else {
-            this.iterationStore.rescheduleIteration(data.id, new Date(this.day.date), new Date(this.day.date));
-        }
-
-
-    }
 }
 </script>
 

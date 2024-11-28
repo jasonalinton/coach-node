@@ -28,10 +28,10 @@ export default {
     name: 'MonthView',
     components: { TaskList },
     props: {
-        selectedDate: Date
     },
     data: function() {
         return {
+            plannerStore: undefined,
             rows: 5,
             weeks: [],
             weekModels: [],
@@ -43,6 +43,10 @@ export default {
     },
     beforeMount: function() {
         this.initTimeline();
+    },
+    created: async function() {
+        let plannerStore = await import(`@/store/plannerStore`);
+        this.plannerStore = plannerStore.usePlannerStore();
     },
     apollo: {
         iterations: {
@@ -61,7 +65,13 @@ export default {
     },
     computed: {
         dayWidth() { return this.$refs.monthView.clientWidth / 7  },
-        dayHeight() { return this.$refs.monthView.clientHeight  }
+        dayHeight() { return this.$refs.monthView.clientHeight  },
+        selectedDate() {
+            if (this.plannerStore) {
+                return this.plannerStore.selectedDate;
+            }
+            return today;
+        },
     },
     methods: {
         initTimeline,

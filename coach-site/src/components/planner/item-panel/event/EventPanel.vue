@@ -2,9 +2,9 @@
     <div class="row g-0 h-100">
         <div class="col h-100">
             <!-- Header -->
-            <ItemPanelHeader :title="'events'" :sort="sort" :selectedDate="selectedDate" @onSortChange="onSortChange"></ItemPanelHeader>
+            <ItemPanelHeader :title="'events'" :sort="sort" @onSortChange="onSortChange"></ItemPanelHeader>
             <!-- Body -->
-            <EventPanelByDate v-if="activeType.toLowerCase() == 'sortby' && sort.by=='Metric'" :selectedDate="selectedDate"></EventPanelByDate>
+            <EventPanelByDate v-if="activeType.toLowerCase() == 'sortby' && sort.by=='Metric'"></EventPanelByDate>
             <EventTodoPanel v-if="activeType.toLowerCase() == 'todo'" :_event="selectedEvent" />
             <EventRoutinePanel v-if="activeType.toLowerCase() == 'routine'" :_event="selectedEvent" />
         </div>
@@ -34,7 +34,6 @@ export default {
     name: 'EventPanel',
     components: { ItemPanelHeader, EventPanelByDate, EventTodoPanel, EventRoutinePanel },
     props: {
-        selectedDate: Date,
         props: Object
     },
     data: function () {

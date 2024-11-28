@@ -3,16 +3,14 @@
       <CalendarMonth v-for="(month, index) in months" :key="index"
                      class="mt-2"
                      :initialDate="month"
-                     :selectedDate="selectedDate"
-                        @dateChange="dateChange"
-                        @previous="previousMonth"
-                        @next="nextMonth"></CalendarMonth>
+                     @previous="previousMonth"
+                     @next="nextMonth" />
     </div>
 </template>
 
 <script>
 import CalendarMonth from './CalendarMonth.vue'
-import { addMonth, today } from '../../../../utility'
+import { addMonth } from '../../../../utility'
 
 export default {
     name: 'ThumbnailCalendar',
@@ -24,7 +22,6 @@ export default {
         return {
             date: this.initialDate,
             monthCount: 1,
-            selectedDate: today().toLocaleString(),
         }
     },
     created: function() {
@@ -43,11 +40,7 @@ export default {
         previousMonth() { this.date = addMonth(this.date, -1) },
         nextMonth() { this.date = addMonth(this.date, 1) },
         addMonth() { this.monthCount++ },
-        subtractMonth() { this.monthCount-- },
-        dateChange(date) {
-            this.selectedDate = date.toLocaleString();
-            this.$emit('dateChange', new Date(date));
-        }
+        subtractMonth() { this.monthCount-- }
     }
 }
 

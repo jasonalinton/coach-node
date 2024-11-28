@@ -6,9 +6,8 @@
                     <div class="body overflow-auto h-100">
                         <WeekView v-if="selectedView=='weekView'" 
                                   :dayCount="dayCount" 
-                                  :selectedDate="selectedDate" 
                                   @selectEvent="$emit('selectEvent', $event)"></WeekView>
-                        <MonthView v-if="selectedView=='monthView'" :today="today" :selectedDate="selectedDate"></MonthView>
+                        <MonthView v-if="selectedView=='monthView'" :today="today"></MonthView>
                     </div>
                 </div>
             </div>
@@ -28,7 +27,6 @@ export default {
     props: {
         dayCount: Number,
         selectedView: String,
-        selectedDate: Date,
     },
     data: function() {
         return {

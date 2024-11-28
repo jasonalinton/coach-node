@@ -1,46 +1,47 @@
 <template>
-    <div id="app" :class="['grid-container', leftPanelVisibility, itemPanelVisibility]">
-        <div class="nav-bar overflow-scroll">
-            <PlannerNavbar
-                :dayCount="navbar.week.dayCount" 
-                :selectedView="navbar.selectedView" 
-                :selectedPage="navbar.selectedPage"
-                @dayCountChange="dayCountChange"
-                @viewChange="viewChange"
-                @showPage="showPage"
-                @toggleLeftPanel="toggleLeftPanel">
-            </PlannerNavbar>
+    <div id="app" >
+        <div v-if="isExtraSmall">
+            <AppMobile/>
         </div>
-        <div class="grid-left-panel">
-            <LeftPanel :isShown="showLeft" 
-                       :selectedDate="selectedDate"
-                       @dateChange="dateChange"
-                       @togglePanel="toggleLeftPanel"/>
-        </div>
-        <div class="grid-body overflow-scroll">
-            <Planner 
-                v-show="navbar.selectedPage == 'planner'" 
+        <div v-else :class="['grid-container', leftPanelVisibility, itemPanelVisibility]">
+            <div class="nav-bar overflow-scroll">
+                <PlannerNavbar
+                    :dayCount="navbar.week.dayCount" 
+                    :selectedView="navbar.selectedView" 
                     :selectedPage="navbar.selectedPage"
-                    :dayCount="navbar.week.dayCount"
-                    :selectedView="navbar.selectedView"
-                    :selectedDate="selectedDate"
-                    @dateChange="dateChange"
-                    @selectEvent="selectEvent">
-            </Planner>
-            <ItemTabs v-show="navbar.selectedPage == 'items'"></ItemTabs>
-            <ItemTabsOG v-if="navbar.selectedPage == 'itemsOG'"></ItemTabsOG>
-            <PhysicalView v-if="navbar.selectedPage == 'physical'"></PhysicalView>
-        </div>
-        <div class="grid-right-panel">
-            <ItemPanel :selectedDate="selectedDate"
-                       :selectPanel="itemsPage.selectPanel"
-                       :selectedPanel="selectedItemPanel"
-                       @setSelectedPanel="selectedItemPanel = $event"></ItemPanel>
+                    @dayCountChange="dayCountChange"
+                    @viewChange="viewChange"
+                    @showPage="showPage"
+                    @toggleLeftPanel="toggleLeftPanel">
+                </PlannerNavbar>
+            </div>
+            <div class="grid-left-panel">
+                <LeftPanel :isShown="showLeft" 
+                           @togglePanel="toggleLeftPanel"/>
+            </div>
+            <div class="grid-body overflow-scroll">
+                <Planner 
+                    v-show="navbar.selectedPage == 'planner'" 
+                        :selectedPage="navbar.selectedPage"
+                        :dayCount="navbar.week.dayCount"
+                        :selectedView="navbar.selectedView"
+                        @selectEvent="selectEvent">
+                </Planner>
+                <ItemTabs v-show="navbar.selectedPage == 'items'"></ItemTabs>
+                <ItemTabsOG v-if="navbar.selectedPage == 'itemsOG'"></ItemTabsOG>
+                <PhysicalView v-if="navbar.selectedPage == 'physical'"></PhysicalView>
+            </div>
+            <div class="grid-right-panel">
+                <ItemPanel :selectPanel="itemsPage.selectPanel"
+                           :selectedPanel="selectedItemPanel"
+                           @setSelectedPanel="selectedItemPanel = $event"></ItemPanel>
+            </div>
         </div>
     </div>
 </template>
 
 <script>
+import AppMobile from "./components/mobile/AppMobile.vue";
 import PlannerNavbar from "./components/nav/PlannerNavbar.vue";
 import LeftPanel from "./components/planner/left-panel/LeftPanel.vue";
 import ItemPanel from './components/planner/item-panel/ItemPanel.vue';
@@ -48,7 +49,7 @@ import Planner from "./components/planner/Planner.vue";
 import ItemTabs from "./components/items/ItemTabs.vue";
 import ItemTabsOG from "./components/items/ItemTabsOG.vue";
 import PhysicalView from "./components/metrics/physical/PhysicalView.vue";
-import { today } from "../utility"
+import { useAppStore } from '@/store/appStore'
 import { usePlannerStore } from '@/store/plannerStore'
 import { useEventStore } from '@/store/eventStore'
 import { useIterationStore } from '@/store/iterationStore'
@@ -61,6 +62,7 @@ import { useRoutineStore } from '@/store/routineStore'
 export default {
     name: "App",
     components: {
+        AppMobile,
         PlannerNavbar,
         LeftPanel,
         ItemPanel,
@@ -81,8 +83,8 @@ export default {
             itemsPage: {
                 selectPanel: undefined,
             },
-            selectedDate: today(),
             selectedItemPanel: "todo",
+            appStore: undefined,
             plannerStore: undefined,
             showLeft: true
         };
@@ -109,32 +111,25 @@ export default {
             localStorage.setItem(`week-view-day-count`, this.navbar.week.dayCount);
         }
 
-        this.plannerStore = usePlannerStore();
+        await this.initStores();
+    },
+    beforeDestroy () {
+        if (typeof window !== 'undefined') {
+            window.removeEventListener('resize', this.onResize, { passive: true })
+        }
+    },
 
-        let eventStore = useEventStore();
-        let iterationStore = useIterationStore();
-        let physicalStore = usePhysicalStore();
-        let metricStore = useMetricStore();
-        let goalStore = useGoalStore();
-        let todoStore = useTodoStore();
-        let routineStore = useRoutineStore();
-
-        eventStore.initialize();
-        iterationStore.initialize();
-        physicalStore.initialize();
-        let metricPromise = metricStore.initialize();
-        let goalPromise = goalStore.initialize();
-        let todoPromise = todoStore.initialize();
-        let routinePromise = routineStore.initialize();
-
-        await Promise.all([metricPromise, goalPromise, todoPromise, routinePromise]).then(() => {
-            metricStore.initializeItems();
-            goalStore.initializeItems();
-            todoStore.initializeItems();
-            routineStore.initializeItems();
-        });
+    mounted () {
+        this.onResize()
+        window.addEventListener('resize', this.onResize, { passive: true })
     },
     computed: {
+        isExtraSmall() {
+            if (this.appStore) {
+                return this.appStore.isExtraSmall;
+            }
+            return true;
+        },
         leftPanelVisibility() {
             return (this.showLeft) ? `show-left-panel` : 'hide-left-panel'
         },
@@ -143,12 +138,13 @@ export default {
         },
     },
     methods: {
+        initStores,
         toggleLeftPanel,
         dayCountChange,
         viewChange,
         showPage,
-        dateChange,
         selectEvent,
+        onResize
     },
     watch: {
         'navbar.selectedPage'(value) { localStorage.setItem(`selected-page`, value); },
@@ -156,6 +152,34 @@ export default {
         'navbar.week.dayCount'(value) { localStorage.setItem(`week-view-day-count`, value); },
     },
 };
+
+async function initStores() {
+    this.appStore = useAppStore();
+    this.plannerStore = usePlannerStore();
+
+    let eventStore = useEventStore();
+    let iterationStore = useIterationStore();
+    let physicalStore = usePhysicalStore();
+    let metricStore = useMetricStore();
+    let goalStore = useGoalStore();
+    let todoStore = useTodoStore();
+    let routineStore = useRoutineStore();
+
+    eventStore.initialize();
+    iterationStore.initialize();
+    physicalStore.initialize();
+    let metricPromise = metricStore.initialize();
+    let goalPromise = goalStore.initialize();
+    let todoPromise = todoStore.initialize();
+    let routinePromise = routineStore.initialize();
+
+    await Promise.all([metricPromise, goalPromise, todoPromise, routinePromise]).then(() => {
+        metricStore.initializeItems();
+        goalStore.initializeItems();
+        todoStore.initializeItems();
+        routineStore.initializeItems();
+    });
+}
 
 function toggleLeftPanel() {
     this.showLeft = !this.showLeft;
@@ -180,16 +204,16 @@ function showPage(page) {
     this.navbar.selectedPage = page;
 }
 
-function dateChange(date) {
-    this.plannerStore.selectDate(date);
-    this.selectedDate = date;
-}
-
 function selectEvent(_event) {
     this.itemsPage.selectPanel = {
         panel: 'event',
         props: { _event }
     }
+}
+
+function onResize() {
+    this.appStore.setWindowSize(window.innerWidth, window.innerHeight);
+    this.appStore.setWindowOuterSize(window.outerWidth, window.outerHeight);
 }
 </script>
 

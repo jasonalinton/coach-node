@@ -19,6 +19,7 @@
 
 <script>
 import DashboardView from '../../../dashboard/DashboardView.vue';
+import { today } from '../../../../../utility/timeUtility';
 
 export default {
     name: 'DashboardPanel',
@@ -28,11 +29,20 @@ export default {
     },
     data: function () {
         return {
-            
+            plannerStore: undefined,
         }
     },
-    created: function() {
-       
+    created: async function() {
+        let plannerStore = await import(`@/store/plannerStore`);
+        this.plannerStore = plannerStore.usePlannerStore();
+    },
+    computed: {
+        selectedDate() {
+            if (this.plannerStore) {
+                return this.plannerStore.selectedDate;
+            }
+            return today;
+        },
     },
     methods: {
         

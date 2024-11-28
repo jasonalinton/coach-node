@@ -51,7 +51,7 @@ import ItemCheckbox from '../component/ItemCheckbox.vue';
 import ListItem from '../component/ListItem.vue';
 import { toShortWeekdayString, startOfDay, isToday } from '../../../../../utility/timeUtility';
 import { replaceItem, removeItem, today, sortAsc } from '../../../../../utility';
-import { createDefaultTask } from '../../../../resolvers/todo-resolvers';
+// import { createDefaultTask } from '../../../../resolvers/todo-resolvers';
 
 export default {
     name: 'EventRoutinePanel',
@@ -131,7 +131,7 @@ export default {
         addTask,
         cancelAddTask,
         markNewTaskComplete,
-        createDefaultTask,
+        // createDefaultTask,
         replaceItem,
         removeItem,
         today,
@@ -164,10 +164,10 @@ function addTask(iteration) {
         text: this._event.text
     });
 
-    var title = iteration.text;
-    if (title != "") {
-        this.createDefaultTask(iteration, this.$apollo);
-    }
+    // var title = iteration.text;
+    // if (title != "") {
+    //     this.createDefaultTask(iteration, this.$apollo);
+    // }
     this.addNewTask();
 }
 
@@ -185,7 +185,7 @@ function markNewTaskComplete(iteration) {
 
         this.iterations.new = null;
 
-        this.createDefaultTask(iteration, this.$apollo);
+        // this.createDefaultTask(iteration, this.$apollo);
     }
 }
 </script>

@@ -1,6 +1,6 @@
 <template>
     <div class="left-panel d-flex flex-column mt-1 overflow-scroll" :class="{close:!isShown}">
-        <ThumbnailCalendar :initialDate="firstDay" @dateChange="dateChange" />
+        <ThumbnailCalendar :initialDate="firstDay" />
         <TimeframePoints :selectedDate="selectedDate" />
         <AvatarPanel/>
     </div>
@@ -11,7 +11,7 @@ import ThumbnailCalendar from '../thumbnail/ThumbnailCalendar.vue'
 import TimeframePoints from '../../points/TimeframePoints.vue';
 import AvatarPanel from '../../avatar/AvatarPanel.vue';
 import moment from 'moment';
-// import { addMonth } from '../../../../utility/timeUtility';
+import { today } from '../../../../utility/timeUtility';
 
 export default {
     name: 'LeftPanel',
@@ -21,23 +21,32 @@ export default {
             default: true,
             type: Boolean
         },
-        selectedDate: Date
     },
     data: function() {
         return {
+            plannerStore: undefined,
             // firstDay: addMonth(moment().date(1).hour(0).minute(0).second(0).millisecond(0).toDate(), -2) // 2 months ago
             firstDay: moment().date(1).hour(0).minute(0).second(0).millisecond(0).toDate(),
             // firstDay: moment().startOf().toDate()
         }
     },
+    created: async function() {
+        let plannerStore = await import(`@/store/plannerStore`);
+        this.plannerStore = plannerStore.usePlannerStore();
+    },
+    computed: {
+        selectedDate() {
+            if (this.plannerStore) {
+                return this.plannerStore.selectedDate;
+            }
+            return today();
+        },
+    },
     methods: {
-        dateChange
+        
     }
 }
 
-function dateChange(date) {
-    this.$emit('dateChange', date);
-}
 </script>
 
 <style scoped>

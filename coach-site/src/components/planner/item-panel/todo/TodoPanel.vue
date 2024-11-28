@@ -2,7 +2,7 @@
     <div class="row g-0 h-100">
         <div class="col h-100 d-flex flex-column flex-grow-1 overflow-hidden">
             <!-- Header -->
-            <ItemPanelHeader :title="'todos'" :sort="sort" :selectedDate="selectedDate"
+            <ItemPanelHeader :title="'todos'" :sort="sort"
                              @onSortChange="onSortChange">
                 <div class="d-flex flex-row justify-content-end pe-2 mt-auto">
                     <img class="header-button me-1" :class="{ active: showRepeat }"
@@ -55,12 +55,13 @@
 
 <script>
 import ItemPanelHeader from '../component/ItemPanelHeader.vue';
-import TodoPanelByDate from './TodoPanelByDate.vue';
 import TodoPanelByMetric from './TodoPanelByMetric.vue';
+import TodoPanelByDate from './TodoPanelByDate.vue';
 import TodoPanelByRepetition from './TodoPanelByRepetition.vue';
 import TodoPanelByCustom from './TodoPanelByCustom.vue';
 import TodoPanelDefault from './TodoPanelDefault.vue';
 import IterationForm from '../component/form/IterationForm.vue';
+import { today } from '../../../../../utility/timeUtility';
 
 var sortItems = [
     { id: 1, text: "Metric" },
@@ -75,10 +76,11 @@ export default {
     components: { ItemPanelHeader, TodoPanelByMetric, TodoPanelByDate, TodoPanelByRepetition,
         TodoPanelByCustom, TodoPanelDefault, IterationForm, },
     props: {
-        selectedDate: Date
+        
     },
     data: function () {
         return {
+            plannerStore: undefined,
             sort: {
                 by: 'Default',
                 items: sortItems,
@@ -90,12 +92,23 @@ export default {
             showHierarchy: true
         }
     },
-    created: function() {
+    created: async function() {
+        let plannerStore = await import(`@/store/plannerStore`);
+        this.plannerStore = plannerStore.usePlannerStore();
+
         let todoPanelSortBy_Store = localStorage.getItem(`todo-panel-sort-by`);
         if (todoPanelSortBy_Store) {
             this.sort.by = todoPanelSortBy_Store;
         } else {
             localStorage.setItem(`todo-panel-sort-by`, this.sort.by);
+        }
+    },
+    computed: {
+        selectedDate() {
+            if (this.plannerStore) {
+                return this.plannerStore.selectedDate;
+            }
+            return today();
         }
     },
     methods: {

@@ -44,17 +44,18 @@
 import ListItem from '../component/ListItem.vue';
 import TodoItem from '../component/TodoItem.vue';
 import TimeframeRadio from '../component/TimeframeRadio.vue';
-import { firstDayOfWeek, lastDayOfWeek, firstDayOfMonth, firstDayOfYear, lastDayOfMonth, lastDayOfYear } from '../../../../../utility/timeUtility';
+import { today, firstDayOfWeek, lastDayOfWeek, firstDayOfMonth, firstDayOfYear, lastDayOfMonth, lastDayOfYear } from '../../../../../utility/timeUtility';
 // import IconButton from '../../../controls/button/IconButton.vue';
 
 export default {
     name: 'GoalPanelByCustom',
     components: { ListItem, TodoItem, TimeframeRadio },
     props: {
-        selectedDate: Date
+        
     },
     data: function() {
         return {
+            plannerStore: undefined,
             goalStore: null,
             goals: [],
             timeframe: 'month',
@@ -71,6 +72,9 @@ export default {
         }
     },
     created: async function() {
+        let plannerStore = await import(`@/store/plannerStore`);
+        this.plannerStore = plannerStore.usePlannerStore();
+
         let goalStore = await import(`@/store/goalStore`);
         this.goalStore = goalStore.useGoalStore();
 
@@ -100,6 +104,12 @@ export default {
                 return lastDayOfYear(this.selectedDate);
             else
                 return null
+        },
+        selectedDate() {
+            if (this.plannerStore) {
+                return this.plannerStore.selectedDate;
+            }
+            return today;
         },
         // goals() {
         //     if (this.goalStore) {
@@ -226,10 +236,14 @@ export default {
     },
     watch: {
         async timeframe() {
-            this.goals = await this.goalStore.getTimeframeItems(this.start, this.end);
+            if (this.goalStore) {
+                this.goals = await this.goalStore.getTimeframeItems(this.start, this.end);
+            }
         },
         async selectedDate() {
-            this.goals = await this.goalStore.getTimeframeItems(this.start, this.end);
+            if (this.goalStore) {
+                this.goals = await this.goalStore.getTimeframeItems(this.start, this.end);
+            }
         },
     }
 }
