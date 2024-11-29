@@ -2,7 +2,10 @@
     <div class="row g-0 h-100">
         <div class="col h-100">
             <!-- Header -->
-            <ItemPanelHeader :title="'events'" :sort="sort" @onSortChange="onSortChange"></ItemPanelHeader>
+            <ItemPanelHeader v-show="showHead" 
+                             :title="'events'" 
+                             :sort="sort" 
+                             @onSortChange="onSortChange" />
             <!-- Body -->
             <EventPanelByDate v-if="activeType.toLowerCase() == 'sortby' && sort.by=='Metric'"></EventPanelByDate>
             <EventTodoPanel v-if="activeType.toLowerCase() == 'todo'" :_event="selectedEvent" />
@@ -34,7 +37,11 @@ export default {
     name: 'EventPanel',
     components: { ItemPanelHeader, EventPanelByDate, EventTodoPanel, EventRoutinePanel },
     props: {
-        props: Object
+        props: Object,
+        showHead: {
+            type: Boolean,
+            default: true
+        }
     },
     data: function () {
         return {

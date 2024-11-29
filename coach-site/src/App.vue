@@ -1,8 +1,6 @@
 <template>
     <div id="app" >
-        <div v-if="isExtraSmall">
-            <AppMobile/>
-        </div>
+        <AppMobile v-if="isExtraSmall"/>
         <div v-else :class="['grid-container', leftPanelVisibility, itemPanelVisibility]">
             <div class="nav-bar overflow-scroll">
                 <PlannerNavbar
@@ -33,8 +31,7 @@
             </div>
             <div class="grid-right-panel">
                 <ItemPanel :selectPanel="itemsPage.selectPanel"
-                           :selectedPanel="selectedItemPanel"
-                           @setSelectedPanel="selectedItemPanel = $event"></ItemPanel>
+                           :selectedPanel="selectedItemPanel"></ItemPanel>
             </div>
         </div>
     </div>
@@ -83,7 +80,7 @@ export default {
             itemsPage: {
                 selectPanel: undefined,
             },
-            selectedItemPanel: "todo",
+            // selectedItemPanel: "todo",
             appStore: undefined,
             plannerStore: undefined,
             showLeft: true
@@ -136,6 +133,12 @@ export default {
         itemPanelVisibility() {
             return (this.selectedItemPanel) ? 'show-item-panel' : 'hide-item-panel'
         },
+        selectedItemPanel() {
+            if (this.appStore) {
+                return this.appStore.selectedItemPanel;
+            }
+            return "todo";
+        }
     },
     methods: {
         initStores,

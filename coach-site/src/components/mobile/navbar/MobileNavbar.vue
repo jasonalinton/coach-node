@@ -3,7 +3,8 @@
         <div class="container-fluid d-flex flex-row">
             <div class="d-flex flex-row">
                 <div class="d-flex flex-row">
-                    <IconButton class="icon menu-button float-left" src="/icon/menu-button.png" :width="40" :height="40" />
+                    <IconButton class="icon menu-button float-left" src="/icon/menu-button.png" :width="40" :height="40"
+                                @click="toggleTabBar" />
                     <a class="navbar-brand float-left" href="#">Coach</a>
                 </div>
                 <div class="d-flex flex-row">
@@ -39,6 +40,7 @@ export default {
     },
     methods: {
         selectPage,
+        toggleTabBar,
         toggleCalendar
     },
 }
@@ -47,8 +49,12 @@ function selectPage() {
 
 }
 
-function toggleCalendar() {
+function toggleTabBar() {
+    this.appStore.toggleTabBar();
+}
 
+function toggleCalendar() {
+    this.appStore.toggleMobileCalendar();
 }
 
 </script>
@@ -56,6 +62,7 @@ function toggleCalendar() {
 <style scoped>
 .navbar {
     border-bottom: 1px solid rgba(220, 220, 220, .5);
+    padding: 0 0 7px 0;
     padding-bottom: 7px;
     line-height: 38px;
 }

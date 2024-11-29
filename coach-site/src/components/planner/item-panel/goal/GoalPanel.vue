@@ -2,7 +2,10 @@
     <div class="row g-0">
         <div class="col">
             <!-- Header -->
-            <ItemPanelHeader :title="title" :sort="sort" @onSortChange="onSortChange"></ItemPanelHeader>
+            <ItemPanelHeader v-show="showHead" 
+                             :title="title" 
+                             :sort="sort" 
+                             @onSortChange="onSortChange"></ItemPanelHeader>
             <GoalPanelByMetric v-if="sort.by=='Metric'"></GoalPanelByMetric>
             <GoalPanelByDate v-if="sort.by=='Date'"></GoalPanelByDate>
             <GoalPanelByCustom v-if="sort.by=='Custom'"></GoalPanelByCustom>
@@ -30,7 +33,10 @@ export default {
     name: 'GoalPanel',
     components: { ItemPanelHeader, GoalPanelByMetric, GoalPanelByDate, GoalPanelByCustom, GoalPanelByDashboard },
     props: {
-        
+        showHead: {
+            type: Boolean,
+            default: true
+        }
     },
     data: function () {
         return {

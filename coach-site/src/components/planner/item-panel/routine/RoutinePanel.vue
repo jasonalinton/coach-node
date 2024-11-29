@@ -2,7 +2,10 @@
     <div class="row g-0 h-100">
         <div class="col h-100">
             <!-- Header -->
-            <ItemPanelHeader :title="'routine'" :sort="sort" @onSortChange="onSortChange"></ItemPanelHeader>
+            <ItemPanelHeader v-show="showHead" 
+                             :title="'routine'" 
+                             :sort="sort" 
+                             @onSortChange="onSortChange"></ItemPanelHeader>
             <RoutinePanelByCustom v-if="sort.by=='Ordered'"> </RoutinePanelByCustom>
         </div>
     </div>
@@ -23,6 +26,10 @@ export default {
     name: 'RoutinePanel',
     components: { ItemPanelHeader, RoutinePanelByCustom, },
     props: {
+        showHead: {
+            type: Boolean,
+            default: true
+        }
     },
     data: function () {
         return {

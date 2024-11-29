@@ -1,4 +1,7 @@
 import { defineStore } from 'pinia'
+import { EVENTTYPE } from '../model/constants'
+import { useWorkoutStore } from '@/store/workoutStore'
+import { getWorkoutIDFromEvent } from '../api/workoutAPI'
 
 // let initialized = false;
 
@@ -11,7 +14,9 @@ export const useAppStore = defineStore('app', {
         browserType: undefined,
         isTouchscreen: undefined,
         isExtraSmall: undefined,
-        selectedItemPanel: "dashboard"
+        selectedItemPanel: "todo",
+        isTabBarShown: true,
+        isMobileCalendarShown: false,
     }),
     getters: {
         
@@ -33,6 +38,21 @@ export const useAppStore = defineStore('app', {
         },
         setSelectedItemPanel(panel) {
             this.selectedItemPanel = panel;
+        },
+        async setSelectedEvent(eevent) {
+            if (eevent.type.id == EVENTTYPE.WORKOUT) {
+                let workoutStore = useWorkoutStore();
+                let workoutID = await getWorkoutIDFromEvent(eevent.id);
+                workoutStore.selectWorkout(workoutID);
+
+                this.selectedItemPanel = "workout";
+            }
+        },
+        toggleTabBar() {
+            this.isTabBarShown = !this.isTabBarShown;
+        },
+        toggleMobileCalendar() {
+            this.isMobileCalendarShown = !this.isMobileCalendarShown;
         }
     },
 })

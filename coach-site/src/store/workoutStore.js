@@ -16,6 +16,7 @@ export const useWorkoutStore = defineStore('workout', {
         dragged: {
             exerciseID: undefined,
         },
+        selectedWorkoutID: undefined
     }),
     getters: {
         getDragged() {
@@ -146,6 +147,9 @@ export const useWorkoutStore = defineStore('workout', {
         },
         clearDraggedProps() {
             this.dragged.exerciseID = undefined;
+        },
+        selectWorkout(id) {
+            this.selectedWorkoutID = id;
         },
         connectSocket() {
             if (!initialized) {

@@ -2,7 +2,9 @@
     <div class="row g-0 h-100">
         <div class="col h-100 d-flex flex-column flex-grow-1 overflow-hidden">
             <!-- Header -->
-            <ItemPanelHeader :title="'todos'" :sort="sort"
+            <ItemPanelHeader v-show="showHead" 
+                             :title="'todos'" 
+                             :sort="sort"
                              @onSortChange="onSortChange">
                 <div class="d-flex flex-row justify-content-end pe-2 mt-auto">
                     <img class="header-button me-1" :class="{ active: showRepeat }"
@@ -76,7 +78,10 @@ export default {
     components: { ItemPanelHeader, TodoPanelByMetric, TodoPanelByDate, TodoPanelByRepetition,
         TodoPanelByCustom, TodoPanelDefault, IterationForm, },
     props: {
-        
+        showHead: {
+            type: Boolean,
+            default: true
+        }
     },
     data: function () {
         return {

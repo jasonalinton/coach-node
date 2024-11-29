@@ -9,6 +9,12 @@ import { today } from '../../../../utility/timeUtility';
 
 export default {
     name: 'MetricPanel',
+    props: {
+        showHead: {
+            type: Boolean,
+            default: true
+        }
+    },
     data: function () {
         return {
             plannerStore: undefined,

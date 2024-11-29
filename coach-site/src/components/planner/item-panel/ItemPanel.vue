@@ -73,14 +73,13 @@
             <EventPanel v-show="selectedPanel == 'event'" :props="eventPanelProps" class="item-panel"/>
             <InventoryPanel v-show="selectedPanel == 'inventory'" class="item-panel"/>
             <NutritionPanel v-show="selectedPanel == 'nutrition'" class="item-panel"/>
-            <WorkoutPanel v-show="selectedPanel == 'workout'" class="item-panel"
-                          :selectedWorkoutID="workoutPanelProps.selectedWorkoutID"
-                          @selectWorkout="selectWorkout"/>
+            <WorkoutPanel v-show="selectedPanel == 'workout'" class="item-panel"/>
         </div>
     </div>
 </template>
 
 <script>
+import { useAppStore } from '@/store/appStore'
 import DashboardPanel from './dashboard/DashboardPanel.vue'
 import MetricPanel from './MetricPanel.vue'
 import GoalPanel from './goal/GoalPanel.vue'
@@ -93,7 +92,6 @@ import NutritionPanel from './nutrition/NutritionPanel.vue'
 import WorkoutPanel from './workout/WorkoutPanel.vue'
 import { refreshRepetitiveItems } from '../../../resolvers/planner-resolvers'
 import { EVENTTYPE } from '../../../model/constants'
-import { getWorkoutIDFromEvent } from '../../../api/workoutAPI'
 
 export default {
     name: 'ItemPanel',
@@ -101,10 +99,11 @@ export default {
         EventPanel, InventoryPanel, NutritionPanel, WorkoutPanel },
     props: {
         selectPanel: Object,
-        selectedPanel: String
+        // selectedPanel: String
     },
     data: function() {
         return {
+            appStore: undefined,
             eventPanelProps: { },
             workoutPanelProps: { 
                 selectedWorkoutID: undefined
@@ -112,6 +111,7 @@ export default {
         }
     },
     created: function() {
+        this.appStore = useAppStore();
         let selectedPanel_Store = localStorage.getItem(`selected-item-panel`);
         if (selectedPanel_Store) {
             selectedPanel_Store = (selectedPanel_Store == "undefined") ? undefined : selectedPanel_Store;
@@ -120,10 +120,17 @@ export default {
             localStorage.setItem(`selected-item-panel`, this.selectedPanel);
         }
     },
+    computed: {
+        selectedPanel() {
+            if (this.appStore) {
+                return this.appStore.selectedItemPanel;
+            }
+            return "dashboard";
+        }
+    },
     methods: {
         refreshRepetitive,
         setSelectedPanel,
-        selectWorkout
     },
     watch: {
         selectedPanel(value) {
@@ -131,11 +138,7 @@ export default {
         },
         async selectPanel(value) {
             if (value && value.panel && value.panel == 'event') {
-                if (value.props._event.type.id == EVENTTYPE.WORKOUT) { // If event type is workout
-                    this.$emit('setSelectedPanel', 'workout');
-                    let workoutID = await getWorkoutIDFromEvent(value.props._event.id);
-                    this.selectWorkout(workoutID);
-                } else { 
+                if (value.props._event.type.id != EVENTTYPE.WORKOUT)  { 
                     this.$emit('setSelectedPanel', 'event');
                     this.eventPanelProps = value.props;
                 }
@@ -148,12 +151,12 @@ function refreshRepetitive(){
     refreshRepetitiveItems(this.$apollo);
 }
 
-function setSelectedPanel(type) {
-    this.$emit('setSelectedPanel', (this.selectedPanel != type) ? type : undefined)
-}
-
-function selectWorkout(workoutID) {
-    this.workoutPanelProps.selectedWorkoutID = workoutID;
+function setSelectedPanel(panel) {
+    if (this.selectedPanel != panel) {
+        this.appStore.setSelectedItemPanel(panel);
+    } else {
+        this.appStore.setSelectedItemPanel(undefined);
+    }
 }
 </script>
 

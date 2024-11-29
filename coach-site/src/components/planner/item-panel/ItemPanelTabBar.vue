@@ -1,5 +1,5 @@
 <template>
-    <div :style="{'width': '56px', 'padding-left': '8px', 'overflow': 'hidden', 'padding-top': '20px'}">
+    <div class="item-panel-tab-bar" :style="{'width': '56px', 'padding-left': '8px', 'overflow': 'hidden'}">
         <div class="d-flex flex-row mb-1">
             <img class="dashboard" :class="[{ active: selectedPanel == 'dashboard' }]" src='/icon/dashboard-icon.png' width="40" height="40" :style="{'margin-top': '8px'}"
                     @click="setSelectedPanel('dashboard')"/>
@@ -95,6 +95,11 @@ function setSelectedPanel(panel) {
 </script>
 
 <style scoped>
+.item-panel-tab-bar {
+    border-right: 1px solid rgba(220, 220, 220, .5);
+    height: 100%;
+}
+
 img.dashboard:hover, img.dashboard.active {
     background-color: rgba(76, 110, 245, .08);
     border-radius: 20px;

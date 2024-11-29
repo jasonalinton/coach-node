@@ -2,7 +2,8 @@
     <div class="row g-0 h-100">
         <div class="workout-panel col h-100 d-flex flex-column flex-grow-1 overflow-hidden">
             <!-- Header -->
-            <ItemPanelHeader :title="title" :sort="sort" :selectedDate="selectedDate"
+            <ItemPanelHeader v-show="showHead" 
+                             :title="title" :sort="sort" :selectedDate="selectedDate"
                              @onSortChange="onSortChange">
             </ItemPanelHeader>
             <WorkoutPanelDashboard v-if="activePanel == 'dashboard'"
@@ -42,10 +43,14 @@ export default {
     components: { ItemPanelHeader, WorkoutList, WorkoutForm, WorkoutPanelDashboard, ExerciseList },
     props: {
         selectedDate: Date,
-        selectedWorkoutID: Number
+        showHead: {
+            type: Boolean,
+            default: true
+        }
     },
     data: function () {
         return {
+            workoutStore: undefined,
             sort: {
                 by: 'Custom',
                 items: sortItems,
@@ -71,6 +76,14 @@ export default {
             this.sort.by = workoutPanelSortBy_Store;
         } else {
             localStorage.setItem(`workout-panel-sort-by`, this.sort.by);
+        }
+    },
+    computed: {
+        selectedWorkoutID() {
+            if (this.workoutStore) {
+                return this.workoutStore.selectedWorkoutID;
+            }
+            return undefined;
         }
     },
     methods: {
@@ -118,7 +131,7 @@ function setPanelHeader(props) {
 
 function selectWorkout(workoutID) {
     this.back();
-    this.$emit('selectWorkout', workoutID);
+    this.workoutStore.selectWorkout(workoutID);
 }
 
 function back() {

@@ -2,7 +2,8 @@
     <div class="row g-0 h-100">
         <div class="col h-100 d-flex flex-column">
             <div class="nutrition d-flex flex-column flex-grow-1 overflow-hidden">
-                <div class="head align-content-center">
+                <div v-show="showHead" 
+                     class="head align-content-center">
                     <span class="label">Nutrition</span>
                     <div class="d-flex flex-row justify-content-start ps-2">
                         <img class="icon-button"
@@ -89,7 +90,10 @@ export default {
     name: 'NutritionPanel',
     components: { MealItem, FoodItemSearch, NutrientChart },
     props: {
-        
+        showHead: {
+            type: Boolean,
+            default: true
+        } 
     },
     data: function () {
         return {

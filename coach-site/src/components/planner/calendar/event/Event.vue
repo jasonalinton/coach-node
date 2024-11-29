@@ -2,7 +2,7 @@
     <div class="event position-relative d-flex w-100"
          :class="[size, flexDirection, successStatus]"
          :style="{ 'top': `${top}px`, 'height': `${height}px`, 'z-index': 1, 'background-color': color}"
-            @click="$emit('selectEvent', _event)"
+            @click="selectEvent"
             @drop="onDrop($event)" @dragover.prevent @dragenter.prevent>
          <div class="title">
             {{ _event.text }}
@@ -15,6 +15,7 @@
 </template>
 
 <script>
+import { useAppStore } from '@/store/appStore'
 import { getDurationInMinutes, getTimeString } from '../../../../../utility/timeUtility';
 import { sortDesc } from '../../../../../utility';
 import { mapIterationToEvent, unmapTaskFromRoutineEvent, mapTodoToEvent } from '../../../../resolvers/planner-resolvers'
@@ -26,6 +27,15 @@ export default {
         _event: Object,
         minuteHeight: Number,
         zIndex: Number
+    },
+    data: function () {
+        return {
+            appStore: undefined,
+        }
+    },
+    created: function() {
+        this.appStore = useAppStore();
+       
     },
     computed: {
         minutes() { return getDurationInMinutes(new Date(this._event.startAt), new Date(this._event.endAt)); },
@@ -106,7 +116,8 @@ export default {
         onDrop,
         mapIterationToEvent,
         unmapTaskFromRoutineEvent,
-        mapTodoToEvent
+        mapTodoToEvent,
+        selectEvent
     }
 }
 
@@ -128,6 +139,11 @@ function onDrop(ev) {
             this.mapTodoToEvent(data.id, this._event.id, this.$apollo);
         } 
     }
+}
+
+function selectEvent() {
+    this.$emit('selectEvent', this._event)
+    this.appStore.setSelectedEvent(this._event);
 }
 </script>
 
