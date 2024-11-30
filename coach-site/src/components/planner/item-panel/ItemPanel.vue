@@ -122,10 +122,7 @@ export default {
     },
     computed: {
         selectedPanel() {
-            if (this.appStore) {
-                return this.appStore.selectedItemPanel;
-            }
-            return "dashboard";
+            return (this.appStore) ? this.appStore.itemPanel.selected : "todo";
         }
     },
     methods: {

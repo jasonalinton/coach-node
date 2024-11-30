@@ -5,8 +5,7 @@
         <Event v-for="(_event, index) in events" :key="index"
                :_event="_event"
                :minuteHeight="minuteHeight"
-               :zIndex="zIndex"
-                @selectEvent="$emit('selectEvent', $event)">
+               :zIndex="zIndex">
         </Event>
     </div>
 </template>

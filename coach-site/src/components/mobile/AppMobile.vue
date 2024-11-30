@@ -4,7 +4,7 @@
             <MobileNavbar />
         </div>
         <div class="calendar" :class="[{'collapse': !showCalendar}]">
-            <CalendarMobile class="mt-1 mb-1" />
+            <CalendarMobile  />
         </div>
         <div class="item-panel-tabbar" :class="[{'collapse': !showTabBar}]">
             <ItemPanelTabBar />

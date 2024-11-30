@@ -6,6 +6,7 @@
         <TodoPanel v-show="selectedPanel == 'todo'" class="item-panel" :showHead="false" />
         <RoutinePanel v-show="selectedPanel == 'routine'" class="item-panel" :showHead="false"/>
         <TaskRoutinePanel v-show="selectedPanel == 'task-routine'" class="item-panel" :showHead="false"/>
+        <PlannerPanel v-show="selectedPanel == 'planner'" class="item-panel" :dayCount="2" :showHead="false"/>
         <EventPanel v-show="selectedPanel == 'event'" :props="eventPanelProps" class="item-panel" :showHead="false"/>
         <InventoryPanel v-show="selectedPanel == 'inventory'" class="item-panel" :showHead="false"/>
         <NutritionPanel v-show="selectedPanel == 'nutrition'" class="item-panel" :showHead="false"/>
@@ -23,6 +24,7 @@ import GoalPanel from '../../planner/item-panel/goal/GoalPanel.vue'
 import TodoPanel from '../../planner/item-panel/todo/TodoPanel.vue'
 import RoutinePanel from '../../planner/item-panel/routine/RoutinePanel.vue'
 import TaskRoutinePanel from '../../planner/item-panel/TaskRoutinePanel.vue'
+import PlannerPanel from '../../planner/item-panel/planner/PlannerPanel.vue'
 import EventPanel from '../../planner/item-panel/event/EventPanel.vue'
 import InventoryPanel from '../../planner/item-panel/inventory/InventoryPanel.vue'
 import NutritionPanel from '../../planner/item-panel/nutrition/NutritionPanel.vue'
@@ -31,7 +33,7 @@ import WorkoutPanel from '../../planner/item-panel/workout/WorkoutPanel.vue'
 export default {
     name: 'MobileItemTabPanel',
     components: { DashboardPanel, MetricPanel, GoalPanel, TodoPanel, RoutinePanel, TaskRoutinePanel, 
-        EventPanel, InventoryPanel, NutritionPanel, WorkoutPanel },
+        PlannerPanel, EventPanel, InventoryPanel, NutritionPanel, WorkoutPanel },
     props: {
         
     },
@@ -50,7 +52,7 @@ export default {
     computed: {
         selectedPanel() {
             if (this.appStore) {
-                return this.appStore.selectedItemPanel;
+                return this.appStore.itemPanel.selected;
             }
             return "";
         }

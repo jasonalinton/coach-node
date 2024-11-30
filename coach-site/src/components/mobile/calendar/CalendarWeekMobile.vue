@@ -1,7 +1,7 @@
 <template>
-    <div class="week-toolbar d-flex flex-row flex-grow-1 justify-content-evenly">
+    <div class="week-toolbar d-flex flex-row flex-grow-1 justify-content-between">
         <div v-for="(dow, index) in daysOfWeek" :key="index" 
-             class="dow d-flex flex-column" :class="[getPointInTime(dow), { 'selected': isSelected(dow)}]"
+             class="dow d-flex flex-column pt-1 pb-1" :class="[getPointInTime(dow), { 'selected': isSelected(dow)}]"
              @click="selectDate(dow.dateObject)">
             <span class="day">{{ dow.dow }}</span>
             <span class="date">{{ dow.date }}</span>
@@ -30,9 +30,7 @@ export default {
     },
     computed: {
         initialDate() {
-            let date = today(new Date());
-            this.selectDate(date);
-            return date;
+            return this.selectedDate;
         },
         daysOfWeek() {
             let date = firstDayOfWeek(this.initialDate);
@@ -91,6 +89,11 @@ export default {
 .date {
     font-size: 10px;
 }
+
+.dow {
+    width: 50px;
+}
+
 .dow:hover {
     background-color: #F1F3F4;
 }
@@ -98,7 +101,7 @@ export default {
 .dow.present {
     background-color: #1A73E8;
     color: white;
-    font-weight: 800;
+    /* font-weight: 800; */
 }
 
 .dow.selected:not(.present) {

@@ -142,7 +142,6 @@ function onDrop(ev) {
 }
 
 function selectEvent() {
-    this.$emit('selectEvent', this._event)
     this.appStore.setSelectedEvent(this._event);
 }
 </script>

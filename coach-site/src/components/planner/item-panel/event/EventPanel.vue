@@ -7,16 +7,19 @@
                              :sort="sort" 
                              @onSortChange="onSortChange" />
             <!-- Body -->
-            <EventPanelByDate v-if="activeType.toLowerCase() == 'sortby' && sort.by=='Metric'"></EventPanelByDate>
-            <EventTodoPanel v-if="activeType.toLowerCase() == 'todo'" :_event="selectedEvent" />
-            <EventRoutinePanel v-if="activeType.toLowerCase() == 'routine'" :_event="selectedEvent" />
+            <EventTodoPanel v-if="type == EVENTTYPE.TODO" 
+                            :_event="eventt" />
+            <EventRoutinePanel v-if="type == EVENTTYPE.ROUTINE"
+                               :_event="eventt" />
         </div>
     </div>
 </template>
 
 <script>
+import { useAppStore } from '@/store/appStore'
+import { EVENTTYPE } from '../../../../model/constants';
 import ItemPanelHeader from '../component/ItemPanelHeader.vue';
-import EventPanelByDate from './EventPanelByDate.vue';
+// import EventPanelByDate from './EventPanelByDate.vue';
 import EventTodoPanel from './EventTodoPanel.vue';
 import EventRoutinePanel from './EventRoutinePanel.vue';
 
@@ -35,7 +38,7 @@ var sortItems = [
 
 export default {
     name: 'EventPanel',
-    components: { ItemPanelHeader, EventPanelByDate, EventTodoPanel, EventRoutinePanel },
+    components: { ItemPanelHeader, EventTodoPanel, EventRoutinePanel },
     props: {
         props: Object,
         showHead: {
@@ -45,6 +48,8 @@ export default {
     },
     data: function () {
         return {
+            appStore: undefined,
+            EVENTTYPE: { ...EVENTTYPE },
             activeType: 'SortBy',
             sort: {
                 by: 'Date',
@@ -54,6 +59,7 @@ export default {
         }
     },
     created: function() {
+        this.appStore = useAppStore();
         let eventPanelSortBy_Store = localStorage.getItem(`event-panel-sort-by`);
         if (eventPanelSortBy_Store) {
             this.sort.by = eventPanelSortBy_Store;
@@ -62,9 +68,12 @@ export default {
         }
     },
     computed: {
-        selectedItem() {
-            return (this.appStore) ? this.appStore.calendarMobile.type : undefined;
-        }
+        type() { 
+            return (this.appStore) ? this.appStore.itemPanel.event.type : undefined; 
+        },
+        eventt() { 
+            return (this.appStore) ? this.appStore.itemPanel.event.event : undefined; 
+        },
     },
     methods: {
         onSortChange

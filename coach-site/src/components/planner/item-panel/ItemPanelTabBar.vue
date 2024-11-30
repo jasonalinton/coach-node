@@ -13,9 +13,9 @@
             <div :style="{ 'width': '12px', 'height': '40px', 'background-color': '#4285F4', 'margin-left': '3px', 'border-radius': '4px'}"></div></div>
         </div>
         <div class="d-flex flex-row mb-1">
-            <img class="routine" :class="[{ active: selectedPanel == 'routine' }]" src='/icon/routine-icon.png' width="40" height="40"
-                    @click="setSelectedPanel('routine')"/>
-            <div v-if="selectedPanel == 'routine'">
+            <img class="planner" :class="[{ active: selectedPanel == 'planner' }]" src='/icon/routine-icon.png' width="40" height="40"
+                    @click="setSelectedPanel('planner')"/>
+            <div v-if="selectedPanel == 'planner'">
             <div :style="{ 'width': '12px', 'height': '40px', 'background-color': '#4C6EF5', 'margin-left': '3px', 'border-radius': '4px'}"></div></div>
         </div>
         <div class="d-flex flex-row mb-1">
@@ -77,10 +77,7 @@ export default {
     },
     computed: {
         selectedPanel() {
-            if (this.appStore) {
-                return this.appStore.selectedItemPanel;
-            }
-            return "dashboard";
+            return (this.appStore) ? this.appStore.itemPanel.selected : "dashboard";
         }
     },
     methods: {

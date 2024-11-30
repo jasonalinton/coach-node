@@ -25,7 +25,8 @@ export const useAppStore = defineStore('app', {
         itemPanel: {
             selected: "todo",
             event: {
-                selected: undefined
+                type: undefined,
+                event: undefined
             }
         }
     }),
@@ -48,18 +49,23 @@ export const useAppStore = defineStore('app', {
             this.windowOuterHeight = height;
         },
         setSelectedItemPanel(panel) {
-            this.selectedItemPanel = panel;
+            this.itemPanel.selected = panel;
         },
         async setSelectedEvent(eevent) {
+            console.log("hi");
             if (eevent.type.id == EVENTTYPE.WORKOUT) {
                 let workoutStore = useWorkoutStore();
                 let workoutID = await getWorkoutIDFromEvent(eevent.id);
                 workoutStore.selectWorkout(workoutID);
-                this.selectedItemPanel = "workout";
+                this.itemPanel.selected = "event";
             } else if (eevent.type.id == EVENTTYPE.TODO) {
-                this.selectedItemPanel = "event"
+                this.itemPanel.selected = "event";
+                this.itemPanel.event.type = EVENTTYPE.TODO;
+                this.itemPanel.event.event = eevent;
             } else if (eevent.type.id == EVENTTYPE.ROUTINE) {
-                this.selectedItemPanel = "event"
+                this.itemPanel.selected = "event";
+                this.itemPanel.event.type = EVENTTYPE.ROUTINE;
+                this.itemPanel.event.event = eevent;
             }
         },
         toggleTabBar() {
