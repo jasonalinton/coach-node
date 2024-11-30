@@ -1,20 +1,18 @@
 <template>
     <nav id="navbar" class="navbar navbar-expand-sm navbar-light">
-        <div class="container-fluid d-flex flex-row">
+        <div class="d-flex flex-row justify-content-between w-100">
             <div class="d-flex flex-row">
-                <div class="d-flex flex-row">
-                    <IconButton class="icon menu-button float-left" src="/icon/menu-button.png" :width="40" :height="40"
-                                @click="toggleTabBar" />
-                    <a class="navbar-brand float-left" href="#">Coach</a>
-                </div>
-                <div class="d-flex flex-row">
-                    <button class="btn btn-sm" type="button" @click="$emit('selectPage', 'planner')">Planner</button>
-                    <button class="btn btn-sm" type="button" @click="$emit('selectPage', 'items')">Items</button>
-                    <button class="btn btn-sm" type="button" @click="$emit('selectPage', 'metrics')">Metrics</button>
-                </div>
-                <img class="icon calendar-button float-left" src="/icon/planner-icon.png" :width="36" :height="36"
-                     @click="toggleCalendar"/>
+                <IconButton class="icon menu-button float-left" src="/icon/menu-button.png" :width="40" :height="40"
+                            @click="toggleTabBar" />
+                <a class="navbar-brand float-left" href="#">Coach</a>
             </div>
+            <div class="d-flex flex-row">
+                <button class="btn btn-sm" type="button" @click="$emit('selectPage', 'planner')">Planner</button>
+                <button class="btn btn-sm" type="button" @click="$emit('selectPage', 'items')">Items</button>
+                <button class="btn btn-sm" type="button" @click="$emit('selectPage', 'metrics')">Metrics</button>
+            </div>
+            <img class="icon calendar-button float-left" src="/icon/planner-icon.png" :width="36" :height="36"
+                    @click="toggleCalendar"/>
         </div>
     </nav>
 </template>
@@ -65,6 +63,7 @@ function toggleCalendar() {
     padding: 0 0 7px 0;
     padding-bottom: 7px;
     line-height: 38px;
+    width: 100%;
 }
 
 .navbar-brand {
@@ -76,6 +75,7 @@ function toggleCalendar() {
 }
 
 .menu-button {
+    margin-left: 8px;
     margin-right: 12px;
 }
 </style>

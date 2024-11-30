@@ -4,7 +4,7 @@
             <MobileNavbar />
         </div>
         <div class="calendar" :class="[{'collapse': !showCalendar}]">
-            <CalendarMobile class="mt-2" />
+            <CalendarMobile class="mt-1 mb-1" />
         </div>
         <div class="item-panel-tabbar" :class="[{'collapse': !showTabBar}]">
             <ItemPanelTabBar />
@@ -53,7 +53,7 @@ export default {
         },
         showCalendar() {
             if (this.appStore) {
-                return this.appStore.isMobileCalendarShown;
+                return this.appStore.calendarMobile.isShown;
             }
             return false;
         }
@@ -99,6 +99,7 @@ export default {
 .calendar {
     grid-row: 2;
     grid-column: 1 / span 2;
+    border-bottom: 1px solid rgba(220, 220, 220, .5);
 }
 
 .item-panel-tabbar {

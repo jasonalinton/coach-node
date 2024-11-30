@@ -62,3 +62,8 @@ export let EVENTTYPE = {
     TIME: 137,
     REPETITIVE: 138
 };
+
+export let CALENDAR_TYPES = {
+    WEEK: "week",
+    MONTH: "month"
+};

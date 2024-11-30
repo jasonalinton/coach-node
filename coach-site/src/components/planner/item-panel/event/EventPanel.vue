@@ -61,6 +61,11 @@ export default {
             localStorage.setItem(`event-panel-sort-by`, this.sort.by);
         }
     },
+    computed: {
+        selectedItem() {
+            return (this.appStore) ? this.appStore.calendarMobile.type : undefined;
+        }
+    },
     methods: {
         onSortChange
     },
