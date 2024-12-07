@@ -57,7 +57,7 @@ export const useAppStore = defineStore('app', {
                 let workoutStore = useWorkoutStore();
                 let workoutID = await getWorkoutIDFromEvent(eevent.id);
                 workoutStore.selectWorkout(workoutID);
-                this.itemPanel.selected = "event";
+                this.itemPanel.selected = "workout";
             } else if (eevent.type.id == EVENTTYPE.TODO) {
                 this.itemPanel.selected = "event";
                 this.itemPanel.event.type = EVENTTYPE.TODO;
