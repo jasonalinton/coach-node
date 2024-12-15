@@ -79,8 +79,8 @@ export const useAppStore = defineStore('app', {
                 this.calendarMobile.type = CALENDAR_TYPES.MONTH;
                 this.calendarMobile.isShown = true;
             } else if (this.calendarMobile.type == CALENDAR_TYPES.MONTH) {
+                this.calendarMobile.type = undefined;
                 this.calendarMobile.isShown = false;
-                this.calendarMobile.type = CALENDAR_TYPES.WEEK;
             }
 
         },

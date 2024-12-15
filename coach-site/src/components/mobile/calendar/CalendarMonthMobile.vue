@@ -167,10 +167,11 @@ function next() {
 <style scoped>
 .thumbnail-calendar {
     background-color: white;
-    width: 224px;
+    width: 378px;
     /* height: 192px; */
     margin: 0 auto;
     padding: 4px;
+    padding-top: 10px;
 }
 
 .month, .year {
@@ -207,14 +208,14 @@ button.today:hover {
     background-color: rgba(60, 64, 67, .08);
 }
 .pill {
-    width: 24px;
-    height: 24px;
-    border-radius: 12px;
+    width: 30px;
+    height: 30px;
+    border-radius: 15px;
     font-weight: 500;
     font-size: 10px;
-    line-height: 24px;
+    line-height: 30px;
     text-align: center;
-    margin: 2px 3px;
+    margin: 2px 12px;
     user-select: none;
 }
 </style>

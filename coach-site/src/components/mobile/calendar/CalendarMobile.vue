@@ -1,5 +1,5 @@
 <template>
-    <div class="calendar-mobile">
+    <div class="calendar-mobile" :class="{ week: calendarType == CALENDAR_TYPES.WEEK, month: calendarType == CALENDAR_TYPES.MONTH }">
         <CalendarWeekMobile v-if="calendarType == CALENDAR_TYPES.WEEK"/>
         <CalendarMonthMobile v-if="calendarType == CALENDAR_TYPES.MONTH"/>
     </div>
@@ -40,5 +40,16 @@ export default {
 </script>
 
 <style scoped>
+.calendar-mobile {
+    transition: height .5s;
+    height: 0px;
+}
 
+.calendar-mobile.week {
+    height: 47px;
+}
+
+.calendar-mobile.month {
+    height: 240px;
+}
 </style>

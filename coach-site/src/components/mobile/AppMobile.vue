@@ -3,7 +3,7 @@
         <div class="navbar">
             <MobileNavbar />
         </div>
-        <div class="calendar" :class="[{'collapse': !showCalendar}]">
+        <div class="calendar" :class="[{'empty': !showCalendar}]">
             <CalendarMobile  />
         </div>
         <div class="item-panel-tabbar" :class="[{'collapse': !showTabBar}]">
@@ -100,6 +100,10 @@ export default {
     grid-row: 2;
     grid-column: 1 / span 2;
     border-bottom: 1px solid rgba(220, 220, 220, .5);
+}
+
+.calendar.empty {
+    border: none;
 }
 
 .item-panel-tabbar {
