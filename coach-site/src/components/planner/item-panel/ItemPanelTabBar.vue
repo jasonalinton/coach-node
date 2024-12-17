@@ -1,5 +1,5 @@
 <template>
-    <div class="item-panel-tab-bar" :style="{'width': '56px', 'padding-left': '8px', 'overflow': 'hidden'}">
+    <div class="item-panel-tab-bar" :class="{ 'hidden': !isTabBarShown }">
         <div class="d-flex flex-row mb-1">
             <img class="dashboard" :class="[{ active: selectedPanel == 'dashboard' }]" src='/icon/dashboard-icon.png' width="40" height="40" :style="{'margin-top': '8px'}"
                     @click="setSelectedPanel('dashboard')"/>
@@ -78,7 +78,13 @@ export default {
     computed: {
         selectedPanel() {
             return (this.appStore) ? this.appStore.itemPanel.selected : "dashboard";
-        }
+        },
+        isTabBarShown() {
+            if (this.appStore) {
+                return this.appStore.isTabBarShown;
+            }
+            return true;
+        },
     },
     methods: {
         setSelectedPanel
@@ -93,8 +99,16 @@ function setSelectedPanel(panel) {
 
 <style scoped>
 .item-panel-tab-bar {
+    transition: width .5s;
+    width: 48px;
+    overflow: hidden;
     border-right: 1px solid rgba(220, 220, 220, .5);
     height: 100%;
+}
+
+.item-panel-tab-bar.hidden {
+    width: 0px;
+    border-right: none;
 }
 
 img.dashboard:hover, img.dashboard.active {
@@ -112,7 +126,7 @@ img.goal:hover, img.goal.active {
     border-radius: 20px;
 }
 
-img.routine:hover, img.routine.active {
+img.planner:hover, img.planner.active {
     background-color: rgba(144, 19, 254, .08);
     border-radius: 20px;
 }

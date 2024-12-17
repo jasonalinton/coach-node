@@ -6,7 +6,7 @@
         <div class="calendar" :class="[{'empty': !showCalendar}]">
             <CalendarMobile  />
         </div>
-        <div class="item-panel-tabbar" :class="[{'collapse': !showTabBar}]">
+        <div class="item-panel-tabbar">
             <ItemPanelTabBar />
         </div>
         <div class="tab-panel d-flex">
@@ -83,11 +83,7 @@ export default {
     display: grid;
     /* gap: 20px; */
     grid-template-rows: 64px auto 1fr 0;
-    grid-template-columns: 0px auto
-}
-
-.show-tab-bar {
-    grid-template-columns: 57px auto
+    grid-template-columns: auto 1fr;
 }
 
 .navbar {
@@ -109,7 +105,8 @@ export default {
 .item-panel-tabbar {
     grid-row: 3;
     grid-column: 1;
-    height: 100%
+    height: 100%;
+    padding-left: 8px;
 }
 
 .tab-panel {

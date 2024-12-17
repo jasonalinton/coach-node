@@ -82,7 +82,6 @@ export const useAppStore = defineStore('app', {
                 this.calendarMobile.type = undefined;
                 this.calendarMobile.isShown = false;
             }
-
         },
         setCalendarMobileType(type) {
             if (type == CALENDAR_TYPES.WEEK) {
