@@ -41,7 +41,7 @@ export default {
 
 <style scoped>
 .calendar-mobile {
-    transition: height .5s;
+    transition: height .3s;
     height: 0px;
 }
 

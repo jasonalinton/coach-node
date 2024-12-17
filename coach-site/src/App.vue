@@ -222,6 +222,10 @@ function onResize() {
 
 
 <style>
+:root {
+    --background-color: #ffffff
+}
+
 body { 
     overflow-x: hidden;
 }

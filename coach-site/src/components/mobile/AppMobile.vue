@@ -106,7 +106,6 @@ export default {
     grid-row: 3;
     grid-column: 1;
     height: 100%;
-    padding-left: 8px;
 }
 
 .tab-panel {
