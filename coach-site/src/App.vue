@@ -135,7 +135,7 @@ export default {
         },
         selectedItemPanel() {
             if (this.appStore) {
-                return this.appStore.selectedItemPanel;
+                return this.appStore.itemPanel.selected;
             }
             return "todo";
         }
