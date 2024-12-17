@@ -96,12 +96,17 @@ export let timeframes = [
     {
         id: 55,
         text: "Year",
-        isActive: false
+        isActive: true
+    },
+    {
+        id: 56,
+        text: "Milestone",
+        isActive: true
     },
     {
         id: 57,
         text: "Life",
-        isActive: false
+        isActive: true
     },
 ];
 

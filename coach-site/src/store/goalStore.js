@@ -66,6 +66,24 @@ export const useGoalStore = defineStore('goal', {
                     return goals;
                 });
         },
+        getGoalsInTimeframe(timeFrameID, datetime) {
+            var goals = this.goals.filter(goal => {
+                var index = goal.timePairs.findIndex(timePair => {
+                    if (timePair.idTimeframe != timeFrameID) {
+                        return false;
+                    }
+
+                    let start = (timePair.startTime) ? new Date(timePair.startTime.dateTime) : undefined
+                    let end = (timePair.endTime) ? new Date(timePair.endTime.dateTime) : undefined
+                    if ((start && +start <= +datetime) && (end && +end >= +datetime)) {
+                        return true;
+                    }
+                    return false;
+                });
+                return index > -1;
+            });
+            return goals;
+        },
         repositionItem(parentType, itemType, goalID, metricID, newPosition) {
             repositionItem(parentType, itemType, goalID, metricID, newPosition);
         },

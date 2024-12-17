@@ -93,7 +93,7 @@ import { clone, toDateString } from '../../../../../utility'
 import { MOMENT } from '../../../../model/constants'
 import { saveGoalTimePair } from '../../../../api/goalAPI'
 import { saveTodoTimePair } from '../../../../api/todoAPI'
-import { timeModelToString, firstDayOfWeek, lastDayOfWeek, firstDayOfMonth, lastDayOfMonth, endOfDay } from '../../../../../utility/timeUtility'
+import { timeModelToString, firstDayOfWeek, lastDayOfWeek, firstDayOfMonth, lastDayOfMonth, endOfDay, firstDayOfYear, lastDayOfYear } from '../../../../../utility/timeUtility'
 import { TIMEFRAME } from '../../../../model/constants'
 import { timeframes, inheritanceTypes } from '../../../../model/types'
 
@@ -198,6 +198,14 @@ function setTimeframe() {
         } else if (end) {
             start.dateTime = firstDayOfMonth(end.dateTime).toISOString();
             end.dateTime = endOfDay(lastDayOfMonth(end.dateTime)).toISOString();
+        }
+    } else if (value == this.TIMEFRAME.YEAR) {
+        if (start) {
+            start.dateTime = firstDayOfYear(start.dateTime).toISOString();
+            end.dateTime = endOfDay(lastDayOfYear(start.dateTime)).toISOString();
+        } else if (end) {
+            start.dateTime = lastDayOfYear(end.dateTime).toISOString();
+            end.dateTime = endOfDay(lastDayOfYear(end.dateTime)).toISOString();
         }
     }
 }
