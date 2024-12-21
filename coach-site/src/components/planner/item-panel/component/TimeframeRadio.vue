@@ -2,7 +2,7 @@
     <div class="d-flex flex-column">
         <div v-if="isToggle" class="btn-group" role="group" :aria-label="`moment`">
             <template v-for="timeframe in timeframesFirstRow">
-                <input :key="timeframe.id" type="checkbox" class="btn-check" 
+                <input :key="-timeframe.id" type="checkbox" class="btn-check" 
                        :id="`${timeframe.text}-${container}`" :checked="isSelected(timeframe.id)" 
                        @change="toggleTimeframe(timeframe.id)" />
                 <label :key="timeframe.id" class="btn btn-outline-primary" :for="`${timeframe.text}-${container}`">{{ timeframe.text }}</label>
@@ -11,7 +11,7 @@
                 <input :key="timeframe.id" type="checkbox" class="btn-check" 
                        :id="`${timeframe.text}-${container}`" :checked="isSelected(timeframe.id)" 
                        @change="toggleTimeframe(timeframe.id)" />
-                <label :key="timeframe.id" class="btn btn-outline-primary" :for="`${timeframe.text}-${container}`">{{ timeframe.text }}</label>
+                <label :key="-timeframe.id" class="btn btn-outline-primary" :for="`${timeframe.text}-${container}`">{{ timeframe.text }}</label>
             </template>
         </div>
         <div v-if="!isToggle" class="btn-group" role="group" :aria-label="`moment`">

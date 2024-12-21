@@ -92,7 +92,7 @@ export default {
 }
 
 function setSelectedPanel(panel) {
-    this.appStore.setSelectedItemPanel(panel);
+    this.appStore.onItemPanelTabButtonClicked(panel);
 }
 
 </script>

@@ -2,48 +2,26 @@
     <div class="row g-0 h-100">
         <div class="col h-100 d-flex flex-column flex-grow-1 overflow-hidden">
             <!-- Header -->
-            <ItemPanelHeader v-show="showHead" 
-                             :title="'todos'" 
-                             :sort="sort"
-                             @onSortChange="onSortChange">
-                <div class="d-flex flex-row justify-content-end pe-2 mt-auto">
-                    <img class="header-button me-1" :class="{ active: showRepeat }"
-                        src='/icon/repeat.png' width="16" height="16"
-                        @click.prevent="showRepeat = !showRepeat"/>
-                    <img class="header-button me-1" :class="{ active: showTimeline }"
-                        src='/icon/timeline.png' width="16" height="16"
-                        @click.prevent="showTimeline = !showTimeline"/>
-                    <img class="header-button me-1" :class="{ active: showRecommended }"
-                        src='/icon/thumbs-up.png' width="16" height="16"
-                        @click.prevent="showRecommended = !showRecommended"/>
-                    <img class="header-button me-1" :class="{ active: showHierarchy }"
-                        src='/icon/hierarchy.png' width="16" height="16"
-                        @click.prevent="showHierarchy = !showHierarchy"/>
-                </div>
-            </ItemPanelHeader>
+            <TodoPanelHeader v-show="showHead" />
             <template v-if="!iteration_Form">
-                <TodoPanelByMetric v-if="sort.by=='Metric'" 
+                <TodoPanelByMetric v-if="sortBy=='Metric'" 
                                    :selectedDate="selectedDate"
                                    @editIteration="iteration => iteration_Form = iteration">
                 </TodoPanelByMetric>
-                <TodoPanelByDate v-if="sort.by=='Date'" 
+                <TodoPanelByDate v-if="sortBy=='Date'" 
                                  :selectedDate="selectedDate"
                                  @editIteration="iteration => iteration_Form = iteration">
                 </TodoPanelByDate>
-                <TodoPanelByRepetition v-if="sort.by=='Repetition'" 
+                <TodoPanelByRepetition v-if="sortBy=='Repetition'" 
                                        :selectedDate="selectedDate"
                                        @editIteration="iteration => iteration_Form = iteration">
                 </TodoPanelByRepetition>
-                <TodoPanelByCustom v-if="sort.by=='Custom'" 
+                <TodoPanelByCustom v-if="sortBy=='Custom'" 
                                    :selectedDate="selectedDate"
                                    @editIteration="iteration => iteration_Form = iteration">
                 </TodoPanelByCustom>
-                <TodoPanelDefault v-if="sort.by=='Default'" 
+                <TodoPanelDefault v-if="sortBy=='Default'" 
                                     :selectedDate="selectedDate"
-                                    :showRepeat="showRepeat"
-                                    :showTimeline="showTimeline"
-                                    :showRecommended="showRecommended"
-                                    :showHierarchy="showHierarchy"
                                     @editIteration="iteration => iteration_Form = iteration">
                 </TodoPanelDefault>
             </template>
@@ -56,7 +34,7 @@
 </template>
 
 <script>
-import ItemPanelHeader from '../component/ItemPanelHeader.vue';
+import TodoPanelHeader from './TodoPanelHeader.vue';
 import TodoPanelByMetric from './TodoPanelByMetric.vue';
 import TodoPanelByDate from './TodoPanelByDate.vue';
 import TodoPanelByRepetition from './TodoPanelByRepetition.vue';
@@ -65,17 +43,9 @@ import TodoPanelDefault from './TodoPanelDefault.vue';
 import IterationForm from '../component/form/IterationForm.vue';
 import { today } from '../../../../../utility/timeUtility';
 
-var sortItems = [
-    { id: 1, text: "Metric" },
-    { id: 2, text: "Date" },
-    { id: 3, text: "Repetition" },
-    { id: 4, text: "Custom" },
-    { id: 5, text: "Default" },
-];
-
 export default {
     name: 'TodoPanel',
-    components: { ItemPanelHeader, TodoPanelByMetric, TodoPanelByDate, TodoPanelByRepetition,
+    components: { TodoPanelHeader, TodoPanelByMetric, TodoPanelByDate, TodoPanelByRepetition,
         TodoPanelByCustom, TodoPanelDefault, IterationForm, },
     props: {
         showHead: {
@@ -85,28 +55,17 @@ export default {
     },
     data: function () {
         return {
+            appStore: undefined,
             plannerStore: undefined,
-            sort: {
-                by: 'Default',
-                items: sortItems,
-            },
             iteration_Form: null,
-            showRepeat: true,
-            showTimeline: false,
-            showRecommended: true,
-            showHierarchy: true
         }
     },
     created: async function() {
+        let appStore = await import(`@/store/appStore`);
+        this.appStore = appStore.useAppStore();
+
         let plannerStore = await import(`@/store/plannerStore`);
         this.plannerStore = plannerStore.usePlannerStore();
-
-        let todoPanelSortBy_Store = localStorage.getItem(`todo-panel-sort-by`);
-        if (todoPanelSortBy_Store) {
-            this.sort.by = todoPanelSortBy_Store;
-        } else {
-            localStorage.setItem(`todo-panel-sort-by`, this.sort.by);
-        }
     },
     computed: {
         selectedDate() {
@@ -114,16 +73,17 @@ export default {
                 return this.plannerStore.selectedDate;
             }
             return today();
+        },
+        sortBy() {
+            if (this.appStore) {
+                return this.appStore.itemPanel.todo.sort.by;
+            }
+            return undefined;
         }
     },
     methods: {
-        onSortChange
+        
     },
-}
-
-function onSortChange(sortBy) {
-    this.sort.by = sortBy;
-    localStorage.setItem(`todo-panel-sort-by`, sortBy);
 }
 </script>
 

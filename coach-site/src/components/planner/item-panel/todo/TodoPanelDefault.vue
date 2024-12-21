@@ -106,13 +106,10 @@ export default {
     components: { AddTaskButton, ItemCheckbox, HierarchicalListItem },
     props: {
         selectedDate: Date,
-        showRepeat: Boolean,
-        showTimeline: Boolean,
-        showRecommended: Boolean,
-        showHierarchy: Boolean,
     },
     data: function () {
         return {
+            appStore: undefined,
             iterationStore: undefined,
             todoStore: undefined,
             TIMEFRAME: clone(TIMEFRAME),
@@ -120,6 +117,8 @@ export default {
         }
     },
     created: async function() {
+        let appStore = await import(`@/store/appStore`);
+        this.appStore = appStore.useAppStore();
         let todoStore = await import(`@/store/todoStore`);
         this.todoStore = todoStore.useTodoStore();
         let iterationStore = await import(`@/store/iterationStore`);
@@ -212,7 +211,19 @@ export default {
         },
         completeCount() {
             return this.todayComplete.length + this.weekComplete.length;
-        }
+        },
+        showRepeat() {
+            return (this.appStore) ? this.appStore.itemPanel.todo.showRepeat : undefined;
+        },
+        showTimeline() {
+            return (this.appStore) ? this.appStore.itemPanel.todo.showTimeline : undefined;
+        },
+        showRecommended() {
+            return (this.appStore) ? this.appStore.itemPanel.todo.showRecommended : undefined;
+        },
+        showHierarchy() {
+            return (this.appStore) ? this.appStore.itemPanel.todo.showHierarchy : undefined;
+        },
     },
     methods: {
         initNewTask() {

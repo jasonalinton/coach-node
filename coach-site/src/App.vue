@@ -131,7 +131,7 @@ export default {
             return (this.showLeft) ? `show-left-panel` : 'hide-left-panel'
         },
         itemPanelVisibility() {
-            return (this.selectedItemPanel) ? 'show-item-panel' : 'hide-item-panel'
+            return (this.appStore.itemPanel.selected) ? 'show-item-panel' : 'hide-item-panel'
         },
         selectedItemPanel() {
             if (this.appStore) {
