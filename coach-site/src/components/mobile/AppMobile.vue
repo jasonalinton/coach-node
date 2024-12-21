@@ -1,6 +1,6 @@
 <template>
     <div class="app-mobile grid-container-mobile" :class="[{'show-tab-bar': showTabBar}]" >
-        <div class="navbar">
+        <div class="navbar-mobile">
             <MobileNavbar />
         </div>
         <div class="calendar" :class="[{'empty': !showCalendar}]">
@@ -86,7 +86,7 @@ export default {
     grid-template-columns: auto 1fr;
 }
 
-.navbar {
+.navbar-mobile {
     /* background-color: darkcyan; */
     grid-row: 1;
     grid-column: 1 / span 2;

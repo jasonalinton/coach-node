@@ -1,25 +1,29 @@
 <template>
-    <div class="row g-0">
-        <div class="col">
-            <div class="header d-flex flex-row justify-content-between">
-                <div class="d-flex flex-column">
-                    <h1>{{ title }}</h1>
-                    <select class="form-select panel-select" aria-label="select" @change="onSortChange" v-model="sortBy">
-                        <option v-for="sortItem in sortItems" v-bind:key="sortItem.id" :value="sortItem.text">{{sortItem.text}}</option> 
-                    </select>
-                </div>
-                <!-- <IconButton src="/icon/hierarchy-icon.png" :width="40" :height="40"></IconButton> -->
-                <slot></slot>
+    <div class="header d-flex flex-row justify-content-between">
+        <div class="d-flex flex-row">
+            <NavbarMenuButton v-if="isExtraSmall" class="float-left" />
+            <div class="labels d-flex flex-column">
+                <h1>{{ title }}</h1>
+                <select class="form-select panel-select" aria-label="select" @change="onSortChange" v-model="sortBy">
+                    <option v-for="sortItem in sortItems" v-bind:key="sortItem.id" :value="sortItem.text">{{sortItem.text}}</option> 
+                </select>
             </div>
+
+        </div>
+        <div class="d-flex flex-row">
+            <slot></slot>
+            <NavbarCalendarButton v-if="isExtraSmall" />
         </div>
     </div>
 </template>
 
 <script>
-// import IconButton from '../../../controls/button/IconButton.vue';
+import { useAppStore } from '@/store/appStore'
+import NavbarMenuButton from '../../../mobile/navbar/NavbarMenuButton.vue';
+import NavbarCalendarButton from '../../../mobile/navbar/NavbarCalendarButton.vue';
 
 export default {
-    components: {  },
+    components: { NavbarMenuButton, NavbarCalendarButton },
     name: 'ItemPanelHeader',
     props: {
         title: String,
@@ -28,9 +32,21 @@ export default {
     },
     data: function () {
         return {
+            appStore: undefined,
             sortBy: this.sort.by,
             sortItems: this.sort.items
         }
+    },
+    created: function() {
+        this.appStore = useAppStore();
+    },
+    computed: {
+        isExtraSmall() {
+            if (this.appStore) {
+                return this.appStore.isExtraSmall;
+            }
+            return true;
+        },
     },
     methods: {
         onSortChange,
@@ -44,19 +60,25 @@ function onSortChange() {
 
 <style scoped>
 .header {
-    /* padding: 12px 8px; */
-    padding-top: 12px;
-    /* padding-left: 16px; */
-    padding-right: 8px;
+    padding-top: 8px;
     padding-bottom: 7px;
     padding-bottom: 7px;
     border-bottom: 1px solid rgba(220, 220, 220, .5);
 }
 
+.labels {
+    margin-top: 4px;
+}
+
+.menu-button {
+    margin-left: 8px;
+    margin-right: 12px;
+}
+
 h1 {
     text-transform: uppercase;
     text-align: start;
-    margin-left: 8px;
+    margin-left: 12px;
     font-size: 16px;
     line-height: 16px;
     margin-bottom: 0px;
@@ -64,11 +86,6 @@ h1 {
 }
 
 .panel-select {
-    /* padding-top: 4px;
-    padding-bottom: 4px;
-    padding-left: 8px;
-    padding-right: 14px; */
-    /* margin-left: -6px; */
     font-size: 14px;
     line-height: 16px;
     border: none;

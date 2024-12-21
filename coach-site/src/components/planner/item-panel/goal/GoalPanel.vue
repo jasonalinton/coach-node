@@ -8,13 +8,13 @@
                              @onSortChange="onSortChange">
                 <div class="d-flex flex-row justify-content-end pe-2 mt-auto">
                     <img class="header-button me-1" :class="{ active: showReverse }"
-                        src='/icon/reverse-button.png' width="16" height="16"
+                        src='/icon/button/reverse.png' width="24" height="24"
                         @click.prevent="showReverse = !showReverse"/>
                     <img class="header-button me-1" :class="{ active: showTimeline }"
-                        src='/icon/timeline.png' width="16" height="16"
+                        src='/icon/button/timeline.png' width="24" height="24"
                         @click.prevent="showTimeline = !showTimeline"/>
                     <img class="header-button me-1" :class="{ active: showHierarchy }"
-                        src='/icon/hierarchy.png' width="16" height="16"
+                        src='/icon/button/hierarchy.png' width="24" height="24"
                         @click.prevent="showHierarchy = !showHierarchy"/>
                 </div>
             </ItemPanelHeader>
@@ -58,7 +58,7 @@ export default {
         return {
             title: 'Goals',
             sort: {
-                by: 'Custom',
+                by: 'Timeframe',
                 items: sortItems
             },
             showReverse: true,

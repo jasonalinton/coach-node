@@ -43,7 +43,7 @@ export default {
             if (this.plannerStore) {
                 return this.plannerStore.selectedDate;
             }
-            return today;
+            return today();
         },
         date() {
             return toShortWeekdayString(this.selectedDate, true);

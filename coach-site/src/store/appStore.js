@@ -16,6 +16,9 @@ export const useAppStore = defineStore('app', {
         isExtraSmall: undefined,
         selectedItemPanel: "todo",
         isTabBarShown: true,
+        navbar: {
+            active: "main"
+        },
         /* Calendar */
         isMobileCalendarShown: false,
         calendarMobile: {
@@ -24,6 +27,22 @@ export const useAppStore = defineStore('app', {
         },
         itemPanel: {
             selected: "todo",
+            todo: {
+                showRepeat: true,
+                showTimeline: false,
+                showRecommended: true,
+                showHierarchy: true,
+                sort: {
+                    by: 'Default',
+                    items: [
+                        { id: 1, text: "Metric" },
+                        { id: 2, text: "Date" },
+                        { id: 3, text: "Repetition" },
+                        { id: 4, text: "Custom" },
+                        { id: 5, text: "Default" },
+                    ],
+                },
+            },
             event: {
                 type: undefined,
                 event: undefined
@@ -48,11 +67,47 @@ export const useAppStore = defineStore('app', {
             this.windowOuterWidth = width;
             this.windowOuterHeight = height;
         },
+        onMenuButtonClicked() {
+            if (this.navbar.active == "main") {
+                if (this.isTabBarShown) {
+                    this.navbar.active = "itemPanel"
+                    this.isTabBarShown = false;
+                } else {
+                    this.isTabBarShown = true;
+                }
+            } else {
+                this.navbar.active = "main"
+                if (!this.isTabBarShown) {
+                    this.isTabBarShown = true;
+                }
+            }
+        },
+        initItemPanels() {
+
+        },
+        onItemPanelTabButtonClicked(panel) {
+            if (this.itemPanel.selected == panel) {
+                if (this.navbar.active == "main") {
+                    this.navbar.active = "itemPanel";
+                } else {
+                    this.isTabBarShown = false;
+                }
+            } else {
+                this.itemPanel.selected = panel;
+                this.navbar.active = "itemPanel";
+            }
+        },
         setSelectedItemPanel(panel) {
             this.itemPanel.selected = panel;
         },
+        setItemPanelSetting(panel, prop, value) {
+            this.itemPanel[panel][prop] = value;
+        },
+        setItemPanelSortBy(panel, value) {
+            this.itemPanel[panel].sort.by = value;
+            localStorage.setItem(`${panel}-panel-sort-by`, value);
+        },
         async setSelectedEvent(eevent) {
-            console.log("hi");
             if (eevent.type.id == EVENTTYPE.WORKOUT) {
                 let workoutStore = useWorkoutStore();
                 let workoutID = await getWorkoutIDFromEvent(eevent.id);

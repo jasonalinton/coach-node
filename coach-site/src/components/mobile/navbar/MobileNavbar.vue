@@ -1,29 +1,32 @@
 <template>
-    <nav id="navbar" class="navbar navbar-expand-sm navbar-light">
+    <nav v-if="selectedPanel != 'todo' || activeNavbar == 'main'" id="navbar" class="navbar navbar-expand-sm navbar-light">
         <div class="d-flex flex-row justify-content-between w-100">
             <div class="d-flex flex-row">
-                <IconButton class="icon menu-button float-left" src="/icon/menu-button.png" :width="40" :height="40"
-                            @click="toggleTabBar" />
+                <NavbarMenuButton />
                 <a class="navbar-brand float-left" href="#">Coach</a>
             </div>
             <div class="d-flex flex-row">
-                <button class="btn btn-sm" type="button" @click="$emit('selectPage', 'planner')">Planner</button>
-                <button class="btn btn-sm" type="button" @click="$emit('selectPage', 'items')">Items</button>
-                <button class="btn btn-sm" type="button" @click="$emit('selectPage', 'metrics')">Metrics</button>
+                <button class="btn btn-sm" type="button" @click="selectPage('planner')">Planner</button>
+                <button class="btn btn-sm" type="button" @click="selectPage('items')">Items</button>
+                <button class="btn btn-sm" type="button" @click="selectPage('metrics')">Metrics</button>
             </div>
-            <img class="icon calendar-button float-left" src="/icon/planner-icon.png" :width="36" :height="36"
-                    @click="toggleCalendar"/>
+            <NavbarCalendarButton />
         </div>
+    </nav>
+    <nav v-else>
+        <TodoPanelHeader v-if="selectedPanel == 'todo'" />
     </nav>
 </template>
 
 <script>
-import IconButton from '../../controls/button/IconButton.vue';
+import TodoPanelHeader from '../../planner/item-panel/todo/TodoPanelHeader.vue';
 import { useAppStore } from '@/store/appStore'
+import NavbarMenuButton from './NavbarMenuButton.vue';
+import NavbarCalendarButton from './NavbarCalendarButton.vue';
 
 export default {
     name: 'MobileNavbar',
-    components: { IconButton },
+    components: { NavbarMenuButton, NavbarCalendarButton, TodoPanelHeader },
     props: {
         
     },
@@ -34,12 +37,17 @@ export default {
     },
     created: function() {
         this.appStore = useAppStore();
-       
+    },
+    computed: {
+        activeNavbar() {
+            return (this.appStore) ? this.appStore.navbar.active : "main";
+        },
+        selectedPanel() {
+            return (this.appStore) ? this.appStore.itemPanel.selected : "todo";
+        },
     },
     methods: {
         selectPage,
-        toggleTabBar,
-        toggleCalendar
     },
 }
 
@@ -47,20 +55,12 @@ function selectPage() {
 
 }
 
-function toggleTabBar() {
-    this.appStore.toggleTabBar();
-}
-
-function toggleCalendar() {
-    this.appStore.toggleMobileCalendar();
-}
-
 </script>
 
 <style scoped>
 .navbar {
     border-bottom: 1px solid rgba(220, 220, 220, .5);
-    padding: 0 0 7px 0;
+    padding: 8px 0;
     padding-bottom: 7px;
     line-height: 38px;
     width: 100%;
@@ -68,10 +68,6 @@ function toggleCalendar() {
 
 .navbar-brand {
     margin: 0px;
-}
-
-.icon {
-    margin: auto 12px auto 0px;
 }
 
 .menu-button {
