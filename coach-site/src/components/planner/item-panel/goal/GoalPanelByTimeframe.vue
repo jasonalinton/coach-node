@@ -18,19 +18,32 @@ export default {
     name: 'GoalPanelByTimeframe',
     components: { GoalsInTimeframe, TimeframeRadio },
     props: {
-        showReverse: Boolean,
-        showTimeline: Boolean,
-        showHierarchy: Boolean,
+        
     },
     data: function () {
         return {
+            appStore: undefined,
             timeframes: clone(timeframes),
             timeframeIDs: []
         }
     },
-    created: function() {
+    created: async function() {
+        let appStore = await import(`@/store/appStore`);
+        this.appStore = appStore.useAppStore();
+
         let timeframeIDs = this.timeframes.filter(x => x.isActive).map(x => x.id);
         this.timeframeIDs = (this.showReverse) ? timeframeIDs.reverse() : timeframeIDs;
+    },
+    computed: {
+        showReverse() {
+            return (this.appStore) ? this.appStore.itemPanel.goal.showReverse : undefined;
+        },
+        showTimeline() {
+            return (this.appStore) ? this.appStore.itemPanel.goal.showTimeline : undefined;
+        },
+        showHierarchy() {
+            return (this.appStore) ? this.appStore.itemPanel.goal.showHierarchy : undefined;
+        },
     },
     methods: {
         toggleTimeframe(timeframeID) {

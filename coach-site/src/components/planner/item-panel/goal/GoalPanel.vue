@@ -2,39 +2,23 @@
     <div class="row g-0">
         <div class="col">
             <!-- Header -->
-            <ItemPanelHeader v-show="showHead" 
-                             :title="title" 
-                             :sort="sort" 
-                             @onSortChange="onSortChange">
-                <div class="d-flex flex-row justify-content-end pe-2 mt-auto">
-                    <img class="header-button me-1" :class="{ active: showReverse }"
-                        src='/icon/button/reverse.png' width="24" height="24"
-                        @click.prevent="showReverse = !showReverse"/>
-                    <img class="header-button me-1" :class="{ active: showTimeline }"
-                        src='/icon/button/timeline.png' width="24" height="24"
-                        @click.prevent="showTimeline = !showTimeline"/>
-                    <img class="header-button me-1" :class="{ active: showHierarchy }"
-                        src='/icon/button/hierarchy.png' width="24" height="24"
-                        @click.prevent="showHierarchy = !showHierarchy"/>
-                </div>
-            </ItemPanelHeader>
-            <GoalPanelByMetric v-if="sort.by=='Metric'" />
-            <GoalPanelByDate v-if="sort.by=='Date'" />
-            <GoalPanelByCustom v-if="sort.by=='Custom'" />
-            <GoalPanelByTimeframe v-if="sort.by=='Timeframe'"
-                                  :showReverse="showReverse" />
-            <GoalPanelByDashboard v-if="sort.by=='Dashboard'" />
+            <ItemPanelNavbar v-show="showHead" />
+            <GoalPanelByMetric v-if="sortBy=='Metric'" />
+            <GoalPanelByDate v-if="sortBy=='Date'" />
+            <GoalPanelByCustom v-if="sortBy=='Custom'" />
+            <GoalPanelByTimeframe v-if="sortBy=='Timeframe'"/>
+            <GoalPanelByDashboard v-if="sortBy=='Dashboard'" />
         </div>
     </div>
 </template>
 
 <script>
-import ItemPanelHeader from '../component/ItemPanelHeader.vue';
 import GoalPanelByCustom from './GoalPanelByCustom.vue';
 import GoalPanelByDate from './GoalPanelByDate.vue';
 import GoalPanelByTimeframe from './GoalPanelByTimeframe.vue';
 import GoalPanelByMetric from './GoalPanelByMetric.vue';
 import GoalPanelByDashboard from './GoalPanelByDashboard.vue';
+import ItemPanelNavbar from '../../../mobile/navbar/ItemPanelNavbar.vue';
 
 var sortItems = [
     { id: 1, text: "Metric" },
@@ -47,7 +31,7 @@ var sortItems = [
 
 export default {
     name: 'GoalPanel',
-    components: { ItemPanelHeader, GoalPanelByMetric, GoalPanelByDate, GoalPanelByTimeframe, GoalPanelByCustom, GoalPanelByDashboard },
+    components: { ItemPanelNavbar, GoalPanelByMetric, GoalPanelByDate, GoalPanelByTimeframe, GoalPanelByCustom, GoalPanelByDashboard },
     props: {
         showHead: {
             type: Boolean,
@@ -56,22 +40,31 @@ export default {
     },
     data: function () {
         return {
+            appStore: undefined,
             title: 'Goals',
             sort: {
                 by: 'Timeframe',
                 items: sortItems
             },
-            showReverse: true,
-            showTimeline: true,
-            showHierarchy: false
         }
     },
-    created: function() {
+    created: async function() {
+        let appStore = await import(`@/store/appStore`);
+        this.appStore = appStore.useAppStore();
+
         let goalPanelSortBy_Store = localStorage.getItem(`goal-panel-sort-by`);
         if (goalPanelSortBy_Store) {
-            this.sort.by = goalPanelSortBy_Store;
+            // this.sortBy = goalPanelSortBy_Store;
         } else {
-            localStorage.setItem(`goal-panel-sort-by`, this.sort.by);
+            localStorage.setItem(`goal-panel-sort-by`, this.sortBy);
+        }
+    },
+    computed: {
+        sortBy() {
+            if (this.appStore) {
+                return this.appStore.itemPanel.goal.sort.by;
+            }
+            return undefined;
         }
     },
     methods: {
@@ -80,7 +73,7 @@ export default {
 }
 
 function onSortChange(sortBy) {
-    this.sort.by = sortBy;
+    // this.sort.by = sortBy;
     localStorage.setItem(`goal-panel-sort-by`, sortBy);
 }
 </script>

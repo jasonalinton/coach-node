@@ -43,6 +43,21 @@ export const useAppStore = defineStore('app', {
                     ],
                 },
             },
+            goal: {
+                showReverse: true,
+                showTimeline: false,
+                showHierarchy: true,
+                sort: {
+                    by: 'Timeframe',
+                    items: [
+                        { id: 1, text: "Metric" },
+                        { id: 2, text: "Date" },
+                        { id: 3, text: "Timeframe" },
+                        { id: 4, text: "Repetition" },
+                        { id: 5, text: "Custom" },
+                        { id: 6, text: "Dashboard" },]
+                },
+            },
             event: {
                 type: undefined,
                 event: undefined

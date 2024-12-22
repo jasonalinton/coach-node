@@ -2,7 +2,7 @@
     <div class="row g-0 h-100">
         <div class="col h-100 d-flex flex-column flex-grow-1 overflow-hidden">
             <!-- Header -->
-            <TodoPanelHeader v-show="showHead" />
+            <ItemPanelNavbar v-show="showHead" />
             <template v-if="!iteration_Form">
                 <TodoPanelByMetric v-if="sortBy=='Metric'" 
                                    :selectedDate="selectedDate"
@@ -34,7 +34,7 @@
 </template>
 
 <script>
-import TodoPanelHeader from './TodoPanelHeader.vue';
+import ItemPanelNavbar from '../../../mobile/navbar/ItemPanelNavbar.vue';
 import TodoPanelByMetric from './TodoPanelByMetric.vue';
 import TodoPanelByDate from './TodoPanelByDate.vue';
 import TodoPanelByRepetition from './TodoPanelByRepetition.vue';
@@ -45,7 +45,7 @@ import { today } from '../../../../../utility/timeUtility';
 
 export default {
     name: 'TodoPanel',
-    components: { TodoPanelHeader, TodoPanelByMetric, TodoPanelByDate, TodoPanelByRepetition,
+    components: { ItemPanelNavbar, TodoPanelByMetric, TodoPanelByDate, TodoPanelByRepetition,
         TodoPanelByCustom, TodoPanelDefault, IterationForm, },
     props: {
         showHead: {

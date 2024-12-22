@@ -1,26 +1,28 @@
 <template>
-    <div class="header d-flex flex-row justify-content-between">
-        <div class="d-flex flex-row">
-            <NavbarMenuButton v-if="isExtraSmall" class="float-left" />
-            <div class="labels d-flex flex-column">
-                <h1>{{ title }}</h1>
-                <select class="form-select panel-select" aria-label="select" @change="onSortChange" v-model="sortBy">
-                    <option v-for="sortItem in sortItems" v-bind:key="sortItem.id" :value="sortItem.text">{{sortItem.text}}</option> 
-                </select>
+    <div>
+        <div class="header d-flex flex-row justify-content-between">
+            <div class="d-flex flex-row">
+                <NavbarMenuButton v-if="isExtraSmall" class="float-left" />
+                <div class="labels d-flex flex-column">
+                    <h1>{{ title }}</h1>
+                    <select class="form-select panel-select" aria-label="select" @change="onSortChange" v-model="sortBy">
+                        <option v-for="sortItem in sortItems" v-bind:key="sortItem.id" :value="sortItem.text">{{sortItem.text}}</option> 
+                    </select>
+                </div>
+    
             </div>
-
-        </div>
-        <div class="d-flex flex-row">
-            <slot></slot>
-            <NavbarCalendarButton v-if="isExtraSmall" />
+            <div class="d-flex flex-row">
+                <slot></slot>
+                <NavbarCalendarButton v-if="isExtraSmall" />
+            </div>
         </div>
     </div>
 </template>
 
 <script>
 import { useAppStore } from '@/store/appStore'
-import NavbarMenuButton from '../../../mobile/navbar/NavbarMenuButton.vue';
-import NavbarCalendarButton from '../../../mobile/navbar/NavbarCalendarButton.vue';
+import NavbarMenuButton from '../../../mobile/navbar/component/NavbarMenuButton.vue';
+import NavbarCalendarButton from '../../../mobile/navbar/component/NavbarCalendarButton.vue';
 
 export default {
     components: { NavbarMenuButton, NavbarCalendarButton },
@@ -51,6 +53,12 @@ export default {
     methods: {
         onSortChange,
     },
+    watch: {
+        sort(value) {
+            this.sortBy = value.by;
+            this.sortItems = value.items;
+        }
+    }
 }
 
 function onSortChange() {

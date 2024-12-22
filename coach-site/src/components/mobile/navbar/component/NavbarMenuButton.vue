@@ -5,7 +5,7 @@
 
 <script>
 import { useAppStore } from '@/store/appStore'
-import IconButton from '../../controls/button/IconButton.vue';
+import IconButton from '../../../controls/button/IconButton.vue';
 
 export default {
     name: 'NavbarMenuButton',

@@ -1,5 +1,5 @@
 <template>
-    <nav v-if="selectedPanel != 'todo' || activeNavbar == 'main'" id="navbar" class="navbar navbar-expand-sm navbar-light">
+    <nav v-if="!['todo', 'goal'].includes(selectedPanel) || activeNavbar == 'main'" id="navbar" class="navbar navbar-expand-sm navbar-light">
         <div class="d-flex flex-row justify-content-between w-100">
             <div class="d-flex flex-row">
                 <NavbarMenuButton />
@@ -14,19 +14,19 @@
         </div>
     </nav>
     <nav v-else>
-        <TodoPanelHeader v-if="selectedPanel == 'todo'" />
+        <ItemPanelNavbar />
     </nav>
 </template>
 
 <script>
-import TodoPanelHeader from '../../planner/item-panel/todo/TodoPanelHeader.vue';
+import ItemPanelNavbar from './ItemPanelNavbar.vue';
 import { useAppStore } from '@/store/appStore'
-import NavbarMenuButton from './NavbarMenuButton.vue';
-import NavbarCalendarButton from './NavbarCalendarButton.vue';
+import NavbarMenuButton from './component/NavbarMenuButton.vue';
+import NavbarCalendarButton from './component/NavbarCalendarButton.vue';
 
 export default {
     name: 'MobileNavbar',
-    components: { NavbarMenuButton, NavbarCalendarButton, TodoPanelHeader },
+    components: { NavbarMenuButton, NavbarCalendarButton, ItemPanelNavbar },
     props: {
         
     },
