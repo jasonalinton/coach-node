@@ -58,6 +58,15 @@ export const useAppStore = defineStore('app', {
                         { id: 6, text: "Dashboard" },]
                 },
             },
+            inventory: {
+                showPrimary: true,
+                showSecondary: false,
+                showTertiary: false,
+                primaryToggled: undefined,
+                secondaryToggled: undefined,
+                tertiaryToggled: undefined,
+                clear: 0, // Incrementor to trigger watch value component
+            },
             event: {
                 type: undefined,
                 event: undefined

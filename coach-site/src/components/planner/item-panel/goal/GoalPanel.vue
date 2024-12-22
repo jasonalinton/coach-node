@@ -2,7 +2,7 @@
     <div class="row g-0">
         <div class="col">
             <!-- Header -->
-            <ItemPanelNavbar v-show="showHead" />
+            <ItemPanelNavbar v-if="showHead" />
             <GoalPanelByMetric v-if="sortBy=='Metric'" />
             <GoalPanelByDate v-if="sortBy=='Date'" />
             <GoalPanelByCustom v-if="sortBy=='Custom'" />

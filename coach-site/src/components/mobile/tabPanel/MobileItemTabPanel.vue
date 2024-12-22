@@ -9,7 +9,7 @@
         <PlannerPanel v-show="selectedPanel == 'planner'" class="item-panel" :dayCount="2" :showHead="false"/>
         <EventPanel v-show="selectedPanel == 'event'" :props="eventPanelProps" class="item-panel" :showHead="false"/>
         <InventoryPanel v-show="selectedPanel == 'inventory'" class="item-panel" :showHead="false"/>
-        <NutritionPanel v-show="selectedPanel == 'nutrition'" class="item-panel" :showHead="false"/>
+        <NutritionPanel v-if="selectedPanel == 'nutrition'" class="item-panel" :showHead="false"/>
         <WorkoutPanel v-show="selectedPanel == 'workout'" class="item-panel" :showHead="false"
                         :selectedWorkoutID="workoutPanelProps.selectedWorkoutID"
                         @selectWorkout="selectWorkout"/>

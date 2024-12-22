@@ -1,5 +1,5 @@
 <template>
-    <nav v-if="!['todo', 'goal'].includes(selectedPanel) || activeNavbar == 'main'" id="navbar" class="navbar navbar-expand-sm navbar-light">
+    <nav v-if="!['todo', 'goal', 'inventory'].includes(selectedPanel) || activeNavbar == 'main'" id="navbar" class="navbar navbar-expand-sm navbar-light">
         <div class="d-flex flex-row justify-content-between w-100">
             <div class="d-flex flex-row">
                 <NavbarMenuButton />
@@ -14,7 +14,8 @@
         </div>
     </nav>
     <nav v-else>
-        <ItemPanelNavbar />
+        <ItemPanelNavbar v-if="['todo', 'goal'].includes(selectedPanel)" />
+        <InventoryPanelNavbar v-if="selectedPanel == 'inventory'" />
     </nav>
 </template>
 
@@ -23,10 +24,11 @@ import ItemPanelNavbar from './ItemPanelNavbar.vue';
 import { useAppStore } from '@/store/appStore'
 import NavbarMenuButton from './component/NavbarMenuButton.vue';
 import NavbarCalendarButton from './component/NavbarCalendarButton.vue';
+import InventoryPanelNavbar from './InventoryPanelNavbar.vue';
 
 export default {
     name: 'MobileNavbar',
-    components: { NavbarMenuButton, NavbarCalendarButton, ItemPanelNavbar },
+    components: { NavbarMenuButton, NavbarCalendarButton, ItemPanelNavbar, InventoryPanelNavbar },
     props: {
         
     },

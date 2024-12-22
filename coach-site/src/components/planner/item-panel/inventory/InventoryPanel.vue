@@ -2,24 +2,7 @@
     <div class="row g-0 h-100">
         <div class="col h-100 d-flex flex-column">
             <div class="inventory d-flex flex-column flex-grow-1 overflow-hidden">
-                <div v-show="showHead" 
-                     class="head align-content-center">
-                    <span class="label">Inventory</span>
-                    <div class="d-flex flex-row justify-content-end pe-2">
-                        <img class="header-button me-1"
-                             src='/icon/eraser-icon.png' width="16" height="16"
-                             @click.prevent="clearValues"/>
-                        <img class="header-button me-1" :class="{ active: (primaryToggled == undefined) ? showPrimary : primaryToggled }"
-                             src='/icon/first-icon.png' width="16" height="16"
-                             @click.prevent="primaryToggled = (primaryToggled == undefined) ? !showPrimary : !primaryToggled"/>
-                        <img class="header-button me-1" :class="{ active: (secondaryToggled == undefined) ? showSecondary : secondaryToggled}"
-                             src='/icon/second-icon.png' width="16" height="16"
-                             @click.prevent="secondaryToggled = (secondaryToggled == undefined) ? !showSecondary : !secondaryToggled"/>
-                        <img class="header-button me-1" :class="{ active: (tertiaryToggled == undefined) ? showTertiary : tertiaryToggled}"
-                             src='/icon/third-icon.png' width="16" height="16"
-                             @click.prevent="tertiaryToggled = (tertiaryToggled == undefined) ? !showTertiary : !tertiaryToggled"/>
-                    </div>
-                </div>
+                <InventoryPanelNavbar v-show="showHead" />
                 <div class="body d-flex flex-column flex-grow-1" :class="{ hide: selectedPanel != 'list'}">
                     <div v-for="(list, metric, index) in inventoryList" :key="index"
                          class="metric mb-2">
@@ -45,14 +28,16 @@
 <script>
 import LogItemView from './LogItemView.vue';
 import LogItemHistory from './LogItemHistory.vue'
+import { useAppStore } from '../../../../store/appStore';
 import { useMetricStore } from '../../../../store/metricStore';
 import { CONTROL } from '../../../../model/constants'
 import { clone } from '../../../../../utility';
 import { subtractMinutes } from '../../../../../utility/timeUtility';
+import InventoryPanelNavbar from '../../../mobile/navbar/InventoryPanelNavbar.vue';
 
 export default {
     name: 'InventoryPanel',
-    components: { LogItemView, LogItemHistory },
+    components: { LogItemView, LogItemHistory, InventoryPanelNavbar },
     props: {
         showHead: {
             type: Boolean,
@@ -61,21 +46,16 @@ export default {
     },
     data: function () {
         return {
+            appStore: undefined,
             metricStore: undefined,
             selectedPanel: 'list',
             selectedLogItemID: undefined,
             inventoryList: [],
-            clear: 0, // Incrementor to trigger watch value component
             clearMinutes: 15,
-            showPrimary: true,
-            showSecondary: false,
-            showTertiary: false,
-            primaryToggled: undefined,
-            secondaryToggled: undefined,
-            tertiaryToggled: undefined
         }
     },
     created: function() {
+       this.appStore = useAppStore();
        this.metricStore = useMetricStore();
        this.metricStore.initializeLogItems();
     },
@@ -88,10 +68,30 @@ export default {
                 return [];
             }
         },
+        clear() {
+            return (this.appStore) ? this.appStore.itemPanel.inventory.clear : 0;
+        },
+        showPrimary() {
+            return (this.appStore) ? this.appStore.itemPanel.inventory.showPrimary : true;
+        },
+        showSecondary() {
+            return (this.appStore) ? this.appStore.itemPanel.inventory.showSecondary : false;
+        },
+        showTertiary() {
+            return (this.appStore) ? this.appStore.itemPanel.inventory.showTertiary : false;
+        },
+        primaryToggled() {
+            return (this.appStore) ? this.appStore.itemPanel.inventory.primaryToggled : undefined;
+        },
+        secondaryToggled() {
+            return (this.appStore) ? this.appStore.itemPanel.inventory.secondaryToggled : undefined;
+        },
+        tertiaryToggled() {
+            return (this.appStore) ? this.appStore.itemPanel.inventory.tertiaryToggled : undefined;
+        },
     },
     methods: {
         setInventoryList,
-        clearValues,
         selectLogItem,
         back
     },
@@ -171,8 +171,8 @@ function setInventoryList() {
                 }
             }
         });
-        this.showSecondary = showSecondary;
-        this.showTertiary = showTertiary;
+        this.appStore.itemPanel.inventory.showSecondary = showSecondary;
+        this.appStore.itemPanel.inventory.showTertiary = showTertiary;
         
         /* Add applicable items to list */
         this.logItems.forEach(x => {
@@ -215,18 +215,6 @@ function setInventoryList() {
     this.inventoryList = inventoryList;
 }
 
-function clearValues() {
-    /* Reset display values */
-    this.showPrimary = true;
-    this.showSecondary = false;
-    this.showTertiary = false;
-    this.primaryToggled = undefined;
-    this.secondaryToggled = undefined;
-    this.tertiaryToggled = undefined;
-
-    this.clear++;
-}
-
 function selectLogItem(id) {
     this.selectedLogItemID = id;
     this.selectedPanel = "logItemHistory"
@@ -247,23 +235,6 @@ function back() {
 
 .body.hide {
     display: none !important;
-}
-
-.head {
-    min-height: 64px;
-    border-bottom: 1px solid black;
-}
-
-.head .label {
-    margin: auto;
-}
-
-.header-button:hover {
-    background-color: rgba(60, 64, 67, .08);
-}
-
-.header-button.active {
-    background-color: rgba(60, 64, 67, .2);
 }
 
 .metric .label {

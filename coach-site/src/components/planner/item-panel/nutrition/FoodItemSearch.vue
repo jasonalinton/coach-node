@@ -1,5 +1,8 @@
 <template>
     <div class="food-item-search d-flex flex-column flex-grow-1 overflow-scroll">
+        <img class="icon-button"
+             src='/icon/previous.png' width="20" height="20"
+             @click.prevent="$emit('back')"/>
         <div class="pt-2 ms-2 me-2 sticky-top head">
             <div class="d-flex flex-row">
                 <input id="title" class="textbox" type="text" ref="text"  placeholder="Search"

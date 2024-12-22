@@ -2,7 +2,7 @@
     <div class="row g-0 h-100">
         <div class="col h-100 d-flex flex-column flex-grow-1 overflow-hidden">
             <!-- Header -->
-            <ItemPanelNavbar v-show="showHead" />
+            <ItemPanelNavbar v-if="showHead" />
             <template v-if="!iteration_Form">
                 <TodoPanelByMetric v-if="sortBy=='Metric'" 
                                    :selectedDate="selectedDate"

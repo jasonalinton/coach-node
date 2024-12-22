@@ -1,34 +1,34 @@
 <template>
-    <div>
+    <div class="item-panel-navbar" :class="selectedPanel">
         <ItemPanelHeader v-if="sort" :title="`${selectedPanel}s`" 
                          :sort="sort"
                          @onSortChange="onSortChange">
             <div v-if="appStore" class="buttons d-flex flex-row justify-content-end pe-2 mt-auto" :class="[{['mb-auto']: isExtraSmall}]">
                 <template v-if="selectedPanel == 'todo'">
-                    <img class="header-button me-1" :class="{ active: showRepeatTodo }"
+                    <img class="header-button me-1" :class="{ active: showRepeat }"
                         src='/icon/button/repeat.png' width="24" height="24"
                         @click.prevent="setSetting('showRepeat')"/>
-                    <img class="header-button me-1" :class="{ active: showTimelineTodo }"
+                    <img class="header-button me-1" :class="{ active: showTimeline }"
                         src='/icon/button/timeline.png' width="24" height="24"
                         @click.prevent="setSetting('showTimeline')"/>
-                    <img class="header-button me-1" :class="{ active: showRecommendedTodo }"
+                    <img class="header-button me-1" :class="{ active: showRecommended }"
                         src='/icon/button/thumbs-up.png' width="24" height="24"
                         @click.prevent="setSetting('showRecommended')"/>
-                    <img class="header-button me-1" :class="{ active: showHierarchyTodo }"
+                    <img class="header-button me-1" :class="{ active: showHierarchy }"
                         src='/icon/button/hierarchy.png' width="24" height="24"
                         @click.prevent="setSetting('showHierarchy')"/>
                 </template>
                 <template v-if="selectedPanel == 'goal'">
-                    <img class="header-button me-1" :class="{ active: showReverseGoal }"
+                    <img class="header-button me-1" :class="{ active: showReverse }"
                         src='/icon/button/reverse.png' width="24" height="24"
                         @click.prevent="setSetting('showReverse')"/>
-                    <img class="header-button me-1" :class="{ active: showTimelineGoal }"
+                    <img class="header-button me-1" :class="{ active: showTimeline }"
                         src='/icon/button/timeline.png' width="24" height="24"
                         @click.prevent="setSetting('showTimeline')"/>
-                    <img class="header-button me-1" :class="{ active: showHierarchyGoal }"
+                    <img class="header-button me-1" :class="{ active: showHierarchy }"
                         src='/icon/button/hierarchy.png' width="24" height="24"
                         @click.prevent="setSetting('showHierarchy')"/>
-                    </template>
+                </template>
             </div>
         </ItemPanelHeader>
     </div>
@@ -36,7 +36,6 @@
 
 <script>
 import ItemPanelHeader from '../../planner/item-panel/component/ItemPanelHeader.vue';
-import { capitalize } from '../../../../utility';
 
 export default {
     name: 'ItemPanelNavbar',
@@ -55,28 +54,23 @@ export default {
             return (this.appStore) ? this.appStore.itemPanel.selected : "todo";
         },
         sort() {
-            return (this.appStore) ? this.appStore.itemPanel[this.selectedPanel].sort : undefined;
+            return (this.appStore && this.appStore.itemPanel[this.selectedPanel]) 
+            ? this.appStore.itemPanel[this.selectedPanel].sort : undefined;
         },
-        showRepeatTodo() {
-            return (this.appStore) ? this.appStore.itemPanel.todo.showRepeat : undefined;
+        showReverse() {
+            return (this.appStore) ? this.appStore.itemPanel[this.selectedPanel].showReverse : undefined;
         },
-        showTimelineTodo() {
-            return (this.appStore) ? this.appStore.itemPanel.todo.showTimeline : undefined;
+        showRepeat() {
+            return (this.appStore) ? this.appStore.itemPanel[this.selectedPanel].showRepeat : undefined;
         },
-        showRecommendedTodo() {
-            return (this.appStore) ? this.appStore.itemPanel.todo.showRecommended : undefined;
+        showTimeline() {
+            return (this.appStore) ? this.appStore.itemPanel[this.selectedPanel].showTimeline : undefined;
         },
-        showHierarchyTodo() {
-            return (this.appStore) ? this.appStore.itemPanel.todo.showHierarchy : undefined;
+        showRecommended() {
+            return (this.appStore) ? this.appStore.itemPanel[this.selectedPanel].showRecommended : undefined;
         },
-        showReverseGoal() {
-            return (this.appStore) ? this.appStore.itemPanel.goal.showReverse : undefined;
-        },
-        showTimelineGoal() {
-            return (this.appStore) ? this.appStore.itemPanel.goal.showTimeline : undefined;
-        },
-        showHierarchyGoal() {
-            return (this.appStore) ? this.appStore.itemPanel.goal.showHierarchy : undefined;
+        showHierarchy() {
+            return (this.appStore) ? this.appStore.itemPanel[this.selectedPanel].showHierarchy : undefined;
         },
         isExtraSmall() {
             if (this.appStore) {
@@ -87,7 +81,7 @@ export default {
     },
     methods: {
         setSetting(prop) {
-            this.appStore.setItemPanelSetting(this.selectedPanel, prop, !this[`${prop}${capitalize(this.selectedPanel)}`])
+            this.appStore.setItemPanelSetting(this.selectedPanel, prop, !this[prop])
         },
         onSortChange(sortBy) {
             this.appStore.setItemPanelSortBy(this.selectedPanel, sortBy);
