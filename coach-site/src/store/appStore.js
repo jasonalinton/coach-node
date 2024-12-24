@@ -35,11 +35,11 @@ export const useAppStore = defineStore('app', {
                 sort: {
                     by: 'Default',
                     items: [
-                        { id: 1, text: "Metric" },
+                        { id: 1, text: "Default" },
                         { id: 2, text: "Backlog" },
-                        { id: 3, text: "Repetition" },
-                        { id: 4, text: "Custom" },
-                        { id: 5, text: "Default" },
+                        { id: 3, text: "Custom" },
+                        { id: 4, text: "Repetition" },
+                        { id: 5, text: "Metric" },
                     ],
                 },
             },
@@ -50,12 +50,13 @@ export const useAppStore = defineStore('app', {
                 sort: {
                     by: 'Timeframe',
                     items: [
-                        { id: 1, text: "Metric" },
-                        { id: 2, text: "Date" },
-                        { id: 3, text: "Timeframe" },
-                        { id: 4, text: "Repetition" },
-                        { id: 5, text: "Custom" },
-                        { id: 6, text: "Dashboard" },]
+                        { id: 1, text: "Dashboard" },
+                        { id: 2, text: "Timeframe" },
+                        { id: 3, text: "Repetition" },
+                        { id: 4, text: "Metric" },
+                        { id: 5, text: "Date" },
+                        { id: 6, text: "Custom" },
+                    ]
                 },
             },
             inventory: {

@@ -35,8 +35,8 @@ export default {
     data: function () {
         return {
             appStore: undefined,
-            sortBy: this.sort.by,
-            sortItems: this.sort.items
+            sortBy: (this.sort) ? this.sort.by : undefined,
+            sortItems: (this.sort) ? this.sort.items : undefined
         }
     },
     created: function() {

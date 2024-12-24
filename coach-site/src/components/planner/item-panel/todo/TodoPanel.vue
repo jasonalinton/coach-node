@@ -8,10 +8,10 @@
                                    :selectedDate="selectedDate"
                                    @editIteration="iteration => iteration_Form = iteration">
                 </TodoPanelByMetric>
-                <TodoPanelByDate v-if="sortBy=='Date'" 
+                <TodoPanelBacklog v-if="sortBy=='Backlog'" 
                                  :selectedDate="selectedDate"
                                  @editIteration="iteration => iteration_Form = iteration">
-                </TodoPanelByDate>
+                </TodoPanelBacklog>
                 <TodoPanelByRepetition v-if="sortBy=='Repetition'" 
                                        :selectedDate="selectedDate"
                                        @editIteration="iteration => iteration_Form = iteration">
@@ -36,7 +36,7 @@
 <script>
 import ItemPanelNavbar from '../../../mobile/navbar/ItemPanelNavbar.vue';
 import TodoPanelByMetric from './TodoPanelByMetric.vue';
-import TodoPanelByDate from './TodoPanelByDate.vue';
+import TodoPanelBacklog from './TodoPanelBacklog.vue';
 import TodoPanelByRepetition from './TodoPanelByRepetition.vue';
 import TodoPanelByCustom from './TodoPanelByCustom.vue';
 import TodoPanelDefault from './TodoPanelDefault.vue';
@@ -45,7 +45,7 @@ import { today } from '../../../../../utility/timeUtility';
 
 export default {
     name: 'TodoPanel',
-    components: { ItemPanelNavbar, TodoPanelByMetric, TodoPanelByDate, TodoPanelByRepetition,
+    components: { ItemPanelNavbar, TodoPanelByMetric, TodoPanelBacklog, TodoPanelByRepetition,
         TodoPanelByCustom, TodoPanelDefault, IterationForm, },
     props: {
         showHead: {

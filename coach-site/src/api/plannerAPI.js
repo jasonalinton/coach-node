@@ -66,6 +66,24 @@ export async function getAllIterationsInRange(startAt, endAt) {
     });
 }
 
+export async function getUnplannedIterations() {
+    return fetch(`${URL}/api/Planner/GetUnplannedIterations`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+    })
+    .then(response => response.json())
+    .then((data) => {
+        if (data.status.success) {
+            return data.result;
+        } else {
+            console.error('Error:', data.status.errorMessage);
+        }
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+    });
+}
+
 export async function updateIteration(iterationID, text, points, startAt, endAt) {
     let data = { iterationID, text, points, startAt, endAt };
 
