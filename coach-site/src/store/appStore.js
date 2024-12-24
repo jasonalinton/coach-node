@@ -36,7 +36,7 @@ export const useAppStore = defineStore('app', {
                     by: 'Default',
                     items: [
                         { id: 1, text: "Metric" },
-                        { id: 2, text: "Date" },
+                        { id: 2, text: "Backlog" },
                         { id: 3, text: "Repetition" },
                         { id: 4, text: "Custom" },
                         { id: 5, text: "Default" },
@@ -59,6 +59,7 @@ export const useAppStore = defineStore('app', {
                 },
             },
             inventory: {
+                title: "Inventory",
                 showPrimary: true,
                 showSecondary: false,
                 showTertiary: false,

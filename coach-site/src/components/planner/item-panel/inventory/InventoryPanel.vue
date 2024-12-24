@@ -2,7 +2,7 @@
     <div class="row g-0 h-100">
         <div class="col h-100 d-flex flex-column">
             <div class="inventory d-flex flex-column flex-grow-1 overflow-hidden">
-                <InventoryPanelNavbar v-show="showHead" />
+                <ItemPanelNavbar v-show="showHead" />
                 <div class="body d-flex flex-column flex-grow-1" :class="{ hide: selectedPanel != 'list'}">
                     <div v-for="(list, metric, index) in inventoryList" :key="index"
                          class="metric mb-2">
@@ -26,6 +26,7 @@
 </template>
 
 <script>
+import ItemPanelNavbar from '../../../mobile/navbar/ItemPanelNavbar.vue';
 import LogItemView from './LogItemView.vue';
 import LogItemHistory from './LogItemHistory.vue'
 import { useAppStore } from '../../../../store/appStore';
@@ -33,11 +34,10 @@ import { useMetricStore } from '../../../../store/metricStore';
 import { CONTROL } from '../../../../model/constants'
 import { clone } from '../../../../../utility';
 import { subtractMinutes } from '../../../../../utility/timeUtility';
-import InventoryPanelNavbar from '../../../mobile/navbar/InventoryPanelNavbar.vue';
 
 export default {
     name: 'InventoryPanel',
-    components: { LogItemView, LogItemHistory, InventoryPanelNavbar },
+    components: { LogItemView, LogItemHistory, ItemPanelNavbar },
     props: {
         showHead: {
             type: Boolean,

@@ -20,8 +20,10 @@
                 <input v-if="CONTROL.SLIDER == field.controlTypeID" :key="field.id"
                        class="slider" :class="{ 'has-value': field.value }"
                        type="range" min="1" max="10" step="0.1" v-model="field.value"
-                       @mousedown="sliderMouseDown($event, field)"
-                       @mouseup="sliderMouseUp($event, field)">
+                       @mousedown="sliderStart($event, field)"
+                       @mouseup="sliderEnd($event, field)"
+                       @touchstart="sliderStart($event, field)"
+                       @touchend="sliderEnd($event, field)">
             </template>
         </div>
         <div v-if="value && showAdditionalValues" 
@@ -109,12 +111,12 @@ export default {
                 this.clear();
             }, minutes * 60 * 1000)
         },
-        sliderMouseDown(e, field) {
+        sliderStart(e, field) {
             if (field.value == undefined) {
                 field.value = e.currentTarget.value;
             }
         },
-        sliderMouseUp() {
+        sliderEnd() {
             if (this.entryDateTime == undefined) {
                 this.entryDateTime = new Date();
                 this.save(true);

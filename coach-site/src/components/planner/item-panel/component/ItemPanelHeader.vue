@@ -3,9 +3,9 @@
         <div class="header d-flex flex-row justify-content-between">
             <div class="d-flex flex-row">
                 <NavbarMenuButton v-if="isExtraSmall" class="float-left" />
-                <div class="labels d-flex flex-column">
+                <div class="labels d-flex flex-column justify-content-center">
                     <h1>{{ title }}</h1>
-                    <select class="form-select panel-select" aria-label="select" @change="onSortChange" v-model="sortBy">
+                    <select v-if="sort" class="form-select panel-select" aria-label="select" @change="onSortChange" v-model="sortBy">
                         <option v-for="sortItem in sortItems" v-bind:key="sortItem.id" :value="sortItem.text">{{sortItem.text}}</option> 
                     </select>
                 </div>
@@ -72,6 +72,7 @@ function onSortChange() {
     padding-bottom: 7px;
     padding-bottom: 7px;
     border-bottom: 1px solid rgba(220, 220, 220, .5);
+    min-height: 64px;
 }
 
 .labels {

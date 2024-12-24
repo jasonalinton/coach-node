@@ -1,6 +1,6 @@
 <template>
     <div class="item-panel-navbar" :class="selectedPanel">
-        <ItemPanelHeader v-if="sort" :title="`${selectedPanel}s`" 
+        <ItemPanelHeader :title="`${title}`" 
                          :sort="sort"
                          @onSortChange="onSortChange">
             <div v-if="appStore" class="buttons d-flex flex-row justify-content-end pe-2 mt-auto" :class="[{['mb-auto']: isExtraSmall}]">
@@ -29,6 +29,20 @@
                         src='/icon/button/hierarchy.png' width="24" height="24"
                         @click.prevent="setSetting('showHierarchy')"/>
                 </template>
+                <template v-if="selectedPanel == 'inventory'">
+                    <img class="header-button me-1"
+                            src='/icon/button/eraser.png' width="24" height="24"
+                            @click.prevent="clearInventoryValues"/>
+                    <img class="header-button me-1" :class="{ active: (primaryToggled == undefined) ? showPrimary : primaryToggled }"
+                            src='/icon/button/one.png' width="24" height="24"
+                            @click.prevent="setInventorySetting('primaryToggled', (primaryToggled == undefined) ? !showPrimary : !primaryToggled)"/>
+                    <img class="header-button me-1" :class="{ active: (secondaryToggled == undefined) ? showSecondary : secondaryToggled}"
+                            src='/icon/button/two.png' width="24" height="24"
+                            @click.prevent="setInventorySetting('secondaryToggled', (secondaryToggled == undefined) ? !showSecondary : !secondaryToggled)"/>
+                    <img class="header-button me-1" :class="{ active: (tertiaryToggled == undefined) ? showTertiary : tertiaryToggled}"
+                            src='/icon/button/three.png' width="24" height="24"
+                            @click.prevent="setInventorySetting('tertiaryToggled',(tertiaryToggled == undefined) ? !showTertiary : !tertiaryToggled)"/>
+                </template>
             </div>
         </ItemPanelHeader>
     </div>
@@ -50,8 +64,21 @@ export default {
         this.appStore = appStore.useAppStore();
     },
     computed: {
+        isExtraSmall() {
+            if (this.appStore) {
+                return this.appStore.isExtraSmall;
+            }
+            return true;
+        },
         selectedPanel() {
             return (this.appStore) ? this.appStore.itemPanel.selected : "todo";
+        },
+        title() {
+            if (this.selectedPanel == 'inventory') {
+                return "Inventory";
+            } else {
+                return `${this.selectedPanel}s`;
+            }
         },
         sort() {
             return (this.appStore && this.appStore.itemPanel[this.selectedPanel]) 
@@ -72,19 +99,46 @@ export default {
         showHierarchy() {
             return (this.appStore) ? this.appStore.itemPanel[this.selectedPanel].showHierarchy : undefined;
         },
-        isExtraSmall() {
-            if (this.appStore) {
-                return this.appStore.isExtraSmall;
-            }
-            return true;
+        /* Inventory */
+        showPrimary() {
+            return (this.appStore) ? this.appStore.itemPanel.inventory.showPrimary : true;
+        },
+        showSecondary() {
+            return (this.appStore) ? this.appStore.itemPanel.inventory.showSecondary : false;
+        },
+        showTertiary() {
+            return (this.appStore) ? this.appStore.itemPanel.inventory.showTertiary : false;
+        },
+        primaryToggled() {
+            return (this.appStore) ? this.appStore.itemPanel.inventory.primaryToggled : undefined;
+        },
+        secondaryToggled() {
+            return (this.appStore) ? this.appStore.itemPanel.inventory.secondaryToggled : undefined;
+        },
+        tertiaryToggled() {
+            return (this.appStore) ? this.appStore.itemPanel.inventory.tertiaryToggled : undefined;
         },
     },
     methods: {
+        onSortChange(sortBy) {
+            this.appStore.setItemPanelSortBy(this.selectedPanel, sortBy);
+        },
         setSetting(prop) {
             this.appStore.setItemPanelSetting(this.selectedPanel, prop, !this[prop])
         },
-        onSortChange(sortBy) {
-            this.appStore.setItemPanelSortBy(this.selectedPanel, sortBy);
+        setInventorySetting(prop, value) {
+            this.appStore.itemPanel.inventory[prop] = value;
+        },
+        clearInventoryValues() {
+            /* Reset display values */
+            this.appStore.itemPanel.inventory.showPrimary = true;
+            this.appStore.itemPanel.inventory.showSecondary = false;
+            this.appStore.itemPanel.inventory.showTertiary = false;
+            this.appStore.itemPanel.inventory.primaryToggled = undefined;
+            this.appStore.itemPanel.inventory.secondaryToggled = undefined;
+            this.appStore.itemPanel.inventory.tertiaryToggled = undefined;
+
+            this.appStore.itemPanel.inventory.clear++;
         }
     },
 }

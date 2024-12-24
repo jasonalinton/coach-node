@@ -4,16 +4,16 @@
         <span class="label">Inventory</span>
         <div class="d-flex flex-row justify-content-end pe-2">
             <img class="header-button me-1"
-                    src='/icon/eraser-icon.png' width="16" height="16"
+                    src='/icon/button/eraser.png' width="24" height="24"
                     @click.prevent="clearValues"/>
             <img class="header-button me-1" :class="{ active: (primaryToggled == undefined) ? showPrimary : primaryToggled }"
-                    src='/icon/first-icon.png' width="16" height="16"
+                    src='/icon/button/one.png' width="24" height="24"
                     @click.prevent="setSetting('primaryToggled', (primaryToggled == undefined) ? !showPrimary : !primaryToggled)"/>
             <img class="header-button me-1" :class="{ active: (secondaryToggled == undefined) ? showSecondary : secondaryToggled}"
-                    src='/icon/second-icon.png' width="16" height="16"
+                    src='/icon/button/two.png' width="24" height="24"
                     @click.prevent="setSetting('secondaryToggled', (secondaryToggled == undefined) ? !showSecondary : !secondaryToggled)"/>
             <img class="header-button me-1" :class="{ active: (tertiaryToggled == undefined) ? showTertiary : tertiaryToggled}"
-                    src='/icon/third-icon.png' width="16" height="16"
+                    src='/icon/button/three.png' width="24" height="24"
                     @click.prevent="setSetting('tertiaryToggled',(tertiaryToggled == undefined) ? !showTertiary : !tertiaryToggled)"/>
         </div>
     </div>
