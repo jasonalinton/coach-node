@@ -80,6 +80,48 @@ export async function saveGoalTimePair(timePair) {
     });
 }
 
+export async function deleteTimePair(goalTimePairID) {
+    let data = { goalTimePairID };
+
+    return fetch(`${URL}/api/Goal/DeleteGoalTimePair`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then((data) => {
+        if (data.status.success) {
+            return data.result;
+        } else {
+            console.error('Error:', data.status.errorMessage);
+        }
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+    });
+}
+
+export async function unmapTodoFromGoalTimePair(goalTimePairTodoID) {
+    let data = { goalTimePairTodoID };
+
+    return fetch(`${URL}/api/Goal/UnmapTodoFromGoalTimePair`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then((data) => {
+        if (data.status.success) {
+            return data.result;
+        } else {
+            console.error('Error:', data.status.errorMessage);
+        }
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+    });
+}
+
 export async function createAndMapItem(goalID, itemType, itemText) {
     let data = { goalID, itemType, itemText };
     

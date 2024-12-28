@@ -52,10 +52,10 @@ export const useAppStore = defineStore('app', {
                     items: [
                         { id: 1, text: "Dashboard" },
                         { id: 2, text: "Timeframe" },
-                        { id: 3, text: "Repetition" },
-                        { id: 4, text: "Metric" },
-                        { id: 5, text: "Date" },
-                        { id: 6, text: "Custom" },
+                        { id: 3, text: "Custom" },
+                        { id: 4, text: "Repetition" },
+                        { id: 5, text: "Metric" },
+                        { id: 6, text: "Date" },
                     ]
                 },
             },

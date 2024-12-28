@@ -109,6 +109,7 @@ export default {
     data: function() {
         return {
             todoStore: null,
+            goalStore: null,
             TIMEFRAME: clone(TIMEFRAME),
             timeframes: clone(timeframes),
             inheritanceTypes: clone(inheritanceTypes),
@@ -121,6 +122,8 @@ export default {
     created: async function() {
         let todoStore = await import(`@/store/todoStore`);
         this.todoStore = todoStore.useTodoStore();
+        let goalStore = await import(`@/store/goalStore`);
+        this.goalStore = goalStore.useGoalStore();
 
         if (this.timePair.id < 0) {
             this.isEditing = true;

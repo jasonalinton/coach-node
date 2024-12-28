@@ -7,7 +7,8 @@
             <span class="date">{{ date }}</span>
         </div>
         <span v-else class="timeframe">{{ timeframe }}</span>
-        <span class="goal" v-for="goal in goals" :key="goal.id">{{ goal.text }}</span>
+        <GoalTimeframeItem v-for="goal in goals" :key="goal.id"
+                           :goalID="goal.id" :timeframeID="timeframeID" />
     </div>
 </template>
 
@@ -16,10 +17,11 @@ import { TIMEFRAME } from '../../../../../model/constants';
 import { timeframes } from '../../../../../model/types';
 import { clone, today } from '../../../../../../utility';
 import { isToday, toShortWeekdayString } from '../../../../../../utility/timeUtility';
+import GoalTimeframeItem from './GoalTimeframeItem.vue';
 
 export default {
     name: 'GoalsInTimeframe',
-    components: {  },
+    components: { GoalTimeframeItem },
     props: {
         timeframeID: Number,
     },
@@ -84,10 +86,5 @@ span.date {
 span.dash {
     margin: 0 4px;
     line-height: 21px;
-}
-
-.goal {
-    padding-left: 20px;
-    color: #565656;
 }
 </style>

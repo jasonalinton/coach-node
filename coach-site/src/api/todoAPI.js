@@ -314,6 +314,27 @@ export async function getRepetitiveTodoIterations(start, end) {
     });
 }
 
+export async function toggleGoalTimePairTodoCompletion(goalTimePairTodoID, completedAt) {
+    let data = { goalTimePairTodoID, completedAt };
+
+    return fetch(`${URL}/api/Todo/ToggleGoalTimePairTodoCompletion`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then((data) => {
+        if (data.status.success) {
+            return data.result;
+        } else {
+            console.error('Error:', data.status.errorMessage);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
+
 export async function toggleIterationCompletion(iterationID, attemptedAt, completedAt) {
     let data = {
         iterationID,
