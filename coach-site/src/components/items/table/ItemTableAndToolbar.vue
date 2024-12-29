@@ -3,7 +3,8 @@
         <ItemTableToolbar :itemType="itemType"
                           @setColumns="selectedColumns = $event" 
                           @setSortBy="sortBy = $event"
-                          @setSearchTerm="searchTerm = $event"/>
+                          @setSearchTerm="searchTerm = $event"
+                          @addItem="addItem"/>
         <ItemTable :itemType="itemType"
                    :sortBy="sortBy"
                    :searchTerm="searchTerm"
@@ -70,6 +71,18 @@ export default {
             } 
 
             // myModal.handleUpdate()
+        },
+        async addItem(itemType) {
+            this.form.id = undefined;
+            this.form.itemType = undefined
+            await this.$nextTick();
+            this.form.id = -1;
+            this.form.itemType = itemType;
+            await this.$nextTick();
+            this.modal = new Modal(this.$refs[`${itemType}-${this.form.id}-Modal`]);
+            if (itemType == "goal" || itemType == "todo" || itemType == "routine") {
+                this.modal.show();
+            } 
         },
         async closeItemModal() {
             this.modal.hide();

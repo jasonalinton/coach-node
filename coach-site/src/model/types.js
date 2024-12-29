@@ -40,6 +40,25 @@ export let todoTypes = [
     },
 ]
 
+export let routineTypes = [
+    {
+        id: 13,
+        text: "Task Routine"
+    },
+    {
+        id: 14,
+        text: "Lifestyle"
+    },
+    {
+        id: 15,
+        text: "Maintainance"
+    },
+    {
+        id: 16,
+        text: "Housekeeping"
+    },
+]
+
 export let mediums = [
     {
         id: 28,

@@ -16,6 +16,9 @@
               <option disabled>Sort By</option>
               <option v-for="option in sortOptions" :key="option.id" :value="option.text">{{ option.text }}</option>
           </select>
+          <button class="add-btn my-auto" type="button" @click="$emit('addItem', itemType)">
+              <img class="m-auto" src="/icon/button/add.png" width="10" height="10"/>
+          </button>
       </div>
   </div>
   </template>

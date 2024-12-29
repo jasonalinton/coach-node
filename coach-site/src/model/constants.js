@@ -1,3 +1,10 @@
+export let ROUTINETYPES = {
+    TASKROUTINE: 13,
+    LIFESTYLE: 14,
+    MAINTAINANCE: 15,
+    HOUSEKEEPING: 16
+};
+
 export let TIMEFRAME = {
     MILLISECOND: 39,
     SECOND: 40,

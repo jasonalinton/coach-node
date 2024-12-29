@@ -10,9 +10,20 @@
                     <div class="row g-2">
                         <div class="col-12">
                             <input id="text" class="textbox" type="text" placeholder="Title"
-                                v-model.lazy.trim="text.value" 
+                                v-model.lazy.trim="text" 
                                 v-on:keyup.enter="save()"
                                 spellcheck/>
+                        </div>
+                    </div>
+                    <div class="row g-2">
+                        <div class="col-4">
+                            <div class="form-check">
+                                <input class="form-check-input mt-1" type="checkbox" value="" id="is-task-routine" 
+                                       v-model="isTaskRoutine">
+                                <label class="form-check-label float-start" for="is-task-routine">
+                                    Task-Routine
+                                </label>
+                            </div>
                         </div>
                     </div>
                     <div class="row g-2">
@@ -58,6 +69,7 @@ import RepeatControl from '../component/RepeatControl.vue';
 import FormItemList from '../component/FormItemList.vue';
 import ItemMapper from '../component/ItemMapper.vue'
 import { clone, replaceItem, addOrReplaceItem, sortItems } from '../../../../../utility';
+import { ROUTINETYPES } from '../../../../model/constants'
 
 export default {
     name: "RoutineFormModal",
@@ -68,11 +80,10 @@ export default {
     data: function() {
         return {
             store: null,
-            text: {
-                value: undefined,
-                oldValue: undefined,
-                isUpdated: false
-            },
+            initialized: false,
+            ROUTINETYPES: clone(ROUTINETYPES),
+            text: undefined,
+            isTaskRoutine: undefined,
             repeats: {
                 value: [],
                 added: [],
@@ -128,15 +139,19 @@ export default {
     },
     methods: {
         setProps(routine) {
-            this.text.value = routine.text;
-            this.text.oldValue = routine.text;
-            this.text.isUpdated = false;
+            this.initialized = false;
 
-            this.repeats.value = clone(routine.repeats),
+            this.text = (routine) ? routine.text : "";
+
+            let index = (routine) ? routine.types.findIndex(x => x.id == this.ROUTINETYPES.TASKROUTINE) : -1;
+            this.isTaskRoutine = (index > -1) ? true : false;
+
+            this.repeats.value = (routine) ? clone(routine.repeats) : [],
             this.repeats.added = [];
             this.repeats.updated = [];
             this.repeats.deletedIDs = [];
 
+            this.initialized = true;
         },
         setSelectedRepeat(repeatID) {
             this.selectedRepeatID = repeatID;
@@ -163,12 +178,15 @@ export default {
             this.selectedRepeatID = undefined;
         },
         save() {
-            let model = {
-                id: this.id,
-                text: this.text,
-            };
-            saveRoutine(model);
-            this.$emit("closeItemModal");
+            if (this.text.trim()) {
+                let model = {
+                    id: this.id,
+                    text: this.text,
+                    isTaskRoutine: this.isTaskRoutine
+                };
+                saveRoutine(model);
+                this.$emit("closeItemModal");
+            }
         },
         addItem(itemType, itemText) {
             createAndMapItem(this.id, itemType, itemText);
@@ -193,11 +211,9 @@ export default {
         },
     },
     watch: {
-        'text.value'(value) {
-            if (value != this.text.oldValue) {
-                this.text.isUpdated = true;
-            } else {
-                this.isUpdated = false;
+        isTaskRoutine() {
+            if (this.initialized && this.id > -1) {
+                this.store.toggleIsTaskRoutine(this.id, this.isTaskRoutine);
             }
         }
     }
