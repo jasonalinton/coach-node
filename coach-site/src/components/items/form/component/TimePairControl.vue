@@ -285,6 +285,14 @@ function setTime(time, endpoint) {
                 start.dateTime = firstDayOfMonth(new Date(time)).toISOString();
                 end.dateTime = endOfDay(lastDayOfMonth(new Date(time))).toISOString();
             }
+        } else if (this.updatedTimePair.idTimeframe == this.TIMEFRAME.YEAR) {
+            if (endpoint == "start") {
+                start.dateTime = firstDayOfYear(new Date(time)).toISOString();
+                end.dateTime = endOfDay(lastDayOfYear(new Date(time))).toISOString();
+            } else if (endpoint == "end") {
+                start.dateTime = lastDayOfYear(new Date(time)).toISOString();
+                end.dateTime = endOfDay(lastDayOfYear(new Date(time))).toISOString();
+            }
         }
     } else {
         if (endpoint == "start" && end.dateTime) {

@@ -27,6 +27,26 @@ export let TIMEFRAME = {
     LIFE: 57
 };
 
+export let REPETITION = {
+    MILLISECONDLY: 59,
+    SECONDLY: 60,
+    MINUTELY: 61,
+    HOURLY: 62,
+    DAILY: 63,
+    WORKDAYLY: 64,
+    WEEKDAYLY: 65,
+    WEEKENDDAYLY: 66,
+    WEEKENDLY: 67,
+    WEEKLY: 68,
+    MONTHLY: 69,
+    SEASONLY: 70,
+    QUARTERLY: 71,
+    TRIANUALLY: 72,
+    BIANUALLY: 73,
+    SENUANUALLY: 74,
+    ANUALLY: 75
+};
+
 export let MOMENT = {
     DATE: 87,
     TIME: 88,

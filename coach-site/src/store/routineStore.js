@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { getRoutines, refreshRepetitionForRepeat, saveRoutine } from '../api/routineAPI'
 import { repositionItem } from '../api/itemAPI';
 import { replaceOrAddItem, sortAsc } from '../../utility';
+import { ROUTINETYPES } from '../model/constants';
 import { getSocketConnection } from './socket'
 import { useMetricStore } from '@/store/metricStore'
 import { useTodoStore } from '@/store/todoStore'
@@ -45,6 +46,10 @@ export const useRoutineStore = defineStore('routine', {
         },
         getItem(id) {
             return this.routines.find(x => x.id == id);
+        },
+        getTaskRoutines() {
+            let taskRoutines = this.routines.filter(x => x.types.findIndex(x => x.id == ROUTINETYPES.TASKROUTINE) > -1);
+            return taskRoutines;
         },
         repositionItem(parentType, itemType, goalID, metricID, newPosition) {
             repositionItem(parentType, itemType, goalID, metricID, newPosition);

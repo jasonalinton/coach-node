@@ -68,11 +68,11 @@ export async function saveGoalTimePair(timePair) {
         body: JSON.stringify(data)
     })
     .then(response => response.json())
-    .then(data => {
-        if (!data.errorMessage) {
-            return data;
+    .then((data) => {
+        if (data.status.success) {
+            return data.result;
         } else {
-            this.errorMessage = data.errorMessage;
+            console.error('Error:', data.status.errorMessage);
         }
     })
     .catch(error => {

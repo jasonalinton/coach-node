@@ -17,16 +17,16 @@
                     <div :style="{ 'width': '12px', 'height': '40px', 'background-color': '#4285F4', 'margin-left': '3px', 'border-radius': '4px'}"></div></div>
                 </div>
                 <div class="d-flex flex-row mb-1">
-                    <img class="routine" :class="[{ active: selectedPanel == 'routine' }]" src='/icon/routine-icon.png' width="40" height="40"
-                         @click="setSelectedPanel('routine')"/>
-                    <div v-if="selectedPanel == 'routine'">
-                    <div :style="{ 'width': '12px', 'height': '40px', 'background-color': '#4C6EF5', 'margin-left': '3px', 'border-radius': '4px'}"></div></div>
-                </div>
-                <div class="d-flex flex-row mb-1">
                     <img class="goal" :class="[{ active: selectedPanel == 'goal' }]" src='/icon/goal-icon.png' width="40" height="40"
                          @click="setSelectedPanel('goal')"/>
                     <div v-if="selectedPanel == 'goal'">
                     <div :style="{ 'width': '12px', 'height': '40px', 'background-color': '#9013FE', 'margin-left': '3px', 'border-radius': '4px'}"></div></div>
+                </div>
+                <div class="d-flex flex-row mb-1">
+                    <img class="routine" :class="[{ active: selectedPanel == 'routine' }]" src='/icon/routine-icon.png' width="40" height="40"
+                         @click="setSelectedPanel('routine')"/>
+                    <div v-if="selectedPanel == 'routine'">
+                    <div :style="{ 'width': '12px', 'height': '40px', 'background-color': '#4C6EF5', 'margin-left': '3px', 'border-radius': '4px'}"></div></div>
                 </div>
                 <!-- <div class="d-flex flex-row mb-1">
                     <img class="task-routine" :class="[{ active: selectedPanel == 'task-routine' }]" src='/icon/task-routine-icon.png' width="40" height="40" 

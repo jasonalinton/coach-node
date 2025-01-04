@@ -196,6 +196,11 @@ export function getDayOfWeekShort(dateTime = new Date()) {
     return date.format(dateTime, 'ddd');   
 }
 
+// Ex. Friday, Sunday
+export function getDayOfWeekLong(dateTime = new Date()) {
+    return date.format(dateTime, 'dddd');   
+}
+
 // Ex. Sep, Oct
 export function getMonthShort(dateTime = new Date()) {
     return date.format(dateTime, 'MMM');   

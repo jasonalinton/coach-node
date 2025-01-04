@@ -7,6 +7,7 @@
                              :sort="sort" 
                              @onSortChange="onSortChange"></ItemPanelHeader>
             <RoutinePanelByCustom v-if="sort.by=='Ordered'"> </RoutinePanelByCustom>
+            <RoutinePanelByTask v-if="sort.by=='Task Routine'"/>
         </div>
     </div>
 </template>
@@ -14,9 +15,10 @@
 <script>
 import ItemPanelHeader from '../component/ItemPanelHeader.vue';
 import RoutinePanelByCustom from './RoutinePanelByCustom.vue';
+import RoutinePanelByTask from './RoutinePanelByTask.vue';
 
 var sortItems = [
-    { id: 1, text: "Metric" },
+    { id: 1, text: "Task Routine" },
     { id: 2, text: "Date" },
     { id: 3, text: "Repetition" },
     { id: 4, text: "Ordered" },
@@ -24,7 +26,7 @@ var sortItems = [
 
 export default {
     name: 'RoutinePanel',
-    components: { ItemPanelHeader, RoutinePanelByCustom, },
+    components: { ItemPanelHeader, RoutinePanelByCustom, RoutinePanelByTask },
     props: {
         showHead: {
             type: Boolean,
@@ -34,7 +36,7 @@ export default {
     data: function () {
         return {
             sort: {
-                by: 'Ordered',
+                by: 'Task Routine',
                 items: sortItems
             },
         }

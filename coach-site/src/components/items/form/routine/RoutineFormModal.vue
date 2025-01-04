@@ -37,6 +37,12 @@
                         </div>
                         <div class="col-4 d-flex flex-column">
                             <span class="form-head">Repetition</span>
+                                <!-- Quick Add Item -->
+                                <div class="d-flex justify-content-between mt-1 mb-1">
+                                    <button class="add-btn my-auto" type="button" @click="addRepeatClicked">
+                                        <img src="/icon/button/add.png" width="10" height="10"/>Add
+                                    </button>
+                                </div>
                             <div>
                                 <RepeatControl v-for="repeat in repeats.value" :key="repeat.id"
                                                :repeat="repeat" :itemID="id" itemType="routine" :canEdit="selectedRepeatID == undefined"
@@ -68,7 +74,7 @@ import { saveRoutine, mapTodos, createAndMapItem } from '../../../../api/routine
 import RepeatControl from '../component/RepeatControl.vue';
 import FormItemList from '../component/FormItemList.vue';
 import ItemMapper from '../component/ItemMapper.vue'
-import { clone, replaceItem, addOrReplaceItem, sortItems } from '../../../../../utility';
+import { clone, replaceItem, addOrReplaceItem, sortItems, sortAsc } from '../../../../../utility';
 import { ROUTINETYPES } from '../../../../model/constants'
 
 export default {
@@ -106,6 +112,9 @@ export default {
     created: async function() {
         let routineStore = await import(`@/store/routineStore`);
         this.store = routineStore.useRoutineStore();
+
+        let plannerStore = await import(`@/store/plannerStore`);
+        this.plannerStore = plannerStore.usePlannerStore();
 
         let routine = this.store.getItem(this.id);
         this.setProps(routine);
@@ -165,6 +174,12 @@ export default {
             this.mapper.isShown = false;
             this.mapper.type = undefined;
 
+        },
+        addRepeatClicked() {
+            let repeats = sortAsc(this.repeats.value, 'id');
+            let newRepeat = this.plannerStore.createRepeat();
+            newRepeat.id = (repeats.length > 0 && repeats[0].id < 0) ? repeats[0].id - 1 : -1;
+            this.repeats.value.unshift(newRepeat);
         },
         saveRepeat(repeat) {
             let _repeat = clone(repeat);
