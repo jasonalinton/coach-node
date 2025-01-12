@@ -206,6 +206,16 @@ export function getMonthShort(dateTime = new Date()) {
     return date.format(dateTime, 'MMM');   
 }
 
+// Ex. Jan 24, 1988 7:50 AM
+export function getShortDateString(date = new Date()) {
+    return moment(date).format("MMM D, h:mm A");
+}
+
+// Ex. January 24, 1988 7:50 AM
+export function getLongDateString(date = new Date()) {
+    return moment(date).format("LLL");
+}
+
 export function year(dateTime = new Date()) {
     return date.format(dateTime, 'YYYY');   
 }

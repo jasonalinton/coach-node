@@ -90,6 +90,18 @@ export let EVENTTYPE = {
     REPETITIVE: 138
 };
 
+export let BLURB = {
+    ADVICE: 162,
+    REASON: 163,
+    MEASUREOFSUCCESS: 164,
+    NOTE: 165,
+    BLURB: 166,
+    QUESTION: 167,
+    ANSWER: 168,
+    INSECURITY: 169,
+    REMINDER: 170
+};
+
 export let CALENDAR_TYPES = {
     WEEK: "week",
     MONTH: "month"

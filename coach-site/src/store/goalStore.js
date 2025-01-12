@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
-import { getGoals, getGoalsWithTimeframe, createAndMapItem, mapItems, deleteTimePair, unmapTodoFromGoalTimePair } from '../api/goalAPI'
+import { getGoals, saveGoal, addReason, getGoalsWithTimeframe, createAndMapItem, 
+    mapItems, deleteTimePair, unmapTodoFromGoalTimePair } from '../api/goalAPI'
 import { repositionItem } from '../api/itemAPI';
 import { replaceOrAddItem, sortAsc } from '../../utility';
 import { getSocketConnection } from './socket'
@@ -98,6 +99,18 @@ export const useGoalStore = defineStore('goal', {
         },
         unmapTodoFromGoalTimePair(goalTimePairTodoID) {
             unmapTodoFromGoalTimePair(goalTimePairTodoID);
+        },
+        saveDescription(goalID, description) {
+            let model = {
+                id: goalID,
+                description: {
+                    value: description
+                }
+            };
+            saveGoal(model);
+        },
+        addReason(id, datetime, text) {
+            addReason(id, datetime, text);
         },
         connectSocket() {
             if (!initialized) {

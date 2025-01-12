@@ -22,7 +22,40 @@
                 </div>
                 <div class="row g-2">
                         <div class="col-12 col-sm-4">
-                            
+                            <!-- Description -->
+                            <div class="d-flex flex-column">
+                                <div class="header d-flex flex-column">
+                                    <div class="d-flex flex-row justify-content-between">
+                                        <span class="text-start">Description</span>
+                                        <img class="mt-auto mb-auto me-2" src="/icon/caret-right.png" width="5" height="8"/>
+                                    </div>
+                                    <hr/>
+                                </div>
+                                <textarea class="textarea" 
+                                          v-model.lazy.trim="description.value"
+                                          spellcheck></textarea>
+                            </div>
+                            <!-- Reasons -->
+                            <div class="d-flex flex-column">
+                                <div class="header d-flex flex-column">
+                                    <div class="d-flex flex-row justify-content-between">
+                                        <span class="text-start">Reasons</span>
+                                        <img class="mt-auto mb-auto me-2" src="/icon/caret-right.png" width="5" height="8"/>
+                                    </div>
+                                    <hr/>
+                                </div>
+                                <textarea class="textarea" 
+                                          v-model.trim="reason"
+                                          v-on:keyup.enter.ctrl="addReason"
+                                          spellcheck></textarea>
+                                <div class="d-flex flex-column">
+                                    <div v-for="reason in reasons" :key="reason.id"
+                                         class="d-flex flex-column">
+                                        <span class="text-start">{{ getDateString(reason.datetime) }}</span>
+                                        <span class="text-start">{{ reason.text }}</span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                         <div class="col-6 col-sm-4 form-column">
                             <!-- Parents -->
@@ -102,7 +135,8 @@ import TimePairControl from '../component/TimePairControl.vue';
 import FormItemList from '../component/FormItemList.vue';
 import ItemMapper from '../component/ItemMapper.vue';
 import { clone, replaceItem, addOrReplaceItem, sortItems, sortAsc } from '../../../../../utility';
-import { INHERITANCE } from '../../../../model/constants'
+import { getShortDateString } from '../../../../../utility/timeUtility';
+import { INHERITANCE, BLURB } from '../../../../model/constants'
 
 export default {
     name: "GoalFormModal",
@@ -114,7 +148,13 @@ export default {
         return {
             store: null,
             plannerStore: null,
+            BLURB: BLURB,
             text: {
+                value: undefined,
+                oldValue: undefined,
+                isUpdated: false
+            },
+            description: {
                 value: undefined,
                 oldValue: undefined,
                 isUpdated: false
@@ -142,6 +182,8 @@ export default {
                 addedIDs: [],
                 removedIDs: []
             },
+            reasons: [],
+            reason: undefined,
             selectedRepeatID: undefined,
             selectedTimePairID: undefined,
             mapper: {
@@ -208,6 +250,10 @@ export default {
             this.text.oldValue = goal.text;
             this.text.isUpdated = false;
 
+            this.description.value = goal.description;
+            this.description.oldValue = goal.description;
+            this.description.isUpdated = false;
+
             this.timeframes = {
                 value: [],
                 original: [],
@@ -223,6 +269,8 @@ export default {
             this.timePairs.added = [];
             this.timePairs.updated = [];
             this.timePairs.deletedIDs = [];
+
+            this.reasons = goal.blurbs.filter(x => x.type.id == this.BLURB.REASON);
         },
         setSelectedRepeat(repeatID) {
             this.selectedRepeatID = repeatID;
@@ -276,6 +324,13 @@ export default {
             this.mapper.isShown = false;
             this.mapper.type = undefined;
         },
+        saveDescription() {
+            if (this.id > 0) {
+                if (this.description.value.trim() != "" && this.description.value != this.description.oldValue) {
+                    this.store.saveDescription(this.id, this.description.value);
+                }
+            }
+        },
         saveRepeat(repeat) {
             let _repeat = clone(repeat);
             _repeat.startRepeat = _repeat.startRepeat.value;
@@ -312,6 +367,7 @@ export default {
             let model = {
                 id: this.id,
                 text: this.text,
+                description: this.description,
                 timeframes: this.timeframes
             };
             saveGoal(model);
@@ -337,6 +393,14 @@ export default {
             newTimePair.id = (timePairs.length > 0 && timePairs[0].id < 0) ? timePairs[0].id - 1 : -1;
             this.timePairs.value.unshift(newTimePair);
         },
+        addReason() {
+            if (this.id > 0) {
+                if (this.reason.trim() != "") {
+                    this.store.addReason(this.id, new Date(), this.reason);
+                    this.reason = undefined;
+                }
+            }
+        },
         cancelMapping() {
             this.mapper.isShown = false;
             this.mapper.type = undefined;
@@ -354,7 +418,14 @@ export default {
                 this.timePairs.value.splice(index, 1)
             }
             this.selectedTimePairID = undefined;
-        }
+        },
+        getDateString(datetime) {
+            if (datetime) {
+                let date = new Date(datetime);
+                return getShortDateString(date);
+            }
+            return "";
+        },
     },
     watch: {
         'text.value'(value) {
@@ -363,7 +434,15 @@ export default {
             } else {
                 this.isUpdated = false;
             }
-        }
+        },
+        'description.value'(value) {
+            if (value != this.description.oldValue) {
+                this.description.isUpdated = true;
+                this.saveDescription();
+            } else {
+                this.isUpdated = false;
+            }
+        },
     }
 }
 </script>
