@@ -43,6 +43,8 @@
                             src='/icon/button/three.png' width="24" height="24"
                             @click.prevent="setInventorySetting('tertiaryToggled',(tertiaryToggled == undefined) ? !showTertiary : !tertiaryToggled)"/>
                 </template>
+                <template v-if="selectedPanel == 'briefing'">
+                </template>
             </div>
         </ItemPanelHeader>
     </div>
@@ -76,6 +78,8 @@ export default {
         title() {
             if (this.selectedPanel == 'inventory') {
                 return "Inventory";
+            } else if (this.selectedPanel == 'briefing') {
+                return "Briefing";
             } else {
                 return `${this.selectedPanel}s`;
             }

@@ -27,6 +27,9 @@ export const useAppStore = defineStore('app', {
         },
         itemPanel: {
             selected: "todo",
+            briefing: {
+                title: "Briefing"
+            },
             todo: {
                 showRepeat: true,
                 showTimeline: false,

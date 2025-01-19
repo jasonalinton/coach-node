@@ -11,6 +11,12 @@
                     <div :style="{ 'width': '12px', 'height': '40px', 'background-color': '#4285F4', 'margin-left': '3px', 'margin-top': '8px', 'border-radius': '4px'}"></div></div>
                 </div>
                 <div class="d-flex flex-row mb-1">
+                    <img class="briefing" :class="[{ active: selectedPanel == 'briefing' }]" src='/icon/briefing2.png' width="40" height="40"
+                         @click="setSelectedPanel('briefing')"/>
+                    <div v-if="selectedPanel == 'briefing'">
+                    <div :style="{ 'width': '12px', 'height': '40px', 'background-color': '#4285F4', 'margin-left': '3px', 'border-radius': '4px'}"></div></div>
+                </div>
+                <div class="d-flex flex-row mb-1">
                     <img class="todo" :class="[{ active: selectedPanel == 'todo' }]" src='/icon/todo-icon.png' width="40" height="40"
                          @click="setSelectedPanel('todo')"/>
                     <div v-if="selectedPanel == 'todo'">
@@ -65,6 +71,7 @@
         </div>
         <div class="col-auto h-100">
             <DashboardPanel v-show="selectedPanel == 'dashboard'" class="item-panel"/>
+            <BriefingPanel v-show="selectedPanel == 'briefing'" class="item-panel"/>
             <MetricPanel v-show="selectedPanel == 'metric'" class="item-panel"/>
             <GoalPanel v-show="selectedPanel == 'goal'" class="item-panel"></GoalPanel>
             <TodoPanel v-show="selectedPanel == 'todo'" class="item-panel"/>
@@ -81,6 +88,7 @@
 <script>
 import { useAppStore } from '@/store/appStore'
 import DashboardPanel from './dashboard/DashboardPanel.vue'
+import BriefingPanel from './briefing/BriefingPanel.vue'
 import MetricPanel from './MetricPanel.vue'
 import GoalPanel from './goal/GoalPanel.vue'
 import TodoPanel from './todo/TodoPanel.vue'
@@ -95,7 +103,7 @@ import { EVENTTYPE } from '../../../model/constants'
 
 export default {
     name: 'ItemPanel',
-    components: { DashboardPanel, MetricPanel, GoalPanel, TodoPanel, RoutinePanel, TaskRoutinePanel, 
+    components: { DashboardPanel, BriefingPanel, MetricPanel, GoalPanel, TodoPanel, RoutinePanel, TaskRoutinePanel, 
         EventPanel, InventoryPanel, NutritionPanel, WorkoutPanel },
     props: {
         selectPanel: Object,
@@ -169,6 +177,11 @@ function setSelectedPanel(panel) {
 }
 
 img.dashboard:hover, img.dashboard.active {
+    background-color: rgba(76, 110, 245, .08);
+    border-radius: 20px;
+}
+
+img.briefing:hover, img.briefing.active {
     background-color: rgba(76, 110, 245, .08);
     border-radius: 20px;
 }
