@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { getGoals, saveGoal, addReason, getGoalsWithTimeframe, createAndMapItem, 
+import { getGoals, saveGoal, saveGoalTimePair, addReason, getGoalsWithTimeframe, createAndMapItem, 
     mapItems, deleteTimePair, unmapTodoFromGoalTimePair } from '../api/goalAPI'
 import { repositionItem } from '../api/itemAPI';
 import { replaceOrAddItem, sortAsc } from '../../utility';
@@ -108,6 +108,19 @@ export const useGoalStore = defineStore('goal', {
                 }
             };
             saveGoal(model);
+        },
+        saveMetrics(goalID, addedIDs, removedIDs) {
+            let model = {
+                id: goalID,
+                metrics: {
+                    addedIDs,
+                    removedIDs
+                }
+            };
+            saveGoal(model);
+        },
+        saveTimePair(timePair) {
+            saveGoalTimePair(timePair);
         },
         addReason(id, datetime, text) {
             addReason(id, datetime, text);

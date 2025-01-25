@@ -1,12 +1,16 @@
 <template>
     <div v-if="todo" class="wrapper d-flex flex-column">
-        <div class="todo d-flex flex-row"
+        <div class="todo-form-item d-flex flex-row"
              @click="repeatsShown = !repeatsShown">
             <img src="/icon/todo-icon.png" width="18" height="18"/>
-            <div class="d-flex flex-column">
-                <div class="d-flex flex-row">
-                    <span class="id">{{ todo.id }}</span>
-                    <span class="text">{{ todo.text }}</span>
+            <div class="d-flex flex-column flex-grow-1">
+                <div class="d-flex flex-row justify-content-between flex-grow-1">
+                    <div class="d-flex flex-row">
+                        <span class="id">{{ todo.id }}</span>
+                        <span class="text">{{ todo.text }}</span>
+                    </div>
+                    <button class="btn-close mt-auto mb-auto" type="button" aria-label="close"
+                            @click.stop="$emit('removeItem')"></button>
                 </div>
                 <!-- <div class="d-flex flex-row">
                     <span class="metrics">{{ metricString }}</span>
@@ -124,5 +128,14 @@ img {
 
 .metric {
     color: #747474;
+}
+
+button.btn-close {
+    font-size: 8px;
+    visibility: hidden;
+}
+
+.wrapper:hover button.btn-close {
+    visibility: visible;
 }
 </style>

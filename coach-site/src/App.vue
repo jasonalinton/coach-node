@@ -223,7 +223,10 @@ function onResize() {
 
 <style>
 :root {
-    --background-color: #ffffff
+    --background-color: #ffffff;
+    --pill-default: #EFF6FC;
+    --pill-border-hover: #3B99FC;
+    --pill-background-selected: #BAD8F1;
 }
 
 body { 

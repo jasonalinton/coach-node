@@ -47,6 +47,12 @@ export let REPETITION = {
     ANUALLY: 75
 };
 
+export let TIMETYPE = {
+    SCHEDULED: 80,
+    RECOMMENDED: 81,
+    DUE: 82
+};
+
 export let MOMENT = {
     DATE: 87,
     TIME: 88,

@@ -33,6 +33,7 @@
                                 </div>
                                 <textarea class="textarea" 
                                           v-model.lazy.trim="description.value"
+                                          placeholder="Click to add Description"
                                           spellcheck></textarea>
                             </div>
                             <!-- Reasons -->
@@ -95,9 +96,9 @@
                                     </button>
                                 </div>
                                 <div>
-                                    <TimePairControl v-for="timePair in timePairs.value" :key="timePair.id"
-                                                     :timePair="timePair" :itemID="id" itemType="goal" :canEdit="selectedTimePairID == undefined"
-                                                     @saveTimePair="saveTimePair" @setSelectedTimePair="setSelectedTimePair" @cancelTimePairEditing="cancelTimePairEditing"/>
+                                    <GoalTimePairControl v-for="timePair in timePairs.value" :key="timePair.id"
+                                                         :timePair="timePair" :itemID="id" :canEdit="selectedTimePairID == undefined"
+                                                         @saveTimePair="saveTimePair" @setSelectedTimePair="setSelectedTimePair" @cancelTimePairEditing="cancelTimePairEditing"/>
                                 </div>
                             </div>
                         </div>
@@ -131,7 +132,7 @@
 import { saveGoal } from '../../../../api/goalAPI';
 import TimeframeControl from '../component/TimeframeControl.vue';
 import RepeatControl from '../component/RepeatControl.vue';
-import TimePairControl from '../component/TimePairControl.vue';
+import GoalTimePairControl from '../component/GoalTimePairControl.vue';
 import FormItemList from '../component/FormItemList.vue';
 import ItemMapper from '../component/ItemMapper.vue';
 import { clone, replaceItem, addOrReplaceItem, sortItems, sortAsc } from '../../../../../utility';
@@ -140,7 +141,7 @@ import { INHERITANCE, BLURB } from '../../../../model/constants'
 
 export default {
     name: "GoalFormModal",
-    components: { TimeframeControl, RepeatControl, TimePairControl, ItemMapper, FormItemList },
+    components: { TimeframeControl, RepeatControl, GoalTimePairControl, ItemMapper, FormItemList },
     props: {
       id: Number
     },
