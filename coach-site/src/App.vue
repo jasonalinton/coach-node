@@ -351,7 +351,7 @@ body {
 }
 
 .add-btn {
-    width: 52px;
+    width: 53px;
     height: 28px;
     line-height: 28px;
     padding-left: 5px;
