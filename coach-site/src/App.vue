@@ -227,6 +227,9 @@ function onResize() {
     --pill-default: #EFF6FC;
     --pill-border-hover: #3B99FC;
     --pill-background-selected: #BAD8F1;
+    --task-color: #F4511E;
+    --goal-color: #4285F4;
+    --form-header-hover: #005A9E;
 }
 
 body { 

@@ -1,27 +1,40 @@
 <template>
     <div class="d-flex flex-column">
-        <span class="form-head">{{ capitalize(title) }}</span>
-        <!-- Quick Add Item -->
-        <div class="d-flex justify-content-between mt-1 mb-1">
-            <button class="add-btn my-auto" type="button" @click="addItemClicked">
-                <img src="/icon/button/add.png" width="10" height="10"/>Add
-            </button>
-            <input class="add textbox" type="text" 
-                   v-model="newItemText"
-                   v-on:keyup.enter="addItem"
-                   :style="{'width': 'calc(100% - 55px)'}"/>
-        </div>
-        <div class="d-flex flex-column">
-            <div v-if="itemType == 'goal'">
-                <GoalFormItem v-for="id in itemIDs" :key="id"
-                              :id="id" :parentID="parentID" :parentType="parentType" 
-                              :routineRepeatIDs="repeatIDs"/>
+        <div class="header d-flex flex-column"
+             @click="isShown = !isShown"
+             @mouseover="hovered = true">
+            <div class="d-flex flex-row justify-content-between">
+                <span class="form-head">{{ capitalize(title) }}</span>
+                <img v-if="!isShown" class="caret mt-auto mb-auto me-2" 
+                        src='/icon/caret-right.png' width="5" height="8"/>
+                <img v-if="isShown" class="caret mt-auto mb-auto me-2" 
+                        src='/icon/caret-down.png' width="8" height="5"/>
             </div>
-            <div v-if="itemType == 'todo'">
-                <TodoFormItem v-for="id in itemIDs" :key="id"
-                              :id="id" :parentID="parentID" :parentType="parentType" 
-                              :routineRepeatIDs="parentType == 'routine' ? repeatIDs : []"
-                              :parentRepeatIDs="parentType == 'todo' ? repeatIDs : []"/>
+            <hr/>
+        </div>
+        <div v-if="isShown" class="d-flex flex-column">
+            <!-- Quick Add Item -->
+            <div class="d-flex justify-content-between mt-1 mb-1">
+                <button class="add-btn my-auto" type="button" @click="addItemClicked">
+                    <img src="/icon/button/add.png" width="10" height="10"/>Add
+                </button>
+                <input class="add textbox" type="text" 
+                       v-model="newItemText"
+                       v-on:keyup.enter="addItem"
+                       :style="{'width': 'calc(100% - 55px)'}"/>
+            </div>
+            <div class="d-flex flex-column">
+                <div v-if="itemType == 'goal'">
+                    <GoalFormItem v-for="id in itemIDs" :key="id"
+                                  :id="id" :parentID="parentID" :parentType="parentType" 
+                                  :routineRepeatIDs="repeatIDs"/>
+                </div>
+                <div v-if="itemType == 'todo'">
+                    <TodoFormItem v-for="id in itemIDs" :key="id"
+                                  :id="id" :parentID="parentID" :parentType="parentType" 
+                                  :routineRepeatIDs="parentType == 'routine' ? repeatIDs : []"
+                                  :parentRepeatIDs="parentType == 'todo' ? repeatIDs : []"/>
+                </div>
             </div>
         </div>
     </div>
@@ -47,6 +60,7 @@ export default {
     data: function() {
         return {
             newItemText: "",
+            isShown: true
         }
     },
     computed: {
@@ -101,5 +115,27 @@ function addItemClicked() {
     text-align: start;
     width: 100%;
     display: inline-block;
+    font-weight: 500;
+}
+
+.header {
+    cursor: default;
+}
+
+.header:hover .form-head {
+    color: var(--form-header-hover);
+}
+
+.caret {
+    visibility: hidden;
+}
+
+.header:hover .caret {
+    visibility: visible;
+}
+
+hr {
+    margin-top: 3px;
+    margin-bottom: 3px;
 }
 </style>

@@ -93,7 +93,7 @@
                 </div>
             </div>
             <!-- Todos -->
-            <div class="d-flex flex-column">
+            <div class="d-flex flex-column mt-2">
                 <span class="label text-start">Todos</span>
                 <input class="textbox" type="number" min="1"
                                v-model="todoID" 

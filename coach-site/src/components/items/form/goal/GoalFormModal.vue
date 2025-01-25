@@ -2,32 +2,32 @@
     <div :id="`goal-form-modal-${id}`" class="modal-dialog modal-xl modal-fullscreen-md-down modal-dialog modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content">
         <div class="modal-header">
-            <h5 class="modal-title" :id="`goal-${id}-ModalLabel`">{{ (goal) ? goal.id : "" }}</h5>
+            <span class="me-2">Goal {{ (goal) ? goal.id : "" }}</span>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
             <div v-if="!mapper.isShown" class="container-fluid">
-                <div class="row g-2">
-                    <div class="col-sm-12 col-lg-7 col-xl-8">
+                <div class="label row gx-0">
+                    <div class="col">
                         <input id="text" class="textbox" type="text" placeholder="Title"
                                v-model.lazy.trim="text.value" 
                                v-on:keyup.enter="save()"
                                spellcheck/>
                     </div>
-                    <div class="col-sm-12 col-lg-5 col-xl-4">
+                    <!-- <div class="col-sm-12 col-lg-5 col-xl-4 d-none d-lg-block">
                         <TimeframeControl v-if="timeframes.value" 
                                           :selectedTimeframes="timeframes.value"
                                           @toggleTimeframe="toggleTimeframe($event)"/>
-                    </div>
+                    </div> -->
                 </div>
-                <div class="row g-2">
-                        <div class="col-12 col-sm-4">
+                <div class="body row gx-0">
+                        <div class="blurb col-12 col-sm-12 col-md-4 col-lg-6 mt-2">
                             <!-- Description -->
-                            <div class="d-flex flex-column">
+                            <div class="description d-flex flex-column">
                                 <div class="header d-flex flex-column">
                                     <div class="d-flex flex-row justify-content-between">
-                                        <span class="text-start">Description</span>
-                                        <img class="mt-auto mb-auto me-2" src="/icon/caret-right.png" width="5" height="8"/>
+                                        <span class="form-head text-start">Description</span>
+                                        <img class="caret mt-auto mb-auto me-2" src="/icon/caret-right.png" width="5" height="8"/>
                                     </div>
                                     <hr/>
                                 </div>
@@ -37,28 +37,10 @@
                                           spellcheck></textarea>
                             </div>
                             <!-- Reasons -->
-                            <div class="d-flex flex-column">
-                                <div class="header d-flex flex-column">
-                                    <div class="d-flex flex-row justify-content-between">
-                                        <span class="text-start">Reasons</span>
-                                        <img class="mt-auto mb-auto me-2" src="/icon/caret-right.png" width="5" height="8"/>
-                                    </div>
-                                    <hr/>
-                                </div>
-                                <textarea class="textarea" 
-                                          v-model.trim="reason"
-                                          v-on:keyup.enter.ctrl="addReason"
-                                          spellcheck></textarea>
-                                <div class="d-flex flex-column">
-                                    <div v-for="reason in reasons" :key="reason.id"
-                                         class="d-flex flex-column">
-                                        <span class="text-start">{{ getDateString(reason.datetime) }}</span>
-                                        <span class="text-start">{{ reason.text }}</span>
-                                    </div>
-                                </div>
-                            </div>
+                            <BlurbFormControl title="Reasons" placeholder="Click to add Reason" :blurbs="reasons" 
+                                              @addBlurb="addReason($event)" />
                         </div>
-                        <div class="col-6 col-sm-4 form-column">
+                        <div class="items col-12 col-sm-6 col-md-4 col-lg-3 mt-2 form-column">
                             <!-- Parents -->
                             <FormItemList itemType="goal" :itemIDs="parentIDs" :isParent="true"
                                           parentType="goal" :parentID="id" :repeatIDs="repeatIDs"
@@ -72,33 +54,61 @@
                                           parentType="goal" :parentID="id" :repeatIDs="repeatIDs"
                                           @addItemClicked="addItemClicked" @addItem="addItem"/>
                         </div>
-                        <div class="col-6 col-sm-4 d-flex flex-column">
-                            <div>
-                                <span class="form-head">Repetition</span>
-                                <!-- Quick Add Item -->
-                                <div class="d-flex justify-content-between mt-1 mb-1">
-                                    <button class="add-btn my-auto" type="button" @click="addRepeatClicked">
-                                        <img src="/icon/button/add.png" width="10" height="10"/>Add
-                                    </button>
+                        <div class="time col-12 col-sm-6 col-md-4 col-lg-3 mt-2 d-flex flex-column">
+                            <!-- Repetition -->
+                            <div class="d-flex flex-column">
+                                <div class="header d-flex flex-column"
+                                    @click="isRepetitionShown = !isRepetitionShown">
+                                    <div class="d-flex flex-row justify-content-between">
+                                        <span class="form-head text-start">Repetition</span>
+                                        <img v-if="!isShown" class="caret mt-auto mb-auto me-2" 
+                                                src='/icon/caret-right.png' width="5" height="8"/>
+                                        <img v-if="isShown" class="caret mt-auto mb-auto me-2" 
+                                                src='/icon/caret-down.png' width="8" height="5"/>
+                                        <!-- <img class="caret mt-auto mb-auto me-2" 
+                                            :src="`/icon/caret-${(isVisible) ? 'down' : 'right' }.png`" width="5" height="8"/> -->
+                                    </div>
+                                    <hr/>
                                 </div>
-                                <div>
-                                    <RepeatControl v-for="repeat in repeats.value" :key="repeat.id"
-                                                   :repeat="repeat" :itemID="id" itemType="goal" :canEdit="selectedRepeatID == undefined"
-                                                   @saveRepeat="saveRepeat" @setSelectedRepeat="setSelectedRepeat" @cancelRepeatEditing="cancelRepeatEditing"/>
+                                <div v-if="isRepetitionShown" class="d-flex flex-column">
+                                    <!-- Quick Add Item -->
+                                    <div class="d-flex justify-content-between mt-1 mb-1">
+                                        <button class="add-btn my-auto" type="button" @click="addRepeatClicked">
+                                            <img src="/icon/button/add.png" width="10" height="10"/>Add
+                                        </button>
+                                    </div>
+                                    <div>
+                                        <RepeatControl v-for="repeat in repeats.value" :key="repeat.id"
+                                                       :repeat="repeat" :itemID="id" itemType="goal" :canEdit="selectedRepeatID == undefined"
+                                                       @saveRepeat="saveRepeat" @setSelectedRepeat="setSelectedRepeat" @cancelRepeatEditing="cancelRepeatEditing"/>
+                                    </div>
                                 </div>
                             </div>
-                            <div>
-                                <span class="form-head">Time</span>
-                                <!-- Quick Add Item -->
-                                <div class="d-flex justify-content-between mt-1 mb-1">
-                                    <button class="add-btn my-auto" type="button" @click="addTimeClicked">
-                                        <img src="/icon/button/add.png" width="10" height="10"/>Add
-                                    </button>
+                            <!-- Time Pair -->
+                            <div class="d-flex flex-column">
+                                <div class="header d-flex flex-column"
+                                    @click="isTimeShown = !isTimeShown">
+                                    <div class="d-flex flex-row justify-content-between">
+                                        <span class="form-head text-start">Time</span>
+                                        <img v-if="!isShown" class="caret mt-auto mb-auto me-2" 
+                                                src='/icon/caret-right.png' width="5" height="8"/>
+                                        <img v-if="isShown" class="caret mt-auto mb-auto me-2" 
+                                                src='/icon/caret-down.png' width="8" height="5"/>
+                                    </div>
+                                    <hr/>
                                 </div>
-                                <div>
-                                    <GoalTimePairControl v-for="timePair in timePairs.value" :key="timePair.id"
-                                                         :timePair="timePair" :itemID="id" :canEdit="selectedTimePairID == undefined"
-                                                         @saveTimePair="saveTimePair" @setSelectedTimePair="setSelectedTimePair" @cancelTimePairEditing="cancelTimePairEditing"/>
+                                <div v-if="isTimeShown" class="d-flex flex-column">
+                                    <!-- Quick Add Item -->
+                                    <div class="d-flex justify-content-between mt-1 mb-1">
+                                        <button class="add-btn my-auto" type="button" @click="addTimeClicked">
+                                            <img src="/icon/button/add.png" width="10" height="10"/>Add
+                                        </button>
+                                    </div>
+                                    <div>
+                                        <GoalTimePairControl v-for="timePair in timePairs.value" :key="timePair.id"
+                                                             :timePair="timePair" :itemID="id" :canEdit="selectedTimePairID == undefined"
+                                                             @saveTimePair="saveTimePair" @setSelectedTimePair="setSelectedTimePair" @cancelTimePairEditing="cancelTimePairEditing"/>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -130,18 +140,19 @@
 
 <script>
 import { saveGoal } from '../../../../api/goalAPI';
-import TimeframeControl from '../component/TimeframeControl.vue';
+// import TimeframeControl from '../component/TimeframeControl.vue';
 import RepeatControl from '../component/RepeatControl.vue';
 import GoalTimePairControl from '../component/GoalTimePairControl.vue';
 import FormItemList from '../component/FormItemList.vue';
 import ItemMapper from '../component/ItemMapper.vue';
+import BlurbFormControl from '../component/BlurbFormControl.vue';
 import { clone, replaceItem, addOrReplaceItem, sortItems, sortAsc } from '../../../../../utility';
 import { getShortDateString } from '../../../../../utility/timeUtility';
 import { INHERITANCE, BLURB } from '../../../../model/constants'
 
 export default {
     name: "GoalFormModal",
-    components: { TimeframeControl, RepeatControl, GoalTimePairControl, ItemMapper, FormItemList },
+    components: { RepeatControl, GoalTimePairControl, ItemMapper, FormItemList, BlurbFormControl },
     props: {
       id: Number
     },
@@ -191,6 +202,8 @@ export default {
                 isShown: false,
                 type: undefined
             },
+            isRepetitionShown: true,
+            isTimeShown: true
         }
     },
     created: async function() {
@@ -394,11 +407,10 @@ export default {
             newTimePair.id = (timePairs.length > 0 && timePairs[0].id < 0) ? timePairs[0].id - 1 : -1;
             this.timePairs.value.unshift(newTimePair);
         },
-        addReason() {
+        addReason(text) {
             if (this.id > 0) {
-                if (this.reason.trim() != "") {
-                    this.store.addReason(this.id, new Date(), this.reason);
-                    this.reason = undefined;
+                if (text.trim() != "") {
+                    this.store.addReason(this.id, new Date(), text);
                 }
             }
         },
@@ -449,6 +461,26 @@ export default {
 </script>
 
 <style scoped>
+.modal-header {
+    padding: 4px 16px 0 18px;
+    border-bottom: none;
+    border-left: var(--goal-color) solid 8px;
+}
+
+.modal-body {
+    padding: 0px;
+}
+
+.label.row {
+    border-left: var(--goal-color) solid 8px;
+    padding-left: 8px;
+    padding-right: 16px;
+}
+
+.body.row {
+    padding: 6px 16px;
+}
+
 #text {
     height: 52px;
     font-size: 32px;
@@ -463,5 +495,50 @@ export default {
     text-align: start;
     width: 100%;
     display: inline-block;
+    font-weight: 500;
+}
+
+.caret {
+    visibility: hidden;
+}
+
+.header {
+    cursor: default;
+}
+
+.header:hover .form-head {
+    color: var(--form-header-hover);
+}
+
+.header:hover .caret {
+    visibility: visible;
+}
+
+hr {
+    margin-top: 3px;
+    margin-bottom: 3px;
+    color: #565656
+}
+
+.btn-close {
+    font-size: 12px;
+}
+
+.blurb {
+    padding-right: 8px;
+    overflow: scroll;
+}
+
+.description {
+    margin-bottom: 8px;
+}
+
+.items {
+    padding-left: 8px;
+    padding-right: 8px
+}
+
+.time {
+    padding-right: 8px
 }
 </style>
