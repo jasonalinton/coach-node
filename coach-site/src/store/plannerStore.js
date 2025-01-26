@@ -96,6 +96,7 @@ export const usePlannerStore = defineStore('planner', {
                 isOwner: true,
                 isRecommended: false,
                 isEventVisible: false,
+                todoIDs: [],
             }
         }
     },

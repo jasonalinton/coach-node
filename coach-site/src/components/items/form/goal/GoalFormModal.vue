@@ -517,7 +517,7 @@ export default {
 hr {
     margin-top: 3px;
     margin-bottom: 3px;
-    color: #565656
+    color: #8A8A8A
 }
 
 .btn-close {

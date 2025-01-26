@@ -137,5 +137,6 @@ function addItemClicked() {
 hr {
     margin-top: 3px;
     margin-bottom: 3px;
+    color: #8A8A8A
 }
 </style>
