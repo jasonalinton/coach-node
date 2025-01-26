@@ -475,8 +475,8 @@ export default {
         refreshRepetitionForRepeat(repeatID) {
             this.store.refreshRepetitionForRepeat(this.id, repeatID)
         },
-        deleteFutureRepetitionsForRepeat(repeatID) {
-            this.store.deleteFutureRepetitionsForRepeat(this.id, repeatID)
+        deleteFutureRepetitionsForRepeat(repeatID, selectedDate) {
+            this.store.deleteFutureRepetitionsForRepeat(this.id, repeatID, selectedDate)
         },
     },
     watch: {

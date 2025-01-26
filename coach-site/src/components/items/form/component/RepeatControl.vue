@@ -147,7 +147,7 @@
                 <div class="d-flex flex-row justify-content-between">
                     <div class="d-flex justify-content-start">
                         <button class="btn btn-sm btn-link" type="button" @click="refreshRepetition">Refresh</button>
-                        <button class="btn btn-sm btn-link" type="button" @click="deleteFutureRepetitions">Delete Future</button>
+                        <button class="btn btn-sm btn-link" type="button" @click="deleteFutureRepetitions">{{ deleteFutureText }}</button>
                     </div>
                     <div class="d-flex justify-content-end">
                         <button class="btn btn-sm btn-link" type="button" @click="save">Save</button>
@@ -162,7 +162,7 @@
 <script>
 import TimeControl from '../../../controls/time/TimeControl.vue'
 import { clone, capitalize, toDateString, today } from '../../../../../utility'
-import { isNextDay, addDay } from '../../../../../utility/timeUtility'
+import { isNextDay, addDay, getNumberDateString } from '../../../../../utility/timeUtility'
 import { saveRoutineRepeat } from '../../../../api/routineAPI'
 import { saveTodoRepeat } from '../../../../api/todoAPI'
 
@@ -270,7 +270,8 @@ export default {
     },
     data: function() {
         return {
-            todoStore: null,
+            todoStore: undefined,
+            plannerStore: undefined,
             timeframes: clone(timeframes),
             inheritanceTypes: clone(inheritanceTypes),
             updatedRepeat: undefined,
@@ -283,11 +284,17 @@ export default {
         let todoStore = await import(`@/store/todoStore`);
         this.todoStore = todoStore.useTodoStore();
 
+        let plannerStore = await import(`@/store/plannerStore`);
+        this.plannerStore = plannerStore.usePlannerStore();
+
         if (this.repeat.id < 0) {
             this.isEditing = true;
         }
     },
     computed: {
+        selectedDate() {
+            return (this.plannerStore) ? this.plannerStore.selectedDate : today();
+        },
         // If end date has passed repeat is considered archived
         isArchived() {
             if (this.repeat.endDate) {
@@ -379,6 +386,12 @@ export default {
                 return "none";
             }
         },
+        deleteFutureText() {
+            if (this.plannerStore && this.selectedDate < today()) {
+                return `Delete Future ${getNumberDateString(this.selectedDate)}`;
+            }
+            return "Delete Future";
+        }
         // todoRepeats() {
         //     if (this.updatedRepeat) {
         //         // var todoIDs = this.updatedRepeat.todo_Repeats.map(x => x.idTod);
@@ -642,7 +655,7 @@ function refreshRepetition() {
 }
 
 function deleteFutureRepetitions() {
-    this.$emit('deleteFutureRepetitions', this.repeat.id);
+    this.$emit('deleteFutureRepetitions', this.repeat.id, this.selectedDate);
     this.isEditing = false;
 }
 

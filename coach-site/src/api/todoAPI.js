@@ -249,8 +249,8 @@ export async function refreshRepetitionForRepeat(id, repeatID) {
     });
 }
 
-export async function deleteFutureRepetitionsForRepeat(id, repeatID) {
-    let data = { id, repeatID };
+export async function deleteFutureRepetitionsForRepeat(id, repeatID, selectedDate) {
+    let data = { id, repeatID, from: selectedDate };
     
     return fetch(`${URL}/api/Todo/DeleteFutureRepetitionsForTodo`, {
         method: 'POST',

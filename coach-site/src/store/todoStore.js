@@ -127,8 +127,8 @@ export const useTodoStore = defineStore('todo', {
         toggleGoalTimePairTodoCompletion(goalTimePairTodoID, completedAt) {
             toggleGoalTimePairTodoCompletion(goalTimePairTodoID, completedAt);
         },
-        deleteFutureRepetitionsForRepeat(id, repeatID) {
-            deleteFutureRepetitionsForRepeat(id, repeatID);
+        deleteFutureRepetitionsForRepeat(id, repeatID, selectedDate) {
+            deleteFutureRepetitionsForRepeat(id, repeatID, selectedDate);
         },
         deleteOrArchiveRepeat(repeatID) {
             deleteOrArchiveRepeat(repeatID);

@@ -216,6 +216,11 @@ export function getLongDateString(date = new Date()) {
     return moment(date).format("LLL");
 }
 
+// Ex. 1/24/88
+export function getNumberDateString(date = new Date()) {
+    return moment(date).format("l");
+}
+
 export function year(dateTime = new Date()) {
     return date.format(dateTime, 'YYYY');   
 }
