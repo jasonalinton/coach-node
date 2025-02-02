@@ -1,7 +1,7 @@
 <template>
     <div v-if="goal">
-        <span class="goal">{{ goal.text }}</span>
-        <div class="d-flex flex-column">
+        <div class="goal" @click="showTodos = !showTodos">{{ goal.text }}</div>
+        <div v-if="showTodos" class="d-flex flex-column">
             <GoalTimeframeTodoItem v-for="gtpt in goalTimePairTodos" :key="gtpt.id"
                                    :todoID="gtpt.todoID" 
                                    :goalTimePairTodoID="gtpt.id"
@@ -25,6 +25,7 @@ export default {
         return {
             plannerStore: undefined,
             goalStore: undefined,
+            showTodos: false
         }
     },
     created: async function() {
@@ -79,5 +80,6 @@ export default {
 .goal {
     padding-left: 20px;
     color: #565656;
+    cursor: default;
 }
 </style>

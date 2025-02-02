@@ -12,6 +12,9 @@
             <span class="text">{{ todo.text }}</span>
         </div>
         <div class="button-group d-flex flex-column justify-content-between">
+            <img class="attempted button" width="14" height="14"
+                 :src="`/icon/thumbs-up-dark-2.png`"
+                 @click="markAttempted()"/>
             <img class="icon-button" 
                     src='/icon/delete-button.png' width="16" height="16"
                     @click="unmapTodo"/>
@@ -89,9 +92,12 @@ export default {
         markIncomplete() {
             this.todoStore.toggleGoalTimePairTodoCompletion(this.goalTimePairTodoID, null)
         },
+        markAttempted() {
+            this.todoStore.createTask(this.todoID, this.selectedDate);
+        },
         unmapTodo() {
             this.goalStore.unmapTodoFromGoalTimePair(this.goalTimePairTodoID);
-        }
+        },
     },
 }
 
@@ -137,7 +143,7 @@ export default {
 }
 
 .todo {
-    padding-left: 12px;
+    padding-left: 20px;
 }
 
 .todo:hover .button-group {
@@ -158,5 +164,6 @@ export default {
     /* height: 14px;
     line-height: 15px; */
     line-height: 22px;
+    color: #969696;
 }
 </style>

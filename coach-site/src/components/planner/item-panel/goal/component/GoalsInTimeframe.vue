@@ -8,6 +8,7 @@
         </div>
         <span v-else class="timeframe">{{ timeframe }}</span>
         <GoalTimeframeItem v-for="goal in goals" :key="goal.id"
+                           class="mb-2"
                            :goalID="goal.id" :timeframeID="timeframeID" />
     </div>
 </template>
