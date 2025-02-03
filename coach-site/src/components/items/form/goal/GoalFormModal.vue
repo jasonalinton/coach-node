@@ -380,9 +380,7 @@ export default {
         save() {
             let model = {
                 id: this.id,
-                text: this.text,
-                description: this.description,
-                timeframes: this.timeframes
+                text: this.text
             };
             saveGoal(model);
             this.$emit("closeItemModal");
