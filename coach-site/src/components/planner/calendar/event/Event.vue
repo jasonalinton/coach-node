@@ -172,7 +172,7 @@ function selectEvent() {
 }
 
 .event.md, .event.lg {
-    font-size: 12px;
+    font-size: 11px;
     padding-top: 6px;
     padding-bottom: 6px;
     padding-right: 4px;
