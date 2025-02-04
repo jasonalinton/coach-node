@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { today } from '../../utility'
+import { today, startOfDay } from '../../utility'
 
 export const usePlannerStore = defineStore('planner', {
     state: () => ({
@@ -22,7 +22,7 @@ export const usePlannerStore = defineStore('planner', {
             }, (60 - seconds) * 1000)
         },
         selectDate(date) {
-            this.selectedDate = new Date(date);
+            this.selectedDate = startOfDay(new Date(date));
         },
         createRepeat() {
             return {

@@ -3,7 +3,8 @@
             :class="pointInTime"
             :style="{ 'flex-basis': 0 }">
         <!-- Date Label -->
-        <div class="date-label d-flex flex-column justify-content-between">
+        <div class="date-label d-flex flex-column justify-content-between"
+             @click="selectDate">
             <div class="dow">{{ dow }}</div> <!-- Day of Week -->
             <div class="date-icon">{{ dateNumber }}</div><!-- Date -->
         </div>
@@ -55,6 +56,9 @@ export default {
         },
         dateNumber() {
             return dateNumber(this.date);
+        },
+        selectDate(date) {
+            this.plannerStore.selectDate(date);
         }
     },
     created: async function() {

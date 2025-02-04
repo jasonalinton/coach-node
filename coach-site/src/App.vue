@@ -303,6 +303,9 @@ body {
 
 /* @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@500;700&family=Varela+Round&display=swap'); */
 
+.cursor-default {
+    cursor: default;
+}
 
 .control-label {
     font-size: 12px;

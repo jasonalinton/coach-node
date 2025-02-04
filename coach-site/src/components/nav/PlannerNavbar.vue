@@ -16,6 +16,10 @@
                 </div>
             </div>
             <div v-if="selectedPage == 'planner'" class="d-flex flex-row me-5">
+                <IconButton class="arrow" src="/icon/previous.png" :width="24" :height="24"
+                            @click="previous" />
+                <IconButton class="arrow" src="/icon/next.png" :width="24" :height="24"
+                            @click="next" />
                 <select v-model="view">
                     <option v-for="_view in views" :key="_view.id" :value="_view.id">{{ _view.text }}</option>
                 </select>
@@ -29,6 +33,7 @@
 
 <script>
 import IconButton from '../controls/button/IconButton.vue';
+import { addDay, subtractDay, today } from '../../../utility';
 
 let views = [
     { id: 1, text: 'Week', view: 'weekView'},
@@ -54,20 +59,32 @@ export default {
     },
     data: function() {
         return {
+            plannerStore: undefined,
             dayCountt: this.dayCount,
             views,
             view: null,
             weekViews,
         }
     },
-    created: function() {
+    created: async function() {
         this.view = views.find(_view => _view.view == this.selectedView).id;
+
+        let plannerStore = await import(`@/store/plannerStore`);
+        this.plannerStore = plannerStore.usePlannerStore();
     },
-    // computed: {
-    //     selectedPage() { return this.$navbarConfig.selectedPage },
-    //     selectedView() { return this.$navbarConfig.planner.selectedView },
-    //     dayCount() { return this.$navbarConfig.planner.week.dayCount },
-    // },
+    computed: {
+        selectedDate() {
+            return (this.plannerStore) ? this.plannerStore.selectedDate : today();
+        },
+    },
+    methods: {
+        previous() {
+            this.plannerStore.selectDate(subtractDay(this.selectedDate, this.dayCount));
+        },
+        next() {
+            this.plannerStore.selectDate(addDay(this.selectedDate, this.dayCount));
+        },
+    },
     watch: {
         dayCountt(value) { this.$emit('dayCountChange', value) },
         view(value) { this.$emit('viewChange', views.find(view => view.id == value).view) },
@@ -106,5 +123,9 @@ select {
 
 select:hover {
     background-color: rgba(60, 64, 67, .08);
+}
+
+.arrow {
+    margin-top: 2px;
 }
 </style>

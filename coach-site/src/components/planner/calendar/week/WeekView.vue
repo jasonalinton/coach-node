@@ -11,7 +11,8 @@
                      :class="day.pointInTime"
                      :style="{ 'flex-basis': 0 }">
                     <!-- Date Label -->
-                    <div class="date-label d-flex flex-column justify-content-between">
+                    <div class="date-label cursor-default d-flex flex-column justify-content-between"
+                         @click="selectDate(day.date)">
                         <div class="dow">{{ day.dow }}</div> <!-- Day of Week -->
                         <div class="date-icon">{{ day.day }}</div><!-- Date -->
                     </div>
@@ -92,10 +93,7 @@ export default {
     },
     computed: {
         selectedDate() {
-            if (this.plannerStore) {
-                return this.plannerStore.selectedDate;
-            }
-            return today;
+            return (this.plannerStore) ? this.plannerStore.selectedDate : today();
         },
         startAt() {
             return firstDayOfWeek(this.selectedDate);
@@ -134,6 +132,9 @@ export default {
             // If task is mapped to an event, don't add to task list
             return day.tasks.filter((_task) => !_task.isInEvent);
         },
+        selectDate(date) {
+            this.plannerStore.selectDate(date);
+        }
     },
     watch: {
         dayCount() {

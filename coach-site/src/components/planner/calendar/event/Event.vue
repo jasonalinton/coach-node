@@ -16,6 +16,7 @@
 
 <script>
 import { useAppStore } from '@/store/appStore'
+import { usePlannerStore } from '@/store/plannerStore'
 import { getDurationInMinutes, getTimeString } from '../../../../../utility/timeUtility';
 import { sortDesc } from '../../../../../utility';
 import { mapIterationToEvent, unmapTaskFromRoutineEvent, mapTodoToEvent } from '../../../../resolvers/planner-resolvers'
@@ -31,11 +32,12 @@ export default {
     data: function () {
         return {
             appStore: undefined,
+            plannerStore: undefined,
         }
     },
     created: function() {
         this.appStore = useAppStore();
-       
+        this.plannerStore = usePlannerStore();
     },
     computed: {
         minutes() { return getDurationInMinutes(new Date(this._event.startAt), new Date(this._event.endAt)); },
@@ -143,6 +145,7 @@ function onDrop(ev) {
 
 function selectEvent() {
     this.appStore.setSelectedEvent(this._event);
+    this.plannerStore.selectDate(new Date(this._event.startAt));
 }
 </script>
 
