@@ -10,23 +10,29 @@
 
 <script>
 import CalendarMonth from './CalendarMonth.vue'
-import { addMonth } from '../../../../utility'
+import { today, addMonth } from '../../../../utility/timeUtility'
 
 export default {
     name: 'ThumbnailCalendar',
     components: { CalendarMonth },
     props: {
-        initialDate: Date
+        initialDate: Date,
     },
     data: function() {
         return {
+            plannerStore: undefined,
             date: this.initialDate,
             monthCount: 1,
         }
     },
-    created: function() {
+    created: async function() {
+        let plannerStore = await import(`@/store/plannerStore`);
+        this.plannerStore = plannerStore.usePlannerStore();
     },
     computed: {
+        selectedDate() {
+            return (this.plannerStore) ? this.plannerStore.selectedDate : today();
+        },
         months() {
             let months = [];
             months.push(new Date(this.date));
@@ -37,10 +43,18 @@ export default {
         }
     },
     methods: {
+        // selectDate(date) {
+        //     this.plannerStore.selectDate(date);
+        // },
         previousMonth() { this.date = addMonth(this.date, -1) },
         nextMonth() { this.date = addMonth(this.date, 1) },
         addMonth() { this.monthCount++ },
         subtractMonth() { this.monthCount-- }
+    },
+    watch: {
+        selectedDate() {
+            this.date = this.selectedDate;
+        }
     }
 }
 
