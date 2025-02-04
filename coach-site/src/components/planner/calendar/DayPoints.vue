@@ -1,6 +1,6 @@
 <template>
     <div>
-        <span>{{ `${pointCompleted} / ${pointTotal}` }}</span>
+        <span class="points">{{ `${pointCompleted}` }}</span>
     </div>
 </template>
 
@@ -67,5 +67,7 @@ export default {
 </script>
 
 <style scoped>
-
+.points {
+    font-size: 14px;
+}
 </style>

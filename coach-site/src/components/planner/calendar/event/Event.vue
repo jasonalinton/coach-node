@@ -6,7 +6,7 @@
             @drop="onDrop($event)" @dragover.prevent @dragenter.prevent>
          <div class="title">
             {{ _event.text }}
-            <span v-if="size == 'sm' || size == 'md'">,</span>
+            <span v-if="size == 'sm'">,</span>
          </div>
          <div class="time">
              {{ getTimeString(new Date(_event.startAt))}}
@@ -51,15 +51,15 @@ export default {
             return marginTop;
         },
         size() {
-            if (this.minutes <= 15)
+            if (this.minutes <= 30)
                 return "sm";
-            else if (this.minutes > 15 && this.minutes <= 30)
+            else if (this.minutes > 30 && this.minutes <= 60)
                 return "md";
             else
                 return "lg";
         },
         flexDirection() {
-            if (this.size == 'sm' || this.size == 'md')
+            if (this.size == 'sm')
                 return 'flex-row'
             else
                 return 'flex-column'
@@ -164,11 +164,14 @@ function selectEvent() {
 .event.sm {
     font-size: 10px;
     white-space: nowrap;
+    padding-top: 4px;
+    padding-bottom: 4px;
 }
 
 .event.md, .event.lg {
     font-size: 12px;
-    padding-top: 4px;
+    padding-top: 6px;
+    padding-bottom: 6px;
 }
 
 .event.success {

@@ -43,9 +43,6 @@ export default {
         }
     },
     methods: {
-        // selectDate(date) {
-        //     this.plannerStore.selectDate(date);
-        // },
         previousMonth() { this.date = addMonth(this.date, -1) },
         nextMonth() { this.date = addMonth(this.date, 1) },
         addMonth() { this.monthCount++ },

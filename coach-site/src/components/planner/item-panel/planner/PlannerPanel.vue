@@ -214,7 +214,7 @@ function onScroll() {
 .day-view {
     min-width: calc(100% / 7);
     border-left: 1px solid #D8D8D8;
-    font-family: SF Pro Display;
+    /* font-family: SF Pro Display; */
 }
 
 .head {
