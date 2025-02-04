@@ -1,16 +1,19 @@
 <template>
     <div class="event position-relative d-flex w-100"
-         :class="[size, flexDirection, successStatus]"
-         :style="{ 'top': `${top}px`, 'height': `${height}px`, 'z-index': 1, 'background-color': color}"
+         :class="[size, successStatus]"
+         :style="{ 'top': `${top}px`, 'z-index': 1, 'background-color': color}"
             @click="selectEvent"
             @drop="onDrop($event)" @dragover.prevent @dragenter.prevent>
-         <div class="title">
-            {{ _event.text }}
-            <span v-if="size == 'sm'">,</span>
-         </div>
-         <div class="time">
-             {{ getTimeString(new Date(_event.startAt))}}
-         </div>
+            <div :class="['d-flex', 'overflow-scroll', flexDirection]"
+                 :style="{ 'height': `${height}px`}">
+                <div class="title">
+                   {{ _event.text }}
+                   <span v-if="size == 'sm'">,</span>
+                </div>
+                <div class="time">
+                    {{ getTimeString(new Date(_event.startAt))}}
+                </div>
+            </div>
     </div>
 </template>
 
@@ -172,6 +175,7 @@ function selectEvent() {
     font-size: 12px;
     padding-top: 6px;
     padding-bottom: 6px;
+    padding-right: 4px;
 }
 
 .event.success {
