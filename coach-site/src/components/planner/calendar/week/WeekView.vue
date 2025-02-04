@@ -8,7 +8,7 @@
                 <div v-for="(day, index) in dayModels"
                      :key="index"
                      class="head day-view d-flex flex-column flex-grow-1 h-100"
-                     :class="day.pointInTime"
+                     :class="[day.pointInTime, {'selected': day.isSelected}]"
                      :style="{ 'flex-basis': 0 }">
                     <!-- Date Label -->
                     <div class="date-label cursor-default d-flex flex-column justify-content-between"
@@ -91,18 +91,6 @@ export default {
             iterationStore: undefined
         };
     },
-    computed: {
-        selectedDate() {
-            return (this.plannerStore) ? this.plannerStore.selectedDate : today();
-        },
-        startAt() {
-            return firstDayOfWeek(this.selectedDate);
-            // return firstDayOfWeek(firstDayOfMonth(this.selectedDate));
-        },
-        endAt() {
-            return lastDayOfWeek(this.selectedDate);
-        }
-    },
     created: async function() {
         let eventStore = await import(`@/store/eventStore`);
         this.eventStore = eventStore.useEventStore();
@@ -119,6 +107,21 @@ export default {
         this.width = this.$refs.weekView.clientWidth;
         // this.initTimeline();
         this.initHours();
+    },
+    computed: {
+        selectedDate() {
+            return (this.plannerStore) ? this.plannerStore.selectedDate : this.today;
+        },
+        today() {
+            return today();
+        },
+        startAt() {
+            return firstDayOfWeek(this.selectedDate);
+            // return firstDayOfWeek(firstDayOfMonth(this.selectedDate));
+        },
+        endAt() {
+            return lastDayOfWeek(this.selectedDate);
+        }
     },
     methods: {
         initHours,
@@ -182,11 +185,11 @@ function newDay(day) {
     
 
     let pointInTime = "";
-    if (day.getTime() < this.selectedDate.getTime()) {
+    if (day < this.today) {
         pointInTime = "past";
-    } else if (day.getTime() == this.selectedDate.getTime()) {
+    } else if (+day == +this.today) {
         pointInTime = "present";
-    } else if (day.getTime() > this.selectedDate.getTime()) {
+    } else if (day > this.today) {
         pointInTime = "future";
     }
     
@@ -196,7 +199,8 @@ function newDay(day) {
         date: new Date(day.getTime()),
         dateString: day.toDateString(),
         tasks,
-        pointInTime
+        pointInTime,
+        isSelected: (+day == +this.selectedDate) ? true : false
     };
 }
 
@@ -269,6 +273,10 @@ function onScroll() {
 
 .future .date-icon {
     color: #565656;
+}
+
+.head.selected:not(.present) .date-icon {
+    background-color: #D2E3FC;
 }
 
 .hour-labels::-webkit-scrollbar {
