@@ -1,11 +1,12 @@
 <template>
     <div class="event position-relative d-flex w-100"
          :class="[size, successStatus]"
-         :style="{ 'top': `${top}px`, 'z-index': 1, 'background-color': color}"
+         :style="{ 'top': `${top}px`, 'padding-top': `${paddingTopBottom}px`, 
+                   'padding-bottom': `${paddingTopBottom}px`, 'z-index': 1, 'background-color': color}"
             @click="selectEvent"
             @drop="onDrop($event)" @dragover.prevent @dragenter.prevent>
             <div :class="['d-flex', 'overflow-scroll', flexDirection]"
-                 :style="{ 'height': `${height}px`}">
+                 :style="{ 'height': `${height-(paddingTopBottom*2)}px`}">
                 <div class="title">
                    {{ _event.text }}
                    <span v-if="size == 'sm'">,</span>
@@ -66,6 +67,12 @@ export default {
                 return 'flex-row'
             else
                 return 'flex-column'
+        },
+        paddingTopBottom() {
+            if (this.size == 'sm')
+                return 4;
+            else
+                return 6;
         },
         todoIterations() {
             return this._event.iterations.filter(iteration => iteration.routineIteration == null)
@@ -167,14 +174,10 @@ function selectEvent() {
 .event.sm {
     font-size: 10px;
     white-space: nowrap;
-    padding-top: 4px;
-    padding-bottom: 4px;
 }
 
 .event.md, .event.lg {
     font-size: 11px;
-    padding-top: 6px;
-    padding-bottom: 6px;
     padding-right: 4px;
 }
 
