@@ -2,18 +2,6 @@
     <div class="item row g-0" tabindex="0" v-on:keyup.esc="closeForm">
         <div :class="{ split: selectedItem }">
             <ItemTableAndToolbar v-if="config.name.toLowerCase() == 'goal' || config.name.toLowerCase() == 'routine' || config.name.toLowerCase() == 'todo' || config.name.toLowerCase() == 'metric'" :itemType="config.name.toLowerCase()" />
-            <component v-if="config.name.toLowerCase() != 'goal' && config.name.toLowerCase() != 'routine' && config.name.toLowerCase() != 'todo' && config.name.toLowerCase() != 'metric'" :is="`${config.name}Table`"
-                    :id="`${config.itemType}-table`"
-                    :config="config"
-                    :selectedItem="selectedItem"
-                    @itemSelected="itemSelected"
-                    @closeForm="closeForm"></component>
-            <component :is="`${config.name}Form`" v-if="selectedItem"
-                       :id="`${config.itemType}-form`"
-                       :config="config"
-                       :item="selectedItem"
-                       @refreshForm="refreshForm"
-                       @closeForm="closeForm"></component>
         </div>
     </div>
 </template>
@@ -21,17 +9,9 @@
 <script>
 import Split from 'split.js'
 import ItemTableAndToolbar from './table/ItemTableAndToolbar.vue';
-import MetricTable from './metric/MetricTable.vue';
-import MetricForm from './metric/MetricForm.vue';
-import GoalTable from './goal/GoalTable.vue';
-import GoalForm from './goal/GoalForm.vue';
-import TodoTable from './todo/TodoTable.vue';
-import TodoForm from './todo/TodoForm.vue';
-import RoutineTable from './routine/RoutineTable.vue';
-import RoutineForm from './routine/RoutineForm.vue';
 
 export default {
-    components: { TodoTable, TodoForm, GoalTable, GoalForm, RoutineTable, RoutineForm, MetricTable, MetricForm, ItemTableAndToolbar },
+    components: { ItemTableAndToolbar },
     name: 'ItemTab',
     props: {
         config: Object,

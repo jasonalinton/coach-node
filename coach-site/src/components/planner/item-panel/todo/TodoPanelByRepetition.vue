@@ -20,17 +20,6 @@
             <div class="d-flex flex-column flex-grow-1 justify-content-between">
                 <!-- Pending -->
                 <ul class="item-list pending">
-                    <!-- New Task -->
-                    <!-- <li v-if="tasks.new">
-                        <div class="new-task d-flex flex-row align-items-center">
-                            <ItemCheckbox :width="40" :height="40" @onChecked="markNewTaskComplete(tasks.new)"></ItemCheckbox>
-                            <input id="newTask" ref="newTask" class="form-control form-control-sm" type="text" 
-                                v-model="tasks.new.text"
-                                v-on:keyup.enter="addTask(tasks.new)"
-                                v-on:keyup.esc="cancelAddTask()"
-                                autofocus/>
-                        </div>
-                    </li> -->
                     <li v-for="(iteration, index) in pending" v-bind:key="iteration.id" :style="{ 'z-index': -index }">
                         <ListItem :iteration="iteration" 
                                   @onEdit="$emit('editIteration', iteration)">
@@ -55,18 +44,13 @@
 </template>
 
 <script>
-// import IconButton from '../../../controls/button/IconButton.vue'
-// import AddTaskButton from '../component/AddTaskButton.vue'
-// import ItemCheckbox from '../component/ItemCheckbox.vue';
 import ListItem from '../component/ListItem.vue'
 import { replaceItem, removeItem, today, sortAsc } from '../../../../../utility';
-import { createDefaultTask } from '../../../../resolvers/todo-resolvers';
 import TimeframeRadio from '../component/TimeframeRadio.vue';
 import { firstDayOfWeek, lastDayOfWeek, firstDayOfMonth, lastDayOfMonth, startOfDay, endOfDay } from '../../../../../utility/timeUtility';
 
 export default {
     name: 'TodoPanelByRepetition',
-    // components: { AddTaskButton, IconButton, ListItem, ItemCheckbox, TimeframeRadio, },
     components: { ListItem, TimeframeRadio, },
     props: {
         selectedDate: Date
@@ -138,11 +122,6 @@ export default {
     },
     methods: {
         initIteration,
-        addNewTask,
-        addTask,
-        cancelAddTask,
-        markNewTaskComplete,
-        createDefaultTask,
         replaceItem,
         removeItem,
         show(value) {
@@ -169,37 +148,6 @@ function initIteration() {
         attemptedAt: null,
         completedAt: null,
         isRecommended: false,
-    }
-}
-
-function addNewTask() {
-    this.tasks.new = this.initIteration();
-    this.$nextTick(() => this.$refs.newTask.focus());
-}
-
-function addTask(iteration) {
-    var title = iteration.text;
-    if (title != "") {
-        this.createDefaultTask(iteration, this.$apollo);
-    }
-    this.addNewTask();
-}
-
-function cancelAddTask() {
-    this.tasks.new = null;
-}
-
-function markNewTaskComplete(iteration) {
-    var title = iteration.text;
-    if (title != "") {
-        let now = today();
-        iteration.startAt = now;
-        iteration.attemptedAt = now;
-        iteration.completedAt = now;
-
-        this.tasks.new = null;
-
-        this.createDefaultTask(iteration, this.$apollo);
     }
 }
 </script>

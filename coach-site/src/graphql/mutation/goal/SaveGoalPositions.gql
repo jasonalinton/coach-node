@@ -1,3 +1,0 @@
-mutation saveGoalPositions($goalPositions: [ItemPositionsInput]!) {
-  saveGoalPositions(goalPositions: $goalPositions)
-}

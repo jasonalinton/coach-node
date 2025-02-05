@@ -91,24 +91,6 @@ export default {
             return dayCount / 7;
         },
     },
-    apollo: {
-        iterationCompletions: {
-            query() { return require('../../../graphql/query/planner/QueryIterationCompletions.gql')},
-            variables() {
-                return {
-                    start: this.firstDate,
-                    end: this.lastDate
-                }
-            },
-            error: function(error) {
-                this.errorMessage = 'Error occurred while loading query'
-                console.log(this.errorMessage, error);
-            },
-            update(data) { 
-                return data.iterationCompletions
-            },
-        },
-    },
     methods: {
         initCalendar,
         refreshCalendar,
@@ -117,12 +99,8 @@ export default {
         goToday,
         addMonth,
         subtractMonth,
-        assignIterationCompletions
     },
     watch: {
-        iterationCompletions(value) {
-            this.assignIterationCompletions(value);
-        },
         initialDate() {
             this.initCalendar();
         }
@@ -163,19 +141,6 @@ function initCalendar() {
         }
         this.weeks.push(week);
     }
-
-    if (this.iterationCompletions) {
-        this.assignIterationCompletions(this.iterationCompletions)
-    }
-}
-
-function assignIterationCompletions(iterationCompletions) {
-    let days = this.weeks.map(_week => _week.days).flat();
-
-    days.forEach(_day => {
-        let iterationCompletion = iterationCompletions.find(_value => (new Date(_value.datetime)).toLocaleString() == _day.date);
-        _day.iterationCompletion = (iterationCompletion) ? iterationCompletion : { status: 'pending' }
-    })
 }
 
 function refreshCalendar() {

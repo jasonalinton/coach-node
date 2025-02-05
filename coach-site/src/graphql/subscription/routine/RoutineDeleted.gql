@@ -1,5 +1,0 @@
-subscription routineDeleted {
-  routineDeleted {
-    id
-  }
-}

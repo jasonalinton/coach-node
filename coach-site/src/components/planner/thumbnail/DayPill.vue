@@ -10,7 +10,6 @@
 
 <script>
 import { today } from "../../../../utility";
-import { unmapTaskFromRoutineEvent } from "../../../resolvers/planner-resolvers";
 
 export default {
     props: {
@@ -46,7 +45,6 @@ export default {
         selectDate,
         status,
         onDrop,
-        unmapTaskFromRoutineEvent,
     },
 }
 
@@ -76,7 +74,7 @@ function onDrop(ev) {
     if (data.type && data.type == "task") {
         /* If routine event, first unmap task from event and routine iteration */
         if (data.parentType && data.parentType == "routineEvent") {
-            this.unmapTaskFromRoutineEvent(data.id, data.parentID, new Date(this.day.date), null, null, this.$apollo);
+            console.log("this.unmapTaskFromRoutineEvent(data.id, data.parentID, new Date(this.day.date), null, null, this.$apollo)");
         } else {
             this.iterationStore.rescheduleIteration(data.id, new Date(this.day.date), new Date(this.day.date));
         }

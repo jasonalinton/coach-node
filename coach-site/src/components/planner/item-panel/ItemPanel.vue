@@ -65,9 +65,6 @@
                     <div :style="{ 'width': '12px', 'height': '40px', 'background-color': '#F4511E', 'margin-left': '3px', 'border-radius': '4px'}"></div></div>
                 </div>
             </div>
-            <!-- <div class="d-flex flex-column">
-                <img class="icon-button m-auto mb-0" src='/icon/refresh-icon.png' width="40" height="40" @click="refreshRepetitive"/>
-            </div> -->
         </div>
         <div class="col-auto h-100">
             <DashboardPanel v-show="selectedPanel == 'dashboard'" class="item-panel"/>
@@ -98,7 +95,6 @@ import EventPanel from './event/EventPanel.vue'
 import InventoryPanel from './inventory/InventoryPanel.vue'
 import NutritionPanel from './nutrition/NutritionPanel.vue'
 import WorkoutPanel from './workout/WorkoutPanel.vue'
-import { refreshRepetitiveItems } from '../../../resolvers/planner-resolvers'
 import { EVENTTYPE } from '../../../model/constants'
 
 export default {
@@ -134,7 +130,6 @@ export default {
         }
     },
     methods: {
-        refreshRepetitive,
         setSelectedPanel,
     },
     watch: {
@@ -150,10 +145,6 @@ export default {
             }
         }
     }
-}
-
-function refreshRepetitive(){
-    refreshRepetitiveItems(this.$apollo);
 }
 
 function setSelectedPanel(panel) {

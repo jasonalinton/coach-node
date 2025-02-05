@@ -15,17 +15,6 @@
         <div v-if="_event" class="d-flex flex-column flex-grow-1 justify-content-between">
             <!-- Pending -->
             <ul v-if="incompleteIterations" class="item-list pending">
-                <li v-if="iterations.new">
-                    <!-- New Task -->
-                    <div class="new-task d-flex flex-row align-items-center">
-                        <ItemCheckbox :width="40" :height="40" @onChecked="markNewTaskComplete(iterations.new)"></ItemCheckbox>
-                        <input id="newTask" ref="newTask" class="form-control form-control-sm" type="text" 
-                               v-model="iterations.new.text"
-                               v-on:keyup.enter="addTask(iterations.new)"
-                               v-on:keyup.esc="cancelAddTask()"
-                               autofocus/>
-                    </div>
-                </li>
                 <li v-for="(iteration, index) in incompleteIterations" v-bind:key="iteration.id" :style="{ 'z-index': -index }">
                     <ListItem :iteration="iteration" :parent="_event" :parentType="'routineEvent'"></ListItem>
                 </li>
@@ -45,17 +34,13 @@
 </template>
 
 <script>
-// import IconButton from '../../../controls/button/IconButton.vue';
-// import AddTaskButton from '../component/AddTaskButton.vue';
-import ItemCheckbox from '../component/ItemCheckbox.vue';
 import ListItem from '../component/ListItem.vue';
 import { toShortWeekdayString, startOfDay, isToday } from '../../../../../utility/timeUtility';
 import { replaceItem, removeItem, today, sortAsc } from '../../../../../utility';
-// import { createDefaultTask } from '../../../../resolvers/todo-resolvers';
 
 export default {
     name: 'EventRoutinePanel',
-    components: { ItemCheckbox, ListItem },
+    components: { ListItem },
     props: {
         _event: Object
     },
@@ -128,10 +113,7 @@ export default {
     methods: {
         initIteration,
         addNewTask,
-        addTask,
         cancelAddTask,
-        markNewTaskComplete,
-        // createDefaultTask,
         replaceItem,
         removeItem,
         today,
@@ -157,37 +139,10 @@ function addNewTask() {
     this.$nextTick(() => this.$refs.newTask.focus());
 }
 
-function addTask(iteration) {
-    if (!iteration.events) iteration.events = [];
-    iteration.events.push({ 
-        id: this._event.id,
-        text: this._event.text
-    });
-
-    // var title = iteration.text;
-    // if (title != "") {
-    //     this.createDefaultTask(iteration, this.$apollo);
-    // }
-    this.addNewTask();
-}
-
 function cancelAddTask() {
     this.iterations.new = null;
 }
 
-function markNewTaskComplete(iteration) {
-    var title = iteration.text;
-    if (title != "") {
-        let now = today();
-        iteration.startAt = now;
-        iteration.attemptedAt = now;
-        iteration.completedAt = now;
-
-        this.iterations.new = null;
-
-        // this.createDefaultTask(iteration, this.$apollo);
-    }
-}
 </script>
 
 <style scoped>

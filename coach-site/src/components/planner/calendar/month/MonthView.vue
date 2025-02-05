@@ -48,47 +48,19 @@ export default {
         let plannerStore = await import(`@/store/plannerStore`);
         this.plannerStore = plannerStore.usePlannerStore();
     },
-    apollo: {
-        iterations: {
-            query() { return require('../../../../graphql/query/todo/QueryTodoIterations.gql')},
-            error: function(error) {
-                this.errorMessage = 'Error occurred while loading query'
-                console.log(this.errorMessage, error);
-            },
-            update(data) { 
-                let iterations = data.todoIterations;
-                this.iterations = iterations;
-                this.iterationsToDays();
-                return iterations
-            },
-        },
-    },
     computed: {
         dayWidth() { return this.$refs.monthView.clientWidth / 7  },
         dayHeight() { return this.$refs.monthView.clientHeight  },
         selectedDate() {
-            if (this.plannerStore) {
-                return this.plannerStore.selectedDate;
-            }
-            return today;
+            return (this.plannerStore) ? this.plannerStore.selectedDate : today();
         },
     },
     methods: {
         initTimeline,
-        iterationsToDays,
-        getMaxTasks,
-    },
-    mounted: function() {
-        // An error gets thrown if pollInterval is set with the query
-        this.$apollo.queries.iterations.setOptions({
-            fetchPolicy: 'cache-and-network',
-            pollInterval: 50000,
-        })
     },
     watch: {
         selectedDate() {
             this.initTimeline();
-            this.iterationsToDays();
         }
     }
 }
@@ -125,29 +97,6 @@ function initTimeline() {
     }
 }
 
-function iterationsToDays() {
-    for (let i = 0; i < this.weeks.length; i++) {
-        let week = this.weeks[i];
-        week.days.forEach(day => {
-            const dateString = new Date(day.date.toJSON()).toDateString();
-
-            let iterations = this.iterations.filter(iteration => {
-                const start = new Date(iteration.startAt).toDateString();
-                const end = new Date(iteration.endAt).toDateString();
-                return start == dateString || (!iteration.startAt && iteration.endAt && end == dateString);
-            });
-
-            day.tasks = iterations;
-        });
-    }
-    return this.weeks;
-}
-
-function getMaxTasks(_this, iterations, week) {
-    return (iterations.length > _this.maxTasks) 
-                ? (week.maxTasks && week.maxTasks > iterations.length) ? week.maxTasks : iterations.length 
-                : (week.maxTasks && week.maxTasks > _this.maxTasks) ? week.maxTasks : _this.maxTasks;
-}
 </script>
 
 <style scoped>

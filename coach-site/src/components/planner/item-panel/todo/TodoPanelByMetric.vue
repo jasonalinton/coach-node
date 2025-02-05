@@ -31,7 +31,6 @@ import MetricSelector from '../component/MetricSelector.vue'
 import todoConfig from '../../../../config/items/todo-config';
 import ListItem from '../component/ListItem.vue';
 import { sortAsc } from '../../../../../utility';
-import { createDefaultTask } from '../../../../resolvers/todo-resolvers';
 import TimeframeRadio from '../component/TimeframeRadio.vue';
 import { firstDayOfWeek, lastDayOfWeek, firstDayOfMonth, lastDayOfMonth, endOfDay } from '../../../../../utility/timeUtility';
 
@@ -119,7 +118,6 @@ export default {
     },
     methods: {
         getMetricTodos,
-        createDefaultTask
     },
     watch: {
         iterations2() {

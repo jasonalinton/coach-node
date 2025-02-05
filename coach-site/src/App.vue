@@ -26,7 +26,6 @@
                         @selectEvent="selectEvent">
                 </Planner>
                 <ItemTabs v-show="navbar.selectedPage == 'items'"></ItemTabs>
-                <ItemTabsOG v-if="navbar.selectedPage == 'itemsOG'"></ItemTabsOG>
                 <PhysicalView v-if="navbar.selectedPage == 'physical'"></PhysicalView>
             </div>
             <div class="grid-right-panel">
@@ -44,7 +43,6 @@ import LeftPanel from "./components/planner/left-panel/LeftPanel.vue";
 import ItemPanel from './components/planner/item-panel/ItemPanel.vue';
 import Planner from "./components/planner/Planner.vue";
 import ItemTabs from "./components/items/ItemTabs.vue";
-import ItemTabsOG from "./components/items/ItemTabsOG.vue";
 import PhysicalView from "./components/metrics/physical/PhysicalView.vue";
 import { useAppStore } from '@/store/appStore'
 import { usePlannerStore } from '@/store/plannerStore'
@@ -65,7 +63,6 @@ export default {
         ItemPanel,
         Planner,
         ItemTabs,
-        ItemTabsOG,
         PhysicalView,
     },
     data: function () {

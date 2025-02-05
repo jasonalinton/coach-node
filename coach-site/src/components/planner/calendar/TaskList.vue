@@ -9,7 +9,6 @@
 
 <script>
 import Task from "./Task.vue";
-import { unmapTaskFromRoutineEvent, scheduleTodo } from "../../../resolvers/planner-resolvers";
 import { sortAsc } from '../../../../utility';
 import { startOfDay } from '../../../../utility/timeUtility';
 
@@ -54,8 +53,6 @@ export default {
     },
     methods: {
         onDrop,
-        unmapTaskFromRoutineEvent,
-        scheduleTodo
     }
 }
 
@@ -68,14 +65,10 @@ function onDrop(ev) {
     if (data.type && data.type == "task") {
         /* If routine event, first unmap task from event and routine iteration */
         if (data.parentType && data.parentType == "routineEvent") {
-            this.unmapTaskFromRoutineEvent(data.id, data.parentID, this.date, null, null, this.$apollo);
+            console.log("this.unmapTaskFromRoutineEvent(data.id, data.parentID, this.date, null, null, this.$apollo)");
         } else {
             this.iterationStore.rescheduleIteration(data.id, this.date, this.date);
         }
-    } else if (data.type && data.type == "todo") {
-        if (data.parentType && data.parentType == "goal") {
-            this.scheduleTodo(data.id, this.date, null, this.$apollo);
-        } 
     }
 }
 </script>

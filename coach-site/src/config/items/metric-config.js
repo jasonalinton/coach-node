@@ -1,4 +1,3 @@
-import { updateMetric } from '../../resolvers/metric-resolvers'
 
 let config = {
     itemType: "metric",
@@ -32,7 +31,6 @@ let config = {
             type: 'objects',
             isItem: true,
             isColumn: true,
-            optionsQuery: require('../../graphql/query/goal/QueryGoals.gql'),
             icon: '/icon/goal-icon.png',
         },
         {
@@ -43,7 +41,6 @@ let config = {
             type: 'objects',
             isItem: true,
             isColumn: true,
-            optionsQuery: require('../../graphql/query/routine/QueryRoutines.gql'),
             icon: '/icon/routine-icon.png',
         },
         {
@@ -54,11 +51,9 @@ let config = {
             type: 'objects',
             isItem: true,
             isColumn: true,
-            optionsQuery: require('../../graphql/query/todo/QueryTodos.gql'),
             icon: '/icon/task-icon.png',
         }
     ],
-    updateItem: updateMetric,
     itemModel: {
         text: "",
         description: "",
@@ -68,11 +63,6 @@ let config = {
         todos: [],
         routines: []
     },
-    query: {
-        name: "metrics",
-        document: require('../../graphql/query/QueryMetrics.gql'),
-        variables: {},
-    }
 }
 
 export default config;

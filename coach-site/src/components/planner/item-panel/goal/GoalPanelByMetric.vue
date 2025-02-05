@@ -53,23 +53,7 @@ export default {
             metrics: []
         }
     },
-    apollo: {
-        goals: {
-            query() { return this.config.query.document },
-            error: function(error) {
-                this.errorMessage = 'Error occurred while loading query'
-                console.log(this.errorMessage, error);
-            }
-        },
-    },
     created: function() {
-    },
-    mounted: function() {
-        // An error gets thrown if pollInterval is set with the query
-        this.$apollo.queries.goals.setOptions({
-            fetchPolicy: 'cache-and-network',
-            pollInterval: 30000,
-        })
     },
     computed: {
         physicalGoals() { return this.getMetricGoals('physical'); },

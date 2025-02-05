@@ -3,8 +3,6 @@
         <div class="col">
             <!-- Header -->
             <ItemPanelNavbar v-if="showHead" />
-            <GoalPanelByMetric v-if="sortBy=='Metric'" />
-            <GoalPanelByDate v-if="sortBy=='Date'" />
             <GoalPanelByCustom v-if="sortBy=='Custom'" />
             <GoalPanelByTimeframe v-if="sortBy=='Timeframe'"/>
             <GoalPanelByDashboard v-if="sortBy=='Dashboard'" />
@@ -14,15 +12,11 @@
 
 <script>
 import GoalPanelByCustom from './GoalPanelByCustom.vue';
-import GoalPanelByDate from './GoalPanelByDate.vue';
 import GoalPanelByTimeframe from './GoalPanelByTimeframe.vue';
-import GoalPanelByMetric from './GoalPanelByMetric.vue';
 import GoalPanelByDashboard from './GoalPanelByDashboard.vue';
 import ItemPanelNavbar from '../../../mobile/navbar/ItemPanelNavbar.vue';
 
 var sortItems = [
-    { id: 1, text: "Metric" },
-    { id: 2, text: "Date" },
     { id: 3, text: "Timeframe" },
     { id: 4, text: "Repetition" },
     { id: 5, text: "Custom" },
@@ -31,7 +25,7 @@ var sortItems = [
 
 export default {
     name: 'GoalPanel',
-    components: { ItemPanelNavbar, GoalPanelByMetric, GoalPanelByDate, GoalPanelByTimeframe, GoalPanelByCustom, GoalPanelByDashboard },
+    components: { ItemPanelNavbar, GoalPanelByTimeframe, GoalPanelByCustom, GoalPanelByDashboard },
     props: {
         showHead: {
             type: Boolean,

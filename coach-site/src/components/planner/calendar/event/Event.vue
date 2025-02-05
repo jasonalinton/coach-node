@@ -23,7 +23,6 @@ import { useAppStore } from '@/store/appStore'
 import { usePlannerStore } from '@/store/plannerStore'
 import { getDurationInMinutes, getTimeString } from '../../../../../utility/timeUtility';
 import { sortDesc } from '../../../../../utility';
-import { mapIterationToEvent, unmapTaskFromRoutineEvent, mapTodoToEvent } from '../../../../resolvers/planner-resolvers'
 import { EVENTTYPE } from '../../../../model/constants';
 
 export default {
@@ -126,9 +125,6 @@ export default {
         getDurationInMinutes,
         getTimeString,
         onDrop,
-        mapIterationToEvent,
-        unmapTaskFromRoutineEvent,
-        mapTodoToEvent,
         selectEvent
     }
 }
@@ -142,13 +138,13 @@ function onDrop(ev) {
     if (data.type && data.type == "task") {
         /* If routine event, first unmap task from event and routine iteration */
         if (data.parentType && data.parentType == "routineEvent") {
-            this.unmapTaskFromRoutineEvent(data.id, data.parentID, this._event.startAt, this._event.endAt, this._event.id, this.$apollo);
+            console.log("this.unmapTaskFromRoutineEvent(data.id, data.parentID, this._event.startAt, this._event.endAt, this._event.id, this.$apollo)");
         } else {
-            this.mapIterationToEvent(data.id, this._event.id, this.$apollo);
+            console.log("this.mapIterationToEvent(data.id, this._event.id, this.$apollo)");
         }
     } else if (data.type && data.type == "todo") {
         if (data.parentType && data.parentType == "goal") {
-            this.mapTodoToEvent(data.id, this._event.id, this.$apollo);
+            console.log("this.mapTodoToEvent(data.id, this._event.id, this.$apollo)");
         } 
     }
 }

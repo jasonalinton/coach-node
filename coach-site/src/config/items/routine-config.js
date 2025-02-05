@@ -1,6 +1,3 @@
-import {
-    addRoutine, updateRoutine, deleteRoutine
-} from '../../resolvers/routine-resolvers'
 
 let config = {
     itemType: "routine",
@@ -37,7 +34,6 @@ let config = {
             type: 'objects',
             isItem: true,
             isColumn: true,
-            optionsQuery: require('../../graphql/query/routine/QueryRoutines.gql'),
             icon: '/icon/parent-icon.png',
         },
         {
@@ -48,7 +44,6 @@ let config = {
             type: 'objects',
             isItem: true,
             isColumn: true,
-            optionsQuery: require('../../graphql/query/routine/QueryRoutines.gql'),
             icon: '/icon/child-icon.png',
         },
         {
@@ -59,7 +54,6 @@ let config = {
             type: 'objects',
             isItem: true,
             isColumn: true,
-            optionsQuery: require('../../graphql/query/QueryMetrics.gql'),
         },
         {
             id: 7,
@@ -69,7 +63,6 @@ let config = {
             type: 'objects',
             isItem: true,
             isColumn: true,
-            optionsQuery: require('../../graphql/query/goal/QueryGoals.gql'),
             icon: '/icon/goal-icon.png',
         },
         {
@@ -80,7 +73,6 @@ let config = {
             type: 'objects',
             isItem: true,
             isColumn: true,
-            optionsQuery: require('../../graphql/query/todo/QueryTodos.gql'),
             icon: '/icon/task-icon.png',
         },
         {
@@ -103,14 +95,6 @@ let config = {
         todos: [],
         repeats: [],
     },
-    addItem: addRoutine,
-    updateItem: updateRoutine,
-    deleteItem: deleteRoutine,
-    query: {
-        name: "routines",
-        document: require('../../graphql/query/routine/QueryRoutines.gql'),
-        variables: {},
-    }
 }
 
 export default config;

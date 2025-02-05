@@ -1,6 +1,3 @@
-import {
-    addGoal, updateGoal, deleteGoal
-} from '../../resolvers/goal-resolvers'
 
 let config = {
     itemType: "goal",
@@ -126,7 +123,6 @@ let config = {
             type: 'objects',
             isItem: true,
             isColumn: true,
-            optionsQuery: require('../../graphql/query/goal/QueryGoals.gql'),
             icon: '/icon/parent-icon.png',
         },
         {
@@ -137,7 +133,6 @@ let config = {
             type: 'objects',
             isItem: true,
             isColumn: true,
-            optionsQuery: require('../../graphql/query/goal/QueryGoals.gql'),
             icon: '/icon/child-icon.png',
         },
         {
@@ -148,7 +143,6 @@ let config = {
             type: 'objects',
             isItem: true,
             isColumn: true,
-            optionsQuery: require('../../graphql/query/QueryMetrics.gql'),
         },
         {
             id: 7,
@@ -158,7 +152,6 @@ let config = {
             type: 'objects',
             isItem: true,
             isColumn: true,
-            optionsQuery: require('../../graphql/query/todo/QueryTodos.gql'),
             icon: '/icon/task-icon.png',
         },
         {
@@ -169,7 +162,6 @@ let config = {
             type: 'objects',
             isItem: true,
             isColumn: true,
-            optionsQuery: require('../../graphql/query/routine/QueryRoutines.gql'),
             icon: '/icon/routine-icon.png',
         },
         // {
@@ -182,9 +174,6 @@ let config = {
         //     isColumn: false,
         // },
     ],
-    addItem: addGoal,
-    updateItem: updateGoal,
-    deleteItem: deleteGoal,
     itemModel: {
         __typename: "Goal",
         text: "",
@@ -195,11 +184,6 @@ let config = {
         todos: [],
         routines: []
     },
-    query: {
-        name: "goals",
-        document: require('../../graphql/query/goal/QueryGoals.gql'),
-        variables: {},
-    }
 }
 
 export default config;
