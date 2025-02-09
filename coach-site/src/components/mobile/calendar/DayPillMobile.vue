@@ -32,10 +32,7 @@ export default {
             return new Date(this.day.date);
         },
         selectedDate() {
-            if (this.plannerStore) {
-                return this.plannerStore.selectedDate;
-            }
-            return today;
+            return (this.plannerStore) ? this.plannerStore.selectedDate : today();
         },
         isSelected() {
             return +this.date == +this.selectedDate;

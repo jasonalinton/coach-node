@@ -148,8 +148,8 @@ function refreshCalendar() {
 }
 
 function goToday() {
-    this.plannerStore.selectDate(this.today);
-    this.refreshCalendar(this.today);
+    this.plannerStore.selectDate(today());
+    this.refreshCalendar();
 }
 
 </script>
