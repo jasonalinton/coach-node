@@ -53,6 +53,7 @@ import { useMetricStore } from '@/store/metricStore'
 import { useGoalStore } from '@/store/goalStore'
 import { useTodoStore } from '@/store/todoStore'
 import { useRoutineStore } from '@/store/routineStore'
+import { useUniversalStore } from '@/store/universalStore'
 
 export default {
     name: "App",
@@ -156,7 +157,8 @@ export default {
 async function initStores() {
     this.appStore = useAppStore();
     this.plannerStore = usePlannerStore();
-
+    
+    let universalStore = useUniversalStore();
     let eventStore = useEventStore();
     let iterationStore = useIterationStore();
     let physicalStore = usePhysicalStore();
@@ -165,6 +167,7 @@ async function initStores() {
     let todoStore = useTodoStore();
     let routineStore = useRoutineStore();
 
+    universalStore.initialize();
     eventStore.initialize();
     iterationStore.initialize();
     physicalStore.initialize();
@@ -314,7 +317,7 @@ body {
     height: 28px;
 }
 
-.textbox, .textarea {
+.textbox, .textarea, .select {
     width: 100%;
     font-size: 14px;
     line-height: 14px;
@@ -322,20 +325,21 @@ body {
     /* padding-top: 4px; */
     /* color: #343434; */
     color: #212529;
+    border-radius: 4px;
 }
 
 .textarea {
     padding: 8px;
 }
 
-.textbox:not(.accissible), .textarea:not(.accissible) {
+.textbox:not(.accissible), .textarea:not(.accissible), .select:not(.accissible) {
     outline-style: none;
     -webkit-appearance: none;
     border: 1px solid rgba(0, 0, 0, .00);
     resize: none;
 }
 
-.textbox:not(.accissible):focus, .textarea:not(.accissible):focus {
+.textbox:not(.accissible):focus, .textarea:not(.accissible):focus, .select:not(.accissible):focus {
     border: 1px solid #039BE5;
     transition-property: border-color;
     transition-duration: 0.15s;
@@ -344,7 +348,7 @@ body {
     resize: vertical;
 }
 
-.textbox:not(.accissible):hover:not(:focus), .textarea:not(.accissible):hover:not(:focus) {
+.textbox:not(.accissible):hover:not(:focus), .textarea:not(.accissible):hover:not(:focus), .select:not(.accissible):hover:not(:focus) {
     /* border: 1px solid rgba(0, 0, 0, .08); */
     border: 1px solid rgba(0, 0, 0, .2);
     resize: vertical;

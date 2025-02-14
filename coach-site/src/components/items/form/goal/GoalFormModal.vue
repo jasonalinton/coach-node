@@ -148,7 +148,7 @@ import ItemMapper from '../component/ItemMapper.vue';
 import BlurbFormControl from '../component/BlurbFormControl.vue';
 import { clone, replaceItem, addOrReplaceItem, sortItems, sortAsc } from '../../../../../utility';
 import { getShortDateString } from '../../../../../utility/timeUtility';
-import { INHERITANCE, BLURB } from '../../../../model/constants'
+import { INHERITANCE, BLURBTYPE } from '../../../../model/constants'
 
 export default {
     name: "GoalFormModal",
@@ -160,7 +160,7 @@ export default {
         return {
             store: null,
             plannerStore: null,
-            BLURB: BLURB,
+            BLURBTYPE: BLURBTYPE,
             text: {
                 value: undefined,
                 oldValue: undefined,
@@ -284,7 +284,7 @@ export default {
             this.timePairs.updated = [];
             this.timePairs.deletedIDs = [];
 
-            this.reasons = goal.blurbs.filter(x => x.type.id == this.BLURB.REASON);
+            this.reasons = goal.blurbs.filter(x => x.type.id == this.BLURBTYPETYPE.REASON);
         },
         setSelectedRepeat(repeatID) {
             this.selectedRepeatID = repeatID;

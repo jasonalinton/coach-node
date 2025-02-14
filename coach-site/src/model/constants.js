@@ -1,3 +1,11 @@
+export let METRIC = {
+    PHYSICAL: 1,
+    SOCIAL: 2,
+    MENTAL: 3,
+    EMOTIONAL: 4,
+    FINANCIAL: 5
+};
+
 export let ROUTINETYPES = {
     TASKROUTINE: 13,
     LIFESTYLE: 14,
@@ -96,7 +104,7 @@ export let EVENTTYPE = {
     REPETITIVE: 138
 };
 
-export let BLURB = {
+export let BLURBTYPE = {
     ADVICE: 162,
     REASON: 163,
     MEASUREOFSUCCESS: 164,
@@ -105,7 +113,9 @@ export let BLURB = {
     QUESTION: 167,
     ANSWER: 168,
     INSECURITY: 169,
-    REMINDER: 170
+    REMINDER: 170,
+    BRIEFING: 172,
+    DEBRIEFING: 173,
 };
 
 export let CALENDAR_TYPES = {
