@@ -12,7 +12,7 @@
                                       @setColumns="$emit('setColumns', $event)">
               </ItemTableColumnOptions>
           </div>
-          <select v-model="sortBy" class="ms-2">
+          <select v-model="sortBy" class="select ms-2">
               <option disabled>Sort By</option>
               <option v-for="option in sortOptions" :key="option.id" :value="option.text">{{ option.text }}</option>
           </select>
@@ -76,12 +76,12 @@ import ItemTableColumnOptions from '../component/ItemTableColumnOptions.vue'
   
   <style scoped>
       .toolbar {
-          background-color: #F5F5F5;
+          /* background-color: #F5F5F5; */
           height: 32px;
           padding: 0 8px;
       }
   
-      .search.textbox {
+      .search.textbox, .select {
           height: 28px;
           margin-top: 2px;
       }
@@ -91,7 +91,7 @@ import ItemTableColumnOptions from '../component/ItemTableColumnOptions.vue'
       }
   
       /* Textbox */
-      .textbox, .textarea, .form-select {
+      .textbox, .textarea, select {
           width: 100%;
           font-size: 14px;
           line-height: 14px;
@@ -99,10 +99,10 @@ import ItemTableColumnOptions from '../component/ItemTableColumnOptions.vue'
           /* padding-top: 4px; */
           /* color: #343434; */
           color: #212529;
-          background-color: #F5F5F5;
+          /* background-color: #F5F5F5; */
       }
   
-      .textbox:not(.accissible), .textarea:not(.accissible) {
+      .textbox:not(.accissible), .textarea:not(.accissible), .select:not(.accissible) {
           outline-style: none;
           -webkit-appearance: none;
           border: 1px solid rgba(0, 0, 0, .08);

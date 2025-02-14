@@ -55,8 +55,8 @@ export default {
     },
     watch: {
         sort(value) {
-            this.sortBy = value.by;
-            this.sortItems = value.items;
+            this.sortBy = (value) ? value.by : undefined;
+            this.sortItems = (value) ? value.items : undefined;
         }
     }
 }
