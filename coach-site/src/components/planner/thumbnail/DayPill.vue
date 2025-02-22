@@ -1,41 +1,51 @@
 <template>
     <div class="day pill d-flex flex-column position-relative" 
-         :class="[day.pointInTime, (isSelected) ? 'selected' : '', status(day.iterationCompletion)]"  
-         @click="selectDate(day.date)"
+         :class="[pointInTime, (isSelected) ? 'selected' : '']"  
+         @click="selectDate(date)"
          @drop="onDrop($event)" @dragover.prevent @dragenter.prevent>
-        <span>{{ day.day }}</span>
+        <span>{{ date.getDate() }}</span>
         <span class="status position-absolute"></span>
     </div>  
 </template>
 
 <script>
-import { today } from "../../../../utility";
+import moment from 'moment'
+import { today, startOfDay } from "../../../../utility";
+
 
 export default {
     props: {
-        day: Object,
+        date: Object,
+        rootDate: Object
     },
     created: async function() {
         let plannerStore = await import(`@/store/plannerStore`);
         this.plannerStore = plannerStore.usePlannerStore();
-        let iterationStore = await import(`@/store/iterationStore`);
-        this.iterationStore = iterationStore.useIterationStore();
     },
     data: function () {
         return {
             plannerStore: undefined,
-            iterationStore: undefined,
         }
     },
     computed: {
-        date() {
-            return new Date(this.day.date);
-        },
         selectedDate() {
             return (this.plannerStore) ? this.plannerStore.selectedDate : today();
         },
+        today() {
+            return (this.plannerStore) ? startOfDay(this.plannerStore.currentTime) : today();
+        },
         isSelected() {
             return +this.date == +this.selectedDate;
+        },
+        pointInTime() {
+            if (this.date.getMonth() < this.rootDate.getMonth()) {
+                return "previous-month";
+            } else if (+this.today == +this.date) {
+                return "present";
+            } else if (moment(this.date).month() > moment(this.rootDate).month()) {
+                return "next-month";
+            }
+            return "";
         }
     },
     methods: {
@@ -73,7 +83,7 @@ function onDrop(ev) {
         if (data.parentType && data.parentType == "routineEvent") {
             console.log("this.unmapTaskFromRoutineEvent(data.id, data.parentID, new Date(this.day.date), null, null, this.$apollo)");
         } else {
-            this.iterationStore.rescheduleIteration(data.id, new Date(this.day.date), new Date(this.day.date));
+            this.iterationStore.rescheduleIteration(data.id, new Date(this.date), new Date(this.date));
         }
 
 

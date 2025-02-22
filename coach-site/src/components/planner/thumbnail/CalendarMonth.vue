@@ -18,7 +18,7 @@
         </div>
         <!-- Days -->
         <div v-for="(week, weekIndex) in weeks" :key="weekIndex" class="week d-flex flex-row">
-            <DayPill v-for="(day, dayIndex) in week.days" :key="dayIndex" :day="day" :date="day.date"/>
+            <DayPill v-for="(date, dayIndex) in week.days" :key="dayIndex" :date="date" :rootDate="date1"/>
         </div>
     </div>
 </template>
@@ -118,26 +118,8 @@ function initCalendar() {
     for (let i = 0; i < this.rows; i++) {
         let week = { days: [] };
         for (let j = 0; j < 7; j++) {
-            let day = {
-                dow: this.date_and_time.format(date, "ddd"),
-                day: date.getDate(),
-                date: new Date(date.getTime()).toLocaleString(),
-                tasks: [],
-                iterationCompletion: {
-                    status: 'pending'
-                }
-            };
-
-            if (moment(date).month() < moment(this.date1).month()) {
-                day.pointInTime = "previous-month";
-            } else if (this.today.getTime() == date.getTime()) {
-                day.pointInTime = "present";
-            } else if (moment(date).month() > moment(this.date1).month()) {
-                day.pointInTime = "next-month";
-            }
-
+            week.days.push(date)
             date = moment(date).add(1, 'day').toDate();
-            week.days.push(day);
         }
         this.weeks.push(week);
     }

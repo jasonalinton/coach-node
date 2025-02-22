@@ -16,13 +16,18 @@ export default {
     name: 'ThumbnailCalendar',
     components: { CalendarMonth },
     props: {
-        initialDate: Date,
+        initialDate: Date, // rename to rootDate
     },
     data: function() {
         return {
             plannerStore: undefined,
             date: this.initialDate,
             monthCount: 1,
+            // rootCalendarIndex: 
+                // ex. If monthCount == 3 and rootCalendarIndex = 2, 
+                // the current day would be shown on the last(third) calendar
+                // ex. If monthCount == 3 and rootCalendarIndex = 0, 
+                // the current day would be shown on the first calendar
         }
     },
     created: async function() {
@@ -43,7 +48,7 @@ export default {
         }
     },
     methods: {
-        previousMonth() { this.date = addMonth(this.date, -1) },
+        previousMonth() { this.date = addMonth(this.date, -1) }, // Changes root date (this might not be right)
         nextMonth() { this.date = addMonth(this.date, 1) },
         addMonth() { this.monthCount++ },
         subtractMonth() { this.monthCount-- }
