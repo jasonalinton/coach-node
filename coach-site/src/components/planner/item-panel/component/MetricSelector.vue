@@ -1,10 +1,10 @@
 <template>
   <div class="d-flex flex-row justify-content-between">
-      <span class="metric physical" :class="[{ selected: selected.physical.selected }]" @click="selected.physical.selected = !selected.physical.selected">P</span>
-      <span class="metric emotional" :class="[{ selected: selected.emotional.selected }]" @click="selected.emotional.selected = !selected.emotional.selected">E</span>
-      <span class="metric mental" :class="[{ selected: selected.mental.selected }]" @click="selected.mental.selected = !selected.mental.selected">M</span>
-      <span class="metric social" :class="[{ selected: selected.social.selected }]" @click="selected.social.selected = !selected.social.selected">S</span>
-      <span class="metric financial" :class="[{ selected: selected.financial.selected }]" @click="selected.financial.selected = !selected.financial.selected">F</span>
+      <span class="metric physical" :class="[{ selected: selected.physical }]" @click="selected.physical = !selected.physical">P</span>
+      <span class="metric emotional" :class="[{ selected: selected.emotional }]" @click="selected.emotional = !selected.emotional">E</span>
+      <span class="metric mental" :class="[{ selected: selected.mental }]" @click="selected.mental = !selected.mental">M</span>
+      <span class="metric social" :class="[{ selected: selected.social }]" @click="selected.social = !selected.social">S</span>
+      <span class="metric financial" :class="[{ selected: selected.financial }]" @click="selected.financial = !selected.financial">F</span>
   </div>
 </template>
 
@@ -12,7 +12,18 @@
 export default {
     name: 'MetricSelector',
     props: {
-        selected: Object
+        selected: {
+            type: Object,
+            default: () => {
+                return {
+                    physical: true,
+                    emotional: true,
+                    mental: true,
+                    social: true,
+                    financial: true
+                }
+            }
+        }
     }
 }
 </script>

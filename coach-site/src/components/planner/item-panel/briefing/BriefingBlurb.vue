@@ -3,11 +3,11 @@
         <!-- Toolbar -->
         <TimeframeRadio :timeframe="timeframe" :isToggle="false" container="briefing-blurb"
                         @timeframeSelected="selectTimeframe" />
-        <MetricSelector class="metric-selector" :selected="selectedMetrics"></MetricSelector>
+        <MetricSelector class="metric-selector mt-1" :selected="selectedMetrics"></MetricSelector>
         <BlurbFormControl title="Physical" placeholder="Click to add Physical blurb" :blurbs="physicalBlurbs" 
                           @addBlurb="addBlurb($event, METRIC.PHYSICAL)"
                           @saveBlurb="saveBlurb" />
-        <BlurbFormControl title="Social" placeholder="Click to add Social blurb" :blurbs="socialBlurbs" 
+        <BlurbFormControl class="mt-2" title="Social" placeholder="Click to add Social blurb" :blurbs="socialBlurbs" 
                           @addBlurb="addBlurb($event, METRIC.SOCIAL)"
                           @saveBlurb="saveBlurb" />
     </div>
@@ -37,11 +37,11 @@ export default {
             idTimeframe: 43,
             timeframe: "day",
             selectedMetrics: {
-                physical: { selected: true},
-                emotional: { selected: true},
-                mental: { selected: true},
-                social: { selected: true},
-                financial: { selected: true}
+                physical: false,
+                emotional: false,
+                mental: false,
+                social: false,
+                financial: false
             },
         }
     },

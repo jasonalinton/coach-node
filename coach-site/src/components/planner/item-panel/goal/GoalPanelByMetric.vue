@@ -44,11 +44,11 @@ export default {
         return {
             config: goalConfig,
             selectedMetrics: {
-                physical: { selected: true},
-                emotional: { selected: true},
-                mental: { selected: true},
-                social: { selected: true},
-                financial: { selected: true}
+                physical: true,
+                emotional: true,
+                mental: true,
+                social: true,
+                financial: true
             },
             metrics: []
         }

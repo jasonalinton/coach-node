@@ -46,11 +46,11 @@ export default {
             todoStore: undefined,
             config: todoConfig,
             selectedMetrics: {
-                physical: { selected: true},
-                emotional: { selected: true},
-                mental: { selected: true},
-                social: { selected: true},
-                financial: { selected: true}
+                physical: true,
+                emotional: true,
+                mental: true,
+                social: true,
+                financial: true
             },
             timeframe: 'day',
             metrics: []
