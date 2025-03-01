@@ -2,7 +2,7 @@
     <input class="form-control form-control-md" type="text" :ref="ref" 
                 v-model.lazy.trim="text" 
                 v-on:keyup.enter="save(item)"
-                spellcheck/>
+                spellcheck="true"/>
 </template>
 
 <script>

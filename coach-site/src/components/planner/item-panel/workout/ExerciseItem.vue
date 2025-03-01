@@ -2,7 +2,7 @@
     <div class="exercise-item d-flex flex-column" 
          :class="[{ 'complete': isExerciseComplete }, dragPosition]"
          ref="item"
-         draggable @dragenter.prevent
+         draggable="true" @dragenter.prevent
          @dragstart="onDragStart($event)" @dragend="onDragEnd($event)"
          @drop="onDrop($event)" @dragover="onDragOver($event)" @dragleave="onDragLeave($event)">
         <div class="d-flex flex-row flex-grow-1 justify-content-between position-relative">

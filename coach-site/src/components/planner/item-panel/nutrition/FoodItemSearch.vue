@@ -7,7 +7,7 @@
             <div class="d-flex flex-row">
                 <input id="title" class="textbox" type="text" ref="text"  placeholder="Search"
                         v-model.trim.lazy="searchTerm" 
-                        spellcheck
+                        spellcheck="true"
                         @keyup.enter="search"/>
                 <input id="quantity" class="textbox ms-1" type="number" placeholder="#"
                         v-model.trim.lazy="quantity" />

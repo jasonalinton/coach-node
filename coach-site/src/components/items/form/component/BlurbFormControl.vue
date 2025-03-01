@@ -23,7 +23,7 @@
                           v-on:keyup.enter.ctrl="saveBlurb"
                           v-on:keyup.esc.stop="cancelBlurb"
                           :placeholder="placeholder"
-                          spellcheck
+                          spellcheck="true"
                           @focus="showButtons = true"
                           @blur="onTextareaBlur">
                 </textarea>

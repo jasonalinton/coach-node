@@ -35,7 +35,7 @@
                       type="text"
                       placeholder="Blurb"
                       v-model.lazy="blurb"
-                      spellcheck></textarea>
+                      spellcheck="true"></textarea>
         </div>
     </div>
 </template>

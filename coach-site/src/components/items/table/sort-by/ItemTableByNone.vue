@@ -9,16 +9,20 @@
            <table :class="['item table table-sm table-borderless', (parentItem) ? 'child' : '']"
                   :style="{ 'width': `${tableWidth}px`}">
                <thead :class="[(!parentItem) ? 'sticky-top' : '']">
-                   <th v-for="column in columns" :key="column.position"
-                       :style="{ 'min-width': `${column.setWidth}px`, 'max-width': `${column.setWidth}px`}">
-                       {{ column.text }}
-                   </th>
-                   <!-- Action buttons -->
-                   <th></th>
+                    <tr>
+                        <th v-for="column in columns" :key="column.position"
+                            :style="{ 'min-width': `${column.setWidth}px`, 'max-width': `${column.setWidth}px`}">
+                            {{ column.text }}
+                        </th>
+                        <!-- Action buttons -->
+                        <th></th>
+                    </tr>
                </thead>
                <tbody>
-                   <template v-for="(item) in items">
-                       <ItemTableRow :key="item.id"
+                    <!-- eslint-disable-next-line vue/no-template-key -->
+                   <template v-for="(item) in items" :key="item.id">
+                        <!-- eslint-disable-next-line vue/valid-v-for -->
+                        <ItemTableRow
                                      :item="item"
                                      :parent="parentItem"
                                      :columns="columns"
@@ -27,7 +31,8 @@
                                      @repositionItem="repositionItem"
                                      @openItemForm="$emit('openItemForm', $event)"
                                      @deleteItem="deleteItem(item.id)"/>
-                       <tr :key="item.id + 1000000" class="child-row">
+                        <!-- eslint-disable-next-line vue/require-v-for-key -->
+                        <tr class="child-row">
                            <td :colspan="columns.length + 1">
                                <ItemTable v-if="options.dropItems.items.parents && states(item).text || states(item).parents"
                                           :itemType="itemType"

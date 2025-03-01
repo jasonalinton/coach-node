@@ -3,7 +3,7 @@
         <div class="todo d-flex flex-row justify-content-between align-items-center" 
              :class="[{ complete: checked, unplanned: isUnplanned }]"
              :style="{ 'font-size': fontSize }"
-             draggable @dragstart="onDragStart($event)" @dragend="onDragEnd($event)">
+             draggable="true" @dragstart="onDragStart($event)" @dragend="onDragEnd($event)">
             <ItemCheckbox class="checkbox align-self-start" 
                           :checked="checked" 
                             @onChecked="markComplete" 

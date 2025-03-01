@@ -120,15 +120,18 @@ export default {
         getMetricTodos,
     },
     watch: {
-        iterations2() {
-            this.metrics = [
-                { id: 1, name: 'physical', todos: this.physicalTodos, selected: this.selectedMetrics.physical, collapsed: false },
-                { id: 2, name: 'emotional', todos: this.emotionalTodos, selected: this.selectedMetrics.emotional, collapsed: false },
-                { id: 3, name: 'mental', todos: this.mentalTodos, selected: this.selectedMetrics.mental, collapsed: false },
-                { id: 4, name: 'social', todos: this.socialTodos, selected: this.selectedMetrics.social, collapsed: false },
-                { id: 5, name: 'financial', todos: this.financialTodos, selected: this.selectedMetrics.financial, collapsed: false },
-            ]
-        },
+        iterations2: {
+            handler() {
+                this.metrics = [
+                    { id: 1, name: 'physical', todos: this.physicalTodos, selected: this.selectedMetrics.physical, collapsed: false },
+                    { id: 2, name: 'emotional', todos: this.emotionalTodos, selected: this.selectedMetrics.emotional, collapsed: false },
+                    { id: 3, name: 'mental', todos: this.mentalTodos, selected: this.selectedMetrics.mental, collapsed: false },
+                    { id: 4, name: 'social', todos: this.socialTodos, selected: this.selectedMetrics.social, collapsed: false },
+                    { id: 5, name: 'financial', todos: this.financialTodos, selected: this.selectedMetrics.financial, collapsed: false },
+                ]
+            },
+            deep: true
+        }
     }
 }
 

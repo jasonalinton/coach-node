@@ -113,13 +113,17 @@ export function sortTrueOnBottom(array, prop) {
 
 export function listToString(objectArray, property) {
     let string = "";
-    let index = 0;
-    objectArray.forEach(object => {
-        if (index++ !== 0)
-            string += ", ";
-
-        string += object[property];
-    });
+    try {
+        let index = 0;
+        objectArray.forEach(object => {
+            if (index++ !== 0)
+                string += ", ";
+    
+            string += object[property];
+        });
+    } catch {
+        console.log()
+    }
     return string;
 }
 

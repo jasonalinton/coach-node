@@ -14,7 +14,7 @@
                     </div>
                     <input id="name" class="textbox mb-2" type="text" ref="text"  placeholder="Workout Name"
                             v-model.lazy.trim="name.value" 
-                            spellcheck/>
+                            spellcheck="true"/>
                  </div>
                  <div class="d-flex flex-column">
                      <ExerciseItem class="mb-2" v-for="exercise in exercises.value" :key="exercise.id"

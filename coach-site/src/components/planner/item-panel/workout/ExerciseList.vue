@@ -10,7 +10,7 @@
              </div>
              <input id="title" class="textbox mb-2" type="text" ref="text"  placeholder="Search"
                     v-model.trim="searchTerm" 
-                    spellcheck/>
+                    spellcheck="true"/>
              <button type="button" class="btn btn-primary mb-2" @click="done()">Done</button>
              <div class="d-flex flex-column">
                  <div v-for="(list, index) in exerciseList" :key="index">
@@ -86,8 +86,11 @@ export default {
         back
     },
     watch: {
-        exercises() {
-            this.setExerciseList();
+        exercises: {
+            handler() {
+                this.setExerciseList();
+            },
+            deep: true
         },
         searchTerm() {
             this.setExerciseList();

@@ -17,7 +17,7 @@
             <input class="title textbox" type="text" ref="text" placeholder="Title"
                     v-model.lazy.trim="iteration_updated.text"
                     v-on:keyup.enter="save"
-                    spellcheck/>
+                    spellcheck="true"/>
         </div>
         <!-- Points -->
         <div class="points d-flex flex-row align-items-center mt-1">

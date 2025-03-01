@@ -13,6 +13,8 @@
                     @toggleLeftPanel="toggleLeftPanel">
                 </PlannerNavbar>
             </div>
+            <!-- <RouterLink to="/">Home</RouterLink>
+            <RouterLink to="/item-tables">Item Tables</RouterLink> -->
             <div class="grid-left-panel">
                 <LeftPanel :isShown="showLeft" 
                            @togglePanel="toggleLeftPanel"/>
@@ -54,6 +56,7 @@ import { useGoalStore } from '@/store/goalStore'
 import { useTodoStore } from '@/store/todoStore'
 import { useRoutineStore } from '@/store/routineStore'
 import { useUniversalStore } from '@/store/universalStore'
+// import { RouterLink } from 'vue-router'
 
 export default {
     name: "App",
@@ -65,6 +68,7 @@ export default {
         Planner,
         ItemTabs,
         PhysicalView,
+        // RouterLink
     },
     data: function () {
         return {
@@ -108,7 +112,7 @@ export default {
 
         await this.initStores();
     },
-    beforeDestroy () {
+    beforeUnmount () {
         if (typeof window !== 'undefined') {
             window.removeEventListener('resize', this.onResize, { passive: true })
         }

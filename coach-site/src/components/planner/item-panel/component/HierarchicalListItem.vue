@@ -3,7 +3,7 @@
         <div class="iteration d-flex flex-row justify-content-between align-items-center" 
              :class="[{ complete: checked, unplanned: isUnplanned, recommended: iteration.isRecommended }]"
              :style="{ 'font-size': fontSize }"
-             draggable @dragstart="onDragStart($event)" @dragend="onDragEnd($event)">
+             draggable="true" @dragstart="onDragStart($event)" @dragend="onDragEnd($event)">
             <div class="d-flex flex-row align-items-center flex-grow-1 justify-content-between">
                 <div class="d-flex flex-row">
                     <ItemCheckbox class="checkbox align-self-start" 

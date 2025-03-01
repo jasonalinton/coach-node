@@ -7,13 +7,13 @@
             <!-- Text -->
             <input id="name" class="textbox mb-2" type="text" ref="name"  placeholder="Variation Name"
             v-model.lazy.trim="name.value" 
-            spellcheck/>
+            spellcheck="true"/>
             <!-- Description -->
             <textarea id="description" class="textarea" 
                     type="text"
                     placeholder="Variation Description"
                     v-model="description.value"
-                    spellcheck></textarea>
+                    spellcheck="true"></textarea>
             <!-- Type -->
             <div class="d-flex flex-column mt-2">
                 <select class="form-select panel-select" aria-label="select" v-model="type.value.id">

@@ -74,12 +74,14 @@ export default {
         });
     },
     watch: {
-        selectedTimeframes(value) {
-            this.timeframes.forEach(timeframe => {
-                var selected = value.find(x => x.id == timeframe.id);
-                timeframe.isSelected = (selected) ? true : false;
-            });
-            
+        selectedTimeframes: {
+            handler(value) {
+                this.timeframes.forEach(timeframe => {
+                    var selected = value.find(x => x.id == timeframe.id);
+                    timeframe.isSelected = (selected) ? true : false;
+                });
+            },
+            deep: true
         }
     }
 }

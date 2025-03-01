@@ -54,9 +54,12 @@ export default {
         }
     },
     watch: {
-        timeframes(value) {
-            let timeframeIDs = value.filter(x => x.isActive).map(x => x.id);
-            this.timeframeIDs = (this.showReverse) ? timeframeIDs.reverse() : timeframeIDs;
+        timeframes: {
+            handler(value) {
+                let timeframeIDs = value.filter(x => x.isActive).map(x => x.id);
+                this.timeframeIDs = (this.showReverse == true) ? timeframeIDs.reverse() : timeframeIDs;
+            },
+            deep: true
         },
         showReverse() {
             this.timeframeIDs = this.timeframeIDs.reverse();

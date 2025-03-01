@@ -7,12 +7,12 @@
             <!-- Text -->
             <input id="name" class="textbox mb-2" type="text" ref="name"  placeholder="Exercise Name"
                    v-model.lazy.trim="name.value" 
-                   spellcheck/>
+                   spellcheck="true"/>
             <textarea id="description" class="textarea" 
                     type="text"
                     placeholder="Exercise Description"
                     v-model="description.value"
-                    spellcheck></textarea>
+                    spellcheck="true"></textarea>
             <button type="button" class="btn btn-primary mt-2" @click="save()">Save</button>
             <!-- Muscle Groups -->
             <div class="d-flex flex-column">

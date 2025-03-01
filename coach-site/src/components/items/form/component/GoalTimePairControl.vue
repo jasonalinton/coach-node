@@ -32,7 +32,7 @@
                 <span class="label text-start">Points</span>
                 <input class="textbox" type="number" min="1"
                                v-model.lazy="updatedTimePair.points" 
-                               spellcheck/>
+                               spellcheck="true"/>
                 <div class="pills d-flex flex-row justify-content-between mt-1 gap-1">
                     <span v-for="point in points" :key="point" 
                           class="pill flex-grow-1"
@@ -98,7 +98,7 @@
                 <input class="textbox" type="number" min="1"
                                v-model="todoID" 
                                v-on:keyup.enter="addTodo"
-                               spellcheck/>
+                               spellcheck="true"/>
                 <div class="d-flex flex-column">
                     <TodoFormItem v-for="id in updatedTimePair.todoIDs" :key="id"
                                 :id="id" :parentID="itemID" parentType="goal" 
