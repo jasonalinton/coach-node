@@ -53,7 +53,7 @@ export default {
         deleteTask,
         onDragStart,
         onDragEnd
-    },
+    }
 }
 
 function toNextDay() {

@@ -95,11 +95,17 @@
 import ItemTableRow from '../../component/ItemTableRow.vue'; 
 import { sortDesc, capitalize, clone } from '../../../../../utility';
 import { columnConfigs } from '../../../../config/item-table-column-config';
+import { defineAsyncComponent } from 'vue'
+
+// https://v3-migration.vuejs.org/breaking-changes/async-components.html
+const ItemTable = defineAsyncComponent(() =>
+  import('../ItemTable.vue')
+)
 
 export default {
     components: { 
         ItemTableRow,
-        ItemTable: () => import('../ItemTable.vue')
+        ItemTable
     },
     name: 'ItemTableByNone',
     props: {

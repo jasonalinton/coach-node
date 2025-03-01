@@ -4,11 +4,9 @@
         <TimeframeRadio :timeframe="timeframe" :isToggle="false" container="briefing-blurb"
                         @timeframeSelected="selectTimeframe" />
         <MetricSelector class="metric-selector mt-1" :selected="selectedMetrics"></MetricSelector>
-        <BlurbFormControl title="Physical" placeholder="Click to add Physical blurb" :blurbs="physicalBlurbs" 
-                          @addBlurb="addBlurb($event, METRIC.PHYSICAL)"
-                          @saveBlurb="saveBlurb" />
-        <BlurbFormControl class="mt-2" title="Social" placeholder="Click to add Social blurb" :blurbs="socialBlurbs" 
-                          @addBlurb="addBlurb($event, METRIC.SOCIAL)"
+        <BlurbFormControl v-for="metric in metrics" :key="metric.id" :title="metric.title" :placeholder="`Click to add ${metric.title} blurb`" :blurbs="metric.prop"
+                          class="mt-2" 
+                          @addBlurb="addBlurb($event, metric.id)"
                           @saveBlurb="saveBlurb" />
     </div>
 </template>
@@ -71,6 +69,35 @@ export default {
 
             return blurbs;
         },
+        metrics() {
+            return [
+                {
+                    id: this.METRIC.PHYSICAL,
+                    title: "Physical",
+                    prop: this.physicalBlurbs,
+                },
+                {
+                    id: this.METRIC.SOCIAL,
+                    title: "Social",
+                    prop: this.socialBlurbs,
+                },
+                {
+                    id: this.METRIC.MENTAL,
+                    title: "Mental",
+                    prop: this.mentalBlurbs,
+                },
+                {
+                    id: this.METRIC.EMOTIONAL,
+                    title: "Emotional",
+                    prop: this.emotionalBlurbs,
+                },
+                {
+                    id: this.METRIC.FINANCIAL,
+                    title: "Financial",
+                    prop: this.financialBlurbs,
+                },
+            ]
+        },
         physicalBlurbs() {
             // TODO: Sort
             let blurbs = this.blurbs.filter(x => x.idMetric == METRIC.PHYSICAL);
@@ -79,6 +106,21 @@ export default {
         socialBlurbs() {
             // TODO: Sort
             let blurbs = this.blurbs.filter(x => x.idMetric == METRIC.SOCIAL);
+            return blurbs
+        },
+        mentalBlurbs() {
+            // TODO: Sort
+            let blurbs = this.blurbs.filter(x => x.idMetric == METRIC.MENTAL);
+            return blurbs
+        },
+        emotionalBlurbs() {
+            // TODO: Sort
+            let blurbs = this.blurbs.filter(x => x.idMetric == METRIC.EMOTIONAL);
+            return blurbs
+        },
+        financialBlurbs() {
+            // TODO: Sort
+            let blurbs = this.blurbs.filter(x => x.idMetric == METRIC.FINANCIAL);
             return blurbs
         },
         nextPostition() {

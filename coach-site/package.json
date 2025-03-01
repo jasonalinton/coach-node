@@ -12,7 +12,6 @@
     "@livelybone/vue-datepicker": "^4.0.3",
     "@microsoft/signalr": "^7.0.0",
     "@popperjs/core": "^2.11.8",
-    "@vue/compat": "^3.5.13",
     "@vue/composition-api": "^1.7.1",
     "axios": "^0.27.2",
     "bootstrap": "^5.3.1",
