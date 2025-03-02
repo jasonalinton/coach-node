@@ -1,21 +1,17 @@
 <template>
-    <Datepicker :value="dateTimeString" :dayStr="daysOfWeek" :btnStr="btnStr"
-                    @input="setDateTime" />
+    <input class="date-picker" type="date" :value="dateTimeString" @change="setDateTime" />
 </template>
 
 <script>
-import { Datepicker } from '@livelybone/vue-datepicker';
 import { toDateString, toTimezoneOffset } from '../../../../utility';
 
 export default {
-    components: { Datepicker },
+    name: "DateSelector",
     props: {
         date: String
     },
     data: function () {
         return {
-            daysOfWeek: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-            btnStr: "Done",
         }
     },
     computed: {
@@ -29,6 +25,7 @@ export default {
 }
 
 function setDateTime(value) {
+    value = value.currentTarget.value;
     if (value) {
         let timezoneOffset = this.toTimezoneOffset(new Date(value).toJSON());
         let date = value + "T00:00:00" + timezoneOffset;
@@ -38,7 +35,3 @@ function setDateTime(value) {
     }
 }
 </script>
-
-<style scoped>
-@import '../../../../node_modules/@livelybone/vue-datepicker/lib/css/index.css';
-</style>

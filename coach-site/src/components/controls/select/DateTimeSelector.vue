@@ -1,21 +1,15 @@
 <template>
-    <DatetimePicker :value="dateTimeString" :dayStr="daysOfWeek" :timeStr="timeStr" :btnStr="btnStr" timeType="minute" 
-                    @input="onChange"/>
+    <input class="date-picker" type="datetime-local" :value="dateTimeString" @change="onChange" />
 </template>
 
 <script>
-import { DatetimePicker } from '@livelybone/vue-datepicker';
-
 export default {
-    components: { DatetimePicker },
+    name: "DateTimeSelector",
     props: {
         dateTime: String
     },
     data: function () {
         return {
-            daysOfWeek: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-            timeStr: ['hour', 'min', 'sec'],
-            btnStr: "Done",
         }
     },
     computed: {
@@ -48,7 +42,3 @@ function onChange(value) {
     }
 }
 </script>
-
-<style scoped>
-@import '../../../../node_modules/@livelybone/vue-datepicker/lib/css/index.css';
-</style>

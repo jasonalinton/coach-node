@@ -368,9 +368,9 @@ function setTime(time, endpoint) {
     let timeModel = this.updatedTimePair[`${endpoint}Time`]
     timeModel.value.dateTime = time;
     if (timeModel.oldValue.dateTime != time && timeModel.oldValue.id) {
-        timeModel.value.isEdited = true;
+        timeModel.isEdited = true;
     } else {
-        timeModel.value.isEdited = false;
+        timeModel.isEdited = false;
     }
 
     let start = this.updatedTimePair.startTime.value;

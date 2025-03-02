@@ -321,7 +321,7 @@ body {
     height: 28px;
 }
 
-.textbox, .textarea, .select {
+.textbox, .textarea, .select, .date-picker {
     width: 100%;
     font-size: 14px;
     line-height: 14px;
@@ -336,14 +336,16 @@ body {
     padding: 8px;
 }
 
-.textbox:not(.accissible), .textarea:not(.accissible), .select:not(.accissible) {
+.textbox:not(.accissible), .textarea:not(.accissible), 
+.select:not(.accissible), .date-picker:not(.accissible) {
     outline-style: none;
     -webkit-appearance: none;
     border: 1px solid rgba(0, 0, 0, .00);
     resize: none;
 }
 
-.textbox:not(.accissible):focus, .textarea:not(.accissible):focus, .select:not(.accissible):focus {
+.textbox:not(.accissible):focus, .textarea:not(.accissible):focus, 
+.select:not(.accissible):focus, .date-picker:not(.accissible):focus {
     border: 1px solid #039BE5;
     transition-property: border-color;
     transition-duration: 0.15s;
@@ -352,10 +354,15 @@ body {
     resize: vertical;
 }
 
-.textbox:not(.accissible):hover:not(:focus), .textarea:not(.accissible):hover:not(:focus), .select:not(.accissible):hover:not(:focus) {
+.textbox:not(.accissible):hover:not(:focus), .textarea:not(.accissible):hover:not(:focus), 
+.select:not(.accissible):hover:not(:focus) .date-picker:not(.accissible):hover:not(:focus) {
     /* border: 1px solid rgba(0, 0, 0, .08); */
     border: 1px solid rgba(0, 0, 0, .2);
     resize: vertical;
+}
+
+.date-picker:not(:focus) {
+    border: 1px solid rgba(0, 0, 0, .08) !important;
 }
 
 .add-btn {

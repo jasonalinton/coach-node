@@ -332,7 +332,7 @@ function save() {
     let timePair = {
         id: this.updatedTimePair.id,
         idParent: this.updatedTimePair.idParent,
-        idTimeType: this.updatedTimePair.idTimeType,
+        idTimeType: this.updatedTimePair.idTimeType || 80,
         idInheritance: this.updatedTimePair.idInheritance,
         idTimeframe: this.updatedTimePair.idTimeframe,
         points: this.updatedTimePair.points || null,

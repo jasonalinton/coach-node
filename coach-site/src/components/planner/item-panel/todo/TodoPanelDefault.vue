@@ -278,6 +278,9 @@ export default {
                     vm = viewModels.find(_vm => _vm.todoID == iteration.todoID);
                 }
                 if (vm == undefined) {
+                    if (todo == undefined) {
+                        console.log("Todo undefined")
+                    }
                     vm = {
                         id: iteration.id,
                         timeframeID: undefined,

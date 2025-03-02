@@ -9,7 +9,6 @@
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^5.15.3",
-    "@livelybone/vue-datepicker": "^4.0.3",
     "@microsoft/signalr": "^7.0.0",
     "@popperjs/core": "^2.11.8",
     "@vue/composition-api": "^1.7.1",
