@@ -16,9 +16,9 @@
             </div>
             <div v-if="selectedPage == 'planner'" class="d-flex flex-row me-5">
                 <IconButton class="arrow" src="/icon/previous.png" :width="24" :height="24"
-                            @click="previous" />
+                            @clicked="previous" />
                 <IconButton class="arrow" src="/icon/next.png" :width="24" :height="24"
-                            @click="next" />
+                            @clicked="next" />
                 <select v-model="view">
                     <option v-for="_view in views" :key="_view.id" :value="_view.id">{{ _view.text }}</option>
                 </select>

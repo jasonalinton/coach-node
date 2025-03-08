@@ -26,7 +26,7 @@ export default {
 }
 
 function click() {
-    this.$emit("click");
+    this.$emit("clicked");
 }
 </script>
 

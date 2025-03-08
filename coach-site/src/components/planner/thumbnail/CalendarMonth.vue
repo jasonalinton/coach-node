@@ -7,9 +7,9 @@
                 <div class="year">{{ year }}</div>
             </div>
             <div class="buttons d-flex flex-row">
-                <icon-button :src="`icon/previous.png`" :width="22" :height="22" @click="$emit('previous')"/>
+                <icon-button :src="`icon/previous.png`" :width="22" :height="22" @clicked="$emit('previous')"/>
                 <button class="today" type="button" @click="goToday">Today</button>
-                <icon-button :src="`icon/next.png`" :width="22" :height="22" @click="$emit('next')"/>
+                <icon-button :src="`icon/next.png`" :width="22" :height="22" @clicked="$emit('next')"/>
             </div>
         </div>
         <!-- Week Labels -->

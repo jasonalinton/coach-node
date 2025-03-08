@@ -7,9 +7,9 @@
                 <div class="year">{{ year }}</div>
             </div>
             <div class="buttons d-flex flex-row">
-                <icon-button :src="`icon/previous.png`" :width="22" :height="22" @click="date = addMonth(date, -1)"/>
+                <icon-button :src="`icon/previous.png`" :width="22" :height="22" @clicked="date = addMonth(date, -1)"/>
                 <button class="today" type="button" @click="goToday">Today</button>
-                <icon-button :src="`icon/next.png`" :width="22" :height="22" @click="date = addMonth(date, 1)"/>
+                <icon-button :src="`icon/next.png`" :width="22" :height="22" @clicked="date = addMonth(date, 1)"/>
             </div>
         </div>
         <!-- Week Labels -->

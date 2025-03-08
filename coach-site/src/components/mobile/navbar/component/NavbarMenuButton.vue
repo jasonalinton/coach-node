@@ -1,6 +1,6 @@
 <template>
     <IconButton class="menu-button float-left" src="/icon/menu-button.png" :width="40" :height="40"
-                @click="onClick" />
+                @clicked="onClick" />
 </template>
 
 <script>
