@@ -37,7 +37,7 @@ export default {
         }
     },
     created: async function() {
-        let storeObject = await import(`@/store/${this.itemType}Store`);
+        let storeObject = await import(`@/store/${this.itemType}Store.js`);
         let useStore = storeObject[`use${capitalize(this.itemType)}Store`];
         this.store = useStore();
 

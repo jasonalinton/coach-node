@@ -31,8 +31,7 @@
                 <PhysicalView v-if="navbar.selectedPage == 'physical'"></PhysicalView>
             </div>
             <div class="grid-right-panel">
-                <ItemPanel :selectPanel="itemsPage.selectPanel"
-                           :selectedPanel="selectedItemPanel"></ItemPanel>
+                <ItemPanel ></ItemPanel>
             </div>
         </div>
     </div>
@@ -82,7 +81,6 @@ export default {
             itemsPage: {
                 selectPanel: undefined,
             },
-            // selectedItemPanel: "todo",
             appStore: undefined,
             plannerStore: undefined,
             showLeft: true
@@ -226,6 +224,8 @@ function onResize() {
 
 
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Varela+Round&display=swap');
+
 :root {
     --background-color: #ffffff;
     --pill-default: #EFF6FC;
@@ -303,7 +303,6 @@ body {
   src: url("https://applesocial.s3.amazonaws.com/assets/styles/fonts/sanfrancisco/sanfranciscodisplay-regular-webfont.woff");
 } */
 
-@import url('https://fonts.googleapis.com/css2?family=Varela+Round&display=swap');
 
 /* @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@500;700&family=Varela+Round&display=swap'); */
 

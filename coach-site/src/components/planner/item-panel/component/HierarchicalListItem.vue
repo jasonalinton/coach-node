@@ -50,7 +50,6 @@
 
 <script>
 import ItemCheckbox from './ItemCheckbox.vue';
-import HierarchicalListItem from '../component/HierarchicalListItem.vue'
 import { clone } from '../../../../../utility'
 
 /* 
@@ -71,8 +70,7 @@ Parent Types
 export default {
     name: 'HierarchicalListItem',
     components: { 
-        ItemCheckbox,
-        HierarchicalListItem
+        ItemCheckbox
     },
     props: {
         viewModel: Object,

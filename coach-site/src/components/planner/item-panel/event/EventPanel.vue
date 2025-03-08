@@ -55,7 +55,6 @@ export default {
                 by: 'Date',
                 items: sortItems
             },
-            selectedEvent: undefined
         }
     },
     created: function() {
@@ -77,20 +76,6 @@ export default {
     },
     methods: {
         onSortChange
-    },
-    watch: {
-        props(value) {
-            if (value._event && value._event.type && value._event.type.text.toLowerCase() == 'todo') {
-                this.activeType = 'todo'
-                this.selectedEvent = this.props._event;
-            } else if (value._event && value._event.type && value._event.type.text.toLowerCase() == 'routine') {
-                this.activeType = 'routine'
-                this.selectedEvent = this.props._event;
-            } else if (!value) {
-                this.activeType = 'sortby';
-                this.selectedEvent = undefined;
-            }
-        }
     }
 }
 

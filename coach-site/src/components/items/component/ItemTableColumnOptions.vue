@@ -15,7 +15,7 @@
 </template>
 
 <script>
-import { sortAsc } from ' ../../../utility';
+import { sortAsc } from '../../../../utility.js';
 
 let metricProperties = [
         {

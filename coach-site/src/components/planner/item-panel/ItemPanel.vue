@@ -74,7 +74,7 @@
             <TodoPanel v-show="selectedPanel == 'todo'" class="item-panel"/>
             <RoutinePanel v-show="selectedPanel == 'routine'" class="item-panel"/>
             <TaskRoutinePanel v-show="selectedPanel == 'task-routine'" class="item-panel"/>
-            <EventPanel v-show="selectedPanel == 'event'" :props="eventPanelProps" class="item-panel"/>
+            <EventPanel v-show="selectedPanel == 'event'" class="item-panel"/>
             <InventoryPanel v-show="selectedPanel == 'inventory'" class="item-panel"/>
             <NutritionPanel v-show="selectedPanel == 'nutrition'" class="item-panel"/>
             <WorkoutPanel v-show="selectedPanel == 'workout'" class="item-panel"/>
@@ -101,14 +101,9 @@ export default {
     name: 'ItemPanel',
     components: { DashboardPanel, BriefingPanel, MetricPanel, GoalPanel, TodoPanel, RoutinePanel, TaskRoutinePanel, 
         EventPanel, InventoryPanel, NutritionPanel, WorkoutPanel },
-    props: {
-        selectPanel: Object,
-        // selectedPanel: String
-    },
     data: function() {
         return {
             appStore: undefined,
-            eventPanelProps: { },
             workoutPanelProps: { 
                 selectedWorkoutID: undefined
             }
@@ -136,14 +131,6 @@ export default {
         selectedPanel(value) {
             localStorage.setItem(`selected-item-panel`, value);
         },
-        async selectPanel(value) {
-            if (value && value.panel && value.panel == 'event') {
-                if (value.props._event.type.id != EVENTTYPE.WORKOUT)  { 
-                    this.$emit('setSelectedPanel', 'event');
-                    this.eventPanelProps = value.props;
-                }
-            }
-        }
     }
 }
 

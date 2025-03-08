@@ -16,11 +16,8 @@
 </template>
 
 <script>
-import TypePoints from './TypePoints';
-
 export default {
     name: 'TypePoints',
-    components: { TypePoints },
     props: {
         item: Object,
         level: Number,
