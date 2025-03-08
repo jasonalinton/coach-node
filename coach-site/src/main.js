@@ -1,4 +1,3 @@
-// import Vue from 'vue'
 import { createApp } from 'vue'
 
 import App from './App.vue'
@@ -7,30 +6,24 @@ import { createPinia } from 'pinia'
 
 const app = createApp(App)
 
-// import { createMemoryHistory, createRouter } from 'vue-router'
-// import Planner from './components/planner/Planner.vue'
-// import ItemTabs from './components/items/ItemTabs.vue'
+import { createMemoryHistory, createRouter } from 'vue-router'
+import Planner from './components/planner/Planner.vue'
+import ItemTabs from './components/items/ItemTabs.vue'
 
-// const routes = [
-//   { path: '/', component: Planner },
-//   { path: '/item-tables', component: ItemTabs },
-// ]
+const routes = [
+  { path: '/', component: Planner },
+  { path: '/item-tables', component: ItemTabs },
+]
 
-// const router = createRouter({
-//   history: createMemoryHistory(),
-//   routes,
-// })
+const router = createRouter({
+  history: createMemoryHistory(),
+  routes,
+})
 
 const pinia = createPinia();
+
+app.use(router);
 app.use(pinia);
-
-// Vue.config.productionTip = false;
-
-// new Vue({
-//   // router,
-//   pinia,
-//   render: h => h(App)
-// }).$mount('#app')
 
 app.mount("#app");
 

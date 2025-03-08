@@ -20,6 +20,7 @@
                            @togglePanel="toggleLeftPanel"/>
             </div>
             <div class="grid-body overflow-scroll">
+                <!-- <RouterView/> -->
                 <Planner 
                     v-show="navbar.selectedPage == 'planner'" 
                         :selectedPage="navbar.selectedPage"
@@ -55,7 +56,7 @@ import { useGoalStore } from '@/store/goalStore'
 import { useTodoStore } from '@/store/todoStore'
 import { useRoutineStore } from '@/store/routineStore'
 import { useUniversalStore } from '@/store/universalStore'
-// import { RouterLink } from 'vue-router'
+// import { RouterLink, RouterView } from 'vue-router'
 
 export default {
     name: "App",
@@ -67,7 +68,8 @@ export default {
         Planner,
         ItemTabs,
         PhysicalView,
-        // RouterLink
+        // RouterLink,
+        // RouterView
     },
     data: function () {
         return {
