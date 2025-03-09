@@ -4,7 +4,7 @@
         <!-- Toolbar -->
         <!-- <div class="toolbar d-flex flex-row justify-content-between align-items-center">
             <AddTaskButton @click="addNewTask"></AddTaskButton>
-            <IconButton src="/icon/goal-icon.png" :width="32" :height="32" @click="show(showGoals)"></IconButton>
+            <IconButton src="/icon/goal-icon.png" :width="32" :height="32" @clicked="show(showGoals)"></IconButton>
         </div> -->
         <!-- Body -->
         <div class="d-flex flex-column flex-grow-1 justify-content-start">

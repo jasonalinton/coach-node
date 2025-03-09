@@ -66,15 +66,18 @@ export default {
         getMetricGoals
     },
     watch: {
-        goals() {
-            this.metrics = [
-                { id: 1, name: 'physical', goals: this.physicalGoals, selected: this.selectedMetrics.physical, collapsed: true },
-                { id: 2, name: 'emotional', goals: this.emotionalGoals, selected: this.selectedMetrics.emotional, collapsed: false },
-                { id: 3, name: 'mental', goals: this.mentalGoals, selected: this.selectedMetrics.mental, collapsed: false },
-                { id: 4, name: 'social', goals: this.socialGoals, selected: this.selectedMetrics.social, collapsed: false },
-                { id: 5, name: 'financial', goals: this.financialGoals, selected: this.selectedMetrics.financial, collapsed: false },
-            ]
-        },
+        goals: {
+            handler() {
+                this.metrics = [
+                    { id: 1, name: 'physical', goals: this.physicalGoals, selected: this.selectedMetrics.physical, collapsed: true },
+                    { id: 2, name: 'emotional', goals: this.emotionalGoals, selected: this.selectedMetrics.emotional, collapsed: false },
+                    { id: 3, name: 'mental', goals: this.mentalGoals, selected: this.selectedMetrics.mental, collapsed: false },
+                    { id: 4, name: 'social', goals: this.socialGoals, selected: this.selectedMetrics.social, collapsed: false },
+                    { id: 5, name: 'financial', goals: this.financialGoals, selected: this.selectedMetrics.financial, collapsed: false },
+                ]
+            },
+            deep: true
+        }
     }
 }
 

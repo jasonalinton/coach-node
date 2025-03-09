@@ -2,8 +2,7 @@
     <div> 
         <div class="iteration d-flex flex-row justify-content-between align-items-center" 
              :class="[{ complete: checked, unplanned: isUnplanned, recommended: iteration.isRecommended }]"
-             :style="{ 'font-size': fontSize }"
-             draggable @dragstart="onDragStart($event)" @dragend="onDragEnd($event)">
+             :style="{ 'font-size': fontSize }">
             <div class="d-flex flex-row align-items-center flex-grow-1 justify-content-between">
                 <div class="d-flex flex-row">
                     <ItemCheckbox class="checkbox align-self-start" 
@@ -51,7 +50,6 @@
 
 <script>
 import ItemCheckbox from './ItemCheckbox.vue';
-import HierarchicalListItem from '../component/HierarchicalListItem.vue'
 import { clone } from '../../../../../utility'
 
 /* 
@@ -72,8 +70,7 @@ Parent Types
 export default {
     name: 'HierarchicalListItem',
     components: { 
-        ItemCheckbox,
-        HierarchicalListItem
+        ItemCheckbox
     },
     props: {
         viewModel: Object,
@@ -116,25 +113,12 @@ export default {
         isParent() {
             return this.viewModel.children.length > 0;
         },
-        // percentComplete() {
-        //     if (this.isParent) {
-        //         let iterations = [];
-        //         let count = 1;
-        //         this.vm.children.forEach(child => {
-
-        //         });
-        //     } else {
-        //         return null
-        //     }
-        // }
     },
     methods: {
         markComplete,
         markIncomplete,
         onEdit,
         onDelete,
-        onDragStart,
-        onDragEnd,
         toggleChildren
     },
     watch: {
@@ -174,26 +158,6 @@ function onEdit() {
 
 function onDelete() {
     this.iterationStore.deleteIteration(this.iteration.id);
-}
-
-function onDragStart(ev) {
-    let data = {
-        id: this.iteration.id,
-        type: (this.parentType == "goal") ? "todo" : "task",
-        parentType: this.parentType,
-        parentID: this.parent.id
-    };
-    data = JSON.stringify(data);
-
-    console.log("Drag Started");
-    ev.target.classList.add("drag");
-    ev.dataTransfer.dropEffect = 'move';
-    ev.dataTransfer.effectAllowed = 'move';
-    ev.dataTransfer.setData("text", data);
-}
-
-function onDragEnd(ev) {
-    ev.target.classList.remove("drag");
 }
 </script>
 

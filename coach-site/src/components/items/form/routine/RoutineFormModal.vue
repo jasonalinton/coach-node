@@ -12,7 +12,7 @@
                             <input id="text" class="textbox" type="text" placeholder="Title"
                                 v-model.lazy.trim="text" 
                                 v-on:keyup.enter="save()"
-                                spellcheck/>
+                                spellcheck="true"/>
                         </div>
                     </div>
                     <div class="row g-2">

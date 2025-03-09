@@ -18,7 +18,7 @@
                                 <div class="text-wrapper">
                                     <input id="text" class="textbox" type="text" placeholder="Title"
                                         v-model.lazy.trim="text.value" 
-                                        spellcheck/>
+                                        spellcheck="true"/>
                                 </div>
                                 <!-- Toolbar -->
                                 <div class="toolbar d-flex flex-row mt-1">
@@ -68,7 +68,7 @@
                                 </div>
                                 <textarea class="textarea" 
                                           v-model.lazy.trim="description.value"
-                                          spellcheck></textarea>
+                                          spellcheck="true"></textarea>
                             </div>
                         </div>
                         <!-- Item Mapping -->

@@ -21,14 +21,16 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <template v-for="entry in tableEntries" >
-                        <tr :key="entry.id" 
-                            :ref="`entry-${entry.time}`" :class="{ 'active': entry.isActive }"
+                    <!-- eslint-disable-next-line vue/no-template-key -->
+                    <template v-for="entry in tableEntries" :key="entry.id">
+                        <!-- eslint-disable-next-line vue/require-v-for-key -->
+                        <tr :ref="`entry-${entry.time}`" :class="{ 'active': entry.isActive }"
                             @click="setSelectedEntry(entry)">
                             <th scope="row">{{ jsonToDateTimeString(entry.dateTime) }}</th>
                             <td v-for="value in entry.fieldValues" :key="value.id">{{ value.value }}</td>
                         </tr>
-                        <tr v-if="entry.isSelected" :key="entry.id * -1">
+                        <!-- eslint-disable-next-line vue/require-v-for-key -->
+                        <tr v-if="entry.isSelected">
                             <td :colspan="entry.fieldValues.length + 1">
                                 <div  class="additional-values d-flex flex-column">
                                     <DateTimeSelector class="date-selector mt-2"
@@ -37,13 +39,13 @@
                                     <div class="fields d-flex flex-column">
                                         <input v-for="field in selectedEntry.fields" :key="field.id"
                                             class="textbox mt-2" type="text" :placeholder="field.name"
-                                            v-model.lazy.trim="field.value" spellcheck
+                                            v-model.lazy.trim="field.value" spellcheck="true"
                                             @change="updateEntryField(field)"/>
                                     </div>
                                     <textarea id="blurb" class="textarea mt-2" 
                                             type="text"
                                             placeholder="Blurb"
-                                            v-model.lazy="selectedEntry.blurb" spellcheck
+                                            v-model.lazy="selectedEntry.blurb" spellcheck="true"
                                             @change="updateEntryBlurb"></textarea>
                                     
                                     <!-- Delete -->

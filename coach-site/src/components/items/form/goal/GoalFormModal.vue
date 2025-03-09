@@ -12,7 +12,7 @@
                         <input id="text" class="textbox" type="text" placeholder="Title"
                                v-model.lazy.trim="text.value" 
                                v-on:keyup.enter="save()"
-                               spellcheck/>
+                               spellcheck="true"/>
                     </div>
                     <!-- <div class="col-sm-12 col-lg-5 col-xl-4 d-none d-lg-block">
                         <TimeframeControl v-if="timeframes.value" 
@@ -34,7 +34,7 @@
                                 <textarea class="textarea" 
                                           v-model.lazy.trim="description.value"
                                           placeholder="Click to add Description"
-                                          spellcheck></textarea>
+                                          spellcheck="true"></textarea>
                             </div>
                             <!-- Reasons -->
                             <BlurbFormControl title="Reasons" placeholder="Click to add Reason" :blurbs="reasons" 

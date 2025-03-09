@@ -25,6 +25,9 @@ export const useAppStore = defineStore('app', {
             isShown: true,
             type: CALENDAR_TYPES.WEEK
         },
+        thumbnailCalendar: {
+            monthCount: 1
+        },
         itemPanel: {
             selected: "todo",
             briefing: {

@@ -96,8 +96,11 @@ export default {
         back
     },
     watch: {
-        logItems() {
-            this.setInventoryList();
+        logItems: {
+            handler() {
+                this.setInventoryList();
+            },
+            deep: true
         },
         showPrimary() {
             this.setInventoryList();

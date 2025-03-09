@@ -586,7 +586,7 @@ function correctTimes() {
         let startIterationDate = new Date(startIteration.value.dateTime);
         let isStartNextDay = isNextDay(new Date(), new Date(startIteration.value.dateTime.slice(0, -1))); // Used to correct timezone errors when re-setting date portion
         startIterationDate.setUTCFullYear(startRepeatDate.getUTCFullYear(), startRepeatDate.getUTCMonth(), startRepeatDate.getUTCDate())
-        startIteration.value.dateTime = (isStartNextDay) ? addDay(startIterationDate.toISOString()) : startIterationDate.toISOString();
+        startIteration.value.dateTime = (isStartNextDay) ? addDay(startIterationDate).toISOString() : startIterationDate.toISOString();
         if (startIteration.oldValue.id &&
             new Date(startIteration.value.dateTime).getTime() 
             != new Date(startIteration.oldValue.dateTime).getTime()) {

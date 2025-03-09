@@ -1,8 +1,11 @@
 <template>
     <div class="btn-group w-100" role="group" :aria-label="`moment`">
-        <template v-for="(option, index) in options">
-            <input  :key="index + 1" type="radio" class="btn-check" :id="option" v-model="selected" :value="option" />
-            <label  :key="(index + 1) * -1" class="btn btn-outline-primary" :for="option">{{ option }}</label>
+        <!-- eslint-disable-next-line vue/no-template-key -->
+        <template v-for="(option, index) in options"  :key="index + 1">
+            <!-- eslint-disable-next-line vue/require-v-for-key -->
+            <input type="radio" class="btn-check" :id="option" v-model="selected" :value="option" />
+            <!-- eslint-disable-next-line vue/require-v-for-key -->
+            <label class="btn btn-outline-primary" :for="option">{{ option }}</label>
         </template>
     </div>
 </template>

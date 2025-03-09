@@ -1,6 +1,6 @@
 <template>
     <div class="task d-flex" :class="{ complete: isComplete, incomplete: !isComplete }"
-         draggable @dragstart="onDragStart($event)" @dragend="onDragEnd($event)">
+         draggable="true" @dragstart="onDragStart($event)" @dragend="onDragEnd($event)">
         <div class="actions d-flex align-items-center">
             <img class="check button" width="14" height="14"
                  :src="`/icon/task-icon-${(isComplete)?'black':'white'}.png`"
@@ -53,7 +53,7 @@ export default {
         deleteTask,
         onDragStart,
         onDragEnd
-    },
+    }
 }
 
 function toNextDay() {

@@ -112,12 +112,22 @@ export default {
         setWaterSeries
     },
     watch: {
-        mealHistories() {
-            this.setCalorieSeries();
+        mealHistories: {
+            handler(value) {
+                if (value.length && value.length > 0) {
+                    this.setCalorieSeries();
+                }
+            },
+            deep: true
         },
-        waterHistories() {
-            this.setWaterSeries();
-        },
+        waterHistories: {
+            handler(value) {
+                if (value.length && value.length > 0) {
+                    this.setWaterSeries();
+                }
+            },
+            deep: true
+        }
     }
 }
 

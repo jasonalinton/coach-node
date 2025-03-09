@@ -3,7 +3,7 @@
         <!-- Toolbar -->
         <div class="toolbar d-flex flex-row justify-content-between align-items-center">
             <AddTaskButton @click="initNewTask"></AddTaskButton>
-            <!-- <IconButton src="/icon/goal-icon.png" :width="32" :height="32" @click="show(showGoals)"></IconButton> -->
+            <!-- <IconButton src="/icon/goal-icon.png" :width="32" :height="32" @clicked="show(showGoals)"></IconButton> -->
         </div>
         <div class="d-flex flex-column flex-grow-1">
             <!-- Pending -->
@@ -278,6 +278,9 @@ export default {
                     vm = viewModels.find(_vm => _vm.todoID == iteration.todoID);
                 }
                 if (vm == undefined) {
+                    if (todo == undefined) {
+                        console.log("Todo undefined")
+                    }
                     vm = {
                         id: iteration.id,
                         timeframeID: undefined,

@@ -185,19 +185,25 @@ export default {
         setHistogramSeries
     },
     watch: {
-        mealHistories() {
-            this.setCalorieSeries();
-            this.setProteinSeries();
-            // if (this.waterHistories.length > 0) {
-            //     this.setHistogramSeries();        
-            // }
+        mealHistories: {
+            handler() {
+                this.setCalorieSeries();
+                this.setProteinSeries();
+                // if (this.waterHistories.length > 0) {
+                //     this.setHistogramSeries();        
+                // }
+            },
+            deep: true
         },
-        waterHistories() {
-            this.setWaterSeries();
-            // if (this.mealHistories.length > 0) {
-            //     this.setHistogramSeries();                
-            // }
-        },
+        waterHistories: {
+            handler() {
+                this.setWaterSeries();
+                // if (this.mealHistories.length > 0) {
+                //     this.setHistogramSeries();                
+                // }
+            },
+            deep: true
+        }
     }
 }
 

@@ -9,16 +9,20 @@
            <table :class="['item table table-sm table-borderless', (parentItem) ? 'child' : '']"
                   :style="{ 'width': `${tableWidth}px`}">
                <thead :class="[(!parentItem) ? 'sticky-top' : '']">
-                   <th v-for="column in columns" :key="column.position"
-                       :style="{ 'min-width': `${column.setWidth}px`, 'max-width': `${column.setWidth}px`}">
-                       {{ column.text }}
-                   </th>
-                   <!-- Action buttons -->
-                   <th></th>
+                    <tr>
+                        <th v-for="column in columns" :key="column.position"
+                            :style="{ 'min-width': `${column.setWidth}px`, 'max-width': `${column.setWidth}px`}">
+                            {{ column.text }}
+                        </th>
+                        <!-- Action buttons -->
+                        <th></th>
+                    </tr>
                </thead>
                <tbody>
-                   <template v-for="(item) in items">
-                       <ItemTableRow :key="item.id"
+                    <!-- eslint-disable-next-line vue/no-template-key -->
+                   <template v-for="(item) in items" :key="item.id">
+                        <!-- eslint-disable-next-line vue/valid-v-for -->
+                        <ItemTableRow
                                      :item="item"
                                      :parent="parentItem"
                                      :columns="columns"
@@ -27,7 +31,8 @@
                                      @repositionItem="repositionItem"
                                      @openItemForm="$emit('openItemForm', $event)"
                                      @deleteItem="deleteItem(item.id)"/>
-                       <tr :key="item.id + 1000000" class="child-row">
+                        <!-- eslint-disable-next-line vue/require-v-for-key -->
+                        <tr class="child-row">
                            <td :colspan="columns.length + 1">
                                <ItemTable v-if="options.dropItems.items.parents && states(item).text || states(item).parents"
                                           :itemType="itemType"
@@ -90,11 +95,17 @@
 import ItemTableRow from '../../component/ItemTableRow.vue'; 
 import { sortDesc, capitalize, clone } from '../../../../../utility';
 import { columnConfigs } from '../../../../config/item-table-column-config';
+import { defineAsyncComponent } from 'vue'
+
+// https://v3-migration.vuejs.org/breaking-changes/async-components.html
+const ItemTable = defineAsyncComponent(() =>
+  import('../ItemTable.vue')
+)
 
 export default {
     components: { 
         ItemTableRow,
-        ItemTable: () => import('../ItemTable.vue')
+        ItemTable
     },
     name: 'ItemTableByNone',
     props: {
@@ -163,7 +174,7 @@ export default {
         let todoStore = await import(`@/store/todoStore`);
         this.todoStore = todoStore.useTodoStore();
         
-        let storeObject = await import(`@/store/${this.itemType}Store`);
+        let storeObject = await import(`@/store/${this.itemType}Store.js`);
         let useStore = storeObject[`use${this.itemTypeCapitalized}Store`];
         this.store = useStore();
     },

@@ -14,7 +14,7 @@
                     <input class="title textbox" type="text" ref="text" placeholder="Title"
                             v-model.lazy.trim="iteration.text"
                             v-on:keyup.enter="save(iteration)"
-                            spellcheck/>
+                            spellcheck="true"/>
                 </div>
                 <!-- Time -->
                 <div class="form-group mt-1">

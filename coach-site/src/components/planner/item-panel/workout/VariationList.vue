@@ -10,7 +10,7 @@
             </div>
             <input id="title" class="textbox mb-2" type="text" ref="text"  placeholder="Search"
                    v-model.trim="searchTerm" 
-                   spellcheck/>
+                   spellcheck="true"/>
             <button type="button" class="btn btn-primary mb-2" @click="done()">Done</button>
             <div class="d-flex flex-column flex-grow-1">
                 <div v-for="(list, name, index) in variationList" :key="index">
@@ -89,9 +89,12 @@ export default {
         setVariationList
     },
     watch: {
-        variations() {
-            this.setVariationList();
-        },
+        // variations: {
+        //     handler() {
+        //         this.setVariationList();
+        //     },
+        //     deep: true
+        // },
         searchTerm() {
             this.setVariationList();
         }

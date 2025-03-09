@@ -13,11 +13,14 @@
                     @toggleLeftPanel="toggleLeftPanel">
                 </PlannerNavbar>
             </div>
+            <!-- <RouterLink to="/">Home</RouterLink>
+            <RouterLink to="/item-tables">Item Tables</RouterLink> -->
             <div class="grid-left-panel">
                 <LeftPanel :isShown="showLeft" 
                            @togglePanel="toggleLeftPanel"/>
             </div>
             <div class="grid-body overflow-scroll">
+                <!-- <RouterView/> -->
                 <Planner 
                     v-show="navbar.selectedPage == 'planner'" 
                         :selectedPage="navbar.selectedPage"
@@ -29,8 +32,7 @@
                 <PhysicalView v-if="navbar.selectedPage == 'physical'"></PhysicalView>
             </div>
             <div class="grid-right-panel">
-                <ItemPanel :selectPanel="itemsPage.selectPanel"
-                           :selectedPanel="selectedItemPanel"></ItemPanel>
+                <ItemPanel ></ItemPanel>
             </div>
         </div>
     </div>
@@ -54,6 +56,7 @@ import { useGoalStore } from '@/store/goalStore'
 import { useTodoStore } from '@/store/todoStore'
 import { useRoutineStore } from '@/store/routineStore'
 import { useUniversalStore } from '@/store/universalStore'
+// import { RouterLink, RouterView } from 'vue-router'
 
 export default {
     name: "App",
@@ -65,6 +68,8 @@ export default {
         Planner,
         ItemTabs,
         PhysicalView,
+        // RouterLink,
+        // RouterView
     },
     data: function () {
         return {
@@ -78,7 +83,6 @@ export default {
             itemsPage: {
                 selectPanel: undefined,
             },
-            // selectedItemPanel: "todo",
             appStore: undefined,
             plannerStore: undefined,
             showLeft: true
@@ -108,7 +112,7 @@ export default {
 
         await this.initStores();
     },
-    beforeDestroy () {
+    beforeUnmount () {
         if (typeof window !== 'undefined') {
             window.removeEventListener('resize', this.onResize, { passive: true })
         }
@@ -222,6 +226,8 @@ function onResize() {
 
 
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Varela+Round&display=swap');
+
 :root {
     --background-color: #ffffff;
     --pill-default: #EFF6FC;
@@ -299,7 +305,6 @@ body {
   src: url("https://applesocial.s3.amazonaws.com/assets/styles/fonts/sanfrancisco/sanfranciscodisplay-regular-webfont.woff");
 } */
 
-@import url('https://fonts.googleapis.com/css2?family=Varela+Round&display=swap');
 
 /* @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@500;700&family=Varela+Round&display=swap'); */
 
@@ -317,7 +322,7 @@ body {
     height: 28px;
 }
 
-.textbox, .textarea, .select {
+.textbox, .textarea, .select, .date-picker {
     width: 100%;
     font-size: 14px;
     line-height: 14px;
@@ -332,14 +337,16 @@ body {
     padding: 8px;
 }
 
-.textbox:not(.accissible), .textarea:not(.accissible), .select:not(.accissible) {
+.textbox:not(.accissible), .textarea:not(.accissible), 
+.select:not(.accissible), .date-picker:not(.accissible) {
     outline-style: none;
     -webkit-appearance: none;
     border: 1px solid rgba(0, 0, 0, .00);
     resize: none;
 }
 
-.textbox:not(.accissible):focus, .textarea:not(.accissible):focus, .select:not(.accissible):focus {
+.textbox:not(.accissible):focus, .textarea:not(.accissible):focus, 
+.select:not(.accissible):focus, .date-picker:not(.accissible):focus {
     border: 1px solid #039BE5;
     transition-property: border-color;
     transition-duration: 0.15s;
@@ -348,10 +355,15 @@ body {
     resize: vertical;
 }
 
-.textbox:not(.accissible):hover:not(:focus), .textarea:not(.accissible):hover:not(:focus), .select:not(.accissible):hover:not(:focus) {
+.textbox:not(.accissible):hover:not(:focus), .textarea:not(.accissible):hover:not(:focus), 
+.select:not(.accissible):hover:not(:focus) .date-picker:not(.accissible):hover:not(:focus) {
     /* border: 1px solid rgba(0, 0, 0, .08); */
     border: 1px solid rgba(0, 0, 0, .2);
     resize: vertical;
+}
+
+.date-picker:not(:focus) {
+    border: 1px solid rgba(0, 0, 0, .08) !important;
 }
 
 .add-btn {

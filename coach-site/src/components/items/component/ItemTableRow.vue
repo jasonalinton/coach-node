@@ -1,7 +1,7 @@
 <template>
     <tr :key="item.id"
         ref="tr"
-        draggable @dragenter.prevent
+        draggable="true" @dragenter.prevent
         :class="position"
         @dragstart="onDragStart($event)" @dragend="onDragEnd($event)"
         @drop="onDrop($event)" @dragover="onDragOver($event)" @dragleave="onDragLeave($event)">
@@ -93,15 +93,20 @@ export default {
                         .find(x => x.parentType == this.parent.itemType && x.parentID == this.parent.id).position;
                 }
             } else if (column.text == "Repeat") {
-                return this.item.repeats;
-            } else {
+                if (this.item.repeats) {
+                    return this.item.repeats;
+                } else {
+                    return [];
+                }
+            } 
+            else {
                 return this.item[column.text.toLowerCase()];
             }
         },
         showItems(prop) {
             this.$emit('showItems', this.item.id, prop);
         },
-    }
+    },
 }
 
 function onDragStart(ev) {

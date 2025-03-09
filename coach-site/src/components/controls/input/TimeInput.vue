@@ -1,13 +1,12 @@
 <template>
     <div>
-        <Datepicker v-if="type == 'Date'" :value="dateTimeString" :dayStr="daysOfWeek" :btnStr="btnStr" @input="onChange"></Datepicker>
-        <Timepicker v-if="type == 'Time'" :value="dateTimeString" :timeStr="timeStr" :btnStr="btnStr" type="minute" @input="onChange"></Timepicker>
-        <DatetimePicker v-if="type == 'DateTime'" :value="dateTimeString" :dayStr="daysOfWeek" :timeStr="timeStr" :btnStr="btnStr" timeType="minute" @input="onChange"></DatetimePicker>
+        <input v-if="type == 'Date'" class="date-picker" type="date" :value="dateTimeString" @change="onChange" />
+        <input v-if="type == 'Time'" class="date-picker" type="time" :value="dateTimeString" @change="onChange" />
+        <input v-if="type == 'DateTime'" class="date-picker" type="datetime-local" :value="dateTimeString" @change="onChange" />
     </div>
 </template>
 
 <script>
-import { Datepicker, Timepicker, DatetimePicker } from '@livelybone/vue-datepicker';
 import { toDateString, toTimeString, toDateTimeString, toTimezoneOffset } from '../../../../utility';
 
 var momentTypes = [
@@ -18,7 +17,6 @@ var momentTypes = [
 
 export default {
     name: 'TimeInput',
-    components: { Datepicker, Timepicker, DatetimePicker },
     props: {
         time: Object,
         momentID: Number,
@@ -29,9 +27,6 @@ export default {
     },
     data: function () {
         return {
-            daysOfWeek: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-            timeStr: ['hour', 'min', 'sec'],
-            btnStr: "Done",
             momentTypes,
             dateTimeString: "",
             timezoneOffset: "",
@@ -89,6 +84,7 @@ function getDateTimeString() {
 }
 
 function onChange(value) {
+    value = value.currentTarget.value;
     let time;
     if (value == "") {
         if (this.canRemove) {
@@ -113,8 +109,6 @@ function onChange(value) {
 </script>
 
 <style scoped>
-@import '../../../../node_modules/@livelybone/vue-datepicker/lib/css/index.css';
-
 .datetime-picker .input-wrapper {
     border-radius: 0px;
 }
