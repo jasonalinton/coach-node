@@ -2,8 +2,16 @@ import { defineStore } from 'pinia'
 import { EVENTTYPE, CALENDAR_TYPES } from '../model/constants'
 import { useWorkoutStore } from '@/store/workoutStore'
 import { getWorkoutIDFromEvent } from '../api/workoutAPI'
+import { now } from 'jquery'
 
 // let initialized = false;
+
+/*
+Local Storage:
+DayCount
+CalendarView
+Selected Page
+*/
 
 export const useAppStore = defineStore('app', {
     state: () => ({
@@ -17,8 +25,10 @@ export const useAppStore = defineStore('app', {
         selectedItemPanel: "todo",
         isTabBarShown: true,
         navbar: {
-            active: "main"
+            active: "main",
+            selectedPage: 'planner',
         },
+        showLeftPanel: true,
         /* Calendar */
         isMobileCalendarShown: false,
         calendarMobile: {
@@ -27,6 +37,10 @@ export const useAppStore = defineStore('app', {
         },
         thumbnailCalendar: {
             monthCount: 1
+        },
+        planner: {
+            selectedView: "week",
+            dayCount: 7
         },
         itemPanel: {
             selected: "todo",
@@ -113,6 +127,21 @@ export const useAppStore = defineStore('app', {
                     this.isTabBarShown = true;
                 }
             }
+        },
+        setLeftPanelVisibility(isVisible) {
+            this.showLeftPanel = isVisible;
+        },
+        toggleLeftPanel() {
+            this.showLeftPanel = !this.showLeftPanel;
+        },
+        selectPage(page) {
+            this.navbar.selectedPage = page;
+        },
+        selectPlannerView(view) {
+            this.planner.selectedView = view;
+        },
+        setPlannerDayCount(count) {
+            this.planner.dayCount = count;
         },
         initItemPanels() {
 

@@ -7,6 +7,7 @@
 </template>
 
 <script>
+import { useAppStore } from '@/store/appStore'
 import ThumbnailCalendar from '../thumbnail/ThumbnailCalendar.vue'
 import TimeframePoints from '../../points/TimeframePoints.vue';
 import AvatarPanel from '../../avatar/AvatarPanel.vue';
@@ -16,14 +17,9 @@ import { today } from '../../../../utility/timeUtility';
 export default {
     name: 'LeftPanel',
     components: { ThumbnailCalendar, AvatarPanel, TimeframePoints },
-    props: {
-        isShown: {
-            default: true,
-            type: Boolean
-        },
-    },
     data: function() {
         return {
+            appStore: undefined,
             plannerStore: undefined,
             // firstDay: addMonth(moment().date(1).hour(0).minute(0).second(0).millisecond(0).toDate(), -2) // 2 months ago
             firstDay: moment().date(1).hour(0).minute(0).second(0).millisecond(0).toDate(),
@@ -31,6 +27,8 @@ export default {
         }
     },
     created: async function() {
+        this.appStore = useAppStore();
+
         let plannerStore = await import(`@/store/plannerStore`);
         this.plannerStore = plannerStore.usePlannerStore();
     },
@@ -40,6 +38,9 @@ export default {
                 return this.plannerStore.selectedDate;
             }
             return today();
+        },
+        isShown() {
+            return (this.appStore) ? this.appStore.showLeftPanel : true;
         },
     },
     methods: {

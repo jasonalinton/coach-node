@@ -44,8 +44,7 @@
                                 class="day-view flex-grow-1"
                                 :date="day.date"
                                 :style="{ 'flex-basis': 0 }"
-                                :blockHeight="hour.blockHeight"
-                                    @selectEvent="$emit('selectEvent', $event)">
+                                :blockHeight="hour.blockHeight">
                     </HourBlocks>
                 </div>
             </div>
@@ -54,6 +53,7 @@
 </template>
 
 <script>
+import { useAppStore } from '@/store/appStore'
 import date from "date-and-time";
 import TaskList from "../TaskList.vue";
 import DayPoints from "../DayPoints.vue";
@@ -65,11 +65,9 @@ import { firstDayOfWeek, lastDayOfWeek, addDay, today } from "../../../../../uti
 export default {
     name: "WeekView",
     components: { TaskList, DayPoints, HourBlocks },
-    props: {
-        dayCount: Number,
-    },
     data: function () {
         return {
+            appStore: undefined,
             padding: 60,
             days: [],
             dayModels: [],
@@ -92,6 +90,8 @@ export default {
         };
     },
     created: async function() {
+        this.appStore = useAppStore();
+
         let eventStore = await import(`@/store/eventStore`);
         this.eventStore = eventStore.useEventStore();
 
@@ -121,6 +121,9 @@ export default {
         },
         endAt() {
             return lastDayOfWeek(this.selectedDate);
+        },
+        dayCount() {
+            return (this.appStore) ? this.appStore.planner.dayCount : 7;
         }
     },
     methods: {
@@ -140,8 +143,9 @@ export default {
         }
     },
     watch: {
-        dayCount() {
+        dayCount(value) {
             this.initTimeline();
+            localStorage.setItem(`week-view-day-count`, value);
         },
         selectedDate() {
             this.initTimeline();

@@ -4,10 +4,8 @@
             <div class="left-wrapper row h-100 g-0">
                 <div class="col d-flex flex-row h-100">
                     <div class="body overflow-auto h-100">
-                        <WeekView v-if="selectedView=='weekView'" 
-                                  :dayCount="dayCount" 
-                                  @selectEvent="$emit('selectEvent', $event)"></WeekView>
-                        <MonthView v-if="selectedView=='monthView'" :today="today"></MonthView>
+                        <WeekView v-if="selectedView=='week'" />
+                        <MonthView v-if="selectedView=='month'" :today="today"></MonthView>
                     </div>
                 </div>
             </div>
@@ -16,6 +14,7 @@
 </template>
 
 <script>
+import { useAppStore } from '@/store/appStore'
 import Split from 'split.js'
 import WeekView from './calendar/week/WeekView.vue';
 import MonthView from './calendar/month/MonthView.vue';
@@ -24,14 +23,10 @@ import { today } from "../../../utility";
 export default {
     name: "Planner",
     components: { WeekView, MonthView },
-    props: {
-        dayCount: Number,
-        selectedView: String,
-    },
     data: function() {
         return {
+            appStore: undefined,
             split: null,
-            selectedPage: "items",
             today: today(),
         }
     },
@@ -39,16 +34,16 @@ export default {
 
     },
     created: function() {
-
+        this.appStore = useAppStore();
+    },
+    computed: {
+        selectedView() {
+            return (this.appStore) ? this.appStore.planner.selectedView : "week";
+        },
     },
     methods: {
         initSplit,
     },
-    watch: {
-        dayCount(value) {
-            localStorage.setItem(`week-view-day-count`, value);
-        },
-  }
 };
 
 function initSplit() {
