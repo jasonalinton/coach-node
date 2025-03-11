@@ -80,7 +80,7 @@
                      <div v-if="!showCheckbox" class="index">
                           {{ index }}
                      </div>
-                     <ItemCheckbox v-if="showCheckbox" class="checkbox align-self-start" style="margin-top: -2px;" 
+                     <ItemCheckbox v-if="isExtraSmall || showCheckbox" class="checkbox align-self-start" style="margin-top: -2px;" 
                                  :checked="isComplete" 
                                  :width="20"
                                  :height="20"
@@ -130,6 +130,7 @@
 </template>
 
 <script>
+import { useAppStore } from '@/store/appStore'
 import { useWorkoutStore } from '../../../../store/workoutStore';
 import { clone, listToString } from '../../../../../utility';
 import ItemCheckbox from '../component/ItemCheckbox.vue';
@@ -161,6 +162,8 @@ export default {
         },
     },
     created: function() {
+        this.appStore = useAppStore();
+
         this.workoutStore = useWorkoutStore();
         if (this.editingSetID == this.set.id) {
             this.isEditing = true;
@@ -168,6 +171,7 @@ export default {
     },
     data: function () {
         return {
+            appStore: undefined,
             workoutStore: null,
             isEditing: false,
             showCheckbox: false,
@@ -176,6 +180,9 @@ export default {
         }
     },
     computed: {
+        isExtraSmall() {
+            return (this.appStore) ? this.appStore.isExtraSmall : true;
+        },
         rest() {
             if (this.set.restSeconds) {
                 let minutes_floor = 0;

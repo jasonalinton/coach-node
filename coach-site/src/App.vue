@@ -123,24 +123,24 @@ export default {
         window.addEventListener('resize', this.onResize, { passive: true })
     },
     computed: {
-        isExtraSmall() {
-            if (this.appStore) {
-                return this.appStore.isExtraSmall;
-            }
-            return true;
-        },
         leftPanelVisibility() {
-            return (this.showLeft) ? `show-left-panel` : 'hide-left-panel'
+            return (this.showLeftPanel) ? `show-left-panel` : 'hide-left-panel'
+        },
+        isExtraSmall() {
+            return (this.appStore) ?this.appStore.isExtraSmall : true;
         },
         itemPanelVisibility() {
             return (this.appStore.itemPanel.selected) ? 'show-item-panel' : 'hide-item-panel'
         },
         selectedItemPanel() {
-            if (this.appStore) {
-                return this.appStore.itemPanel.selected;
-            }
-            return "todo";
-        }
+            return (this.appStore) ? this.appStore.itemPanel.selected : "todo";
+        },
+        selectedPage() {
+            return (this.appStore) ? this.appStore.navbar.selectedPage : "planner";
+        },
+        showLeftPanel() {
+            return (this.appStore) ? this.appStore.showLeftPanel : true;
+        },
     },
     methods: {
         initStores,

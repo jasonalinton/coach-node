@@ -76,7 +76,7 @@ export default {
     data: function () {
         return {
             workoutStore: undefined,
-            setsShown: false,
+            setsShown: true,
             showOptions: false,
             showReps: false,
             showWeight: false,
