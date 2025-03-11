@@ -9,10 +9,13 @@ const app = createApp(App)
 import { createMemoryHistory, createRouter } from 'vue-router'
 import Planner from './components/planner/Planner.vue'
 import ItemTabs from './components/items/ItemTabs.vue'
+import PhysicalView from './components/metrics/physical/PhysicalView.vue'
 
 const routes = [
   { path: '/', component: Planner },
-  { path: '/item-tables', component: ItemTabs },
+  { path: '/planner', component: Planner },
+  { path: '/items', component: ItemTabs },
+  { path: '/physical-view', component: PhysicalView },
 ]
 
 const router = createRouter({

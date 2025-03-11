@@ -5,13 +5,13 @@
                 <div class="d-flex flex-row">
                     <IconButton class="icon menu-button float-left" src="/icon/menu-button.png" :width="48" :height="48"></IconButton>
                     <img class="icon calendar-button float-left" src="/icon/planner-icon.png" :width="36" :height="36"
-                         @click="$emit('toggleLeftPanel')"/>
+                         @click="toggleLeftPanel"/>
                     <a class="navbar-brand float-left" href="#">Inventory Planner</a>
                 </div>
                 <div class="d-flex flex-row">
-                    <button class="btn btn-sm" type="button" @click="$emit('showPage', 'planner')">Planner</button>
-                    <button class="btn btn-sm" type="button" @click="$emit('showPage', 'items')">Items</button>
-                    <button class="btn btn-sm" type="button" @click="$emit('showPage', 'physical')">Physical</button>
+                    <button class="btn btn-sm" type="button" @click="selectPage('planner')">Planner</button>
+                    <button class="btn btn-sm" type="button" @click="selectPage('items')">Items</button>
+                    <button class="btn btn-sm" type="button" @click="selectPage('physical')">Physical</button>
                 </div>
             </div>
             <div v-if="selectedPage == 'planner'" class="d-flex flex-row me-5">
@@ -22,7 +22,7 @@
                 <select v-model="view">
                     <option v-for="_view in views" :key="_view.id" :value="_view.id">{{ _view.text }}</option>
                 </select>
-                <select v-if="view == 1" v-model="dayCountt">
+                <select v-if="view == 1" v-model="dayCount">
                     <option v-for="weekView in weekViews" :key="weekView.id" :value="weekView.id">{{ weekView.text }}</option>
                 </select>
             </div>
@@ -31,12 +31,13 @@
 </template>
 
 <script>
+import { useAppStore } from '@/store/appStore'
 import IconButton from '../controls/button/IconButton.vue';
 import { addDay, subtractDay, today } from '../../../utility';
 
 let views = [
-    { id: 1, text: 'Week', view: 'weekView'},
-    { id: 2, text: 'Month', view: 'monthView' },
+    { id: 1, text: 'Week', view: 'week'},
+    { id: 2, text: 'Month', view: 'month' },
 ]
 
 let weekViews = [
@@ -51,22 +52,16 @@ let weekViews = [
 export default {
     name: "PlannerNavbar",
     components: { IconButton },
-    props: {
-        dayCount: Number,
-        selectedView: String,
-        selectedPage: String,
-    },
     data: function() {
         return {
+            appStore: undefined,
             plannerStore: undefined,
-            dayCountt: this.dayCount,
             views,
-            view: null,
             weekViews,
         }
     },
     created: async function() {
-        this.view = views.find(_view => _view.view == this.selectedView).id;
+        this.appStore = useAppStore();
 
         let plannerStore = await import(`@/store/plannerStore`);
         this.plannerStore = plannerStore.usePlannerStore();
@@ -75,6 +70,29 @@ export default {
         selectedDate() {
             return (this.plannerStore) ? this.plannerStore.selectedDate : today();
         },
+        selectedPage() {
+            return (this.appStore) ? this.appStore.navbar.selectedPage : "planner";
+        },
+        selectedView() {
+            return (this.appStore) ? this.appStore.planner.selectedView : "week";
+        },
+        view: {
+            get() {
+                return this.views.find(_view => _view.view == this.selectedView).id;
+            },
+            set(id) {
+                let view = this.views.find(_view => _view.id == id).view;
+                this.appStore.selectPlannerView(view)
+            }
+        },
+        dayCount: {
+            get() {
+                return (this.appStore) ? this.appStore.planner.dayCount : 7;
+            },
+            set(count) {
+                this.appStore.setPlannerDayCount(count)
+            }
+        }
     },
     methods: {
         previous() {
@@ -83,10 +101,21 @@ export default {
         next() {
             this.plannerStore.selectDate(addDay(this.selectedDate, this.dayCount));
         },
-    },
-    watch: {
-        dayCountt(value) { this.$emit('dayCountChange', value) },
-        view(value) { this.$emit('viewChange', views.find(view => view.id == value).view) },
+        selectPage(page) {
+            this.appStore.selectPage(page)
+        },
+        toggleLeftPanel() {
+            this.appStore.toggleLeftPanel();
+        },
+        selectPlanner() {
+            this.$router.push('/planner')
+        },
+        selectItems() {
+            this.$router.push('/items')
+        },
+        selectPhysical() {
+            this.$router.push('/physical-view')
+        }
     }
 };
 </script>

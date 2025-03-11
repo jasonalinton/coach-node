@@ -77,7 +77,7 @@
              @mouseleave="showCheckbox = false">
              <div class="d-flex flex-column flex-grow-1">
                  <div class="d-flex flex-row flex-grow-1">
-                     <div v-if="!showCheckbox" class="index">
+                     <div v-if="!isExtraSmall || !showCheckbox" class="index">
                           {{ index }}
                      </div>
                      <ItemCheckbox v-if="isExtraSmall || showCheckbox" class="checkbox align-self-start" style="margin-top: -2px;" 

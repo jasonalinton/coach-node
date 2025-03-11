@@ -3,36 +3,19 @@
         <AppMobile v-if="isExtraSmall"/>
         <div v-else :class="['grid-container', leftPanelVisibility, itemPanelVisibility]">
             <div class="nav-bar overflow-scroll">
-                <PlannerNavbar
-                    :dayCount="navbar.week.dayCount" 
-                    :selectedView="navbar.selectedView" 
-                    :selectedPage="navbar.selectedPage"
-                    @dayCountChange="dayCountChange"
-                    @viewChange="viewChange"
-                    @showPage="showPage"
-                    @toggleLeftPanel="toggleLeftPanel">
-                </PlannerNavbar>
+                <PlannerNavbar/>
             </div>
-            <!-- <RouterLink to="/">Home</RouterLink>
-            <RouterLink to="/item-tables">Item Tables</RouterLink> -->
             <div class="grid-left-panel">
-                <LeftPanel :isShown="showLeft" 
-                           @togglePanel="toggleLeftPanel"/>
+                <LeftPanel />
             </div>
             <div class="grid-body overflow-scroll">
                 <!-- <RouterView/> -->
-                <Planner 
-                    v-show="navbar.selectedPage == 'planner'" 
-                        :selectedPage="navbar.selectedPage"
-                        :dayCount="navbar.week.dayCount"
-                        :selectedView="navbar.selectedView"
-                        @selectEvent="selectEvent">
-                </Planner>
-                <ItemTabs v-show="navbar.selectedPage == 'items'"></ItemTabs>
-                <PhysicalView v-if="navbar.selectedPage == 'physical'"></PhysicalView>
+                <Planner v-show="selectedPage == 'planner'" />
+                <ItemTabs v-show="selectedPage == 'items'" />
+                <PhysicalView v-if="selectedPage == 'physical'" />
             </div>
             <div class="grid-right-panel">
-                <ItemPanel ></ItemPanel>
+                <ItemPanel />
             </div>
         </div>
     </div>
@@ -56,7 +39,7 @@ import { useGoalStore } from '@/store/goalStore'
 import { useTodoStore } from '@/store/todoStore'
 import { useRoutineStore } from '@/store/routineStore'
 import { useUniversalStore } from '@/store/universalStore'
-// import { RouterLink, RouterView } from 'vue-router'
+// import { RouterView } from 'vue-router'
 
 export default {
     name: "App",
@@ -68,48 +51,18 @@ export default {
         Planner,
         ItemTabs,
         PhysicalView,
-        // RouterLink,
         // RouterView
     },
     data: function () {
         return {
-            navbar: {
-                selectedView: 'weekView',
-                week: {
-                    dayCount: 7,
-                },
-                selectedPage: 'planner',
-            },
             itemsPage: {
                 selectPanel: undefined,
             },
             appStore: undefined,
             plannerStore: undefined,
-            showLeft: true
         };
     },
     created: async function () {
-        let selectedPage_Store = localStorage.getItem(`selected-page`);
-        if (selectedPage_Store) {
-            this.navbar.selectedPage = selectedPage_Store;
-        } else {
-            localStorage.setItem(`selected-page`, this.navbar.selectedPage);
-        }
-
-        let selectedView_Store = localStorage.getItem(`selected-planner-view`);
-        if (selectedView_Store) {
-            this.navbar.selectedView = selectedView_Store;
-        } else {
-            localStorage.setItem(`selected-planner-view`, this.navbar.selectedView);
-        }
-
-        let dayCount_Store = localStorage.getItem(`week-view-day-count`);
-        if (dayCount_Store) {
-            this.navbar.week.dayCount = Number(dayCount_Store);
-        } else {
-            localStorage.setItem(`week-view-day-count`, this.navbar.week.dayCount);
-        }
-
         await this.initStores();
     },
     beforeUnmount () {
@@ -144,17 +97,18 @@ export default {
     },
     methods: {
         initStores,
-        toggleLeftPanel,
-        dayCountChange,
-        viewChange,
-        showPage,
-        selectEvent,
         onResize
     },
     watch: {
-        'navbar.selectedPage'(value) { localStorage.setItem(`selected-page`, value); },
-        'navbar.selectedView'(value) { localStorage.setItem(`selected-planner-view`, value); },
-        'navbar.week.dayCount'(value) { localStorage.setItem(`week-view-day-count`, value); },
+        selectedPage(page) {
+            if (page == 'planner') {
+                this.appStore.setLeftPanelVisibility(true);
+            } else if (page == 'items') {
+                this.appStore.setLeftPanelVisibility(false);
+            } else if (page == 'physical') {
+                this.appStore.setLeftPanelVisibility(false);
+            }
+        }
     },
 };
 
@@ -186,36 +140,6 @@ async function initStores() {
         todoStore.initializeItems();
         routineStore.initializeItems();
     });
-}
-
-function toggleLeftPanel() {
-    this.showLeft = !this.showLeft;
-}
-
-function dayCountChange(count) {
-    this.navbar.week.dayCount = count;
-}
-
-function viewChange(view) {
-    this.navbar.selectedView = view;
-}
-
-function showPage(page) {
-    if (page == 'planner') {
-        this.showLeft = true;
-    } else if (page == 'items') {
-        this.showLeft = false;
-    } else if (page == 'physical') {
-        this.showLeft = false;
-    }
-    this.navbar.selectedPage = page;
-}
-
-function selectEvent(_event) {
-    this.itemsPage.selectPanel = {
-        panel: 'event',
-        props: { _event }
-    }
 }
 
 function onResize() {

@@ -4,8 +4,7 @@
             <HourBlock :hour="hour" 
                        :date="date"
                        :blockHeight="blockHeight"
-                       :zIndex="index * 100"
-                        @selectEvent="$emit('selectEvent', $event)">
+                       :zIndex="index * 100">
             </HourBlock>
         </div>
     </div>
