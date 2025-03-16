@@ -1,5 +1,5 @@
 <template>
-    <div class="event position-relative d-flex w-100"
+    <div class="event cursor-default position-relative d-flex w-100"
          :class="[size, successStatus]"
          :style="{ 'top': `${top}px`, 'padding-top': `${paddingTopBottom}px`, 
                    'padding-bottom': `${paddingTopBottom}px`, 'z-index': 1, 'background-color': color}"
