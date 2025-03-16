@@ -33,6 +33,7 @@ export default {
 }
 
 function onChange(value) {
+    value = value.currentTarget.value;
     if (value) {
         let date = new Date(value);
         let time = date.toISOString();
