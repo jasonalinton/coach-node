@@ -21,10 +21,14 @@ export default {
     created: async function() {
         let plannerStore = await import(`@/store/plannerStore`);
         this.plannerStore = plannerStore.usePlannerStore();
+        
+        let iterationStore = await import(`@/store/iterationStore`);
+        this.iterationStore = iterationStore.useIterationStore();
     },
     data: function () {
         return {
             plannerStore: undefined,
+            iterationStore: undefined
         }
     },
     computed: {

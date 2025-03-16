@@ -30,7 +30,7 @@
                                    @saveWorkout="save"/>
                  </div>
                  <!-- Settings -->
-                 <span class="text-start"
+                 <span class="text-start cursor-default"
                        @click="settings.isShown = !settings.isShown">Settings</span>
                  <div v-if="settings.isShown" class="d-flex flex-column">
                     <!-- Time -->
