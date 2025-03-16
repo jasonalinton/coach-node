@@ -21,15 +21,12 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <!-- eslint-disable-next-line vue/no-template-key -->
                     <template v-for="entry in tableEntries" :key="entry.id">
-                        <!-- eslint-disable-next-line vue/require-v-for-key -->
                         <tr :ref="`entry-${entry.time}`" :class="{ 'active': entry.isActive }"
                             @click="setSelectedEntry(entry)">
                             <th scope="row">{{ jsonToDateTimeString(entry.dateTime) }}</th>
                             <td v-for="value in entry.fieldValues" :key="value.id">{{ value.value }}</td>
                         </tr>
-                        <!-- eslint-disable-next-line vue/require-v-for-key -->
                         <tr v-if="entry.isSelected">
                             <td :colspan="entry.fieldValues.length + 1">
                                 <div  class="additional-values d-flex flex-column">
@@ -92,7 +89,10 @@ export default {
         }
     },
     created: function() {
-       this.metricStore = useMetricStore();
+        this.metricStore = useMetricStore();
+    },
+    mounted() {
+        this.createLogChart();
     },
     computed: {
         logItem() {
@@ -149,7 +149,6 @@ export default {
     watch: {
         logItem(value) {
             this.setTableEntries(value);
-            this.createLogChart();
         },
         entryCount() {
             this.setTableEntries(this.logItem);
@@ -188,7 +187,6 @@ function createLogChart() {
     chart.subscribeClick(this.handleChartClick);
     chart.subscribeDblClick(this.handleChartDoubleClick);
     let timeScale = chart.timeScale();
-    console.log(timeScale);
     // chart.setCrosshairPosition(this.seriesData[17].value, this.seriesData[3].time, this.series);
     this.chart = chart;
     this.initInfiniteScroll();
