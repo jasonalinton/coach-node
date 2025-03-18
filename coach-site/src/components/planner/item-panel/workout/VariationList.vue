@@ -89,12 +89,12 @@ export default {
         setVariationList
     },
     watch: {
-        // variations: {
-        //     handler() {
-        //         this.setVariationList();
-        //     },
-        //     deep: true
-        // },
+        variations: {
+            handler() {
+                this.setVariationList();
+            },
+            deep: true
+        },
         searchTerm() {
             this.setVariationList();
         }
