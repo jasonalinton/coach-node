@@ -122,3 +122,14 @@ export let CALENDAR_TYPES = {
     WEEK: "week",
     MONTH: "month"
 };
+
+export let WORKOUT_SECTIONS = {
+    MAIN: 150,
+    WARMUP: 174,
+    STRETCH: 175,
+    WARMUP_STETCH: 176,
+    SKILL_TRAINING: 177,
+    STRENGTH: 178,
+    COOL_DOWN: 179,
+    MOBILITY: 180
+}

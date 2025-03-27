@@ -32,7 +32,11 @@
                              @selectWorkout="$emit('selectWorkout', $event.id)"></WorkoutItem>
             </div>
         </div>
-        <WorkoutForm v-if="selectedPanel == 'workoutForm'"
+        <!-- <WorkoutForm v-if="selectedPanel == 'workoutForm'"
+                     :id="selectedWorkoutID"
+                     @setPanelHeader="$emit('setPanelHeader', $event)"
+                     @back="$emit('selectWorkout')"/> -->
+        <WorkoutActive v-if="selectedPanel == 'workoutForm'"
                      :id="selectedWorkoutID"
                      @setPanelHeader="$emit('setPanelHeader', $event)"
                      @back="$emit('selectWorkout')"/>
@@ -42,10 +46,11 @@
 <script>
 import WorkoutItem from './WorkoutItem.vue';
 import WorkoutForm from './WorkoutForm.vue';
+import WorkoutActive from './WorkoutActive.vue';
 
 export default {
     name: 'WorkoutList',
-    components: { WorkoutItem, WorkoutForm },
+    components: { WorkoutItem, WorkoutForm, WorkoutActive },
     props: {
         selectedID: Number,
     },
