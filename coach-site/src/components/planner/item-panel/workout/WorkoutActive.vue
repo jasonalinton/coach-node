@@ -1,5 +1,11 @@
 <template>
-    <div class="workout-active d-flex flex-column">
+    <div class="workout-active d-flex flex-column overflow-scroll">
+        <div class="label d-flex flex-row mb-2">
+            <img class="icon-button mb-2"
+                 src='/icon/previous.png' width="20" height="20"
+                 @click.prevent="back"/>
+            <span>{{ workout.name }}</span>
+        </div>
         <div class="d-flex flex-column">
             <WorkoutSection v-for="section in sections" :key="section.id" :section="section"/>
         </div>
@@ -7,31 +13,39 @@
 </template>
 
 <script>
-import { useWorkoutStore } from '../../../../store/workoutStore';
-import { clone } from '../../../../../utility';
+import { useAppStore } from '@/store/appStore'
+import { useWorkoutStore } from '@/store/workoutStore';
 import WorkoutSection from './WorkoutSection.vue';
 
 export default {
     name: 'WorkoutActive',
     components: { WorkoutSection },
     props: {
-        id: Number
+        
     },
     data: function () {
         return {
+            appStore: null,
             workoutStore: null,
         }
     },
     created: function() {
+        this.appStore = useAppStore();
         this.workoutStore = useWorkoutStore();
     },
     computed: {
+        id() {
+            return (this.appStore) ? this.appStore.itemPanel.workout.selectedWorkoutID : undefined;
+        },
         workout() {
-            if (this.workoutStore) {
+            if (this.workoutStore && this.id) {
                 let workout = this.workoutStore.getWorkout(this.id);
-                return clone(workout);
+                return workout;
             }
             return undefined;
+        },
+        name() {
+            return (this.workout) ? this.workout.name : "Loading..."
         },
         sections() {
             if (this.workout) {
@@ -39,39 +53,23 @@ export default {
             }
             return [];
         }
-        // sections() {
-        //     if (this.workout) {
-        //         let sections = [];
-        //         this.workout.exercises.forEach(exercise => {
-        //             let section = undefined;
-        //             let index = sections.findIndex(x => x.id == exercise.idWorkoutSection);
-        //             if (index == -1) {
-        //                 section 
-        //             }
-        //         });
-        //     }
-
-        //     var sections = new List<WorkoutSection>();
-        //     foreach (var exercise in exercises)
-        //     {
-        //         var section = sections.FirstOrDefault(x => x.ID == exercise.IdWorkoutSection);
-        //         if (section == null)
-        //         {
-        //             section = new WorkoutSection(exercise.IdWorkoutSection);
-        //             sections.Add(section);
-        //         }
-        //         section.Exercises.Add(exercise);
-        //     }
-        //     return sections;
-        // }
     },
     methods: {
-        
+        back() {
+            this.appStore.onBackWorkoutPanel();
+        }
     },
 }
 
 </script>
 
 <style scoped>
+.workout-active {
+    padding-top: 12px;
+    padding-bottom: 12px;
+}
 
+.label {
+    font-size: 14px;
+}
 </style>

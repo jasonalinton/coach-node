@@ -133,3 +133,12 @@ export let WORKOUT_SECTIONS = {
     COOL_DOWN: 179,
     MOBILITY: 180
 }
+
+export let WORKOUT_VIEWS = {
+    DASHBOARD: "dashboard",
+    WORKOUT_LIST: "workoutList",
+    WORKOUT_ACTIVE: "workoutActive",
+    WORKOUT_FORM: "workoutForm",
+    EXERCISE_LIST: "exerciseList",
+    EXERCISE_FORM: "exerciseForm"
+}

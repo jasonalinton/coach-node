@@ -92,7 +92,14 @@ export const useAppStore = defineStore('app', {
             event: {
                 type: undefined,
                 event: undefined
-            }
+            },
+            workout: {
+                selectedView: "dashboard",
+                selectedWorkoutID: undefined,
+                selectedExerciseID: undefined,
+                panelQueue: [ ],
+
+            },
         }
     }),
     getters: {
@@ -205,6 +212,25 @@ export const useAppStore = defineStore('app', {
             } else if (type == CALENDAR_TYPES.MONTH) {
                 this.calendarMobile.type = CALENDAR_TYPES.MONTH
             }
+        },
+        /* Workout */
+        selectWorkoutView(view) {
+            let workoutPanel = this.itemPanel.workout
+            if (workoutPanel.selectedView != view) {
+                workoutPanel.panelQueue.push(workoutPanel.selectedView);
+            }
+            workoutPanel.selectedView = view;
+        },
+        selectWorkout(id) {
+            this.itemPanel.workout.selectedWorkoutID = id;
+            this.selectWorkoutView("workoutActive")
+        },
+        selectExercise(id) {
+            this.itemPanel.workout.selectedExerciseID = id;
+            this.selectWorkoutView("exerciseActive")
+        },
+        onBackWorkoutPanel() {
+            this.itemPanel.workout.selectedView = this.itemPanel.workout.panelQueue.pop();
         }
     },
 })

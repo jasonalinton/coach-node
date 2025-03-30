@@ -1,5 +1,6 @@
 <template>
-    <div class="exercise-card">
+    <div class="exercise-card"
+         @click="$emit('selectExercise', exercise.id)">
         <div class="d-flex flex-row flex-grow-1 justify-content-between position-relative">
             <div class="d-flex flex-row overflow-hidden">
                 <span class="image flex-shrink-0"></span>
@@ -15,7 +16,7 @@
             <div class="button-group d-flex flex-column">
                 <img class="icon-button" 
                      src='/icon/delete-button.png' width="16" height="16"
-                        @click="$emit('removeExercise', exercise.exercise.id)"/>
+                        @click="$emit('removeExercise', exercise.id)"/>
             </div>
         </div>
     </div>
@@ -60,13 +61,17 @@ export default {
     cursor: default;
 }
 
+.exercise-card:hover {
+    background-color: #F5F5F5;
+}
+
 .exercise-card.complete {
     opacity: .6;
 }
 
 .image {
     width: 40px;
-    height: 48px;
+    height: 40px;
     background-color: #E25555;
 }
 

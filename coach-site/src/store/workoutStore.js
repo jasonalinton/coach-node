@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { getWorkoutInfo, getWorkouts, getExercises, getWorkoutIDFromEvent,
-    saveExercise, saveWorkout, copyAndStartWorkout, logSet, completeWorkout, repositionExercise } from '../api/workoutAPI'
+    saveExercise, saveWorkout, copyAndStartWorkout, saveSet, logSet, completeWorkout, repositionExercise } from '../api/workoutAPI'
 import { replaceOrAddItem, removeItemByID, sortAsc } from '../../utility';
 import { getSocketConnection } from './socket'
 
@@ -89,6 +89,19 @@ export const useWorkoutStore = defineStore('workout', {
             }
             return this.exercises;
         },
+        getWorkoutExercise(idExercise, idWorkout) {
+            let exercise;
+            let workout = this.workouts.find(x => x.id == idWorkout);
+            if (workout) {
+                for (let i = 0; i < workout.sections.length; i++) {
+                    exercise = workout.sections[i].exercises.find(x => x.id == idExercise);
+                    if (exercise) {
+                        break;
+                    }
+                }
+            }
+            return exercise;
+        },
         getVariation(id) {
             return this.variations.find(x => x.id == id);
         },
@@ -132,6 +145,9 @@ export const useWorkoutStore = defineStore('workout', {
                     replaceOrAddItem(workout, _this.workouts);
                     return workout;
                 });
+        },
+        async saveSet(model) {
+            return saveSet(model);
         },
         async logSet(setID, completedAt) {
             return logSet(setID, completedAt);

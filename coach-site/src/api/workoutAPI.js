@@ -67,7 +67,7 @@ export async function getWorkoutIDFromEvent(eventID) {
     })
     .then((response) => response.json())
     .then((data) => {
-        if (!data.status.errorCode) {
+        if (data.status.success) {
             return data.result;
         } else {
             console.error('Error:', data.status.errorMessage);
@@ -86,7 +86,7 @@ export async function saveWorkout(model) {
     })
     .then((response) => response.json())
     .then((data) => {
-        if (!data.status.errorCode) {
+        if (data.status.success) {
             return data.result;
         } else {
             console.error('Error:', data.status.errorMessage);
@@ -136,6 +136,25 @@ export async function copyAndStartWorkout(workoutID) {
     });
 }
 
+export async function saveSet(model) {
+    return fetch(`${URL}/api/Physical/SaveSet`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(model)
+    })
+    .then((response) => response.json())
+    .then((data) => {
+        if (data.status.success) {
+            return data.result;
+        } else {
+            console.error('Error:', data.status.errorMessage);
+        }
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+    });
+}
+
 export async function logSet(setID, completedAt) {
     let data = { setID, completedAt };
     return fetch(`${URL}/api/Physical/LogSet`, {
@@ -145,10 +164,10 @@ export async function logSet(setID, completedAt) {
     })
     .then((response) => response.json())
     .then((data) => {
-        if (!data.errorMessage) {
-            return data;
+        if (data.status.success) {
+            return data.result;
         } else {
-            this.errorMessage = data.errorMessage;
+            console.error('Error:', data.status.errorMessage);
         }
     })
     .catch((error) => {

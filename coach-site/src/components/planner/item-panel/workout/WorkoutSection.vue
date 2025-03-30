@@ -5,7 +5,8 @@
         </div>
         <div class="d-felx flex-column">
             <ExerciseCard class="exercise-card" v-for="exercise in exercises"
-                          :exercise="exercise" />
+                          :exercise="exercise" 
+                          @selectExercise="selectExercise($event)"/>
             <!-- <div class="exercise-card" v-for="exercise in exercises">
                 {{ exercise.name }}
             </div> -->
@@ -14,8 +15,9 @@
 </template>
 
 <script>
+import { useAppStore } from '@/store/appStore'
+import { useWorkoutStore } from '@/store/workoutStore';
 import ExerciseCard from './ExerciseCard.vue';
-import { useWorkoutStore } from '../../../../store/workoutStore';
 import { workoutSectionTypes } from '../../../../model/types';
 import { clone } from '../../../../../utility';
 
@@ -27,11 +29,13 @@ export default {
     },
     data: function () {
         return {
+            appStore: undefined,
             workoutStore: null,
             workoutSectionTypes: clone(workoutSectionTypes),
         }
     },
     created: function() {
+        this.appStore = useAppStore();
         this.workoutStore = useWorkoutStore();
     },
     computed: {
@@ -50,23 +54,14 @@ export default {
                     };
                     exercises.push(exercise);
                 })
-                // let exercisesModels = this.workoutStore.exercises;
-                // exercises = exercises.filter(x => this.sec)
             }
             return exercises;
         }
     },
     methods: {
-        // getExercise(exercise) {
-        //     exercise = clone(exercise);
-        //     if (this.workoutStore) {
-        //         let exerciseModel = this.workoutStore.getExercise(exercise.id);
-        //         exercise = {
-        //             ...exercise,
-        //             ...exerciseModel
-        //         }
-        //     }
-        // }
+        selectExercise(id) {
+            this.appStore.selectExercise(id);
+        }
     },
 }
 

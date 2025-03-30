@@ -1,7 +1,7 @@
 <template>
     <div class="workout-panel-dashboard d-flex flex-column">
         <div class="workout card"
-             @click="$emit('selectView', { panel: 'workoutList' } )">
+             @click="selectView('workoutList', { panel: 'workoutList' })">
             <span>Workouts</span>
         </div>
         <div class="exercise card"
@@ -18,6 +18,7 @@
 </template>
 
 <script>
+import { useAppStore } from '@/store/appStore'
 
 export default {
     name: 'WorkoutPanelDashboard',
@@ -27,14 +28,17 @@ export default {
     },
     data: function () {
         return {
-            
+            appStore: undefined
         }
     },
     created: function() {
-       
+        this.appStore = useAppStore();
     },
     methods: {
-        
+        selectView(view, data) {
+            this.appStore.selectWorkoutView(view);
+            this.$emit('selectView', data );
+        }
     },
 }
 
