@@ -141,9 +141,10 @@ export default {
             let timeframe = this.timeframes[index];
             this.idTimeframe = timeframe.id;
             this.timeframe = timeframeText;
+            this.universalStore.getBriefingBlurbs(this.idTimeframe, this.selectedDate);
         },
         addBlurb(text, idMetric) {
-            this.universalStore.addBriefingBlurb(text, new Date(), BLURBTYPE.BRIEFING, idMetric, this.idTimeframe)
+            this.universalStore.addBriefingBlurb(text, this.selectedDate, BLURBTYPE.BRIEFING, idMetric, this.idTimeframe)
         },
         saveBlurb(id, text) {
             let index = this.blurbs.findIndex(x => x.id == id);
