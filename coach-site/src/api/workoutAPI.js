@@ -155,6 +155,26 @@ export async function saveSet(model) {
     });
 }
 
+export async function logAllSets(idWorkoutExercise) {
+    let data = { idWorkoutExercise };
+    return fetch(`${URL}/api/Physical/LogAllSets`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    })
+    .then((response) => response.json())
+    .then((data) => {
+        if (data.status.success) {
+            return data.result;
+        } else {
+            console.error('Error:', data.status.errorMessage);
+        }
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+    });
+}
+
 export async function logSet(setID, completedAt) {
     let data = { setID, completedAt };
     return fetch(`${URL}/api/Physical/LogSet`, {

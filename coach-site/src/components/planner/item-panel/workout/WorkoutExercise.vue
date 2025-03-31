@@ -11,8 +11,9 @@
         </div>
         <div class="exercise-sets d-flex flex-column ms-auto me-auto mt-3">
             <div v-for="(set, index) in sets" :key="set.id"
-                 class="exercise-set d-flex flex-row flex-grow-1" style="gap:10px">
-                <span>{{ index }}</span>
+                 class="exercise-set d-flex flex-row flex-grow-1" :class="{ complete: isComplete(set) }" style="gap:10px">
+                <span class="set-number" :class="{ active: set.id == activeSetID }"
+                      @click="activeSetID = set.id">{{ index }}</span>
                 <div class="reps d-flex flex-column align-items-center">
                     <input class="prop form-control form-control-sm me-1" type="number" min="0" ref="repsInput"
                            v-model="set.reps"
@@ -26,7 +27,7 @@
                            v-model="set.timeSeconds"
                            :style="{'width': inputWidth(set.timeSeconds)}" 
                            @keyup.enter.esc="doneEditing"
-                           @blur="blur"/>
+                           @blur="saveSet(set)"/>
                     <span class="text">TIME</span>
                 </div>
                 <div class="hold d-flex flex-column align-items-center">
@@ -34,7 +35,7 @@
                            v-model="set.holdSeconds"
                            :style="{'width': inputWidth(set.holdSeconds)}" 
                            @keyup.enter.esc="doneEditing"
-                           @blur="blur"/>
+                           @blur="saveSet(set)"/>
                     <span class="text">HOLD</span>
                 </div>
                 <div class="weight d-flex flex-column align-items-center">
@@ -42,7 +43,7 @@
                            v-model="set.weight"
                            :style="{'width': inputWidth(set.weight)}" 
                            @keyup.enter.esc="doneEditing"
-                           @blur="blur"/>
+                           @blur="saveSet(set)"/>
                     <span class="text">LBS</span>
                 </div>
                 <div class="rest d-flex flex-column align-items-center">
@@ -50,7 +51,7 @@
                            v-model="set.restSeconds"
                            :style="{'width': inputWidth(set.restSeconds)}" 
                            @keyup.enter.esc="doneEditing"
-                           @blur="blur"/>
+                           @blur="saveSet(set)"/>
                     <span class="text">REST</span>
                 </div>
             </div>
@@ -81,8 +82,9 @@ export default {
     },
     data: function () {
         return {
-            appStore: null,
-            workoutStore: null,
+            appStore: undefined,
+            workoutStore: undefined,
+            activeSetID: undefined
         }
     },
     created: function() {
@@ -143,6 +145,9 @@ export default {
                 return "45px";
             }
         },
+        isComplete(set) {
+            return (set.iteration) ? true : false;
+        },
         addSet() {
             let setIDs = this.sets.map(s => s.id).sort((a, b) => a - b);
             let nextID = (setIDs.length == 0 || setIDs[0] - 1 > -1) ? -1 : setIDs[0] - 1;
@@ -155,8 +160,17 @@ export default {
                 this.workoutStore.saveSet(newSet);
             }
         },
+        logSet() {
+            //TODO: Can only unlog last logged set
+            let set = this.sets.find(x => x.id == this.activeSetID);
+            let completedAt = (set.iteration) ? undefined : new Date();
+            this.workoutStore.logSet(set.id, completedAt);
+        },
+        logAllSets() {
+            this.workoutStore.logAllSets(this.workoutExercise.idWorkoutExercise);
+        },
         saveSet(set) {
-
+            this.workoutStore.saveSet(set);
         }
     },
 }
@@ -167,6 +181,21 @@ export default {
 .media {
     min-height: 300px;
     background-color: beige;
+}
+
+.exercise-set.complete {
+    opacity: .5;
+}
+
+.set-number {
+    line-height: 30px;
+    width: 20px;
+    height: 30px;
+    border-radius: 10px;
+}
+
+.set-number.active {
+    background-color: greenyellow;
 }
 
 /* Chrome, Safari, Edge, Opera */

@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { getWorkoutInfo, getWorkouts, getExercises, getWorkoutIDFromEvent,
-    saveExercise, saveWorkout, copyAndStartWorkout, saveSet, logSet, completeWorkout, repositionExercise } from '../api/workoutAPI'
+    saveExercise, saveWorkout, copyAndStartWorkout, saveSet, logSet, logAllSets, completeWorkout, repositionExercise } from '../api/workoutAPI'
 import { replaceOrAddItem, removeItemByID, sortAsc } from '../../utility';
 import { getSocketConnection } from './socket'
 
@@ -151,6 +151,9 @@ export const useWorkoutStore = defineStore('workout', {
         },
         async logSet(setID, completedAt) {
             return logSet(setID, completedAt);
+        },
+        async logAllSets(idWorkoutExercise) {
+            return logAllSets(idWorkoutExercise);
         },
         async completeWorkout(workoutID, startAt, endAt, createEvent) {
             return completeWorkout(workoutID, startAt, endAt, createEvent);
