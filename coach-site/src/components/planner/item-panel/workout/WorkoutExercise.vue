@@ -10,51 +10,10 @@
 
         </div>
         <div class="exercise-sets d-flex flex-column ms-auto me-auto mt-3">
-            <div v-for="(set, index) in sets" :key="set.id"
-                 class="exercise-set d-flex flex-row flex-grow-1" :class="{ complete: isComplete(set) }" style="gap:10px">
-                <span class="set-number" :class="{ active: set.id == activeSetID }"
-                      @click="activeSetID = set.id">{{ index }}</span>
-                <div class="reps d-flex flex-column align-items-center">
-                    <input class="prop form-control form-control-sm me-1" type="number" min="0" ref="repsInput"
-                           v-model="set.reps"
-                           :style="{'width': inputWidth(set.reps)}"
-                           @keyup.enter.esc="doneEditing"
-                           @blur="saveSet(set)"/>
-                    <span class="text">REPS</span>
-                </div>
-                <div class="time d-flex flex-column align-items-center">
-                    <input class="prop form-control form-control-sm me-1" type="number" min="0" ref="timeInput"
-                           v-model="set.timeSeconds"
-                           :style="{'width': inputWidth(set.timeSeconds)}" 
-                           @keyup.enter.esc="doneEditing"
-                           @blur="saveSet(set)"/>
-                    <span class="text">TIME</span>
-                </div>
-                <div class="hold d-flex flex-column align-items-center">
-                    <input class="prop form-control form-control-sm me-1" type="number" min="0" ref="holdInput"
-                           v-model="set.holdSeconds"
-                           :style="{'width': inputWidth(set.holdSeconds)}" 
-                           @keyup.enter.esc="doneEditing"
-                           @blur="saveSet(set)"/>
-                    <span class="text">HOLD</span>
-                </div>
-                <div class="weight d-flex flex-column align-items-center">
-                    <input class="prop form-control form-control-sm me-1" type="number" min="0" ref="weightInput"
-                           v-model="set.weight"
-                           :style="{'width': inputWidth(set.weight)}" 
-                           @keyup.enter.esc="doneEditing"
-                           @blur="saveSet(set)"/>
-                    <span class="text">LBS</span>
-                </div>
-                <div class="rest d-flex flex-column align-items-center">
-                    <input class="prop form-control form-control-sm me-1" type="number" min="0" ref="restInput"
-                           v-model="set.restSeconds"
-                           :style="{'width': inputWidth(set.restSeconds)}" 
-                           @keyup.enter.esc="doneEditing"
-                           @blur="saveSet(set)"/>
-                    <span class="text">REST</span>
-                </div>
-            </div>
+            <ExerciseSet v-for="(set, index) in sets" :key="set.id" 
+                         :set="set" :isActive="set.id == activeSetID" 
+                         :setNumber="index + 1" :idExercise="this.exercise.id"
+                         @click="activeSetID = set.id" />
             <div class="d-flex flex-row mt-1">
                 <img class="icon-button ms-1" src="/icon/add-button.png" :width="24" :height="24" 
                      @click="addSet" />
@@ -72,11 +31,12 @@
 <script>
 import { useAppStore } from '@/store/appStore'
 import { useWorkoutStore } from '@/store/workoutStore';
+import ExerciseSet from './ExerciseSet.vue';
 import { clone } from '../../../../../utility';
 
 export default {
     name: '',
-    components: {  },
+    components: { ExerciseSet },
     props: {
         
     },
@@ -99,11 +59,10 @@ export default {
             return (this.appStore) ? this.appStore.itemPanel.workout.selectedWorkoutID : undefined;
         },
         exercise() {
-            if (this.workoutStore && this.id) {
-                let workoutExercise = this.workoutStore.getWorkoutExercise(this.id, this.idWorkout);
+            if (this.workoutExercise) {
                 let exercise = this.workoutStore.getExercise(this.id);
                 return {
-                    ...workoutExercise,
+                    ...this.workoutExercise,
                     ...exercise
                 };
             }
@@ -136,18 +95,6 @@ export default {
         back() {
             this.appStore.onBackWorkoutPanel();
         },
-        inputWidth(prop) {
-            if (prop < 10) {
-                return "27px";
-            } else if (prop < 100){
-                return "37px";
-            } else {
-                return "45px";
-            }
-        },
-        isComplete(set) {
-            return (set.iteration) ? true : false;
-        },
         addSet() {
             let setIDs = this.sets.map(s => s.id).sort((a, b) => a - b);
             let nextID = (setIDs.length == 0 || setIDs[0] - 1 > -1) ? -1 : setIDs[0] - 1;
@@ -169,9 +116,6 @@ export default {
         logAllSets() {
             this.workoutStore.logAllSets(this.workoutExercise.idWorkoutExercise);
         },
-        saveSet(set) {
-            this.workoutStore.saveSet(set);
-        }
     },
 }
 
@@ -181,33 +125,6 @@ export default {
 .media {
     min-height: 300px;
     background-color: beige;
-}
-
-.exercise-set.complete {
-    opacity: .5;
-}
-
-.set-number {
-    line-height: 30px;
-    width: 20px;
-    height: 30px;
-    border-radius: 10px;
-}
-
-.set-number.active {
-    background-color: greenyellow;
-}
-
-/* Chrome, Safari, Edge, Opera */
-input::-webkit-outer-spin-button,
-input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-/* Firefox */
-input[type=number] {
-  -moz-appearance: textfield;
 }
 
 .btn {
