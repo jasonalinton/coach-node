@@ -9,7 +9,7 @@
             <div class="variations picks d-flex flex-row">
                 <span v-for="variation in potentialVariations" :key="variation.id"
                       :class="{ selected: variationIDs.includes(variation.id)}"
-                      @click="variationClicked(variation.id)">
+                      @click="variationClicked(variation)">
                 {{ variation.name }}
                 </span>
             </div>
@@ -64,7 +64,7 @@
                         @click.stop.prevent="showVariationSelector = !showVariationSelector"/>
                 <img class="icon-button" 
                     src='/icon/delete-button.png' width="16" height="16"
-                        @click="$emit('deleteSet', set.id)"/>
+                        @click="deleteSet"/>
             </div>
         </div>
     </div>
@@ -125,16 +125,32 @@ export default {
                 return "45px";
             }
         },
-        variationClicked(variationID) {
-            if (this.variationIDs.includes(variationID)) {
-                this.$emit('removeVariation', { setID: this.set.id, variationID, idExercise: this.idExercise});
+        variationClicked(variation) {
+            if (this.variationIDs.includes(variation.id)) {
+                let index = this.set.variations.findIndex(x => x.id == variation.id);
+                this.set.variations.splice(index, 1);
+                let set = {
+                    ...this.set
+                };
+                set.variations = [{
+                    id: variation.id,
+                    isRemoved: true
+                }];
+                this.workoutStore.saveSet(set);
             } else {
                 let set = {
                     ...this.set
                 };
-                set.variations.push({ id: variationID });
+                set.variations.push({ id: variation.id, name: variation.name });
                 this.workoutStore.saveSet(this.set);
             }
+        },
+        deleteSet() {
+            var data = { 
+                ...this.set,
+                isDeleted: true
+            };
+            this.workoutStore.saveSet(data);
         },
         save() {
             this.workoutStore.saveSet(this.set);

@@ -105,6 +105,12 @@ export default {
                 newSet.id = nextID;
 
                 this.workoutStore.saveSet(newSet);
+            } else {
+                let newSet = {
+                    id: nextID,
+                    idWorkoutExercise: this.workoutExercise.idWorkoutExercise
+                };
+                this.workoutStore.saveSet(newSet);
             }
         },
         logSet() {
