@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { getWorkoutInfo, getWorkouts, getExercises, getWorkoutIDFromEvent,
-    saveExercise, addExercisesToWorkout, saveWorkout, copyAndStartWorkout, 
+    saveExercise, addExercisesToWorkout, removeExerciseFromWorkout, saveWorkout, copyAndStartWorkout, 
     saveSet, logSet, logAllSets, completeWorkout, repositionExercise } from '../api/workoutAPI'
 import { replaceOrAddItem, removeItemByID, sortAsc, getNextNewID } from '../../utility';
 import { getSocketConnection } from './socket'
@@ -135,6 +135,9 @@ export const useWorkoutStore = defineStore('workout', {
                 position = (exercisesWithPosition.length > 0) ? exercisesWithPosition.at(-1).position + 1 : 1;
             }
 
+            // This must come before the next section or the saved position will be wrong
+            addExercisesToWorkout(exerciseIDs, idWorkout, idSection, position);
+
             exerciseIDs.forEach(id => {
                 let workoutExercise = {
                     id,
@@ -149,7 +152,9 @@ export const useWorkoutStore = defineStore('workout', {
             })
             section.exercises = sortAsc(section.exercises, 'position');
 
-            addExercisesToWorkout(exerciseIDs, idWorkout, idSection, position);
+        },
+        removeExerciseFromWorkout(idWorkoutExercise) {
+            removeExerciseFromWorkout(idWorkoutExercise);
         },
         getMuscleGroup(id) {
             return this.muscleGroups.find(x => x.id == id);

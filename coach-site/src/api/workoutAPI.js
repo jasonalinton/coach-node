@@ -158,6 +158,27 @@ export async function addExercisesToWorkout(exerciseIDs, idWorkout, idWorkoutSec
     });
 }
 
+export async function removeExerciseFromWorkout(idWorkoutExercise) {
+    let data = { idWorkoutExercise };
+    
+    return fetch(`${URL}/api/Physical/RemoveExerciseFromWorkout`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    })
+    .then((response) => response.json())
+    .then((data) => {
+        if (data.status.success) {
+            return data.result;
+        } else {
+            console.error('Error:', data.status.errorMessage);
+        }
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+    });
+}
+
 export async function copyAndStartWorkout(workoutID) {
     let data = { workoutID };
     return fetch(`${URL}/api/Physical/CopyAndStartWorkout`, {

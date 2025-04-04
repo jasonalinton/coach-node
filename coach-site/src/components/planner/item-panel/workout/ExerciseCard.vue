@@ -5,7 +5,7 @@
             <div class="d-flex flex-row overflow-hidden">
                 <span class="image flex-shrink-0"></span>
                 <div class="label d-flex flex-column">
-                    <span class="name">{{ exercise.name }}</span>
+                    <span class="name">{{ exercise.name }} {{ exercise.position }}</span>
                     <div class="d-flex flex-row">
                         <span class="set-count">
                               {{ setCount }} Sets
@@ -16,13 +16,14 @@
             <div class="button-group d-flex flex-column">
                 <img class="icon-button" 
                      src='/icon/delete-button.png' width="16" height="16"
-                        @click="$emit('removeExercise', exercise.id)"/>
+                        @click.stop="removeExercise"/>
             </div>
         </div>
     </div>
 </template>
 
 <script>
+import { useWorkoutStore } from '@/store/workoutStore';
 
 export default {
     name: '',
@@ -32,11 +33,11 @@ export default {
     },
     data: function () {
         return {
-            
+            workoutStore: null,
         }
     },
     created: function() {
-       
+        this.workoutStore = useWorkoutStore();
     },
     computed: {
         setCount() {
@@ -46,7 +47,9 @@ export default {
         },
     },
     methods: {
-        
+        removeExercise() {
+            this.workoutStore.removeExerciseFromWorkout(this.exercise.idWorkoutExercise);
+        }
     },
 }
 
