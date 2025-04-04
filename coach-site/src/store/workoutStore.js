@@ -1,7 +1,8 @@
 import { defineStore } from 'pinia'
 import { getWorkoutInfo, getWorkouts, getExercises, getWorkoutIDFromEvent,
-    saveExercise, saveWorkout, copyAndStartWorkout, saveSet, logSet, logAllSets, completeWorkout, repositionExercise } from '../api/workoutAPI'
-import { replaceOrAddItem, removeItemByID, sortAsc } from '../../utility';
+    saveExercise, addExercisesToWorkout, saveWorkout, copyAndStartWorkout, 
+    saveSet, logSet, logAllSets, completeWorkout, repositionExercise } from '../api/workoutAPI'
+import { replaceOrAddItem, removeItemByID, sortAsc, getNextNewID } from '../../utility';
 import { getSocketConnection } from './socket'
 
 let initialized = false;
@@ -122,6 +123,33 @@ export const useWorkoutStore = defineStore('workout', {
                 this.variations.splice(0, 0, variation_new);
             }
 
+        },
+        addExercisesToSection(idWorkout, idSection, exerciseIDs, position) {
+            let workout = this.workouts.find(x => x.id == idWorkout);
+            let section = workout.sections.find(x => x.id == idSection);
+            
+            let idWorkoutExercise = getNextNewID(section.exercises, 'idWorkoutSection');
+
+            if (position == undefined) {
+                let exercisesWithPosition = section.exercises.filter(x => x.position != undefined);
+                position = (exercisesWithPosition.length > 0) ? exercisesWithPosition.at(-1).position + 1 : 1;
+            }
+
+            exerciseIDs.forEach(id => {
+                let workoutExercise = {
+                    id,
+                    idExercise: id,
+                    idWorkoutExercise,
+                    idWorkoutSection: idSection,
+                    position: position++,
+                    sets: [],
+                    isPending: true
+                };
+                section.exercises.push(workoutExercise);
+            })
+            section.exercises = sortAsc(section.exercises, 'position');
+
+            addExercisesToWorkout(exerciseIDs, idWorkout, idSection, position);
         },
         getMuscleGroup(id) {
             return this.muscleGroups.find(x => x.id == id);

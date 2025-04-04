@@ -1,9 +1,16 @@
 <template>
     <div class="workout-section d-flex flex-column">
-        <div class="d-flex flex-row">
+        <div class="header d-flex flex-row"
+             @click="isShown = !isShown">
             <span class="name">{{ sectionName }}</span>
+            <img class="icon-button" src="/icon/add-button.png" :width="20" :height="20" 
+                @click="addExercise" />
+            <img v-if="!isShown" class="caret mt-auto mb-auto me-2" 
+                    src='/icon/caret-right.png' width="5" height="8"/>
+            <img v-if="isShown" class="caret mt-auto mb-auto me-2" 
+                    src='/icon/caret-down.png' width="8" height="5"/>
         </div>
-        <div class="d-felx flex-column">
+        <div v-if="isShown" class="d-felx flex-column">
             <ExerciseCard class="exercise-card" v-for="exercise in exercises"
                           :exercise="exercise" 
                           @selectExercise="selectExercise($event)"/>
@@ -32,6 +39,8 @@ export default {
             appStore: undefined,
             workoutStore: null,
             workoutSectionTypes: clone(workoutSectionTypes),
+            addedExercises: [],
+            isShown: false
         }
     },
     created: function() {
@@ -61,6 +70,9 @@ export default {
     methods: {
         selectExercise(id) {
             this.appStore.selectExercise(id);
+        },
+        addExercise() {
+            this.appStore.onAddExerciseToSection(this.section.id);
         }
     },
 }
@@ -70,6 +82,14 @@ export default {
 <style scoped>
 .name {
     padding-left: 12px;
+}
+
+.caret {
+    visibility: hidden;
+}
+
+.header:hover .caret {
+    visibility: visible;
 }
 
 </style>

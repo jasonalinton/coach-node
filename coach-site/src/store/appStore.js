@@ -97,6 +97,11 @@ export const useAppStore = defineStore('app', {
                 selectedView: "dashboard",
                 selectedWorkoutID: undefined,
                 selectedExerciseID: undefined,
+                exerciseList: {
+                    selectedSectionID: undefined,
+                    nextExercisePosition: undefined,
+                    isSelector: undefined
+                },
                 panelQueue: [ ],
 
             },
@@ -179,7 +184,7 @@ export const useAppStore = defineStore('app', {
             if (eevent.type.id == EVENTTYPE.WORKOUT) {
                 let workoutStore = useWorkoutStore();
                 let workoutID = await getWorkoutIDFromEvent(eevent.id);
-                workoutStore.selectWorkout(workoutID);
+                this.selectWorkout(workoutID);
                 this.itemPanel.selected = "workout";
             } else if (eevent.type.id == EVENTTYPE.TODO) {
                 this.itemPanel.selected = "event";
@@ -227,7 +232,20 @@ export const useAppStore = defineStore('app', {
         },
         selectExercise(id) {
             this.itemPanel.workout.selectedExerciseID = id;
-            this.selectWorkoutView("exerciseActive")
+            this.selectWorkoutView("workoutExercise")
+        },
+        onAddExerciseToSection(idSection, position) {
+            this.itemPanel.workout.exerciseList.selectedSectionID = idSection;
+            this.itemPanel.workout.exerciseList.nextExercisePosition = position;
+            this.itemPanel.workout.exerciseList.isSelector = true;
+
+            this.selectWorkoutView("exerciseList");
+        },
+        onDoneExerciseSelection() {
+            this.itemPanel.workout.exerciseList.selectedSectionID = undefined;
+            this.itemPanel.workout.exerciseList.nextExercisePosition = undefined;
+            this.itemPanel.workout.exerciseList.addedExerciseIDs = [];
+            this.itemPanel.workout.exerciseList.isSelector = undefined;
         },
         onBackWorkoutPanel() {
             this.itemPanel.workout.selectedView = this.itemPanel.workout.panelQueue.pop();

@@ -1,14 +1,15 @@
 <template>
     <div class="workout-active d-flex flex-column overflow-scroll"
          :class="{ 'is-active': isActive }">
-        <div class="label d-flex flex-row mb-2">
+        <div class="label d-flex flex-row">
             <img class="icon-button mb-2"
                  src='/icon/previous.png' width="20" height="20"
                  @click.prevent="back"/>
             <span>{{ workout.name }}</span>
         </div>
         <div class="d-flex flex-column">
-            <WorkoutSection v-for="section in sections" :key="section.id" :section="section"/>
+            <WorkoutSection v-for="section in sections" :key="section.id" :section="section"
+                            class="mt-2"/>
         </div>
         <!-- Completion Controls -->
         <div v-if="isActive" class="completion d-flex flex-column justify-content-center position-sticky bottom-0 pb-1">
@@ -43,11 +44,12 @@
 import { useAppStore } from '@/store/appStore'
 import { useWorkoutStore } from '@/store/workoutStore';
 import WorkoutSection from './WorkoutSection.vue';
+import DateTimeSelector from '../../../controls/select/DateTimeSelector.vue';
 import { timeSince } from '../../../../../utility/timeUtility';
 
 export default {
     name: 'WorkoutActive',
-    components: { WorkoutSection },
+    components: { WorkoutSection, DateTimeSelector },
     props: {
         
     },
@@ -174,6 +176,7 @@ function stopWorkout() {
 
 .label {
     font-size: 14px;
+    line-height: 20px;
 }
 
 .clock {

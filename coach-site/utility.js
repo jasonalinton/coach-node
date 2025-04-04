@@ -217,6 +217,14 @@ export function unmapItem(item, removedItem, property) {
 export let getIDs =
     (objects) => objects.map(object => object.id);
 
+export function getNextNewID(list, prop) {
+    prop = prop || "id";
+
+    let ids = list.map(x => x.id).sort((a, b) => a - b);
+    let nextID = (ids.length == 0 || ids[0] - 1 > -1) ? -1 : ids[0] - 1;
+    return nextID;
+}
+
 export function clone(item) {
   return JSON.parse(JSON.stringify(item));
 }

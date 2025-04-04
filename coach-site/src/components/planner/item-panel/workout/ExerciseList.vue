@@ -4,7 +4,7 @@
              <div class="label d-flex flex-row flex-grow-1 mb-2">
                  <img class="icon-button"
                      src='/icon/previous.png' width="20" height="20"
-                     @click.prevent="$emit('back')"/>
+                     @click.prevent="back"/>
                  <span>Create Exercise</span>
                  <img class="icon-button" src="/icon/add-button.png" :width="20" :height="20" @click="createExercise" />
              </div>
@@ -37,7 +37,8 @@
 </template>
 
 <script>
-import { useWorkoutStore } from '../../../../store/workoutStore';
+import { useAppStore } from '@/store/appStore';
+import { useWorkoutStore } from '@/store/workoutStore';
 import { sortAlphaAsc, clone } from '../../../../../utility';
 import ExerciseForm from './ExerciseForm.vue';
 
@@ -45,7 +46,6 @@ export default {
     name: 'ExerciseList',
     components: { ExerciseForm },
     props: {
-        isSelector: Boolean,
         selectedIDs: {
             type: Array,
             default: () => { return []}
@@ -53,23 +53,29 @@ export default {
     },
     data: function () {
         return {
+            appStore: undefined,
             workoutStore: undefined,
             searchTerm: "",
             selectedExerciseID: undefined,
-            exerciseList: []
+            exerciseList: [],
+            newlySelectedIDs: []
         }
     },
     created: function() {
+       this.appStore = useAppStore();
        this.workoutStore = useWorkoutStore();
 
     },
     computed: {
+        isSelector() {
+            return (this.appStore) ? this.appStore.itemPanel.workout.exerciseList.isSelector : false;
+        },
         exercises() {
             if (this.workoutStore) {
                 let exercises = clone(this.workoutStore.getExercises());
                 if (this.isSelector) {
                     exercises.forEach(e => { 
-                        e.isSelected = (this.selectedIDs.includes(e.id)) ? true : false;
+                        e.isSelected = (this.selectedIDs.includes(e.id) || this.newlySelectedIDs.includes(e.id));
                     });
                 }
                 return clone(exercises);
@@ -131,7 +137,14 @@ function createExercise() {
 
 function selectExercise(exercise) {
     if (this.isSelector) {
-        exercise.isSelected = !exercise.isSelected;
+        if (exercise.isSelected) {
+            let index = this.newlySelectedIDs.findIndex(x => x == exercise.id);
+            if (index > -1) {
+                this.newlySelectedIDs.splice(index, 1);
+            }
+        } else {
+            this.newlySelectedIDs.push(exercise.id);
+        }
     } else {
         this.selectedExerciseID = exercise.id;
         this.$emit('setPanelHeader', { text: 'Exercise Form' } );
@@ -139,18 +152,17 @@ function selectExercise(exercise) {
 }
 
 function done() {
-    let selectedIDs = [];
-    this.exercises.forEach(e => {
-        if (e.isSelected) {
-            selectedIDs.push(e.id);
-        }
-    });
-    this.$emit("setExercises", selectedIDs);
+    let idWorkout = this.appStore.itemPanel.workout.selectedWorkoutID;
+    let idSection = this.appStore.itemPanel.workout.exerciseList.selectedSectionID;
+    let nextPositon = this.appStore.itemPanel.workout.exerciseList.nextExercisePosition;
+    this.workoutStore.addExercisesToSection(idWorkout, idSection, this.newlySelectedIDs, nextPositon);
+
+    this.back();
 }
 
 function back() {
-    this.selectedExerciseID = undefined;
-    this.$emit('setPanelHeader', { text: 'Exercise List' } );
+    this.appStore.onBackWorkoutPanel();
+    this.appStore.onDoneExerciseSelection();
 }
 </script>
 

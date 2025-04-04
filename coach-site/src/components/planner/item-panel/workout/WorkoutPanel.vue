@@ -13,14 +13,11 @@
                          @selectWorkout="selectWorkout"
                          @back="back"/>
             <WorkoutForm v-if="selectedView == 'workoutForm'"
-                         :workout="workoutView.workout"
                          @selectView="selectView"
                          @back="back"/>
             <WorkoutActive v-if="selectedView == 'workoutActive'"/>
-            <WorkoutExercise v-if="selectedView == 'exerciseList'"
-                          @setPanelHeader="setPanelHeader"
-                          @back="back"/>
-            <WorkoutExercise v-if="selectedView == 'exerciseActive'" />
+            <WorkoutExercise v-if="selectedView == 'workoutExercise'" />
+            <ExerciseList v-if="selectedView == 'exerciseList'" />
         </div>
     </div>
 </template>
