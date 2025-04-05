@@ -90,12 +90,12 @@ export const useWorkoutStore = defineStore('workout', {
             }
             return this.exercises;
         },
-        getWorkoutExercise(idExercise, idWorkout) {
+        getWorkoutExercise(idWorkoutExercise, idWorkout) {
             let exercise;
             let workout = this.workouts.find(x => x.id == idWorkout);
             if (workout) {
                 for (let i = 0; i < workout.sections.length; i++) {
-                    exercise = workout.sections[i].exercises.find(x => x.id == idExercise);
+                    exercise = workout.sections[i].exercises.find(x => x.idWorkoutExercise == idWorkoutExercise);
                     if (exercise) {
                         break;
                     }
@@ -128,7 +128,7 @@ export const useWorkoutStore = defineStore('workout', {
             let workout = this.workouts.find(x => x.id == idWorkout);
             let section = workout.sections.find(x => x.id == idSection);
             
-            let idWorkoutExercise = getNextNewID(section.exercises, 'idWorkoutSection');
+            // let idWorkoutExercise = getNextNewID(section.exercises, 'idWorkoutSection');
 
             if (position == undefined) {
                 let exercisesWithPosition = section.exercises.filter(x => x.position != undefined);
@@ -138,19 +138,19 @@ export const useWorkoutStore = defineStore('workout', {
             // This must come before the next section or the saved position will be wrong
             addExercisesToWorkout(exerciseIDs, idWorkout, idSection, position);
 
-            exerciseIDs.forEach(id => {
-                let workoutExercise = {
-                    id,
-                    idExercise: id,
-                    idWorkoutExercise,
-                    idWorkoutSection: idSection,
-                    position: position++,
-                    sets: [],
-                    isPending: true
-                };
-                section.exercises.push(workoutExercise);
-            })
-            section.exercises = sortAsc(section.exercises, 'position');
+            // exerciseIDs.forEach(id => {
+            //     let workoutExercise = {
+            //         id,
+            //         idExercise: id,
+            //         idWorkoutExercise,
+            //         idWorkoutSection: idSection,
+            //         position: position++,
+            //         sets: [],
+            //         isPending: true
+            //     };
+            //     section.exercises.push(workoutExercise);
+            // })
+            // section.exercises = sortAsc(section.exercises, 'position');
 
         },
         removeExerciseFromWorkout(idWorkoutExercise) {

@@ -1,6 +1,6 @@
 <template>
     <div class="exercise-card"
-         @click="$emit('selectExercise', exercise.id)">
+         @click="$emit('selectExercise', exercise.idWorkoutExercise)">
         <div class="d-flex flex-row flex-grow-1 justify-content-between position-relative">
             <div class="d-flex flex-row overflow-hidden">
                 <span class="image flex-shrink-0"></span>

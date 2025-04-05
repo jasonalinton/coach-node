@@ -40,7 +40,7 @@ export default {
             workoutStore: null,
             workoutSectionTypes: clone(workoutSectionTypes),
             addedExercises: [],
-            isShown: false
+            isShown: true
         }
     },
     created: function() {

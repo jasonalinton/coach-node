@@ -60,7 +60,7 @@ export default {
         },
         exercise() {
             if (this.workoutExercise) {
-                let exercise = this.workoutStore.getExercise(this.id);
+                let exercise = this.workoutStore.getExercise(this.workoutExercise.idExercise);
                 return {
                     ...this.workoutExercise,
                     ...exercise
