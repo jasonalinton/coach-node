@@ -12,19 +12,19 @@
                             class="mt-2"/>
         </div>
         <!-- Completion Controls -->
-        <div v-if="isActive" class="completion d-flex flex-column justify-content-center position-sticky bottom-0 pb-1">
+        <div v-if="isActive" class="completion d-flex flex-column justify-content-center position-sticky bottom-0 ps-2 pe-2 pb-1">
             <div class="clock d-flex flex-row justify-content-center align-items-center">
                 <img class="icon-button me-2"
                         src='/icon/circle-stop.png' width="24" height="24"
                         @click.prevent="stopWorkout"/>
                 <div>{{ timeSinceStart }}</div>
             </div>
-            <div v-if="completion.isActive" class="form-group pb-2">
+            <div v-if="completion.isActive" class="form-group">
                     <!-- Time -->
                     <DateTimeSelector class="date-selector" :class="{ 'invalid': !completion.isValid }"
-                                        :dateTime="startAt.value" @onChange="setIterationTime($event, 'start')"/>
+                                        :dateTime="startAt" @onChange="setIterationTime($event, 'start')"/>
                     <DateTimeSelector class="date-selector mt-2" :class="{ 'invalid': !completion.isValid }"
-                                        :dateTime="endAt.value" @onChange="setIterationTime($event, 'end')"/>
+                                        :dateTime="endAt" @onChange="setIterationTime($event, 'end')"/>
                     <!-- Create Event -->
                     <div class="d-flex flex-row justify-items-start mt-2">
                         <input type="checkbox" id="create-event" v-model="completion.createEvent" />
@@ -66,7 +66,9 @@ export default {
                 isActive: false,
                 isValid: true,
                 createEvent: true
-            }
+            },
+            startAt: undefined,
+            endAt: undefined
         }
     },
     created: function() {
@@ -97,18 +99,6 @@ export default {
             }
             return [];
         },
-        startAt() {
-            if (this.workout && this.workout.iteration && this.workout.iteration.startAt) {
-                return this.workout.iteration.startAt;
-            }
-            return undefined;
-        },
-        endAt() {
-            if (this.workout && this.workout.iteration && this.workout.iteration.endAt) {
-                return this.workout.iteration.endAt;
-            }
-            return undefined;
-        },
         isActive() {
             if ((this.startAt && !this.endAt) || this.completion.isActive) {
                 return true;
@@ -134,17 +124,36 @@ export default {
     },
     methods: {
         stopWorkout,
+        cancelCompletion,
+        completeWorkout,
+        setIterationTime,
+        validateTimes,
         back() {
             this.appStore.onBackWorkoutPanel();
         }
     },
+    watch: {
+        workout() {
+            if (this.workout.iteration) {
+                if (this.workout.iteration.startAt) {
+                    this.startAt = this.workout.iteration.startAt;
+                }
+                if (this.workout.iteration.endAt) {
+                    this.endAt = this.workout.iteration.endAt;
+                }
+            }
+        }
+    }
 }
 
 
 
 function stopWorkout() {
     if (!this.completion.isActive) {
-        let sets = this.exercises.value.flatMap(x => x.sets.value).filter(set => set.iteration && set.iteration.completedAt);
+        let sets = this.sections
+            .flatMap(x => x.exercises).flatMap(x => x.sets)
+            .filter(set => set.iteration && set.iteration.completedAt);
+            
         if (sets.length > 0) {
             let lastLoggedTime = new Date(sets[0].iteration.completedAt);
             sets.forEach(set => {
@@ -155,10 +164,53 @@ function stopWorkout() {
                     }
                 }
             });
-            this.endAt.value = lastLoggedTime.toISOString();
+            this.endAt = lastLoggedTime.toISOString();
         }
         this.validateTimes();
         this.completion.isActive = !this.completion.isActive;
+    }
+}
+
+function cancelCompletion() {
+    this.endAt = undefined;
+    this.completion.isActive = false;
+}
+
+function completeWorkout() {
+    if (this.completion.isValid) {
+        this.workoutStore.completeWorkout(this.workout.id, this.startAt, this.endAt, this.completion.createEvent)
+        .then(() => {
+            this.completion.isActive = false;
+            this.back();
+        });
+    }
+}
+
+function setIterationTime(value, endpoint) {
+    if (value) {
+        if (endpoint == "start") {
+            this.startAt = value;
+        } else if (endpoint == "end") {
+            this.endAt = value;
+        }
+        this.validateTimes();
+    }
+}
+
+function validateTimes() {
+    let iteration = this.workout.iteration || undefined;
+    if (iteration) {
+        if (this.startAt && this.endAt) {
+            if (+new Date(this.startAt) > +new Date(this.endAt)) {
+                this.completion.isValid = false;
+            } else if (+new Date(this.startAt) <= +new Date(this.endAt)) {
+                this.completion.isValid = true;
+            }
+        } else if (!this.endAt) {
+            this.completion.isValid = false;
+        } else {
+            this.completion.isValid = true;
+        }
     }
 }
 
@@ -177,6 +229,10 @@ function stopWorkout() {
 .label {
     font-size: 14px;
     line-height: 20px;
+}
+
+.completion {
+    background-color: white;
 }
 
 .clock {
