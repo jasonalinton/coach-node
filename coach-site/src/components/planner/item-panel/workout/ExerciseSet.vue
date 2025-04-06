@@ -49,14 +49,17 @@
                         @blur="save(set)"/>
                 <span class="text">LBS</span>
             </div>
-            <div class="rest d-flex flex-column align-items-center">
+            <img class="history-button"
+                    src='/icon/chart-line-solid.png' width="24" height="24"
+                    @click.prevent="showHistory"/>
+            <!-- <div class="rest d-flex flex-column align-items-center">
                 <input class="prop form-control form-control-sm me-1" type="number" min="0" ref="restInput"
                         v-model="set.restSeconds"
                         :style="{'width': inputWidth(set.restSeconds)}" 
                         @keyup.enter.esc="doneEditing"
                         @blur="save(set)"/>
                 <span class="text">REST</span>
-            </div>
+            </div> -->
             <!-- Edit & Delete Buttons -->
             <div class="button-group d-flex flex-column">
                 <img class="icon-button" 
@@ -71,6 +74,7 @@
 </template>
 
 <script>
+import { useAppStore } from '@/store/appStore';
 import { useWorkoutStore } from '@/store/workoutStore';
 import { listToString, clone } from '../../../../../utility';
 
@@ -78,18 +82,20 @@ export default {
     name: 'ExerciseSet',
     components: {  },
     props: {
+        idExercise: Number,
         set: Object,
-        isActive: Boolean,
         setNumber: Number,
-        idExercise: Number
+        isActive: Boolean,
     },
     data: function () {
         return {
+            appStore: undefined,
             workoutStore: undefined,
             showVariationSelector: false,
         }
     },
     created: function() {
+        this.appStore = useAppStore();
         this.workoutStore = useWorkoutStore();
     },
     computed: {
@@ -144,6 +150,10 @@ export default {
                 set.variations.push({ id: variation.id, name: variation.name });
                 this.workoutStore.saveSet(this.set);
             }
+        },
+        showHistory() {
+            let variationIDs = this.set.variations.map(x => x.id);
+            this.appStore.selectExerciseHistory(this.idExercise, variationIDs);
         },
         deleteSet() {
             var data = { 

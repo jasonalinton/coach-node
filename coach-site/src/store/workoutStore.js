@@ -1,8 +1,8 @@
 import { defineStore } from 'pinia'
-import { getWorkoutInfo, getWorkouts, getExercises, getWorkoutIDFromEvent,
+import { getWorkoutInfo, getWorkouts, getExercises, getWorkoutIDFromEvent, getExerciseHistory,
     saveExercise, addExercisesToWorkout, removeExerciseFromWorkout, saveWorkout, copyAndStartWorkout, 
     saveSet, logSet, logAllSets, completeWorkout, repositionExercise } from '../api/workoutAPI'
-import { replaceOrAddItem, removeItemByID, sortAsc, getNextNewID } from '../../utility';
+import { replaceOrAddItem, removeItemByID, sortAsc, sortNumAsc, getNextNewID } from '../../utility';
 import { getSocketConnection } from './socket'
 
 let initialized = false;
@@ -14,6 +14,7 @@ export const useWorkoutStore = defineStore('workout', {
         variations: [],
         muscleGroups: [],
         muscles: [],
+        exerciseHistory: [],
         dragged: {
             exerciseID: undefined,
         },
@@ -108,6 +109,31 @@ export const useWorkoutStore = defineStore('workout', {
         },
         getVariations() {
             return this.variations;
+        },
+        getExerciseHistory(idExercise, variationIDs) {
+            let _this = this;
+            let variationIDString = sortNumAsc(variationIDs).toString();
+
+            getExerciseHistory(idExercise, variationIDs)
+            .then(result => {
+                let history = this.exerciseHistory.find(x => {
+                    let xVariationString = sortNumAsc(x.variationIDs).toString();
+                    return (x.idExercise == idExercise) && variationIDString == xVariationString;
+                });
+                if (!history) {
+                    _this.exerciseHistory.push({
+                        idExercise,
+                        variationIDs,
+                        history: result
+                    });
+                }
+            });
+            let history = this.exerciseHistory.find(x => {
+                let xVariationString = sortNumAsc(x.variationIDs).toString();
+                return (x.idExercise == idExercise) && variationIDString == xVariationString;
+            });
+
+            return (history) ? history.history : [];
         },
         addVariation(name, typeID, typeName) {
             let variation_existing = this.variations.find(v => v.name == name && v.type.id == typeID);

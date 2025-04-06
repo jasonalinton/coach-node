@@ -102,6 +102,10 @@ export const useAppStore = defineStore('app', {
                     nextExercisePosition: undefined,
                     isSelector: undefined
                 },
+                exerciseHistory: {
+                    idExercise: undefined,
+                    variationIDs: []
+                },
                 panelQueue: [ ],
 
             },
@@ -233,6 +237,11 @@ export const useAppStore = defineStore('app', {
         selectExercise(id) {
             this.itemPanel.workout.selectedExerciseID = id;
             this.selectWorkoutView("workoutExercise")
+        },
+        selectExerciseHistory(idExercise, variationIDs) {
+            this.itemPanel.workout.exerciseHistory.idExercise = idExercise;
+            this.itemPanel.workout.exerciseHistory.variationIDs = [...variationIDs];
+            this.selectWorkoutView("exerciseHistory")
         },
         onAddExerciseToSection(idSection, position) {
             this.itemPanel.workout.exerciseList.selectedSectionID = idSection;

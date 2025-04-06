@@ -78,6 +78,27 @@ export async function getWorkoutIDFromEvent(eventID) {
     });
 }
 
+export async function getExerciseHistory(idExercise, variationIDs) {
+    let data = { idExercise, variationIDs };
+
+    return fetch(`${URL}/api/Physical/GetExerciseHistory`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    })
+    .then((response) => response.json())
+    .then((data) => {
+        if (data.status.success) {
+            return data.result;
+        } else {
+            console.error('Error:', data.status.errorMessage);
+        }
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+    });
+}
+
 export async function saveWorkout(model) {
     return fetch(`${URL}/api/Physical/SaveWorkout`, {
         method: 'POST',

@@ -31,6 +31,14 @@ export function sortDesc(array, prop) {
     return array.sort((a, b) => b[prop] - a[prop]);
 }
 
+export function sortNumAsc(array) {
+    return array.sort((a, b) => a - b);
+}
+
+export function sortNumDesc(array) {
+    return array.sort((a, b) => b - a);
+}
+
 export function sortDateAsc(array, dateProp) {
     return array.toSorted((a, b) => new Date(a[dateProp]) - new Date(b[dateProp]));
 }

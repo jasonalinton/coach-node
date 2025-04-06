@@ -206,6 +206,14 @@ export function getMonthShort(dateTime = new Date()) {
     return date.format(dateTime, 'MMM');   
 }
 
+export function getMonthDateYearShort(datetime = new Date(), withoutComma) {
+    if (withoutComma) {
+        return date.format(datetime, 'ddd MMM D, YYYY') // Ex Tue Jul 2
+    } else {
+        return date.format(datetime, 'ddd, MMM D, YYYY') // Ex Tue, Jul 2
+    }
+}
+
 // Ex. Jan 24, 1988 7:50 AM
 export function getShortDateString(date = new Date()) {
     return moment(date).format("MMM D, h:mm A");

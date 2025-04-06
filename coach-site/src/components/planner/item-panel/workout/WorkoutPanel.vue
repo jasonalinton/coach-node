@@ -18,6 +18,7 @@
             <WorkoutActive v-if="selectedView == 'workoutActive'"/>
             <WorkoutExercise v-if="selectedView == 'workoutExercise'" />
             <ExerciseList v-if="selectedView == 'exerciseList'" />
+            <ExerciseHistory v-if="selectedView == 'exerciseHistory'" />
         </div>
     </div>
 </template>
@@ -32,6 +33,7 @@ import WorkoutForm from './WorkoutForm.vue';
 import WorkoutActive from './WorkoutActive.vue';
 import ExerciseList from './ExerciseList.vue';
 import WorkoutExercise from './WorkoutExercise.vue';
+import ExerciseHistory from './ExerciseHistory.vue';
 
 
 var sortItems = [
@@ -41,7 +43,7 @@ var sortItems = [
 export default {
     name: 'WorkoutPanel',
     components: { ItemPanelHeader, WorkoutList, WorkoutForm, WorkoutActive,
-        WorkoutPanelDashboard, ExerciseList, WorkoutExercise },
+        WorkoutPanelDashboard, ExerciseList, WorkoutExercise, ExerciseHistory },
     props: {
         selectedDate: Date,
         showHead: {
