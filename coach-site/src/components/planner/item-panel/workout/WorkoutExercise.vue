@@ -6,9 +6,14 @@
                  @click.prevent="back"/>
             <span>{{ name }}</span>
         </div>
+        <!-- Demo -->
         <div class="media">
 
         </div>
+        <div class="toolbar d-flex flex-row">
+            <span>{{ restSeconds }}</span>
+        </div>
+        <!-- Sets -->
         <div class="exercise-sets d-flex flex-column ms-auto me-auto mt-3">
             <ExerciseSet v-for="(set, index) in sets" :key="set.id" 
                          :set="set" :isActive="set.id == activeSetID" 
@@ -18,10 +23,16 @@
                 <img class="icon-button ms-1" src="/icon/add-button.png" :width="24" :height="24" 
                      @click="addSet" />
                 <span>Add Set</span>
+            </div>
         </div>
+        <!-- Rest Timer -->
+        <div v-if="restRemaining" class="rest-timer d-flex flex-row position-sticky bottom-0">
+            <img src='/icon/goal-icon.png' width="40" height="40" />
+            <div>{{ restRemaining }}</div>
+            <img src='/icon/goal-icon.png' width="40" height="40" />
         </div>
         <!-- Log Buttons -->
-        <div class="d-flex flex-row mt-auto ps-2 pe-2">
+        <div v-if="!restRemaining" class="d-flex flex-row mt-auto ps-2 pe-2">
             <button type="button" class="btn btn-primary mb-2" @click="logAllSets">Log All Sets</button>
             <button type="button" class="btn btn-warning mb-2 ms-2 flex-grow-1" @click="logSet">Log Set</button>
         </div>
@@ -33,6 +44,7 @@ import { useAppStore } from '@/store/appStore'
 import { useWorkoutStore } from '@/store/workoutStore';
 import ExerciseSet from './ExerciseSet.vue';
 import { clone } from '../../../../../utility';
+import { timeSince } from '../../../../../utility/timeUtility';
 
 export default {
     name: '',
@@ -44,7 +56,9 @@ export default {
         return {
             appStore: undefined,
             workoutStore: undefined,
-            activeSetID: undefined
+            activeSetID: undefined,
+            restRemaining: undefined,
+            restIntervalID: undefined
         }
     },
     created: function() {
@@ -57,6 +71,9 @@ export default {
         },
         idWorkout() {
             return (this.appStore) ? this.appStore.itemPanel.workout.selectedWorkoutID : undefined;
+        },
+        name() {
+            return (this.exercise) ? this.exercise.name : "Loading..."
         },
         exercise() {
             if (this.workoutExercise) {
@@ -87,9 +104,19 @@ export default {
             }
             return [];
         },
-        name() {
-            return (this.exercise) ? this.exercise.name : "Loading..."
+        restSeconds() {
+            if (this.workoutExercise) {
+                return this.workoutExercise.restSeconds;
+            }
+            return undefined;
         },
+        // restRemaining() {
+        //     if (this.restStart) {
+        //         return timeSince(this.restStart, this.now);
+        //     } else {
+        //         return undefined;
+        //     }
+        // }
     },
     methods: {
         back() {
@@ -115,7 +142,17 @@ export default {
         },
         logSet() {
             //TODO: Can only unlog last logged set
-            let set = this.sets.find(x => x.id == this.activeSetID);
+            let index = this.sets.findIndex(x => x.id == this.activeSetID);
+
+            if (this.restSeconds) {
+                this.restRemaining = this.restSeconds;
+                var _this = this
+                this.restIntervalID = setInterval(function () {
+                    _this.restRemaining--;
+                }, 1000);
+            }
+
+            let set = this.sets[index];
             let completedAt = (set.iteration) ? undefined : new Date();
             this.workoutStore.logSet(set.id, completedAt);
         },
@@ -123,6 +160,15 @@ export default {
             this.workoutStore.logAllSets(this.workoutExercise.idWorkoutExercise);
         },
     },
+    watch: {
+        restRemaining(value) {
+            if (value != undefined && value == 0) {
+                clearInterval(this.restIntervalID);
+                this.restIntervalID = undefined;
+                this.restRemaining = undefined;
+            }
+        }
+    }
 }
 
 </script>
@@ -135,5 +181,9 @@ export default {
 
 .btn {
     font-weight: 600;
+}
+
+.rest-timer {
+    height: 200px;
 }
 </style>
