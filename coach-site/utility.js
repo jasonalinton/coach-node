@@ -31,6 +31,14 @@ export function sortDesc(array, prop) {
     return array.sort((a, b) => b[prop] - a[prop]);
 }
 
+export function sortNumAsc(array) {
+    return array.sort((a, b) => a - b);
+}
+
+export function sortNumDesc(array) {
+    return array.sort((a, b) => b - a);
+}
+
 export function sortDateAsc(array, dateProp) {
     return array.toSorted((a, b) => new Date(a[dateProp]) - new Date(b[dateProp]));
 }
@@ -216,6 +224,14 @@ export function unmapItem(item, removedItem, property) {
 
 export let getIDs =
     (objects) => objects.map(object => object.id);
+
+export function getNextNewID(list, prop) {
+    prop = prop || "id";
+
+    let ids = list.map(x => x.id).sort((a, b) => a - b);
+    let nextID = (ids.length == 0 || ids[0] - 1 > -1) ? -1 : ids[0] - 1;
+    return nextID;
+}
 
 export function clone(item) {
   return JSON.parse(JSON.stringify(item));

@@ -61,9 +61,9 @@
                                     @click="isRepetitionShown = !isRepetitionShown">
                                     <div class="d-flex flex-row justify-content-between">
                                         <span class="form-head text-start">Repetition</span>
-                                        <img v-if="!isShown" class="caret mt-auto mb-auto me-2" 
+                                        <img v-if="!isRepetitionShown" class="caret mt-auto mb-auto me-2" 
                                                 src='/icon/caret-right.png' width="5" height="8"/>
-                                        <img v-if="isShown" class="caret mt-auto mb-auto me-2" 
+                                        <img v-if="isRepetitionShown" class="caret mt-auto mb-auto me-2" 
                                                 src='/icon/caret-down.png' width="8" height="5"/>
                                         <!-- <img class="caret mt-auto mb-auto me-2" 
                                             :src="`/icon/caret-${(isVisible) ? 'down' : 'right' }.png`" width="5" height="8"/> -->
@@ -90,9 +90,9 @@
                                     @click="isTimeShown = !isTimeShown">
                                     <div class="d-flex flex-row justify-content-between">
                                         <span class="form-head text-start">Time</span>
-                                        <img v-if="!isShown" class="caret mt-auto mb-auto me-2" 
+                                        <img v-if="!isTimeShown" class="caret mt-auto mb-auto me-2" 
                                                 src='/icon/caret-right.png' width="5" height="8"/>
-                                        <img v-if="isShown" class="caret mt-auto mb-auto me-2" 
+                                        <img v-if="isTimeShown" class="caret mt-auto mb-auto me-2" 
                                                 src='/icon/caret-down.png' width="8" height="5"/>
                                     </div>
                                     <hr/>

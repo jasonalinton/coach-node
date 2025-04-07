@@ -7,7 +7,7 @@
                     <div class="label d-flex flex-row mb-2">
                         <img class="icon-button mb-2"
                                 src='/icon/previous.png' width="20" height="20"
-                                @click.prevent="$emit('back')"/>
+                                @click.prevent="back"/>
                         <span>Exercises</span>
                         <img class="icon-button" src="/icon/add-button.png" :width="20" :height="20" 
                             @click="selectExercises" />
@@ -16,7 +16,7 @@
                             v-model.lazy.trim="name.value" 
                             spellcheck="true"/>
                  </div>
-                 <div class="d-flex flex-column">
+                 <div class="exercises d-flex flex-column overflow-scroll flex-grow-1">
                      <ExerciseItem class="mb-2" v-for="exercise in exercises.value" :key="exercise.id"
                                    :exercise="exercise"
                                    :isActive="isActive"
@@ -94,6 +94,7 @@
 </template>
 
 <script>
+import { useAppStore } from '@/store/appStore'
 import DateTimeSelector from '../../../controls/select/DateTimeSelector.vue'
 import { useWorkoutStore } from '../../../../store/workoutStore';
 import { clone, removeItemByID } from '../../../../../utility';
@@ -112,6 +113,7 @@ export default {
     },
     data: function () {
         return {
+            appStore: null,
             workoutStore: null,
             selectedPanel: "form",
             now: Date.now(),
@@ -163,6 +165,7 @@ export default {
         };
     },
     created: function() {
+        this.appStore = useAppStore();
         this.workoutStore = useWorkoutStore();
         var _this = this
         setInterval(function () {
@@ -224,6 +227,9 @@ export default {
         deleteWorkout,
         repositionExercise,
         save,
+        back() {
+            this.appStore.onBackWorkoutPanel();
+        }
     },
     watch: {
         workout() {
@@ -756,5 +762,9 @@ function save() {
 
 .date-selector.invalid {
     border: solid 1px red;
+}
+
+.exercises {
+    max-height: calc(100vh - 240px);
 }
 </style>

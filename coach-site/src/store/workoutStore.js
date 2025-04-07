@@ -1,7 +1,8 @@
 import { defineStore } from 'pinia'
-import { getWorkoutInfo, getWorkouts, getExercises, getWorkoutIDFromEvent,
-    saveExercise, saveWorkout, copyAndStartWorkout, logSet, completeWorkout, repositionExercise } from '../api/workoutAPI'
-import { replaceOrAddItem, removeItemByID, sortAsc } from '../../utility';
+import { getWorkoutInfo, getWorkouts, getExercises, getWorkoutIDFromEvent, getExerciseHistory,
+    saveExercise, addExercisesToWorkout, removeExerciseFromWorkout, saveWorkout, copyAndStartWorkout, 
+    saveSet, logSet, logAllSets, completeWorkout, repositionExercise } from '../api/workoutAPI'
+import { replaceOrAddItem, removeItemByID, sortAsc, sortNumAsc, getNextNewID } from '../../utility';
 import { getSocketConnection } from './socket'
 
 let initialized = false;
@@ -13,6 +14,7 @@ export const useWorkoutStore = defineStore('workout', {
         variations: [],
         muscleGroups: [],
         muscles: [],
+        exerciseHistory: [],
         dragged: {
             exerciseID: undefined,
         },
@@ -89,11 +91,49 @@ export const useWorkoutStore = defineStore('workout', {
             }
             return this.exercises;
         },
+        getWorkoutExercise(idWorkoutExercise, idWorkout) {
+            let exercise;
+            let workout = this.workouts.find(x => x.id == idWorkout);
+            if (workout) {
+                for (let i = 0; i < workout.sections.length; i++) {
+                    exercise = workout.sections[i].exercises.find(x => x.idWorkoutExercise == idWorkoutExercise);
+                    if (exercise) {
+                        break;
+                    }
+                }
+            }
+            return exercise;
+        },
         getVariation(id) {
             return this.variations.find(x => x.id == id);
         },
         getVariations() {
             return this.variations;
+        },
+        getExerciseHistory(idExercise, variationIDs) {
+            let _this = this;
+            let variationIDString = sortNumAsc(variationIDs).toString();
+
+            getExerciseHistory(idExercise, variationIDs)
+            .then(result => {
+                let history = this.exerciseHistory.find(x => {
+                    let xVariationString = sortNumAsc(x.variationIDs).toString();
+                    return (x.idExercise == idExercise) && variationIDString == xVariationString;
+                });
+                if (!history) {
+                    _this.exerciseHistory.push({
+                        idExercise,
+                        variationIDs,
+                        history: result
+                    });
+                }
+            });
+            let history = this.exerciseHistory.find(x => {
+                let xVariationString = sortNumAsc(x.variationIDs).toString();
+                return (x.idExercise == idExercise) && variationIDString == xVariationString;
+            });
+
+            return (history) ? history.history : [];
         },
         addVariation(name, typeID, typeName) {
             let variation_existing = this.variations.find(v => v.name == name && v.type.id == typeID);
@@ -109,6 +149,38 @@ export const useWorkoutStore = defineStore('workout', {
                 this.variations.splice(0, 0, variation_new);
             }
 
+        },
+        addExercisesToSection(idWorkout, idSection, exerciseIDs, position) {
+            let workout = this.workouts.find(x => x.id == idWorkout);
+            let section = workout.sections.find(x => x.id == idSection);
+            
+            // let idWorkoutExercise = getNextNewID(section.exercises, 'idWorkoutSection');
+
+            if (position == undefined) {
+                let exercisesWithPosition = section.exercises.filter(x => x.position != undefined);
+                position = (exercisesWithPosition.length > 0) ? exercisesWithPosition.at(-1).position + 1 : 1;
+            }
+
+            // This must come before the next section or the saved position will be wrong
+            addExercisesToWorkout(exerciseIDs, idWorkout, idSection, position);
+
+            // exerciseIDs.forEach(id => {
+            //     let workoutExercise = {
+            //         id,
+            //         idExercise: id,
+            //         idWorkoutExercise,
+            //         idWorkoutSection: idSection,
+            //         position: position++,
+            //         sets: [],
+            //         isPending: true
+            //     };
+            //     section.exercises.push(workoutExercise);
+            // })
+            // section.exercises = sortAsc(section.exercises, 'position');
+
+        },
+        removeExerciseFromWorkout(idWorkoutExercise) {
+            removeExerciseFromWorkout(idWorkoutExercise);
         },
         getMuscleGroup(id) {
             return this.muscleGroups.find(x => x.id == id);
@@ -133,8 +205,14 @@ export const useWorkoutStore = defineStore('workout', {
                     return workout;
                 });
         },
+        async saveSet(model) {
+            return saveSet(model);
+        },
         async logSet(setID, completedAt) {
             return logSet(setID, completedAt);
+        },
+        async logAllSets(idWorkoutExercise) {
+            return logAllSets(idWorkoutExercise);
         },
         async completeWorkout(workoutID, startAt, endAt, createEvent) {
             return completeWorkout(workoutID, startAt, endAt, createEvent);

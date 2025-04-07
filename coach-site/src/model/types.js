@@ -257,3 +257,42 @@ export let todoActivityTypes = [
         color: undefined
     },
 ]
+
+export let workoutSectionTypes = [
+    {
+        id: 150,
+        text: "Main"
+    },
+    {
+        id: 174,
+        text: "Warm-Up"
+    },
+    {
+        id: 175,
+        text: "Stretch"
+    },
+    {
+        id: 176,
+        text: "Warm-Up/Stretch"
+    },
+    {
+        id: 177,
+        text: "Skill Training"
+    },
+    {
+        id: 178,
+        text: "Strength"
+    },
+    {
+        id: 179,
+        text: "Cool-Down"
+    },
+    {
+        id: 180,
+        text: "Mobility"
+    },
+    {
+        id: 181,
+        text: "Cool-Down/Mobility"
+    },
+]

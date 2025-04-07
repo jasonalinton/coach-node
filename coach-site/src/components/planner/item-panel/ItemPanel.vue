@@ -104,9 +104,6 @@ export default {
     data: function() {
         return {
             appStore: undefined,
-            workoutPanelProps: { 
-                selectedWorkoutID: undefined
-            }
         }
     },
     created: function() {

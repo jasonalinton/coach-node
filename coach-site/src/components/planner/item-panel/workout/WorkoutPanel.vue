@@ -6,32 +6,34 @@
                              :title="title" :sort="sort" :selectedDate="selectedDate"
                              @onSortChange="onSortChange">
             </ItemPanelHeader>
-            <WorkoutPanelDashboard v-if="activePanel == 'dashboard'"
-                                   @selectView="selectView"
-                                   @back="back"/>
-            <WorkoutList v-if="activePanel == 'workoutList'"
-                         :selectedID="selectedWorkoutID"
+            <WorkoutPanelDashboard v-if="selectedView == 'dashboard'"
+                                   @selectView="selectView"/>
+            <WorkoutList v-if="selectedView == 'workoutList'"
                          @setPanelHeader="setPanelHeader"
                          @selectWorkout="selectWorkout"
                          @back="back"/>
-            <WorkoutForm v-if="activePanel == 'workoutForm'"
-                         :workout="workoutView.workout"
+            <WorkoutForm v-if="selectedView == 'workoutForm'"
                          @selectView="selectView"
                          @back="back"/>
-            <ExerciseList v-if="activePanel == 'exerciseList'"
-                          @setPanelHeader="setPanelHeader"
-                          @back="back"/>
+            <WorkoutActive v-if="selectedView == 'workoutActive'"/>
+            <WorkoutExercise v-if="selectedView == 'workoutExercise'" />
+            <ExerciseList v-if="selectedView == 'exerciseList'" />
+            <ExerciseHistory v-if="selectedView == 'exerciseHistory'" />
         </div>
     </div>
 </template>
 
 <script>
-import { useWorkoutStore } from '../../../../store/workoutStore';
+import { useAppStore } from '@/store/appStore'
+import { useWorkoutStore } from '@/store/workoutStore';
 import ItemPanelHeader from '../component/ItemPanelHeader.vue';
 import WorkoutList from './WorkoutList.vue';
 import WorkoutPanelDashboard from './WorkoutPanelDashboard.vue';
 import WorkoutForm from './WorkoutForm.vue';
+import WorkoutActive from './WorkoutActive.vue';
 import ExerciseList from './ExerciseList.vue';
+import WorkoutExercise from './WorkoutExercise.vue';
+import ExerciseHistory from './ExerciseHistory.vue';
 
 
 var sortItems = [
@@ -40,7 +42,8 @@ var sortItems = [
 
 export default {
     name: 'WorkoutPanel',
-    components: { ItemPanelHeader, WorkoutList, WorkoutForm, WorkoutPanelDashboard, ExerciseList },
+    components: { ItemPanelHeader, WorkoutList, WorkoutForm, WorkoutActive,
+        WorkoutPanelDashboard, ExerciseList, WorkoutExercise, ExerciseHistory },
     props: {
         selectedDate: Date,
         showHead: {
@@ -50,6 +53,7 @@ export default {
     },
     data: function () {
         return {
+            appStore: undefined,
             workoutStore: undefined,
             sort: {
                 by: 'Custom',
@@ -68,6 +72,7 @@ export default {
         }
     },
     created: function() {
+        this.appStore = useAppStore();
         this.workoutStore = useWorkoutStore();
         this.workoutStore.initialize();
 
@@ -79,11 +84,8 @@ export default {
         }
     },
     computed: {
-        selectedWorkoutID() {
-            if (this.workoutStore) {
-                return this.workoutStore.selectedWorkoutID;
-            }
-            return undefined;
+        selectedView() {
+            return (this.appStore) ? this.appStore.itemPanel.workout.selectedView : undefined;
         }
     },
     methods: {
@@ -92,11 +94,6 @@ export default {
         setPanelHeader,
         selectWorkout,
         back
-    },
-    watch: {
-        selectedWorkoutID() {
-           this.selectView({ panel: 'workoutList' });
-        }
     }
 }
 
@@ -130,7 +127,7 @@ function setPanelHeader(props) {
 }
 
 function selectWorkout(workoutID) {
-    this.back();
+    // this.back();
     this.workoutStore.selectWorkout(workoutID);
 }
 

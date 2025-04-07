@@ -67,7 +67,28 @@ export async function getWorkoutIDFromEvent(eventID) {
     })
     .then((response) => response.json())
     .then((data) => {
-        if (!data.status.errorCode) {
+        if (data.status.success) {
+            return data.result;
+        } else {
+            console.error('Error:', data.status.errorMessage);
+        }
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+    });
+}
+
+export async function getExerciseHistory(idExercise, variationIDs) {
+    let data = { idExercise, variationIDs };
+
+    return fetch(`${URL}/api/Physical/GetExerciseHistory`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    })
+    .then((response) => response.json())
+    .then((data) => {
+        if (data.status.success) {
             return data.result;
         } else {
             console.error('Error:', data.status.errorMessage);
@@ -86,7 +107,7 @@ export async function saveWorkout(model) {
     })
     .then((response) => response.json())
     .then((data) => {
-        if (!data.status.errorCode) {
+        if (data.status.success) {
             return data.result;
         } else {
             console.error('Error:', data.status.errorMessage);
@@ -116,6 +137,69 @@ export async function saveExercise(model) {
     });
 }
 
+export async function addExerciseToWorkout(idExercise, idWorkout, idWorkoutSection, position) {
+    let data = { idExercise, idWorkout, idWorkoutSection, position };
+    
+    return fetch(`${URL}/api/Physical/AddExerciseToWorkout`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    })
+    .then((response) => response.json())
+    .then((data) => {
+        if (data.status.success) {
+            return data.result;
+        } else {
+            console.error('Error:', data.status.errorMessage);
+        }
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+    });
+}
+
+export async function addExercisesToWorkout(exerciseIDs, idWorkout, idWorkoutSection, position) {
+    let data = { exerciseIDs, idWorkout, idWorkoutSection, position };
+    
+    return fetch(`${URL}/api/Physical/AddExercisesToWorkout`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    })
+    .then((response) => response.json())
+    .then((data) => {
+        if (data.status.success) {
+            return data.result;
+        } else {
+            console.error('Error:', data.status.errorMessage);
+        }
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+    });
+}
+
+export async function removeExerciseFromWorkout(idWorkoutExercise) {
+    let data = { idWorkoutExercise };
+    
+    return fetch(`${URL}/api/Physical/RemoveExerciseFromWorkout`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    })
+    .then((response) => response.json())
+    .then((data) => {
+        if (data.status.success) {
+            return data.result;
+        } else {
+            console.error('Error:', data.status.errorMessage);
+        }
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+    });
+}
+
 export async function copyAndStartWorkout(workoutID) {
     let data = { workoutID };
     return fetch(`${URL}/api/Physical/CopyAndStartWorkout`, {
@@ -136,6 +220,45 @@ export async function copyAndStartWorkout(workoutID) {
     });
 }
 
+export async function saveSet(model) {
+    return fetch(`${URL}/api/Physical/SaveSet`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(model)
+    })
+    .then((response) => response.json())
+    .then((data) => {
+        if (data.status.success) {
+            return data.result;
+        } else {
+            console.error('Error:', data.status.errorMessage);
+        }
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+    });
+}
+
+export async function logAllSets(idWorkoutExercise) {
+    let data = { idWorkoutExercise };
+    return fetch(`${URL}/api/Physical/LogAllSets`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    })
+    .then((response) => response.json())
+    .then((data) => {
+        if (data.status.success) {
+            return data.result;
+        } else {
+            console.error('Error:', data.status.errorMessage);
+        }
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+    });
+}
+
 export async function logSet(setID, completedAt) {
     let data = { setID, completedAt };
     return fetch(`${URL}/api/Physical/LogSet`, {
@@ -145,10 +268,10 @@ export async function logSet(setID, completedAt) {
     })
     .then((response) => response.json())
     .then((data) => {
-        if (!data.errorMessage) {
-            return data;
+        if (data.status.success) {
+            return data.result;
         } else {
-            this.errorMessage = data.errorMessage;
+            console.error('Error:', data.status.errorMessage);
         }
     })
     .catch((error) => {
