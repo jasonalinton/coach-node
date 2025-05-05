@@ -5,7 +5,7 @@
             <div class="d-flex flex-row overflow-hidden">
                 <span class="image flex-shrink-0"></span>
                 <div class="label d-flex flex-column">
-                    <span class="name">{{ exercise.name }} {{ exercise.position }}</span>
+                    <span class="name">{{ exercise.name }}</span>
                     <div class="d-flex flex-row">
                         <span class="set-count">
                               {{ setCount }} Sets
@@ -13,6 +13,8 @@
                     </div>
                 </div>
             </div>
+            <button class="btn btn-sm me-4" type="button"
+                    @click.prevent.stop="setActive">Set</button>
             <div class="button-group d-flex flex-column">
                 <img class="icon-button" 
                      src='/icon/delete-button.png' width="16" height="16"
@@ -23,6 +25,7 @@
 </template>
 
 <script>
+import { useAppStore } from '@/store/appStore';
 import { useWorkoutStore } from '@/store/workoutStore';
 
 export default {
@@ -33,10 +36,12 @@ export default {
     },
     data: function () {
         return {
+            appStore: undefined,
             workoutStore: null,
         }
     },
     created: function() {
+        this.appStore = useAppStore();
         this.workoutStore = useWorkoutStore();
     },
     computed: {
@@ -47,6 +52,9 @@ export default {
         },
     },
     methods: {
+        setActive() {
+            this.appStore.setActiveExercise(this.exercise.idWorkoutExercise);
+        },
         removeExercise() {
             this.workoutStore.removeExerciseFromWorkout(this.exercise.idWorkoutExercise);
         }

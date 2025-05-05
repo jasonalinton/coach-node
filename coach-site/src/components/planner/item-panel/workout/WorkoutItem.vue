@@ -14,7 +14,8 @@
 </template>
 
 <script>
-import { useWorkoutStore } from '../../../../store/workoutStore';
+import { useAppStore } from '@/store/appStore';
+import { useWorkoutStore } from '@/store/workoutStore';
 import { timeSince, toShortWeekdayString, toShortTimeString } from '../../../../../utility/timeUtility';
 
 export default {
@@ -25,10 +26,12 @@ export default {
     data: function () {
         return {
             workoutStore: null,   
+            appStore: null,   
             now: Date.now()         
         }
     },
     created: function() {
+        this.appStore = useAppStore();
         this.workoutStore = useWorkoutStore();
         var _this = this
         setInterval(function () {
@@ -71,7 +74,7 @@ export default {
     },
     methods: {
         startWorkout,
-        selectWorkout
+        selectWorkout,
     },
 }
 
