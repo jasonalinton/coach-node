@@ -182,6 +182,34 @@ export const useWorkoutStore = defineStore('workout', {
         removeExerciseFromWorkout(idWorkoutExercise) {
             removeExerciseFromWorkout(idWorkoutExercise);
         },
+        getActiveExercise(idWorkout) {
+            let exercise;
+            let workout = this.workouts.find(x => x.id == idWorkout);
+            if (workout) {
+                let exercises = workout.sections.flatMap(x => x.exercises);
+                for (let i = 0; i < exercises.length; i++) {
+                    let isPending = false;
+                    exercise = exercises[i];
+                    exercise.sets.forEach(set => {
+                        if (set.iteration == undefined) {
+                            isPending = true;
+                        }
+                    });
+                    if (isPending) {
+                        break;
+                    }
+                }
+            }
+            return exercise;
+
+
+        },
+        getNextExercise(idWorkout, idWorkoutExercise) {
+            
+        },
+        getPreviouseExercise(idWorkout, idWorkoutExercise) {
+            
+        },
         getMuscleGroup(id) {
             return this.muscleGroups.find(x => x.id == id);
         },

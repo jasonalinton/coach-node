@@ -13,6 +13,7 @@
         </div>
         <!-- Completion Controls -->
         <div v-if="isActive" class="completion d-flex flex-column justify-content-center position-sticky bottom-0 ps-2 pe-2 pb-1">
+            <QuickLogExercise />
             <div class="clock d-flex flex-row justify-content-center align-items-center">
                 <img class="icon-button me-2"
                         src='/icon/circle-stop.png' width="24" height="24"
@@ -46,10 +47,11 @@ import { useWorkoutStore } from '@/store/workoutStore';
 import WorkoutSection from './WorkoutSection.vue';
 import DateTimeSelector from '../../../controls/select/DateTimeSelector.vue';
 import { timeSince } from '../../../../../utility/timeUtility';
+import QuickLogExercise from './QuickLogExercise.vue';
 
 export default {
     name: 'WorkoutActive',
-    components: { WorkoutSection, DateTimeSelector },
+    components: { WorkoutSection, DateTimeSelector, QuickLogExercise },
     props: {
         
     },
@@ -142,6 +144,11 @@ export default {
                     this.endAt = this.workout.iteration.endAt;
                 }
             }
+        },
+        id(value) {
+            let exercise = this.workoutStore.getActiveExercise(value);
+            this.appStore.setActiveExercise(exercise.idWorkoutExercise);
+
         }
     }
 }
