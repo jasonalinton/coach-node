@@ -140,6 +140,11 @@ export default {
                 if (this.sets[i].iteration == undefined) {
                     this.activeSetID = this.sets[i].id;
                     break;
+                } else if (i == this.sets.length-1) {
+                    let exercise = this.workoutStore.getNextWorkoutExercise(this.idWorkout, this.activeExercise.id);
+                    if (exercise) {
+                        this.appStore.setActiveExercise(exercise.idWorkoutExercise);
+                    }
                 }
             }
         },
