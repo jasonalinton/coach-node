@@ -201,11 +201,19 @@ export const useWorkoutStore = defineStore('workout', {
                 }
             }
             return exercise;
-
-
         },
-        getNextExercise(idWorkout, idWorkoutExercise) {
-            
+        getNextWorkoutExercise(idWorkout, idWorkoutExercise) {
+            let nextExercise;
+            let workout = this.workouts.find(x => x.id == idWorkout);
+            if (workout) {
+                let exercises = workout.sections.flatMap(x => x.exercises);
+                let index = exercises.findIndex(x => x.id == idWorkoutExercise);
+                if (index < exercises.length - 1) {
+                    let exercise = exercises[index + 1];
+                    return exercise;
+                }
+            }
+            return nextExercise;
         },
         getPreviouseExercise(idWorkout, idWorkoutExercise) {
             
