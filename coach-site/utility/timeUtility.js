@@ -28,6 +28,12 @@ export function toShortWeekdayString(dateTimeJSON, withoutComma) {
     }
 }
 
+// Ex. January 24, 1988
+export function toLongDateString(dateTimeJSON) {
+    let date = new Date(dateTimeJSON);
+    return moment(date).format("LL");
+}
+
 export function toShortTimeString(dateTimeJSON) {
     let datetime = new Date(dateTimeJSON);
     return date.format(datetime, 'h:mm A') // Ex. 7:50 AM
@@ -220,13 +226,23 @@ export function getShortDateString(date = new Date()) {
 }
 
 // Ex. January 24, 1988 7:50 AM
-export function getLongDateString(date = new Date()) {
+export function getLongDateTimeString(date = new Date()) {
     return moment(date).format("LLL");
+}
+
+// Ex. January 24, 1988
+export function getLongDateString(date = new Date()) {
+    return moment(date).format("LL");
 }
 
 // Ex. 1/24/88
 export function getNumberDateString(date = new Date()) {
     return moment(date).format("l");
+}
+
+// Ex. 7:50 AM
+export function getShortTimeString(datetime = new Date()) {
+    return date.format(datetime, 'h:mm A');
 }
 
 export function year(dateTime = new Date()) {

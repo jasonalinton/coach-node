@@ -37,6 +37,10 @@
 </template>
 
 <script>
+import { usePlannerStore } from '@/store/plannerStore'
+import { useUniversalStore } from '@/store/universalStore'
+import { TIMEFRAME, METRIC } from '../../../model/constants'
+import { toLongDateString, toShortTimeString } from '../../../../utility/timeUtility'
 
 export default {
     name: 'PhysicalView',
@@ -46,7 +50,11 @@ export default {
     },
     data: function () {
         return {
-            blurbs: [
+            plannerStore: undefined,
+            universalStore: undefined,
+            idMetric: METRIC.PHYSICAL,
+            blurbs: [],
+            blurbs1: [
                 {
                     id: 1,
                     date: "February 14, 2018",
@@ -124,11 +132,35 @@ export default {
             ]
         }
     },
-    created: function() {
-       
+    created: async function() {
+        this.plannerStore = usePlannerStore();
+        this.universalStore = useUniversalStore();
+
+        this.initBlurbs();
+    },
+    computed: {
+        selectedDate() {
+            return (this.plannerStore) ? this.plannerStore.selectedDate : today();
+        },
+
     },
     methods: {
-        
+        async initBlurbs() {
+            let blurbs = await this.universalStore
+                .getBlurbsInMetric(this.idMetric, TIMEFRAME.MONTH, this.selectedDate);
+
+            blurbs.forEach(blurb => {
+                let blurb_new = {
+                    id: blurb.id,
+                    date: toLongDateString(blurb.datetime),
+                    time: toShortTimeString(blurb.datetime),
+                    title: "Title",
+                    text: blurb.text,
+                    tags: []
+                };
+                this.blurbs.push(blurb_new);
+            });
+        }
     },
 }
 
