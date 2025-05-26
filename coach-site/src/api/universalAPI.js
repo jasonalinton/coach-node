@@ -1,4 +1,4 @@
-import { URL } from "./api";
+import { URL, postEndpoint } from "./api";
 
 export async function getBlurbsInMetric(idMetric, idTimeframe, datetime) {
     let data = { idMetric, idTimeframe, datetime }
@@ -61,4 +61,8 @@ export async function addBriefingBlurb(text, datetime, idBlurbType, idMetric, id
     .catch(error => {
         console.error('Error:', error);
     });
+}
+
+export async function addMetricBlurb(idMetric, datetime, text, title) {
+    postEndpoint('AddMetricBlurb', {idMetric, datetime, text, title});
 }

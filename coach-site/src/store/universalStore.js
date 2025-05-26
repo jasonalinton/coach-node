@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import { getSocketConnection } from './socket';
-import { getBlurbsInMetric, getBriefingBlurbs, addBriefingBlurb } from '../api/universalAPI';
+import { getBlurbsInMetric, getBriefingBlurbs, addBriefingBlurb, addMetricBlurb } from '../api/universalAPI';
 import { replaceOrAddItem } from '../../utility';
 
 let initialized = false;
@@ -40,6 +40,9 @@ export const useUniversalStore = defineStore('universal', {
         },
         addBriefingBlurb(text, datetime, idBlurbType, idMetric, idTimeframe) {
             addBriefingBlurb(text, datetime, idBlurbType, idMetric, idTimeframe);
+        },
+        addMetricBlurb(idMetric, datetime, text, title) {
+            addMetricBlurb(idMetric, datetime, text, title);
         },
         connectSocket() {
             if (!initialized) {

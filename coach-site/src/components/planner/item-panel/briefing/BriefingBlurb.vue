@@ -14,10 +14,10 @@
 <script>
 import MetricSelector from '../component/MetricSelector.vue';
 import BlurbFormControl from '../../../items/form/component/BlurbFormControl.vue';
+import TimeframeRadio from '../component/TimeframeRadio.vue';
 import { sortAsc, today, clone } from '../../../../../utility';
 import { timeframes } from '../../../../model/types';
 import { BLURBTYPE, METRIC } from '../../../../model/constants';
-import TimeframeRadio from '../component/TimeframeRadio.vue';
 
 export default {
     name: 'BriefingBlurb',

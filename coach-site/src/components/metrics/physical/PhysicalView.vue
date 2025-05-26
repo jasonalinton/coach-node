@@ -21,6 +21,7 @@
             <div class="card"></div>
             <div class="card"></div>
         </div>
+        <MetricTimeline class="posts" :idMetric="idMetric" />
         <div class="blurbs d-flex flex-column">
             <div v-for="blurb in blurbs" :key="blurb.id"
                  class="blurb d-flex flex-column">
@@ -38,13 +39,12 @@
 
 <script>
 import { usePlannerStore } from '@/store/plannerStore'
-import { useUniversalStore } from '@/store/universalStore'
-import { TIMEFRAME, METRIC } from '../../../model/constants'
-import { toLongDateString, toShortTimeString } from '../../../../utility/timeUtility'
+import { METRIC } from '../../../model/constants'
+import MetricTimeline from '../component/blog/MetricTimeline.vue'
 
 export default {
     name: 'PhysicalView',
-    components: {  },
+    components: { MetricTimeline },
     props: {
         
     },
@@ -54,113 +54,13 @@ export default {
             universalStore: undefined,
             idMetric: METRIC.PHYSICAL,
             blurbs: [],
-            blurbs1: [
-                {
-                    id: 1,
-                    date: "February 14, 2018",
-                    time: "9:22 AM",
-                    title: "The type I want",
-                    text: "I want an independent ambisiuos girl who is self driven and destined to accomplish their goals. I want a girl who doesn't actually \"need\" me to get through lifes challenges, but instead uses me as a resource for support and knows that I will always be there for them",
-                    tags: [
-                        "Social-Sexual",
-                        "girls",
-                        "want",
-                        "independent"
-                    ]
-                },
-                {
-                    id: 2,
-                    date: "February 15, 2018",
-                    time: "11:25 AM",
-                    title: undefined,
-                    text: "It's 11:30 and I just saw the lady in the cubical in front of me eating her lunch...",
-                    tags: [
-                        "Physical",
-                        "food",
-                        "apetite",
-                    ]
-                },
-                {
-                    id: 3,
-                    date: "February 15, 2018",
-                    time: "11:25 AM",
-                    title: undefined,
-                    text: "It's 11:30 and I just saw the lady in the cubical in front of me eating her lunch... I haven't event finished the apple I started to eat for breakfast an hour and a half ago. Not to mention the fact that I haven't even started on the yogurt as yet",
-                    tags: [
-                        "Physical",
-                        "food",
-                        "apetite",
-                    ]
-                },
-                {
-                    id: 4,
-                    date: "February 14, 2018",
-                    time: "9:22 AM",
-                    title: "The type I want",
-                    text: "I want an independent ambisiuos girl who is self driven and destined to accomplish their goals. I want a girl who doesn't actually \"need\" me to get through lifes challenges, but instead uses me as a resource for support and knows that I will always be there for them",
-                    tags: [
-                        "Social-Sexual",
-                        "girls",
-                        "want",
-                        "independent"
-                    ]
-                },
-                {
-                    id: 5,
-                    date: "February 15, 2018",
-                    time: "11:25 AM",
-                    title: "The type I want",
-                    text: "It's 11:30 and I just saw the lady in the cubical in front of me eating her lunch...",
-                    tags: [
-                        "Physical",
-                        "food",
-                        "apetite",
-                    ]
-                },
-                {
-                    id: 6,
-                    date: "February 15, 2018",
-                    time: "11:25 AM",
-                    title: "The type I want",
-                    text: "It's 11:30 and I just saw the lady in the cubical in front of me eating her lunch... I haven't event finished the apple I started to eat for breakfast an hour and a half ago. Not to mention the fact that I haven't even started on the yogurt as yet",
-                    tags: [
-                        "Physical",
-                        "food",
-                        "apetite",
-                    ]
-                },
-            ]
         }
     },
     created: async function() {
         this.plannerStore = usePlannerStore();
-        this.universalStore = useUniversalStore();
-
-        this.initBlurbs();
-    },
-    computed: {
-        selectedDate() {
-            return (this.plannerStore) ? this.plannerStore.selectedDate : today();
-        },
-
     },
     methods: {
-        async initBlurbs() {
-            let blurbs = await this.universalStore
-                .getBlurbsInMetric(this.idMetric, TIMEFRAME.MONTH, this.selectedDate);
 
-            blurbs.forEach(blurb => {
-                let blurb_new = {
-                    id: blurb.id,
-                    date: toLongDateString(blurb.datetime),
-                    time: toShortTimeString(blurb.datetime),
-                    title: "Title",
-                    text: blurb.text,
-                    tags: []
-                };
-                this.blurbs.push(blurb_new);
-            });
-        }
     },
 }
 
@@ -194,37 +94,7 @@ export default {
     font-size: 28px;
 }
 
-.blurb {
-    background-color: #EDEDED;
-    padding: 15px 28px;
-    text-align: start;
-    margin: 22px auto 0 auto;
-    max-width: 720px;
-    width: 100%;
-}
-
-.blurb .date {
-    font-size: 12px;
-}
-
-.blurb .time {
-    font-size: 10px;
-    font-style: italic;
-    font-weight: bolder;
-}
-
-.blurb .title {
-    font-size: 28px;
-    line-height: 34px;
-    color: #4A90E2
-}
-
-.blurb .text {
-    font-size: 14px;
-}
-
-.blurb .tag {
-    font-size: 12px;
-    color: #F5A623;
+.posts {
+    padding: 0 12px;
 }
 </style>
