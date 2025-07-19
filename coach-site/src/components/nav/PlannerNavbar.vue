@@ -12,6 +12,7 @@
                     <button class="btn btn-sm" type="button" @click="selectPage('planner')">Planner</button>
                     <button class="btn btn-sm" type="button" @click="selectPage('items')">Items</button>
                     <button class="btn btn-sm" type="button" @click="selectPage('physical')">Physical</button>
+                    <button class="btn btn-sm" type="button" @click="selectPage('emotional')">Emotional</button>
                 </div>
             </div>
             <div v-if="selectedPage == 'planner'" class="d-flex flex-row me-5">
@@ -115,6 +116,9 @@ export default {
         },
         selectPhysical() {
             this.$router.push('/physical-view')
+        },
+        selectPhysical() {
+            this.$router.push('/emotional-view')
         }
     }
 };

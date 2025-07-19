@@ -13,6 +13,7 @@
                 <Planner v-show="selectedPage == 'planner'" />
                 <ItemTabs v-show="selectedPage == 'items'" />
                 <PhysicalView v-if="selectedPage == 'physical'" />
+                <EmotionalView v-if="selectedPage == 'emotional'" />
             </div>
             <div class="grid-right-panel">
                 <ItemPanel />
@@ -29,6 +30,7 @@ import ItemPanel from './components/planner/item-panel/ItemPanel.vue';
 import Planner from "./components/planner/Planner.vue";
 import ItemTabs from "./components/items/ItemTabs.vue";
 import PhysicalView from "./components/metrics/physical/PhysicalView.vue";
+import EmotionalView from "./components/metrics/emotional/EmotionalView.vue";
 import { useAppStore } from '@/store/appStore'
 import { usePlannerStore } from '@/store/plannerStore'
 import { useEventStore } from '@/store/eventStore'
@@ -51,6 +53,7 @@ export default {
         Planner,
         ItemTabs,
         PhysicalView,
+        EmotionalView,
         // RouterView
     },
     data: function () {

@@ -38,6 +38,7 @@ import { usePlannerStore } from '@/store/plannerStore'
 import { useUniversalStore } from '@/store/universalStore'
 import { TIMEFRAME } from '../../../../model/constants'
 import { toLongDateString, toShortTimeString, formatInputDateTime } from '../../../../../utility/timeUtility'
+import { sortDateDesc } from '../../../../../utility'
 
 export default {
     name: 'MetricTimeline',
@@ -91,12 +92,14 @@ export default {
             let blurbs = await this.universalStore
                 .getBlurbsInMetric(this.idMetric, TIMEFRAME.MONTH, this.selectedDate);
 
+            blurbs = sortDateDesc(blurbs, 'datetime');
+
             blurbs.forEach(blurb => {
                 let blurb_new = {
                     id: blurb.id,
                     date: toLongDateString(blurb.datetime),
                     time: toShortTimeString(blurb.datetime),
-                    title: "Title",
+                    title:blurb.title,
                     text: blurb.text,
                     tags: []
                 };
@@ -115,6 +118,7 @@ export default {
         },
         onDateTimeChange(value) {
             value = value.currentTarget.value;
+            this.newPost.datetime = value;
         },
         onTextBlur() {
             this.newPost.isTextValid = (!this.newPost.text) ? false : true;
