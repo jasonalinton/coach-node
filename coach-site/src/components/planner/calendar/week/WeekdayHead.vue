@@ -1,5 +1,5 @@
 <template>
-    <div class="head day-view d-flex flex-column flex-grow-1 h-100"
+    <div class="head weekday-head d-flex flex-column flex-grow-1 h-100"
             :class="pointInTime"
             :style="{ 'flex-basis': 0 }">
         <!-- Date Label -->
@@ -20,7 +20,7 @@ import TaskList from "../TaskList.vue";
 import { dow, dateNumber } from '../../../../../utility/timeUtility';
 
 export default {
-    name: "WeekView",
+    name: "WeekdayHead",
     components: { TaskList, HourBlocks },
     props: {
         date: Date,
@@ -72,7 +72,7 @@ export default {
 .head {
     border-bottom: 1px solid #D8D8D8;
 }
-.day-view {
+.weekday-head {
     min-width: calc(100% / 7);
     border-left: 1px solid #D8D8D8;
     font-family: SF Pro Display;

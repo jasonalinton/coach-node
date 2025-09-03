@@ -71,7 +71,7 @@
 
 <script>
 import { saveRoutine, mapTodos, createAndMapItem } from '../../../../api/routineAPI';
-import RepeatControl from '../component/RepeatControl.vue';
+import RepeatControl from '../component/RepeatControl2.vue';
 import FormItemList from '../component/FormItemList.vue';
 import ItemMapper from '../component/ItemMapper.vue'
 import { clone, replaceItem, addOrReplaceItem, sortItems, sortAsc } from '../../../../../utility';
@@ -183,8 +183,6 @@ export default {
         },
         saveRepeat(repeat) {
             let _repeat = clone(repeat);
-            _repeat.startRepeat = _repeat.startRepeat.value;
-            _repeat.endRepeat = _repeat.endRepeat.value;
             replaceItem(_repeat, this.repeats.value);
             
             let updatedRepeat = clone(repeat);
