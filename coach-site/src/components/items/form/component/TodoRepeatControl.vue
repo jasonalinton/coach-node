@@ -335,7 +335,6 @@ export default {
         setTime,
         removeTime,
         validateTimes,
-        correctTimes,
         save
     },
     watch: {
@@ -429,7 +428,6 @@ function removeTime() {
 }
 
 function validateTimes() {
-    this.correctTimes();
     // If end repeat exists and end repeat is less than or equal to start repeat, invalidate
     if (this.updatedRepeat.endRepeat.value && 
         (new Date(this.updatedRepeat.startRepeat.value.dateTime).getTime() 
@@ -456,44 +454,7 @@ function validateTimes() {
     }
 }
 
-/* Set date portion of start & end iterations to date of start repeat */
-function correctTimes() {
-    let startRepeatDate = new Date(this.updatedRepeat.startRepeat.value.dateTime);
-
-    let startIteration = this.updatedRepeat.startIteration;
-    if (startIteration.value) {
-        let startIterationDate = new Date(startIteration.value.dateTime);
-        startIterationDate
-            .setUTCFullYear(startRepeatDate.getUTCFullYear(), startRepeatDate.getUTCMonth(), startRepeatDate.getUTCDate())
-        startIteration.value.dateTime = startIterationDate.toISOString();
-        if (startIteration.oldValue.id &&
-            new Date(startIteration.value.dateTime).getTime() 
-            != new Date(startIteration.oldValue.dateTime).getTime()) {
-            startIteration.isEdited = true;
-        } else {
-            startIteration.isEdited = false;
-        }
-    }
-
-    let endIteration = this.updatedRepeat.endIteration;
-    if (endIteration.value) {
-        let endIterationDate = new Date(endIteration.value.dateTime);
-        endIterationDate
-            .setUTCFullYear(startRepeatDate.getUTCFullYear(), startRepeatDate.getUTCMonth(), startRepeatDate.getUTCDate())
-        endIteration.value.dateTime = endIterationDate.toISOString();
-        if (endIteration.oldValue.id &&
-            new Date(endIteration.value.dateTime).getTime() 
-            != new Date(endIteration.oldValue.dateTime).getTime()) {
-            endIteration.isEdited = true;
-        } else {
-            endIteration.isEdited = false;
-        }
-    }
-}
-
 function save() {
-    this.correctTimes();
-
     let repeat = {
         id: this.updatedRepeat.id,
         itemID: this.itemID,

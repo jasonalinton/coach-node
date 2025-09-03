@@ -148,7 +148,7 @@
 </template>
 
 <script>
-import RepeatControl from '../component/RepeatControl.vue';
+import RepeatControl from '../component/RepeatControl2.vue';
 import TimePairControl from '../component/TimePairControl.vue';
 import FormItemList from '../component/FormItemList.vue';
 import ItemMapper from '../component/ItemMapper.vue'
@@ -346,10 +346,6 @@ export default {
         },
         saveRepeat(repeat) {
             let _repeat = clone(repeat);
-            _repeat.startRepeat = _repeat.startRepeat.value;
-            _repeat.endRepeat = (_repeat.endRepeat) ? _repeat.endRepeat.value : null;
-            _repeat.startIteration = (_repeat.startIteration) ? _repeat.startIteration.value : null;
-            _repeat.endIteration = (_repeat.endIteration) ? _repeat.endIteration.value : null;
             replaceItem(_repeat, this.repeats.value);
             
             let savedRepeat = clone(repeat);

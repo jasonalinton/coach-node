@@ -32,8 +32,7 @@
             <button class="btn-close" type="button" aria-label="close"
                     @click.stop="deleteOrArchive"></button>
         </div>
-        <div v-if="isEditing" 
-             class="wrapper-edit d-flex flex-row" :class="{ 'isValid': isValid}">
+        <div v-if="isEditing" class="wrapper-edit d-flex flex-row">
             <div>
                 <!-- Timeframe -->
                 <div class="d-flex flew-rowalign-middle mt-2">
@@ -59,11 +58,6 @@
                         <span>{{ timeframe }}</span>
                     </div>
                 </div>
-                <!-- Frequency -->
-                <!-- <div class="frequency d-flex flew-row">
-                    <div class="d-flex flex-row">
-                    </div>
-                </div> -->
                 <!-- Day of Week -->
                 <div v-if="updatedRepeat.idTimeframe == 68">
                     <span class="head">Days of Week</span>
@@ -85,38 +79,42 @@
                 <!-- Repeat Times -->
                 <div class="d-flex flex-column">
                     <div class="d-flex flex-column">
-                        <TimeControl class="time-control" :class="{ 'invalid': !updatedRepeat.startRepeat.isValid}"
-                                     label="Repeat Start" :time="updatedRepeat.startRepeat.value" 
-                                     title="Repeat Start" endpoint="Start" type="repeat" :canRemove="false"
-                                     @setTime="setTime"></TimeControl>
+                        <TimeControl class="time-control"  :isValid="isValid.date"
+                                     label="Start Date" :time="updatedRepeat.startDate" :momentID="MOMENT.DATE"
+                                     title="Start Date" endpoint="Start" :canRemove="false"
+                                     @setTime="setTime">
+                        </TimeControl>
                     </div>
                     <div class="d-flex flex-column">
-                        <TimeControl class="time-control" :class="{ 'invalid': !updatedRepeat.endRepeat.isValid}"
-                                     label="Repeat End" :time="updatedRepeat.endRepeat.value" 
-                                     title="Repeat End" endpoint="End" type="repeat" :isSet="!updatedRepeat.endRepeat.isRemoved"
-                                     @addTime="addTime" @setTime="setTime" @removeTime="removeTime(updatedRepeat.endRepeat)"></TimeControl>
+                        <TimeControl class="time-control" :isValid="isValid.date"
+                                     label="End Date" :time="updatedRepeat.endDate" :momentID="MOMENT.DATE"
+                                     title="End Date" endpoint="End"
+                                     @addTime="addTime" @setTime="setTime" @removeTime="removeTime(updatedRepeat.endDate)">
+                        </TimeControl>
                     </div>
                 </div>
                 <!-- Iteration -->
                 <div class="d-flex flex-column">
                     <!-- Start -->
                     <div class="d-flex flex-column">
-                        <TimeControl class="time-control" :class="{ 'invalid': !updatedRepeat.startIteration.isValid}" 
-                                    label="Iteration Start" :time="updatedRepeat.startIteration.value" :canRemove="false"
-                                    title="Iteration Start" type="iteration" endpoint="Start" :isSet="!updatedRepeat.startIteration.isRemoved"
-                                    @addTime="addTime" @setTime="setTime"></TimeControl>
+                        <TimeControl class="time-control" :isValid="isValid.time"
+                                    label="Start Time" :time="updatedRepeat.startTime" :momentID="MOMENT.TIME"
+                                    title="Start Time" endpoint="Start"
+                                    @addTime="addTime" @setTime="setTime">
+                        </TimeControl>
                     </div>
                     <!-- End -->
                     <div class="d-flex flex-column">
-                        <TimeControl class="time-control" :class="{ 'invalid': !updatedRepeat.endIteration.isValid}" 
-                                    label="Iteration End" :time="updatedRepeat.endIteration.value"  :canRemove="false"
-                                    title="Iteration End" type="iteration" endpoint="End" :isSet="!updatedRepeat.endIteration.isRemoved"
-                                    @addTime="addTime" @setTime="setTime"></TimeControl>
+                        <TimeControl class="time-control" :isValid="isValid.time"
+                                    label="End Time" :time="updatedRepeat.endTime" :momentID="MOMENT.TIME"
+                                    title="End Time" endpoint="End"
+                                    @addTime="addTime" @setTime="setTime">
+                        </TimeControl>
                     </div>
                 </div>
                 <!-- End - Iteration -->
                 <!-- Inheritance Type -->
-                <div class="d-flex flex-column">
+                <div class="d-flex flex-column mt-1">
                     <select class="form-select panel-select" aria-label="select" v-model="updatedRepeat.idInheritance">
                         <option v-for="inheritanceType in inheritanceTypes" v-bind:key="inheritanceType.id" :value="inheritanceType.id">{{inheritanceType.text}}</option> 
                     </select> 
@@ -160,11 +158,12 @@
 </template>
 
 <script>
-import TimeControl from '../../../controls/time/TimeControl.vue'
-import { clone, capitalize, toDateString, today } from '../../../../../utility'
-import { isNextDay, addDay, getNumberDateString } from '../../../../../utility/timeUtility'
+import TimeControl from '../../../controls/time/TimeControl2.vue'
+import { clone, capitalize, today } from '../../../../../utility'
+import { dateOnly, getNumberDateString } from '../../../../../utility/timeUtility'
 import { saveRoutineRepeat } from '../../../../api/routineAPI'
 import { saveTodoRepeat } from '../../../../api/todoAPI'
+import { MOMENT } from '../../../../model/constants'
 
 let timeframes = [
     {
@@ -273,11 +272,15 @@ export default {
             todoStore: undefined,
             plannerStore: undefined,
             timeframes: clone(timeframes),
+            MOMENT: clone(MOMENT),
             inheritanceTypes: clone(inheritanceTypes),
             updatedRepeat: undefined,
             todoRepeats: [],
             isEditing: false,
-            isValid: true
+            isValid: {
+                date: true,
+                time: true
+            },
         }
     },
     created: async function() {
@@ -392,28 +395,6 @@ export default {
             }
             return "Delete Future";
         }
-        // todoRepeats() {
-        //     if (this.updatedRepeat) {
-        //         // var todoIDs = this.updatedRepeat.todo_Repeats.map(x => x.idTod);
-        //         // todoIDs.forEach(idTodo => {
-
-        //         // })
-
-        //         let todoRepeats = [];
-        //         this.updatedRepeat.todoRepeats.forEach(tr => {
-        //             let todo = this.todoStore.getItem(tr.idTodo);
-        //             todoRepeats.push({
-        //                 idTodo: todo.id,
-        //                 todoText: todo.text,
-        //                 repeat: tr,
-        //                 isShown: false
-        //             });
-        //         });
-        //         return todoRepeats
-        //     } else {
-        //         return [];
-        //     }
-        // }
     },
     methods: {
         initUpdatedRepeat,
@@ -453,16 +434,6 @@ function initUpdatedRepeat() {
             day.isSelected = true;
         })
     }
-    let timeProps = ["startRepeat", "endRepeat", "startIteration", "endIteration"];
-    timeProps.forEach(prop => {
-        this.updatedRepeat[prop] = {
-            isEdited: false,
-            isRemoved: false,
-            isValid: true,
-            value: this.updatedRepeat[prop] ? clone(this.updatedRepeat[prop]) : null,
-            oldValue: this.updatedRepeat[prop] ? clone(this.updatedRepeat[prop]) : null
-        };
-    });
     this.validateTimes();
 }
 
@@ -498,84 +469,51 @@ function onTimeFrameChanged() {
     this.updatedRepeat.dayIndecies = [];
 }
 
-function addTime(endpoint, type) {
-    var idEndpoint;
-    if (endpoint.toLowerCase() == "start") {
-        idEndpoint = 84
-    } else if (endpoint.toLowerCase() == "end") {
-        idEndpoint = 85
-    }
-    var idMoment;
-    if (type.toLowerCase() == "repeat") {
-        idMoment = 87
-    } else if (type.toLowerCase() == "iteration") {
-        idMoment = 88
+function addTime(endpoint, moment) {
+    let datetime = new Date();
+
+    if (moment.toLowerCase() == "date") {
+        this.updatedRepeat[`${endpoint.toLowerCase()}${capitalize(moment)}`] = dateOnly(datetime);
+    } else if (moment.toLowerCase() == "time") {
+        this.updatedRepeat[`${endpoint.toLowerCase()}${capitalize(moment)}`] = "12:00";
     }
 
-    var dateTime = toDateString(new Date().toJSON());
-    this.updatedRepeat[`${endpoint.toLowerCase()}${capitalize(type)}`] = {
-            isEdited: false,
-            isRemoved: false,
-            isValid: true,
-            value: {
-                idEndpoint,
-                idMoment,
-                idType: 80,
-                dateTime
-            },
-            oldValue: {
-                idEndpoint,
-                idMoment,
-                idType: 80,
-                dateTime
-            }
-    }
-
-}
-
-function setTime(time, endpoint, type) {
-    let timeModel = this.updatedRepeat[`${endpoint.toLowerCase()}${capitalize(type)}`]
-    timeModel.value.dateTime = time;
-    if (timeModel.oldValue.dateTime != time && timeModel.oldValue.id) {
-        timeModel.isEdited = true;
-    } else {
-        timeModel.isEdited = false;
-    }
     this.validateTimes();
 }
 
-function removeTime(time) {
-    time.isRemoved = true;
+function setTime(time, endpoint, moment) {
+    this.updatedRepeat[`${endpoint.toLowerCase()}${moment}`] = time;
+    this.validateTimes();
+}
+
+// TODO: enable this
+function removeTime(endpoint, moment) {
+    this.updatedRepeat[`${endpoint.toLowerCase()}${moment}`] = undefined;
 }
 
 function validateTimes() {
-    // If end repeat exists and end repeat is less than start repeat, invalidate
-    if (this.updatedRepeat.endRepeat.value && 
-        (+new Date(this.updatedRepeat.startRepeat.value.dateTime) 
-        > +new Date(this.updatedRepeat.endRepeat.value.dateTime))) {
-            this.isValid = false;
-            this.updatedRepeat.startRepeat.isValid = false;
-            this.updatedRepeat.endRepeat.isValid = false;
+    // If end date exists and is less than start date, invalidate
+    if (this.updatedRepeat.endDate && (+new Date(this.updatedRepeat.startDate) > +new Date(this.updatedRepeat.endDate))) {
+        this.isValid.date = false;
     } else {
-        this.isValid = true;
-        this.updatedRepeat.startRepeat.isValid = true;
-        this.updatedRepeat.endRepeat.isValid = true;
+        this.isValid.date = true;
     }
-    // If start end iterations exists and end iteration is less than or equal to start iteration, invalidate
-    if (this.updatedRepeat.startIteration.value && this.updatedRepeat.endIteration.value &&
-        (+new Date(this.updatedRepeat.startIteration.value.dateTime) 
-        >= +new Date(this.updatedRepeat.endIteration.value.dateTime))) {
-            this.isValid = false;
-            this.updatedRepeat.startIteration.isValid = false;
-            this.updatedRepeat.endIteration.isValid = false;
+
+    // If start & end times exists and end time is less than or equal to start time, invalidate
+    if (this.updatedRepeat.startTime && this.updatedRepeat.endTime && (this.updatedRepeat.startTime >= this.updatedRepeat.endTime)) {
+        this.isValid.time = false;
     } else {
-        this.isValid = true;
-        this.updatedRepeat.startIteration.isValid = true;
-        this.updatedRepeat.endIteration.isValid = true;
+        this.isValid.time = true;
     }
+
+    // TODO: Invalidate time if missing start or end
 }
 
 function save() {
+    if (!this.isValid.date || !this.isValid.time) {
+        return;
+    }
+
     let repeat = {
         id: this.updatedRepeat.id,
         idInheritance: this.updatedRepeat.idInheritance,
@@ -588,10 +526,10 @@ function save() {
         interval: this.updatedRepeat.interval,
         frequency: this.updatedRepeat.frequency,
         dayIndecies: this.updatedRepeat.dayIndecies,
-        startRepeat: this.updatedRepeat.startRepeat,
-        endRepeat: (this.updatedRepeat.endRepeat.value) ? this.updatedRepeat.endRepeat : null,
-        startIteration: (this.updatedRepeat.startIteration.value) ? this.updatedRepeat.startIteration : null,
-        endIteration: (this.updatedRepeat.endIteration.value) ? this.updatedRepeat.endIteration : null,
+        startDate: this.updatedRepeat.startDate,
+        endDate: this.updatedRepeat.endDate,
+        startTime: this.updatedRepeat.startTime,
+        endTime: this.updatedRepeat.endTime,
         isEventVisible: this.updatedRepeat.isEventVisible,
         isRecommended: this.updatedRepeat.isRecommended,
     };

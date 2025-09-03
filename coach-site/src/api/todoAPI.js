@@ -237,11 +237,11 @@ export async function refreshRepetitionForRepeat(id, repeatID) {
         body: JSON.stringify(data)
     })
     .then(response => response.json())
-    .then(data => {
-        if (!data.errorMessage) {
-            return data;
+    .then((data) => {
+        if (data.status.success) {
+            return data.result;
         } else {
-            this.errorMessage = data.errorMessage;
+            console.error('Error:', data.status.errorMessage);
         }
     })
     .catch(error => {
@@ -253,26 +253,6 @@ export async function deleteFutureRepetitionsForRepeat(id, repeatID, selectedDat
     let data = { id, repeatID, from: selectedDate };
     
     return fetch(`${URL}/api/Todo/DeleteFutureRepetitionsForTodo`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (!data.errorMessage) {
-            return data;
-        } else {
-            this.errorMessage = data.errorMessage;
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-    });
-}
-export async function refreshRepetitiveEvents(id, startAt, endAt, timeframeID, properties) {
-    let data = { id, startAt, endAt, timeframeID, properties };
-    
-    return fetch(`${URL}/api/Todo/RefreshRepetitiveEventsForTodo`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
