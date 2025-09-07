@@ -130,8 +130,8 @@ export const useTodoStore = defineStore('todo', {
         deleteFutureRepetitionsForRepeat(id, repeatID, selectedDate) {
             deleteFutureRepetitionsForRepeat(id, repeatID, selectedDate);
         },
-        deleteOrArchiveRepeat(repeatID) {
-            deleteOrArchiveRepeat(repeatID);
+        deleteOrArchiveRepeat(todoID, repeatID) {
+            deleteOrArchiveRepeat(todoID, repeatID);
         },
         deleteTimePair(id) {
             deleteTodoTimePair(id);
