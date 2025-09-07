@@ -545,7 +545,7 @@ function save() {
 }
 
 function deleteOrArchive() {
-    this.todoStore.deleteOrArchiveRepeat(this.repeat.id);
+    this.todoStore.deleteOrArchiveRepeat(this.itemID, this.repeat.id);
 }
 
 function refreshRepetition() {
