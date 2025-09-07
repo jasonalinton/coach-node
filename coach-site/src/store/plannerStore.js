@@ -35,7 +35,7 @@ export const usePlannerStore = defineStore('planner', {
                 endTime: undefined,
                 startRepeat: {
                     id: null,
-                    dateTime: today(new Date()).toISOString(),
+                    dateTime: today(new Date()).toJSON(),
                     type: 80,
                     endPoint: 84,
                     moment: 87,
@@ -82,14 +82,14 @@ export const usePlannerStore = defineStore('planner', {
                 points: null,
                 startTime: {
                     id: null,
-                    dateTime: today(new Date()).toISOString(),
+                    dateTime: today(new Date()).toJSON(),
                     idType: 81,
                     idEndPoint: 84,
                     idMoment: 89
                 },
                 endTime: {
                     id: null,
-                    dateTime: today(new Date()).toISOString(),
+                    dateTime: today(new Date()).toJSON(),
                     idType: 81,
                     idEndPoint: 84,
                     idMoment: 89

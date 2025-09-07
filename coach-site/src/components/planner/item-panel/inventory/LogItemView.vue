@@ -152,7 +152,7 @@ export default {
         },
         showAdditionalValues(value) {
             if (value) {
-                this.updatedDateTime = this.entryDateTime.toISOString();
+                this.updatedDateTime = this.entryDateTime.toJSON();
             }
         },
         blurb(value) {

@@ -36,7 +36,7 @@ function onChange(value) {
     value = value.currentTarget.value;
     if (value) {
         let date = new Date(value);
-        let time = date.toISOString();
+        let time = date.toJSON();
         this.$emit("onChange", time);
     } else {
         this.$emit('onChange', null);

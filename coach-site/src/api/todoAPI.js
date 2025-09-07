@@ -363,8 +363,8 @@ export async function deleteIteration(iterationID) {
     });
 }
 
-export async function deleteOrArchiveRepeat(repeatID) {
-    let data = { repeatID };
+export async function deleteOrArchiveRepeat(todoID, repeatID) {
+    let data = { todoID, repeatID };
 
     return fetch(`${URL}/api/Todo/DeleteOrArchiveRepeat`, {
         method: 'POST',
