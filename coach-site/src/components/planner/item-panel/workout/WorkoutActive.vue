@@ -11,6 +11,35 @@
             <WorkoutSection v-for="section in sections" :key="section.id" :section="section"
                             class="mt-2"/>
         </div>
+        <!-- Settings -->
+        <div class="settings">
+            <span class="text-start cursor-default"
+                @click="settings.isShown = !settings.isShown">Settings</span>
+            <div v-if="settings.isShown" class="d-flex flex-column mt-2">
+                <!-- Time -->
+                <div class="d-flex flex-column">
+                    <DateTimeSelector class="date-selector" :class="{ 'invalid': !completion.isValid }"
+                                        :dateTime="startAt" @onChange="setIterationTime($event, 'start')"/>
+                    <DateTimeSelector class="date-selector mt-2" :class="{ 'invalid': !completion.isValid }"
+                                        :dateTime="endAt" @onChange="setIterationTime($event, 'end')"/>
+                </div>
+                <!-- Is Template -->
+                <div class="d-flex flex-row justify-items-start mt-2">
+                    <input type="checkbox" id="is-template" v-model="workout.isTemplate" />
+                    <label class="ms-1" for="is-template">Is Template</label>
+                </div>
+                <!-- Save -->
+                <button type="button" class="btn btn-primary mt-2 mb-2" @click="saveSettings()">Save</button>
+                <!-- Delete -->
+                <button v-if="!settings.confimDelete" type="button" class="btn btn-danger mb-2" @click="settings.confimDelete = true">Delete</button>
+                <!-- Delete Confirmation -->
+                <div v-if="settings.confimDelete" class="d-flex flex-row mb-2 align-items-center">
+                    <span>Are you sure?</span>
+                    <button type="button" class="btn btn-warning ms-2" @click="settings.confimDelete = false">Cancel</button>
+                    <button type="button" class="btn btn-danger ms-2" @click="deleteWorkout">Delete</button>
+                </div>
+            </div>
+        </div>
         <!-- Completion Controls -->
         <div v-if="isActive" class="completion d-flex flex-column justify-content-center position-sticky bottom-0 ps-2 pe-2 pb-1">
             <QuickLogExercise />
@@ -130,6 +159,8 @@ export default {
         completeWorkout,
         setIterationTime,
         validateTimes,
+        deleteWorkout,
+        saveSettings,
         back() {
             this.appStore.onBackWorkoutPanel();
         }
@@ -171,7 +202,7 @@ function stopWorkout() {
                     }
                 }
             });
-            this.endAt = lastLoggedTime.toISOString();
+            this.endAt = lastLoggedTime.toJSON();
         }
         this.validateTimes();
         this.completion.isActive = !this.completion.isActive;
@@ -221,6 +252,38 @@ function validateTimes() {
     }
 }
 
+function deleteWorkout() {
+    let model = { 
+        id: this.id,
+        isDeleted: true,
+    };
+
+    this.workoutStore.saveWorkout(model);
+    this.appStore.onDoneWorkout();
+    this.back();
+}
+
+function saveSettings() {
+    let model = { 
+        id: this.id,
+        isUpdated: true,
+        startAt: {
+            isUpdated: true,
+            value: this.startAt
+        },
+        endAt: {
+            isUpdated: true,
+            value: this.endAt
+        },
+        isTemplate: {
+            isUpdated: true,
+            value: this.workout.isTemplate
+        },
+     };
+     
+     this.workoutStore.saveWorkout(model);
+}
+
 </script>
 
 <style scoped>
@@ -248,5 +311,13 @@ function validateTimes() {
 
 .date-selector.invalid {
     border: solid 1px red;
+}
+
+.settings-header {
+    padding-left: 12px;
+}
+
+.settings {
+    padding: 0 12px;
 }
 </style>

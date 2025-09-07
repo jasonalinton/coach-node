@@ -260,6 +260,11 @@ export const useAppStore = defineStore('app', {
             this.itemPanel.workout.exerciseList.addedExerciseIDs = [];
             this.itemPanel.workout.exerciseList.isSelector = undefined;
         },
+        onDoneWorkout() {
+            this.itemPanel.workout.selectedWorkoutID = undefined;
+            this.itemPanel.workout.selectedExerciseID = undefined;
+            this.itemPanel.workout.activeExerciseID = undefined;
+        },
         onBackWorkoutPanel() {
             this.itemPanel.workout.selectedView = this.itemPanel.workout.panelQueue.pop();
         }

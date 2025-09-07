@@ -443,7 +443,7 @@ function stopWorkout() {
                     }
                 }
             });
-            this.endAt.value = lastLoggedTime.toISOString();
+            this.endAt.value = lastLoggedTime.toJSON();
         }
         this.validateTimes();
         this.completion.isActive = !this.completion.isActive;
