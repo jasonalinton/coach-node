@@ -26,15 +26,18 @@ export default {
     data: function () {
         return {
             todoStore: undefined,
+            goalStore: undefined,
         }
     },
     created: async function() {
         let todoStore = await import(`@/store/todoStore`);
         this.todoStore = todoStore.useTodoStore();
+        let goalStore = await import(`@/store/goalStore`);
+        this.goalStore = goalStore.useGoalStore();
     },
     computed: {
         points() {
-            if (this.todoStore == undefined) {
+            if (this.todoStore == undefined || this.goalStore == undefined) {
                 return 0;
             }
             if (this.item.type == 'iteration') {
@@ -74,17 +77,57 @@ export default {
                         }
                     }
                     if (isType) {
-                        matchingIterations.push(iteration);
+                        var id = matchingIterations.findIndex(x => x.id == iteration.id);
+                        if (id == -1) {
+                            matchingIterations.push(iteration);
+                        }
                         return;
                     } else {
                         todo.parents.forEach(todo => {
                             _this.isTodoOfType(iteration, todo.id, matchingIterations)
-                        })
+                        });
+                        if (_this.item.type == "goal" || _this.item.type == "metric") {
+                            todo.goals.forEach(goal => {
+                                _this.isGoalOfType(iteration, goal.id, matchingIterations)
+                            });
+                        }
                     }
                 }
             }
-        }
-        
+        },
+        isGoalOfType(iteration, goalID, matchingIterations) {
+            let _this = this;
+            if (goalID) {
+                var goal = this.goalStore.getItem(goalID);
+                if (goal) {
+                    var typeIDs = [];
+                    if (_this.item.type == "goal") {
+                        typeIDs = goal.parents.map(y => y.id);
+                    } else if (_this.item.type == "metric") {
+                        typeIDs = goal.metrics.map(y => y.id);
+                    }
+                    let isType = false;
+                    if (this.item.id) {
+                        isType = typeIDs.includes(this.item.id);
+                    } else if (this.item.ids) {
+                        for (let i = 0; i < this.item.ids.length && !isType; i++) {
+                            isType = typeIDs.includes(this.item.ids[i]);
+                        }
+                    }
+                    if (isType) {
+                        var id = matchingIterations.findIndex(x => x.id == iteration.id);
+                        if (id == -1) {
+                            matchingIterations.push(iteration);
+                        }
+                        return;
+                    } else {
+                        goal.parents.forEach(goal => {
+                            _this.isGoalOfType(iteration, goal.id, matchingIterations)
+                        });
+                    }
+                }
+            }
+        },
     },
 }
 
