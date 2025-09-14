@@ -1,12 +1,15 @@
 <template>
     <div class="workout-active d-flex flex-column overflow-scroll"
          :class="{ 'is-active': isActive }">
-        <div class="label d-flex flex-row">
-            <img class="icon-button mb-2"
-                 src='/icon/previous.png' width="20" height="20"
-                 @click.prevent="back"/>
-            <span>{{ workout.name }}</span>
-        </div>
+         <div class="label d-flex flex-row justify-content-between">
+             <div class="d-flex flex-row">
+                 <img class="icon-button mb-2"
+                      src='/icon/previous.png' width="20" height="20"
+                      @click.prevent="back"/>
+                 <span>{{ workout.name }}</span>
+                </div>
+                <span class="fload-end me-2">{{ points }}</span>
+         </div>
         <div class="d-flex flex-column">
             <WorkoutSection v-for="section in sections" :key="section.id" :section="section"
                             class="mt-2"/>
@@ -151,6 +154,9 @@ export default {
             } else {
                 return undefined;
             }
+        },
+        points() {
+            return (this.workout) ? this.workout.points : 0;
         }
     },
     methods: {
