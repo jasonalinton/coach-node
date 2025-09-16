@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { getWorkoutInfo, getWorkouts, getExercises, getWorkoutIDFromEvent, getExerciseHistory,
+import { getWorkoutInfo, getWorkout, getWorkouts, getExercises, getWorkoutIDFromEvent, getExerciseHistory,
     saveExercise, addExercisesToWorkout, removeExerciseFromWorkout, saveWorkout, copyAndStartWorkout, 
     saveSet, logSet, logAllSets, completeWorkout, repositionExercise } from '../api/workoutAPI'
 import { replaceOrAddItem, removeItemByID, sortAsc, sortNumAsc, getNextNewID } from '../../utility';
@@ -59,8 +59,29 @@ export const useWorkoutStore = defineStore('workout', {
                 });
             });
         },
+        async getWorkoutIDFromEvent(eventID) {
+            var id = await getWorkoutIDFromEvent(eventID);
+            var workout = getWorkout(id);
+            if (!workout) {
+                workout = await getWorkout(id)
+                .then(workout => {
+                    replaceOrAddItem(workout, _this.workouts);
+                    return workout;
+                });
+            }
+            return id;
+        },
         getWorkout(id) {
-            return this.workouts.find(x => x.id == id);
+            const _this = this;
+            var workout = this.workouts.find(x => x.id == id);
+            if (!workout) {
+                getWorkout(id)
+                .then(workout => {
+                    replaceOrAddItem(workout, _this.workouts);
+                })
+                return undefined;
+            }
+            return workout;
         },
         getWorkouts(shouldRequestServer) {
             const _this = this;
@@ -223,9 +244,6 @@ export const useWorkoutStore = defineStore('workout', {
         },
         getMuscleGroups() {
             return this.muscleGroups;
-        },
-        async getWorkoutIDFromEvent(eventID) {
-            return getWorkoutIDFromEvent(eventID);
         },
         async saveExercise(model) {
             return saveExercise(model);
