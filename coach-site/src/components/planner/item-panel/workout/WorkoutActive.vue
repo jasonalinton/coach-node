@@ -11,7 +11,8 @@
                 <span class="fload-end me-2">{{ points }}</span>
          </div>
         <div class="d-flex flex-column">
-            <WorkoutSection v-for="section in sections" :key="section.id" :section="section"
+            <WorkoutSection v-for="section in sections" :key="section.id" 
+                            :section="section" :isActive="isActive"
                             class="mt-2"/>
         </div>
         <!-- Settings -->
@@ -44,7 +45,7 @@
             </div>
         </div>
         <!-- Completion Controls -->
-        <div v-if="isActive" class="completion d-flex flex-column justify-content-center position-sticky bottom-0 ps-2 pe-2 pb-1">
+        <div v-if="isActive" class="completion d-flex flex-column justify-content-center position-sticky bottom-0 pb-1">
             <QuickLogExercise />
             <div class="clock d-flex flex-row justify-content-center align-items-center">
                 <img class="icon-button me-2"

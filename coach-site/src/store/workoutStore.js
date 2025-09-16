@@ -271,8 +271,8 @@ export const useWorkoutStore = defineStore('workout', {
         async completeWorkout(workoutID, startAt, endAt, createEvent) {
             return completeWorkout(workoutID, startAt, endAt, createEvent);
         },
-        async repositionExercise(workoutID, exerciseID, position) {
-            repositionExercise(workoutID, exerciseID, position);
+        async repositionExercise(exerciseID, sectionID, position) {
+            repositionExercise(exerciseID, sectionID, position);
         },
         setDraggedProps(exerciseID) {
             this.dragged.exerciseID = exerciseID;

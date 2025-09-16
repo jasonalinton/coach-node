@@ -12,7 +12,7 @@
         </div>
         <div v-if="isShown" class="d-felx flex-column">
             <ExerciseCard class="exercise-card" v-for="exercise in exercises"
-                          :exercise="exercise" 
+                          :exercise="exercise" :isActive="isActive"
                           @selectExercise="selectExercise($event)"/>
             <!-- <div class="exercise-card" v-for="exercise in exercises">
                 {{ exercise.name }}
@@ -32,7 +32,8 @@ export default {
     name: 'WorkoutSection',
     components: { ExerciseCard },
     props: {
-        section: Object
+        section: Object,
+        isActive: Boolean
     },
     data: function () {
         return {

@@ -320,8 +320,8 @@ export async function completeWorkout(workoutID, startAt, endAt, createEvent) {
     });
 }
 
-export async function repositionExercise(workoutID, exerciseID, position) {
-    let data = { workoutID, exerciseID, position };
+export async function repositionExercise(exerciseID, sectionID, position) {
+    let data = { exerciseID, sectionID, position };
 
     return fetch(`${URL}/api/Physical/RepositionExercise`, {
         method: 'POST',
