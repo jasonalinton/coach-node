@@ -221,8 +221,8 @@ export async function removeExerciseFromWorkout(idWorkoutExercise) {
     });
 }
 
-export async function copyAndStartWorkout(workoutID) {
-    let data = { workoutID };
+export async function copyAndStartWorkout(workoutID, startAt) {
+    let data = { workoutID, startAt };
     return fetch(`${URL}/api/Physical/CopyAndStartWorkout`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

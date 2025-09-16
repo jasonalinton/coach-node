@@ -91,7 +91,7 @@ export default {
 }
 
 function startWorkout() {
-    this.workoutStore.copyAndStartWorkout(this.workout.id)
+    this.workoutStore.copyAndStartWorkout(this.workout.id, new Date())
         .then((workout) => {
             this.$emit('selectWorkout', { id: workout.id } )
         });

@@ -251,9 +251,9 @@ export const useWorkoutStore = defineStore('workout', {
         async saveWorkout(model) {
             return saveWorkout(model);
         },
-        async copyAndStartWorkout(workoutID) {
+        async copyAndStartWorkout(workoutID, startAt) {
             let _this = this;
-            return copyAndStartWorkout(workoutID)
+            return copyAndStartWorkout(workoutID, startAt)
                 .then(workout => {
                     replaceOrAddItem(workout, _this.workouts);
                     return workout;
