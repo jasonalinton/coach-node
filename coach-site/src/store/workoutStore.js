@@ -15,6 +15,7 @@ export const useWorkoutStore = defineStore('workout', {
         muscleGroups: [],
         muscles: [],
         exerciseHistory: [],
+        displaySettings: [],
         dragged: {
             exerciseID: undefined,
         },
@@ -282,6 +283,26 @@ export const useWorkoutStore = defineStore('workout', {
         },
         selectWorkout(id) {
             this.selectedWorkoutID = id;
+        },
+        getDisplaySettings(workoutID) {
+            var settings = this.displaySettings.find(x => x.workoutID == workoutID);
+            if (settings) {
+                return settings;
+            } else {
+                settings = {
+                    workoutID,
+                    sections: []
+                };
+                var workout = this.getWorkout(workoutID);
+                workout.sections.forEach(section => {
+                    settings.sections.push({
+                        id: section.id,
+                        isOpen: true
+                    });
+                });
+                this.displaySettings.push(settings);
+                return settings;
+            }
         },
         connectSocket() {
             if (!initialized) {

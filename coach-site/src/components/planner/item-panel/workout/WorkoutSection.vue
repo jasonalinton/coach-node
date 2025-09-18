@@ -1,16 +1,16 @@
 <template>
     <div class="workout-section d-flex flex-column">
         <div class="header d-flex flex-row"
-             @click="isShown = !isShown">
+             @click="clickSection">
             <span class="name">{{ sectionName }}</span>
             <img class="icon-button" src="/icon/add-button.png" :width="20" :height="20" 
                 @click="addExercise" />
-            <img v-if="!isShown" class="caret mt-auto mb-auto me-2" 
+            <img v-if="!settings.isOpen" class="caret mt-auto mb-auto me-2" 
                     src='/icon/caret-right.png' width="5" height="8"/>
-            <img v-if="isShown" class="caret mt-auto mb-auto me-2" 
+            <img v-if="settings.isOpen" class="caret mt-auto mb-auto me-2" 
                     src='/icon/caret-down.png' width="8" height="5"/>
         </div>
-        <div v-if="isShown" class="d-felx flex-column">
+        <div v-if="settings.isOpen" class="d-felx flex-column">
             <ExerciseCard class="exercise-card" v-for="exercise in exercises"
                           :exercise="exercise" :isActive="isActive"
                           @selectExercise="selectExercise($event)"/>
@@ -33,15 +33,15 @@ export default {
     components: { ExerciseCard },
     props: {
         section: Object,
-        isActive: Boolean
+        isActive: Boolean,
+        settings: Object
     },
     data: function () {
         return {
             appStore: undefined,
             workoutStore: null,
             workoutSectionTypes: clone(workoutSectionTypes),
-            addedExercises: [],
-            isShown: true
+            addedExercises: []
         }
     },
     created: function() {
@@ -74,6 +74,9 @@ export default {
         },
         addExercise() {
             this.appStore.onAddExerciseToSection(this.section.id);
+        },
+        clickSection() {
+            this.settings.isOpen = !this.settings.isOpen;
         }
     },
 }

@@ -1,7 +1,7 @@
 <template>
-    <div class="workout-exercise d-flex flex-column flex-grow-1 overflow-scroll pt-2">
-        <div class="label d-flex flex-row mb-2">
-            <img class="icon-button mb-2"
+    <div class="workout-exercise d-flex flex-column flex-grow-1 overflow-scroll">
+        <div class="label d-flex flex-row pt-2 pb-2 sticky-top">
+            <img class="icon-button"
                  src='/icon/previous.png' width="20" height="20"
                  @click.prevent="back"/>
             <span>{{ name }}</span>
@@ -174,6 +174,14 @@ export default {
 </script>
 
 <style scoped>
+.label {
+    background-color: var(--background-color);
+}
+
+.icon-button {
+    margin-top: 2px;
+}
+
 .media {
     min-height: 300px;
     background-color: beige;

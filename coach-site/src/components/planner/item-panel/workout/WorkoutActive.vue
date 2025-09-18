@@ -12,7 +12,7 @@
          </div>
         <div class="d-flex flex-column">
             <WorkoutSection v-for="section in sections" :key="section.id" 
-                            :section="section" :isActive="isActive"
+                            :section="section" :isActive="isActive" :settings="sectionSettings.find(x => x.id == section.id)"
                             class="mt-2"/>
         </div>
         <!-- Settings -->
@@ -158,6 +158,13 @@ export default {
         },
         points() {
             return (this.workout) ? this.workout.points : 0;
+        },
+        sectionSettings() {
+            if (this.workout) {
+                var settings = this.workoutStore.getDisplaySettings(this.workout.id);
+                return settings.sections;
+            }
+            return undefined;
         }
     },
     methods: {
