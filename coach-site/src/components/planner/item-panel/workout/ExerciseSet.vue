@@ -18,7 +18,7 @@
             <span class="set-number" :class="{ active: isActive }"
                     @click="activeSetID = set.id">{{ setNumber }}</span>
             <div class="reps d-flex flex-column align-items-center">
-                <input class="prop form-control form-control-sm me-1" type="number" min="0" ref="repsInput"
+                <input class="prop form-control form-control-sm me-2" type="number" min="0" ref="repsInput"
                         v-model="set.reps"
                         :style="{'width': inputWidth(set.reps)}"
                         @keyup.enter.esc="doneEditing"
@@ -26,7 +26,7 @@
                 <span class="field mt-1">REPS</span>
             </div>
             <div class="time d-flex flex-column align-items-center">
-                <input class="prop form-control form-control-sm me-1" type="number" min="0" ref="timeInput"
+                <input class="prop form-control form-control-sm me-2" type="number" min="0" ref="timeInput"
                         v-model="set.timeSeconds"
                         :style="{'width': inputWidth(set.timeSeconds)}" 
                         @keyup.enter.esc="doneEditing"
@@ -34,7 +34,7 @@
                 <span class="field mt-1">TIME</span>
             </div>
             <div class="hold d-flex flex-column align-items-center">
-                <input class="prop form-control form-control-sm me-1" type="number" min="0" ref="holdInput"
+                <input class="prop form-control form-control-sm me-2" type="number" min="0" ref="holdInput"
                         v-model="set.holdSeconds"
                         :style="{'width': inputWidth(set.holdSeconds)}" 
                         @keyup.enter.esc="doneEditing"
@@ -42,7 +42,7 @@
                 <span class="field mt-1">HOLD</span>
             </div>
             <div class="weight d-flex flex-column align-items-center">
-                <input class="prop form-control form-control-sm me-1" type="number" min="0" ref="weightInput"
+                <input class="prop form-control form-control-sm me-2" type="number" min="0" ref="weightInput"
                         v-model="set.weight"
                         :style="{'width': inputWidth(set.weight)}" 
                         @keyup.enter.esc="doneEditing"
