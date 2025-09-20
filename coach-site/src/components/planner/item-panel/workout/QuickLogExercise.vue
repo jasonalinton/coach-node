@@ -1,5 +1,5 @@
 <template>
-    <div class="quick-log-exercise">
+    <div class="quick-log-exercise ps-1 pt-1">
         <div v-if="activeSet" class="d-flex flex-column">
             <span class="exercise-name">{{ `${activeExercise.exercise.name}` }}</span>
             <span class="variation-text" v-if="variationString">{{ variationString }}</span>

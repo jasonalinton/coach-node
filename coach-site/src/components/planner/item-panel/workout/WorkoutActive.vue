@@ -16,7 +16,7 @@
                             class="mt-2"/>
         </div>
         <!-- Settings -->
-        <div class="settings">
+        <div v-if="!completion.isActive" class="settings">
             <span class="text-start cursor-default"
                 @click="settings.isShown = !settings.isShown">Settings</span>
             <div v-if="settings.isShown" class="d-flex flex-column mt-2">
@@ -45,15 +45,15 @@
             </div>
         </div>
         <!-- Completion Controls -->
-        <div v-if="isActive" class="completion d-flex flex-column justify-content-center position-sticky bottom-0 pb-1">
-            <QuickLogExercise />
-            <div class="clock d-flex flex-row justify-content-center align-items-center">
+        <div v-if="isActive" class="completion d-flex flex-column justify-content-center position-sticky bottom-0">
+            <QuickLogExercise  v-if="!completion.isActive" />
+            <div v-if="!completion.isActive" class="clock d-flex flex-row justify-content-center align-items-center">
                 <img class="icon-button me-2"
                         src='/icon/circle-stop.png' width="24" height="24"
                         @click.prevent="stopWorkout"/>
                 <div>{{ timeSinceStart }}</div>
             </div>
-            <div v-if="completion.isActive" class="form-group">
+            <div v-if="completion.isActive" class="form-group pt-2">
                     <!-- Time -->
                     <DateTimeSelector class="date-selector" :class="{ 'invalid': !completion.isValid }"
                                         :dateTime="startAt" @onChange="setIterationTime($event, 'start')"/>
@@ -61,8 +61,12 @@
                                         :dateTime="endAt" @onChange="setIterationTime($event, 'end')"/>
                     <!-- Create Event -->
                     <div class="d-flex flex-row justify-items-start mt-2">
-                        <input type="checkbox" id="create-event" v-model="completion.createEvent" />
-                        <label class="ms-1" for="create-event">Create Event</label>
+                        <span class="create-event" :class="{ 'selected': completion.createEvent }"
+                              @click="completion.createEvent = !completion.createEvent">
+                            Create Event
+                        </span>
+                        <!-- <input type="checkbox" id="create-event" v-model="completion.createEvent" />
+                        <label class="ms-1" for="create-event">Create Event</label> -->
                     </div>
                     <!-- Log Buttom -->
                     <div class="d-flex flex-row mt-2">
@@ -198,8 +202,6 @@ export default {
     }
 }
 
-
-
 function stopWorkout() {
     if (!this.completion.isActive) {
         let sets = this.sections
@@ -220,6 +222,7 @@ function stopWorkout() {
         }
         this.validateTimes();
         this.completion.isActive = !this.completion.isActive;
+        this.settings.isShown = false;
     }
 }
 
@@ -320,7 +323,13 @@ function saveSettings() {
 }
 
 .clock {
-    min-height: 40px;
+    min-height: 32px;
+    background-color: #292929;
+    color: rgba(255, 255, 255, 0.87);
+}
+
+.completion .form-group {
+    padding: 0 12px;
 }
 
 .date-selector.invalid {
@@ -333,5 +342,25 @@ function saveSettings() {
 
 .settings {
     padding: 0 12px;
+}
+
+.create-event {
+    cursor: pointer;
+    padding: 4px 4px;
+    line-height: 14px;
+    font-size: 14px;
+    background-color: var(--pill-default);
+    border-radius: 4px;
+    border: transparent solid 1px;
+}
+.create-event:hover {
+    border: var(--pill-border-hover) solid 1px;
+}
+.create-event.selected {
+    border: var(--pill-border-hover) solid 1px;
+    background-color: var(--pill-background-selected);
+}
+.create-event:active {
+    background-color: var(--pill-background-selected);
 }
 </style>

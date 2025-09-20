@@ -23,7 +23,7 @@
                         :style="{'width': inputWidth(set.reps)}"
                         @keyup.enter.esc="doneEditing"
                         @blur="blur"/>
-                <span class="field mt-1">REPS</span>
+                <span class="field mt-1 me-2">REPS</span>
             </div>
             <div class="time d-flex flex-column align-items-center">
                 <input class="prop form-control form-control-sm me-2" type="number" min="0" ref="timeInput"
@@ -31,7 +31,7 @@
                         :style="{'width': inputWidth(set.timeSeconds)}" 
                         @keyup.enter.esc="doneEditing"
                         @blur="blur"/>
-                <span class="field mt-1">TIME</span>
+                <span class="field mt-1 me-2">TIME</span>
             </div>
             <div class="hold d-flex flex-column align-items-center">
                 <input class="prop form-control form-control-sm me-2" type="number" min="0" ref="holdInput"
@@ -39,7 +39,7 @@
                         :style="{'width': inputWidth(set.holdSeconds)}" 
                         @keyup.enter.esc="doneEditing"
                         @blur="blur"/>
-                <span class="field mt-1">HOLD</span>
+                <span class="field mt-1 me-2">HOLD</span>
             </div>
             <div class="weight d-flex flex-column align-items-center">
                 <input class="prop form-control form-control-sm me-2" type="number" min="0" ref="weightInput"
@@ -47,7 +47,7 @@
                         :style="{'width': inputWidth(set.weight)}" 
                         @keyup.enter.esc="doneEditing"
                         @blur="blur"/>
-                <span class="field mt-1">LBS</span>
+                <span class="field mt-1 me-2">LBS</span>
             </div>
             <!-- <img class="history-button"
                     src='/icon/chart-line-solid.png' width="24" height="24"

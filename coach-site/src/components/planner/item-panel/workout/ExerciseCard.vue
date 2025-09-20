@@ -18,7 +18,7 @@
                     </div>
                 </div>
             </div>
-            <button class="btn btn-sm me-4" type="button"
+            <button class="set-active btn btn-sm me-4" type="button"
                     @click.prevent.stop="setActive">Set</button>
             <div class="button-group d-flex flex-column">
                 <img class="icon-button" 
@@ -148,6 +148,10 @@ function onDragEnd(ev) {
     background-color: #F5F5F5;
 }
 
+.exercise-card:not(:hover) .set-active {
+    visibility: hidden;
+}
+
 .exercise-card.complete {
     opacity: .6;
 }
@@ -156,6 +160,7 @@ function onDragEnd(ev) {
     width: 40px;
     height: 40px;
     background-color: #E25555;
+    border-radius: 4px;
 }
 
 .label {
