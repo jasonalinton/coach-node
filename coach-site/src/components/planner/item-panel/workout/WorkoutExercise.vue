@@ -7,22 +7,30 @@
             <span>{{ name }}</span>
         </div>
         <!-- Demo -->
-        <div class="media">
+        <div class="media position-relative">
 
-        </div>
-        <div class="toolbar d-flex flex-row">
-            <span>{{ restSeconds }}</span>
+            <div class="toolbar d-flex flex-row position-absolute bottom-0 end-0 mb-2 me-2">
+                <!-- <span>{{ restSeconds }}</span> -->
+                <img class="history-button"
+                     src='/icon/chart-line-solid.png' width="24" height="24"
+                     @click.prevent="showHistory"/>
+            </div>
         </div>
         <!-- Sets -->
         <div class="exercise-sets d-flex flex-column ms-auto me-auto mt-3">
             <ExerciseSet v-for="(set, index) in sets" :key="set.id" 
                          :set="set" :isActive="set.id == activeSetID" 
                          :setNumber="index + 1" :idExercise="this.exercise.id"
+                         @removeActiveSet="activeSetID = undefined"
                          @click="activeSetID = set.id" />
             <div class="d-flex flex-row mt-1">
-                <img class="icon-button ms-1" src="/icon/add-button.png" :width="24" :height="24" 
+                <!-- <img class="icon-button ms-1" src="/icon/add-button.png" :width="24" :height="24" 
                      @click="addSet" />
-                <span>Add Set</span>
+                <span>Add Set</span> -->
+                <button class="btn btn-sm ms-4 mb-3" type="button"
+                        @click="addSet" >
+                    Add Set
+                </button>
             </div>
         </div>
         <!-- Rest Timer -->
@@ -32,9 +40,9 @@
             <img src='/icon/goal-icon.png' width="40" height="40" />
         </div>
         <!-- Log Buttons -->
-        <div v-if="!restRemaining" class="d-flex flex-row mt-auto ps-2 pe-2">
-            <button type="button" class="btn btn-primary mb-2" @click="logAllSets">Log All Sets</button>
-            <button type="button" class="btn btn-warning mb-2 ms-2 flex-grow-1" @click="logSet">Log Set</button>
+        <div v-if="!restRemaining" class="d-flex flex-row mt-auto ps-2 pe-2 position-sticky bottom-0">
+            <button type="button" class="btn btn-warning mb-2 flex-grow-1" @click="logSet">Log Set</button>
+            <button type="button" class="btn btn-primary mb-2 ms-2" @click="logAllSets">Log All Sets</button>
         </div>
     </div>
 </template>
@@ -122,6 +130,7 @@ export default {
         back() {
             this.appStore.onBackWorkoutPanel();
         },
+        setActiveSet,
         addSet() {
             let setIDs = this.sets.map(s => s.id).sort((a, b) => a - b);
             let nextID = (setIDs.length == 0 || setIDs[0] - 1 > -1) ? -1 : setIDs[0] - 1;
@@ -140,6 +149,10 @@ export default {
                 this.workoutStore.saveSet(newSet);
             }
         },
+        showHistory() {
+            let variationIDs = [];
+            this.appStore.selectExerciseHistory(this.exercise.id, variationIDs);
+        },
         logSet() {
             //TODO: Can only unlog last logged set
             let index = this.sets.findIndex(x => x.id == this.activeSetID);
@@ -155,9 +168,11 @@ export default {
             let set = this.sets[index];
             let completedAt = (set.iteration) ? undefined : new Date();
             this.workoutStore.logSet(set.id, completedAt);
+            this.activeSetID = undefined;
         },
         logAllSets() {
             this.workoutStore.logAllSets(this.workoutExercise.idWorkoutExercise);
+            this.activeSetID = undefined;
         },
     },
     watch: {
@@ -167,8 +182,27 @@ export default {
                 this.restIntervalID = undefined;
                 this.restRemaining = undefined;
             }
+        },
+        sets(value) {
+            if (value.length > 0) {
+                this.setActiveSet();
+            }
         }
     }
+}
+
+function setActiveSet() {
+    if (this.activeSetID) {
+        return;
+    }
+
+    let activeSetID = undefined;
+    this.sets.forEach(set => {
+        if (!set.iteration && !activeSetID) {
+            activeSetID = set.id
+        }
+    });
+    this.activeSetID = activeSetID;
 }
 
 </script>
