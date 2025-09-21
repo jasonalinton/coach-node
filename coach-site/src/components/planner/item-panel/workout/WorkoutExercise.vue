@@ -12,7 +12,7 @@
             <div class="toolbar d-flex flex-row position-absolute bottom-0 end-0 mb-2 me-2">
                 <!-- <span>{{ restSeconds }}</span> -->
                 <img class="history-button"
-                     src='/icon/chart-line-solid.png' width="24" height="24"
+                     src='/icon/exercise-history.svg' width="24" height="24"
                      @click.prevent="showHistory"/>
             </div>
         </div>
@@ -219,6 +219,10 @@ function setActiveSet() {
 .media {
     min-height: 300px;
     background-color: beige;
+}
+
+.history-button {
+    
 }
 
 .btn {

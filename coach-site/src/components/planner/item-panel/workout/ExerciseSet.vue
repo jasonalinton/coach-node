@@ -23,7 +23,7 @@
                         :style="{'width': inputWidth(set.reps)}"
                         @keyup.enter.esc="doneEditing"
                         @blur="blur"/>
-                <span class="field mt-1 me-2">REPS</span>
+                <span class="field me-2">REPS</span>
             </div>
             <div class="time d-flex flex-column align-items-center">
                 <input class="prop form-control form-control-sm me-2" type="number" min="0" ref="timeInput"
@@ -31,15 +31,7 @@
                         :style="{'width': inputWidth(set.timeSeconds)}" 
                         @keyup.enter.esc="doneEditing"
                         @blur="blur"/>
-                <span class="field mt-1 me-2">TIME</span>
-            </div>
-            <div class="hold d-flex flex-column align-items-center">
-                <input class="prop form-control form-control-sm me-2" type="number" min="0" ref="holdInput"
-                        v-model="set.holdSeconds"
-                        :style="{'width': inputWidth(set.holdSeconds)}" 
-                        @keyup.enter.esc="doneEditing"
-                        @blur="blur"/>
-                <span class="field mt-1 me-2">HOLD</span>
+                <span class="field me-2">TIME</span>
             </div>
             <div class="weight d-flex flex-column align-items-center">
                 <input class="prop form-control form-control-sm me-2" type="number" min="0" ref="weightInput"
@@ -47,8 +39,16 @@
                         :style="{'width': inputWidth(set.weight)}" 
                         @keyup.enter.esc="doneEditing"
                         @blur="blur"/>
-                <span class="field mt-1 me-2">LBS</span>
+                <span class="fieldme-2">LBS</span>
             </div>
+            <!-- <div class="hold d-flex flex-column align-items-center">
+                <input class="prop form-control form-control-sm me-2" type="number" min="0" ref="holdInput"
+                        v-model="set.holdSeconds"
+                        :style="{'width': inputWidth(set.holdSeconds)}" 
+                        @keyup.enter.esc="doneEditing"
+                        @blur="blur"/>
+                <span class="field me-2">HOLD</span>
+            </div> -->
             <!-- <img class="history-button"
                     src='/icon/chart-line-solid.png' width="24" height="24"
                     @click.prevent="showHistory"/> -->
@@ -174,7 +174,7 @@ export default {
 
 <style scoped>
 .exercise-set {
-    gap: 8px;
+    gap: 4px;
 }
 
 .exercise-set.complete {
@@ -182,7 +182,8 @@ export default {
 }
 
 .set-number {
-    margin-right: 2px;
+    margin-top: 2px;
+    margin-right: 4px;
     line-height: 30px;
     width: 30px;
     height: 30px;
@@ -200,13 +201,13 @@ export default {
 }
 
 .variations:not(.picks) {
-    max-width: 156px;
+    max-width: 228px;
     margin-left: 34px;
     line-height: 20px;
 }
 
 .variations.picks {
-    max-width: 222px;
+    max-width: 278px;
     white-space: nowrap;
     overflow: scroll;
 }
@@ -226,8 +227,9 @@ export default {
 }
 
 .prop {
-    min-width: 40px;
+    min-width: 68px;
     text-align: center;
+    font-size: 18px;
 }
 
 .field {
@@ -244,6 +246,10 @@ input::-webkit-inner-spin-button {
 /* Firefox */
 input[type=number] {
   -moz-appearance: textfield;
+}
+
+.button-group {
+    margin-top: 2px;
 }
 
 .button-group:not(.active) {

@@ -159,6 +159,7 @@ function onResize() {
     --pill-background-selected: #BAD8F1;
     --task-color: #F4511E;
     --goal-color: #4285F4;
+    --workout-red: #E25555;
     --form-header-hover: #005A9E;
     --hover-gray: #F5F5F5;
     --active-gray: rgb(60, 64, 67, .1);
