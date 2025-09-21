@@ -15,8 +15,11 @@
             </div>
         </div>
         <div class="d-flex flex-row flex-grow-1">
-            <span class="set-number" :class="{ active: isActive }"
-                    @click="activeSetID = set.id">{{ setNumber }}</span>
+            <span v-if="!isProcessing" class="set-number" :class="{ active: isActive }"
+            @click="activeSetID = set.id">{{ setNumber }}</span>
+            <div>
+                <div v-if="isProcessing" class="loader"></div>
+            </div>
             <div class="reps d-flex flex-column align-items-center">
                 <input class="prop form-control form-control-sm me-2" type="number" min="0" ref="repsInput"
                         v-model="set.reps"
@@ -92,6 +95,7 @@ export default {
             appStore: undefined,
             workoutStore: undefined,
             showVariationSelector: false,
+            isProcessing: false
         }
     },
     created: function() {
@@ -152,12 +156,16 @@ export default {
             }
         },
         deleteSet() {
+            this.isProcessing = true;
             var data = { 
                 ...this.set,
                 isDeleted: true
             };
             this.$emit('removeActiveSet');
-            this.workoutStore.saveSet(data);
+            this.workoutStore.saveSet(data)
+            .then(result => {
+                this.isProcessing = false;
+            });
         },
         blur(e) {
             if (!e.relatedTarget || !e.relatedTarget.classList.contains("prop")) {
@@ -165,7 +173,11 @@ export default {
             }
         },
         save() {
-            this.workoutStore.saveSet(this.set);
+            this.isProcessing = true;
+            this.workoutStore.saveSet(this.set)
+            .then(result => {
+                this.isProcessing = false;
+            });
         }
     },
 }
@@ -254,6 +266,34 @@ input[type=number] {
 
 .button-group:not(.active) {
     visibility: hidden;
+}
+
+/* Loader */
+.loader {
+    margin-top: 2px;
+    margin-right: 4px;
+    width: 30px;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    border: 4px solid var(--workout-red);
+    animation:
+    l20-1 0.8s infinite linear alternate,
+    l20-2 1.6s infinite linear;
+}
+@keyframes l20-1{
+   0%    {clip-path: polygon(50% 50%,0       0,  50%   0%,  50%    0%, 50%    0%, 50%    0%, 50%    0% )}
+   12.5% {clip-path: polygon(50% 50%,0       0,  50%   0%,  100%   0%, 100%   0%, 100%   0%, 100%   0% )}
+   25%   {clip-path: polygon(50% 50%,0       0,  50%   0%,  100%   0%, 100% 100%, 100% 100%, 100% 100% )}
+   50%   {clip-path: polygon(50% 50%,0       0,  50%   0%,  100%   0%, 100% 100%, 50%  100%, 0%   100% )}
+   62.5% {clip-path: polygon(50% 50%,100%    0, 100%   0%,  100%   0%, 100% 100%, 50%  100%, 0%   100% )}
+   75%   {clip-path: polygon(50% 50%,100% 100%, 100% 100%,  100% 100%, 100% 100%, 50%  100%, 0%   100% )}
+   100%  {clip-path: polygon(50% 50%,50%  100%,  50% 100%,   50% 100%,  50% 100%, 50%  100%, 0%   100% )}
+}
+@keyframes l20-2{ 
+  0%    {transform:scaleY(1)  rotate(0deg)}
+  49.99%{transform:scaleY(1)  rotate(135deg)}
+  50%   {transform:scaleY(-1) rotate(0deg)}
+  100%  {transform:scaleY(-1) rotate(-135deg)}
 }
 
 </style>

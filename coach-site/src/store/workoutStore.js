@@ -250,24 +250,71 @@ export const useWorkoutStore = defineStore('workout', {
             return saveExercise(model);
         },
         async saveWorkout(model) {
-            return saveWorkout(model);
+            let _this = this;
+            return saveWorkout(model)
+            .then(workout => {
+                if (workout) {
+                    replaceOrAddItem(workout, _this.workouts);
+                    sortAsc(_this.workouts);
+                    return {
+                        data: workout,
+                        success: true
+                    };
+                }
+            });
         },
         async copyAndStartWorkout(workoutID, startAt) {
             let _this = this;
             return copyAndStartWorkout(workoutID, startAt)
                 .then(workout => {
                     replaceOrAddItem(workout, _this.workouts);
-                    return workout;
+                    return {
+                        data: workout,
+                        success: true
+                    };
                 });
         },
         async saveSet(model) {
-            return saveSet(model);
+            let _this = this;
+            return saveSet(model)
+            .then(workout => {
+                if (workout) {
+                    replaceOrAddItem(workout, _this.workouts);
+                    sortAsc(_this.workouts);
+                    return {
+                        data: workout,
+                        success: true
+                    };
+                }
+            });
         },
         async logSet(setID, completedAt) {
-            return logSet(setID, completedAt);
+            let _this = this;
+            return logSet(setID, completedAt)
+            .then(workout => {
+                if (workout) {
+                    replaceOrAddItem(workout, _this.workouts);
+                    sortAsc(_this.workouts);
+                    return {
+                        data: workout,
+                        success: true
+                    };
+                }
+            });
         },
         async logAllSets(idWorkoutExercise) {
-            return logAllSets(idWorkoutExercise);
+            let _this = this;
+            return logAllSets(idWorkoutExercise)
+            .then(workout => {
+                if (workout) {
+                    replaceOrAddItem(workout, _this.workouts);
+                    sortAsc(_this.workouts);
+                    return {
+                        data: workout,
+                        success: true
+                    };
+                }
+            });
         },
         async completeWorkout(workoutID, startAt, endAt, createEvent) {
             return completeWorkout(workoutID, startAt, endAt, createEvent);

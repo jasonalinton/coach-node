@@ -39,8 +39,11 @@
             <div>{{ restRemaining }}</div>
             <img src='/icon/goal-icon.png' width="40" height="40" />
         </div>
+            <div v-if="isProcessing" class="d-flex flex-row mt-auto mb-2 justify-content-center position-sticky bottom-0">
+                <div class="loader"></div>
+            </div>
         <!-- Log Buttons -->
-        <div v-if="!restRemaining" class="d-flex flex-row mt-auto ps-2 pe-2 position-sticky bottom-0">
+        <div v-if="!isProcessing && !restRemaining" class="d-flex flex-row mt-auto ps-2 pe-2 position-sticky bottom-0">
             <button type="button" class="btn btn-warning mb-2 flex-grow-1" @click="logSet">Log Set</button>
             <button type="button" class="btn btn-primary mb-2 ms-2" @click="logAllSets">Log All Sets</button>
         </div>
@@ -66,7 +69,8 @@ export default {
             workoutStore: undefined,
             activeSetID: undefined,
             restRemaining: undefined,
-            restIntervalID: undefined
+            restIntervalID: undefined,
+            isProcessing: false
         }
     },
     created: function() {
@@ -155,6 +159,7 @@ export default {
         },
         logSet() {
             //TODO: Can only unlog last logged set
+            this.isProcessing = true;
             let index = this.sets.findIndex(x => x.id == this.activeSetID);
 
             if (this.restSeconds) {
@@ -167,12 +172,19 @@ export default {
 
             let set = this.sets[index];
             let completedAt = (set.iteration) ? undefined : new Date();
-            this.workoutStore.logSet(set.id, completedAt);
             this.activeSetID = undefined;
+            this.workoutStore.logSet(set.id, completedAt)
+            .then(result => {
+                this.isProcessing = false;
+            });
         },
         logAllSets() {
-            this.workoutStore.logAllSets(this.workoutExercise.idWorkoutExercise);
+            this.isProcessing = true;
             this.activeSetID = undefined;
+            this.workoutStore.logAllSets(this.workoutExercise.idWorkoutExercise)
+            .then(result => {
+                this.isProcessing = false;
+            });
         },
     },
     watch: {
@@ -231,5 +243,33 @@ function setActiveSet() {
 
 .rest-timer {
     height: 200px;
+}
+
+/* Loader */
+.loader {
+    margin-top: 2px;
+    margin-right: 4px;
+    width: 30px;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    border: 4px solid var(--workout-red);
+    animation:
+    l20-1 0.8s infinite linear alternate,
+    l20-2 1.6s infinite linear;
+}
+@keyframes l20-1{
+   0%    {clip-path: polygon(50% 50%,0       0,  50%   0%,  50%    0%, 50%    0%, 50%    0%, 50%    0% )}
+   12.5% {clip-path: polygon(50% 50%,0       0,  50%   0%,  100%   0%, 100%   0%, 100%   0%, 100%   0% )}
+   25%   {clip-path: polygon(50% 50%,0       0,  50%   0%,  100%   0%, 100% 100%, 100% 100%, 100% 100% )}
+   50%   {clip-path: polygon(50% 50%,0       0,  50%   0%,  100%   0%, 100% 100%, 50%  100%, 0%   100% )}
+   62.5% {clip-path: polygon(50% 50%,100%    0, 100%   0%,  100%   0%, 100% 100%, 50%  100%, 0%   100% )}
+   75%   {clip-path: polygon(50% 50%,100% 100%, 100% 100%,  100% 100%, 100% 100%, 50%  100%, 0%   100% )}
+   100%  {clip-path: polygon(50% 50%,50%  100%,  50% 100%,   50% 100%,  50% 100%, 50%  100%, 0%   100% )}
+}
+@keyframes l20-2{ 
+  0%    {transform:scaleY(1)  rotate(0deg)}
+  49.99%{transform:scaleY(1)  rotate(135deg)}
+  50%   {transform:scaleY(-1) rotate(0deg)}
+  100%  {transform:scaleY(-1) rotate(-135deg)}
 }
 </style>

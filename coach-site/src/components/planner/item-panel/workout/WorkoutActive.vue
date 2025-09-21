@@ -285,11 +285,11 @@ function saveSettings() {
         id: this.id,
         isUpdated: true,
         startAt: {
-            isUpdated: true,
+            isUpdated: this.startAt != undefined,
             value: this.startAt
         },
         endAt: {
-            isUpdated: true,
+            isUpdated: this.endAt != undefined,
             value: this.endAt
         },
         isTemplate: {
