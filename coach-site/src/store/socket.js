@@ -2,6 +2,7 @@ import { URL } from '../api/api';
 import { HubConnectionBuilder } from '@microsoft/signalr';
 
 var hubConnections = {
+    coachHub: undefined,
     metricHub: undefined,
     goalHub: undefined,
     todoHub: undefined,

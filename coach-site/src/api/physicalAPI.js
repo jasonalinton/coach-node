@@ -1,4 +1,4 @@
-import { URL } from "./api";
+import { URL, postEndpoint } from "./api";
 
 export async function getNutritionHistory() {
     return fetch(`${URL}/api/Physical/GetNutritionHistory`, {
@@ -118,24 +118,7 @@ export async function searchFoodUPC(upc) {
 }
 
 export async function addFoodItemToMeal(model) {
-    // let data = { model };
-
-    return fetch(`${URL}/api/Physical/AddFoodItemToMeal`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(model)
-    })
-    .then((response) => response.json())
-    .then((data) => {
-        if (!data.errorMessage) {
-            return data;
-        } else {
-            this.errorMessage = data.errorMessage;
-        }
-    })
-    .catch((error) => {
-        console.error('Error:', error);
-    });
+    return postEndpoint("Physical", "AddFoodItemToMeal", model);
 }
 
 export async function setFoodItemConsumption(mealID, foodItemID, wasConsumed, dateTime) {

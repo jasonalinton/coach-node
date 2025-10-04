@@ -3,6 +3,7 @@ import { getSocketConnection } from './socket';
 import { getNutritionHistory, getMealsInRange, getRecentFoodItems, getWaterLogs, foodSearchAutoComplete, searchFoodUPC, 
     addFoodItemToMeal, logWater, setMealTime, removeFoodItem } from '../api/physicalAPI';
 import { sortAsc, replaceOrAddItem, removeItemByID } from '../../utility';
+import { postEndpoint } from '../api/api';
 
 let initialized = false;
 
@@ -59,7 +60,8 @@ export const usePhysicalStore = defineStore('physical', {
             return result;
         },
         async addFoodItemToMeal(model) {
-            addFoodItemToMeal(model);
+            postEndpoint("Physical", "AddFoodItemToMeal", model)
+                .then(this.onResponse);
         },
         async logWater(amountFLOZ, dateTime, mealID) {
             logWater(amountFLOZ, dateTime, mealID);
@@ -69,6 +71,33 @@ export const usePhysicalStore = defineStore('physical', {
         },
         async removeFoodItem(mealID, foodItemID) {
             removeFoodItem(mealID, foodItemID);
+        },
+        onResponse(response) {
+            if (response.updates)
+                this.runUpdates(response.updates);
+                return response.result;
+        },
+        runUpdates(updates) {
+            let _this = this;
+            if (updates.meals) {
+                updates.meals.forEach(meal => {
+                    replaceOrAddItem(meal, _this.meals);
+                    let mealHistory = {
+                        id: meal.id,
+                        name: meal.name,
+                        dateTime: meal.dateTime,
+                        calories: meal.calories,
+                        carbs: meal.carbohydrates,
+                        protein: meal.protein,
+                        fat: meal.fat
+                    }
+                    replaceOrAddItem(mealHistory, _this.mealHistories);
+                })
+                sortAsc(_this.meals);
+            }
+            if (updates.foodItems) {
+                
+            }
         },
         connectSocket() {
             if (!initialized) {

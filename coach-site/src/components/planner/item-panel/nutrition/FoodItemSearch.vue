@@ -1,14 +1,11 @@
 <template>
     <div class="food-item-search d-flex flex-column flex-grow-1 overflow-scroll">
-        <img class="icon-button"
-             src='/icon/previous.png' width="20" height="20"
-             @click.prevent="$emit('back')"/>
-        <div class="pt-2 ms-2 me-2 sticky-top head">
-            <div class="d-flex flex-row">
-                <input id="title" class="textbox" type="text" ref="text"  placeholder="Search"
+        <div class="pt-2 ms-2 me-2 mb-2 sticky-top head">
+            <div class="d-flex flex-row mb-2">
+                <input id="food-search-input" class="title textbox" type="text" ref="text"  placeholder="Search"
                         v-model.trim.lazy="searchTerm" 
                         @keyup.enter="search"/>
-                <input id="quantity" class="textbox ms-1" type="number" placeholder="#"
+                <input id="quantity" class="quantity textbox ms-1" type="number" placeholder="#"
                         v-model.trim.lazy="quantity" />
             </div>
             <RadioButton :initiallySelected="tab" 
@@ -193,7 +190,13 @@ async function addFoodItem(foodItem, type) {
 </script>
 
 <style scoped>
-#quantity {
+.textbox {
+    font-size: 16px;
+    line-height: 16px;
+    height: 32px;
+}
+
+.quantity {
     width: 60px;
 }
 
