@@ -33,3 +33,4 @@ app.mount("#app");
 // https://stackoverflow.com/questions/31096130/how-to-json-stringify-a-javascript-date-and-preserve-timezone
 // Send an unspecified date when serializing to JSON
 Date.prototype.toJSON = function(){ return moment(this).format().slice(0, -6); }
+String.prototype.toDate = function() { return new Date(this); }
