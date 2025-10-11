@@ -258,6 +258,7 @@ export default {
             let repeatIDs = this.iterations.filter(x => x.isRepeat).map(x => x.repeatID);
             let viewModels = [];
 
+            // StartAt is beginning of Start[Date] & EndAt is beginning of End[Date]
             let iterations = this.iterations.filter(iteration => {
                 return +(new Date(iteration.startAt)) == +start && 
                 +startOfDay((new Date(iteration.endAt))) == +startOfDay(end)

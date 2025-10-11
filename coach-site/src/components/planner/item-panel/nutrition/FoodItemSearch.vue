@@ -177,7 +177,7 @@ async function addFoodItem(foodItem, type) {
         mealID: (this.meal.id > 0) ? this.meal.id : undefined,
         meal: this.meal.name,
         foodName: (['upc','recent'].includes(type)) ? foodItem.name : foodItem.food_name,
-        nIXItemID: (type == "branded") ? foodItem.nix_item_id : undefined,
+        nutritionixID: (type == "branded") ? foodItem.nix_item_id : undefined,
         unit: (['upc','recent'].includes(type)) ? foodItem.unit : foodItem.serving_unit,
         quantity: this.quantity,
         dateString: datetime.toLocaleString(),

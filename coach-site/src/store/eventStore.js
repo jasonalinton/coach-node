@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { postEndpoint } from '../api/api'
 import { getEvent, getEvents } from '../api/eventAPI'
 import { removeItemByID, replaceOrAddItem, sortAsc } from '../../utility'
 import { getSocketConnection } from './socket'
@@ -40,6 +41,42 @@ export const useEventStore = defineStore('event', {
                 })
             }
             return this.events;
+        },
+        async updateEvent(eventID, text, start, end) {
+            let _this = this;
+            return postEndpoint("Event", "UpdateEvent", {eventID, text, start, end})
+                .then(response => {
+                    if (response.result) {
+                        replaceOrAddItem(response.result, _this.events);
+                    }
+                    return response;
+                })
+                .then(this.onResponse);
+        },
+        onResponse(response) {
+            if (response.updates)
+                this.runUpdates(response.updates);
+                return response.result;
+        },
+        runUpdates(updates) {
+            let _this = this;
+            if (updates.events) {
+                updates.events.forEach(event => {
+                    replaceOrAddItem(event, _this.events);
+                })
+                sortAsc(_this.events);
+            }
+            if (updates.iterations) {
+                updates.iterations.forEach(iteration => {
+                    _this.events.forEach(_event => {
+                        var containsIteration = _event.iterations.some(_iteration => _iteration.id == iteration.id);
+                        if (containsIteration) {
+                            replaceOrAddItem(iteration, _event.iterations);
+                            sortAsc(_event.iterations);
+                        }
+                    });                       
+                });
+            }
         },
         connectSocket() {
             if (!initialized) {
