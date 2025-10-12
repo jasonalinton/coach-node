@@ -104,6 +104,16 @@ export let EVENTTYPE = {
     REPETITIVE: 138
 };
 
+export let TODO_ACTIVITY_TYPE = {
+    LOG: 157,
+    SLEEP: 153,
+    BRIEFING: 154,
+    MEAL: 155,
+    WORKOUT: 156,
+    EXERCISE: 158,
+    WATER: 159,
+};
+
 export let BLURBTYPE = {
     ADVICE: 162,
     REASON: 163,
