@@ -4,6 +4,7 @@ import { getWorkoutInfo, getWorkout, getWorkouts, getExercises, getWorkoutIDFrom
     saveSet, logSet, logAllSets, completeWorkout, repositionExercise } from '../api/workoutAPI'
 import { replaceOrAddItem, removeItemByID, sortAsc, sortNumAsc, getNextNewID } from '../../utility';
 import { getSocketConnection } from './socket'
+import { postEndpoint } from '../api/api';
 
 let initialized = false;
 
@@ -11,6 +12,7 @@ export const useWorkoutStore = defineStore('workout', {
     state: () => ({
         workouts: [],
         exercises: [],
+        sets: [],
         variations: [],
         muscleGroups: [],
         muscles: [],
@@ -134,21 +136,26 @@ export const useWorkoutStore = defineStore('workout', {
         },
         getExerciseHistory(idExercise, variationIDs) {
             let _this = this;
+            variationIDs = variationIDs || [];
             let variationIDString = sortNumAsc(variationIDs).toString();
 
             getExerciseHistory(idExercise, variationIDs)
             .then(result => {
-                let history = this.exerciseHistory.find(x => {
+                let index = this.exerciseHistory.findIndex(x => {
                     let xVariationString = sortNumAsc(x.variationIDs).toString();
                     return (x.idExercise == idExercise) && variationIDString == xVariationString;
                 });
-                if (!history) {
-                    _this.exerciseHistory.push({
-                        idExercise,
-                        variationIDs,
-                        history: result
-                    });
-                }
+                let history = {
+                    idExercise,
+                    variationIDs,
+                    history: result
+                };
+                if (index == -1) {
+                    _this.exerciseHistory.push(history);
+                } 
+                // else {
+                //     _this.exerciseHistory.splice(index, 1, history);
+                // }
             });
             let history = this.exerciseHistory.find(x => {
                 let xVariationString = sortNumAsc(x.variationIDs).toString();
@@ -156,6 +163,20 @@ export const useWorkoutStore = defineStore('workout', {
             });
 
             return (history) ? history.history : [];
+        },
+        getSetsForIterations(iterationIDs) {
+            let sets = this.sets.filter(set => {
+                return set.idIteration && iterationIDs.includes(set.id);
+            });
+            return sets;
+        },
+        getExerciseIDOfTodo(idTodo) {
+            var exercise = this.exercises.find(x => x.idTodo == idTodo);
+            return (exercise) ? exercise.id : undefined;
+        },
+        getExerciseForTodo(idTodo) {
+            var exercise = this.exercises.find(x => x.idTodo == idTodo);
+            return exercise;
         },
         addVariation(name, typeID, typeName) {
             let variation_existing = this.variations.find(v => v.name == name && v.type.id == typeID);
@@ -349,6 +370,36 @@ export const useWorkoutStore = defineStore('workout', {
                 });
                 this.displaySettings.push(settings);
                 return settings;
+            }
+        },
+        async createFitnessGoal(idGoalTimePairTodo, frequency, sets, reps, weight, time) {
+            let model = { idGoalTimePairTodo, frequency, sets, reps, weight, time};
+            postEndpoint("Physical", "CreateFitnessGoal", model)
+                .then(this.onResponse);
+        },
+        async saveFitnessGoal(idFitnessGoal, frequency, sets, reps, weight, time) {
+            let model = { idFitnessGoal, frequency, sets, reps, weight, time};
+            postEndpoint("Physical", "SaveFitnessGoal", model)
+                .then(this.onResponse);
+        },
+        onResponse(response) {
+            if (response.updates)
+                this.runUpdates(response.updates);
+                return response.result;
+        },
+        runUpdates(updates) {
+            let _this = this;
+            if (updates.workouts) {
+                updates.workouts.forEach(workout => {
+                    replaceOrAddItem(workout, _this.workouts);
+                })
+                sortAsc(_this.workouts);
+            }
+            if (updates.exercises) {
+                updates.exercises.forEach(exercise => {
+                    replaceOrAddItem(exercise, _this.exercises);
+                })
+                sortAsc(_this.exercises);
             }
         },
         connectSocket() {

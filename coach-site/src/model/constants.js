@@ -152,3 +152,8 @@ export let WORKOUT_VIEWS = {
     EXERCISE_LIST: "exerciseList",
     EXERCISE_FORM: "exerciseForm"
 }
+
+export let GOAL_TYPE = {
+    GOAL_TYPE: 182,
+    FITNESS: 183,
+}

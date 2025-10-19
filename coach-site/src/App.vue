@@ -165,6 +165,7 @@ function onResize() {
     --active-gray: rgb(60, 64, 67, .1);
     --dark-gray: darkgray;
     --dark-gray-text: #3F3F3F;
+    --gray-text: #747474;
 }
 
 body { 

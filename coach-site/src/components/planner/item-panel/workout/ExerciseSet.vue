@@ -44,25 +44,6 @@
                         @blur="blur"/>
                 <span class="fieldme-2">LBS</span>
             </div>
-            <!-- <div class="hold d-flex flex-column align-items-center">
-                <input class="prop form-control form-control-sm me-2" type="number" min="0" ref="holdInput"
-                        v-model="set.holdSeconds"
-                        :style="{'width': inputWidth(set.holdSeconds)}" 
-                        @keyup.enter.esc="doneEditing"
-                        @blur="blur"/>
-                <span class="field me-2">HOLD</span>
-            </div> -->
-            <!-- <img class="history-button"
-                    src='/icon/chart-line-solid.png' width="24" height="24"
-                    @click.prevent="showHistory"/> -->
-            <!-- <div class="rest d-flex flex-column align-items-center">
-                <input class="prop form-control form-control-sm me-1" type="number" min="0" ref="restInput"
-                        v-model="set.restSeconds"
-                        :style="{'width': inputWidth(set.restSeconds)}" 
-                        @keyup.enter.esc="doneEditing"
-                        @blur="save(set)"/>
-                <span class="field mt-1">REST</span>
-            </div> -->
             <!-- Edit & Delete Buttons -->
             <div class="button-group d-flex flex-column" :class="{ active: isActive }">
                 <img class="icon-button" 
@@ -241,7 +222,7 @@ export default {
 .prop {
     min-width: 68px;
     text-align: center;
-    font-size: 18px;
+    font-size: 16px;
 }
 
 .field {

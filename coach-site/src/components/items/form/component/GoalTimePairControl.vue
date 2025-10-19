@@ -81,7 +81,7 @@
                     <TimeControl class="time-control" :class="{ 'invalid': !updatedTimePair.startTime.isValid}"
                                  label="Start" :time="updatedTimePair.startTime.value" 
                                  title="Start" endpoint="Start" type="date" :canRemove="false" :isSet="!updatedTimePair.startTime.isRemoved"
-                                 @addTime="addTime" @setTime="setTime" @removeTime="removeTime(updatedTimePair.startTime)"/>
+                                 @addTime="addTime" @setTime="setTime"/>
                 </div>            
                 <div class="end d-flex flex-column">
                     <div class="d-flex flex-row justify-content-space-between">
@@ -136,7 +136,7 @@
 import TimeControl from '../../../controls/time/TimeControl.vue';
 import TodoFormItem from '../todo/TodoFormItem.vue';
 import { clone } from '../../../../../utility'
-import { timeModelToString, toDateString, firstDayOfWeek, lastDayOfWeek, firstDayOfMonth, 
+import { timeModelToString, today, firstDayOfWeek, lastDayOfWeek, firstDayOfMonth, 
     lastDayOfMonth, endOfDay, firstDayOfYear, lastDayOfYear } from '../../../../../utility/timeUtility'
 import { TIMEFRAME, MOMENT, TIMETYPE } from '../../../../model/constants'
 import { timeframes, inheritanceTypes } from '../../../../model/types'
@@ -307,16 +307,18 @@ function correctTimes() {
             start.dateTime = lastDayOfYear(end.dateTime).toJSON();
             end.dateTime = endOfDay(lastDayOfYear(end.dateTime)).toJSON();
         }
+    } else if (value == this.TIMEFRAME.MILESTONE) {
+        this.updatedTimePair.endTime.value = undefined;
     }
 
 
-    if (new Date(start.dateTime) != new Date(this.timePair.startTime.dateTime)) {
+    if (new Date(start.dateTime) != new Date(this.updatedTimePair.startTime.oldValue.dateTime)) {
         this.updatedTimePair.startTime.isEdited = true;
     } else {
         this.updatedTimePair.startTime.isEdited = false;
     }
 
-    if (new Date(end.dateTime) != new Date(this.timePair.endTime.dateTime)) {
+    if (new Date(end.dateTime) != new Date(this.updatedTimePair.endTime.oldValue.dateTime)) {
         this.updatedTimePair.endTime.isEdited = true;
     } else {
         this.updatedTimePair.endTime.isEdited = false;
@@ -342,7 +344,7 @@ function addTime(endpoint) {
     }
     var idMoment = this.MOMENT.DATETIME;
 
-    var dateTime = toDateString(new Date().toJSON());
+    var dateTime = today().toJSON();
     this.updatedTimePair[`${endpoint.toLowerCase()}Time`] = {
             isEdited: false,
             isRemoved: false,
@@ -422,8 +424,13 @@ function setTime(time, endpoint) {
     this.validateTimes();
 }
 
-function removeTime(time) {
-    time.isRemoved = true;
+function removeTime(time, moment) {
+    if (time.value.id) {
+        time.isEdited = false;
+        time.isRemoved = true;
+    } else {
+        this.updatedTimePair.endTime.value = undefined;
+    }
 }
 
 function validateTimes() {

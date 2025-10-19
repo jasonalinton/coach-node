@@ -7,6 +7,7 @@ import { getSocketConnection } from './socket'
 import { useMetricStore } from '@/store/metricStore'
 import { useTodoStore } from '@/store/todoStore'
 import { useRoutineStore } from '@/store/routineStore'
+import { GOAL_TYPE } from '../model/constants';
 
         
 
@@ -84,6 +85,13 @@ export const useGoalStore = defineStore('goal', {
                 return index > -1;
             });
             return goals;
+        },
+        getFitnessGoals() {
+            let fitnessGoals = this.goals.filter(goal => {
+                let isFitness = goal.types.some(type => type.id == GOAL_TYPE.FITNESS);
+                return isFitness;
+            });
+            return fitnessGoals;
         },
         repositionItem(parentType, itemType, goalID, metricID, newPosition) {
             repositionItem(parentType, itemType, goalID, metricID, newPosition);

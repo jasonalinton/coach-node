@@ -1,6 +1,10 @@
 import moment from "moment";
 import date from 'date-and-time';
 
+export function sum(array, prop) {
+    return array.reduce((accumulator, currentValue) => accumulator + currentValue[prop], 0,);
+}
+
 export function currency(number) {
     return new Intl.NumberFormat([ ], { style: 'currency', currency: 'USD', currencyDisplay: 'narrowSymbol' }).format(number);
 }

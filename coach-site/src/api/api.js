@@ -15,11 +15,12 @@ export async function postEndpoint(controller, endpoint, data) {
         body: JSON.stringify(data)
     })
     .then(response => response.json())
-    .then((data) => {
-        if (data.status.success) {
-            return data;
+    .then((response) => {
+        if (response.status.success) {
+            return response;
         } else {
-            console.error('Error:', data.status.errorMessage);
+            console.error('Error:', response.status.errorMessage);
+            return response;
         }
     })
     .catch(error => {
