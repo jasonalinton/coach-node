@@ -1,7 +1,7 @@
 <template>
-    <div class="fitness-goals d-flex flex-column p-3">
+    <div class="fitness-goals d-flex flex-column p-2 flex-grow-1 overflow-scroll">
         <div class="label d-flex flex-row mb-2">
-            <img class="icon-button"
+            <img class="icon-button me-2"
                  src='/icon/previous.png' width="20" height="20"
                  @click.prevent="back"/>
             <span>Fitness Goals</span>
