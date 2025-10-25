@@ -75,7 +75,7 @@ function isTimePairActive(timepair) {
     if (timepair.startTime && (+timepair.startTime.dateTime.toDate() <= +this.selectedDate)) {
         isTimePairActive = true
     }
-    if (timepair.endTime && (+timepair.endTime.dateTime.toDate() > +this.selectedDate)) {
+    if (timepair.endTime && (+timepair.endTime.dateTime.toDate() < +this.selectedDate)) {
         isTimePairActive = false;
     }
     return isTimePairActive;
