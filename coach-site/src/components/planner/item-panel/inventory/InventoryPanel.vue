@@ -10,7 +10,7 @@
                              <div class="label text-start">{{ metric }}</div>
                              <LogItemView class="log-item d-flex flex-row flex-grow-1 mt-1" 
                                           v-for="(logItem, index2) in list" :key="index2"
-                                          :logItem="logItem"
+                                          :logItemID="logItem.id"
                                           :clearValues="clear"
                                           :clearMinutes="clearMinutes"
                                           @selectLogItem="selectLogItem"/>
