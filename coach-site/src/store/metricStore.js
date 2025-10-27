@@ -61,7 +61,7 @@ export const useMetricStore = defineStore('metric', {
             return clone(this.logItems);
         },
         getLogItem(id) {
-            return clone(this.logItems.find(x => x.id == id));
+            return this.logItems.find(x => x.id == id);
         },
         async logLogItem(model) {
             let _this = this;

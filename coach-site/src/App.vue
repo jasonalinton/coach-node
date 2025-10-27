@@ -322,4 +322,25 @@ body {
 .background {
     background-color: white;
 }
+
+/* pills */
+.app-pill {
+    cursor: pointer;
+    padding: 4px 4px;
+    line-height: 14px;
+    font-size: 14px;
+    background-color: var(--pill-default);
+    border-radius: 4px;
+    border: transparent solid 1px;
+}
+.app-pill:hover {
+    border: var(--pill-border-hover) solid 1px;
+}
+.app-pill.selected {
+    border: var(--pill-border-hover) solid 1px;
+    background-color: var(--pill-background-selected);
+}
+.app-pill:active {
+    background-color: var(--pill-background-selected);
+}
 </style>
