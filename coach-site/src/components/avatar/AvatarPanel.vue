@@ -35,7 +35,7 @@ export default {
     },
     data: function () {
         return {
-            selectedPanel: "mood",
+            selectedPanel: "energy",
             panels: [ 
                 {
                     text: "mood",

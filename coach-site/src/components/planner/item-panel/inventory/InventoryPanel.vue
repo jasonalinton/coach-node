@@ -51,7 +51,7 @@ export default {
             selectedPanel: 'list',
             selectedLogItemID: undefined,
             inventoryList: [],
-            clearMinutes: 15,
+            clearMinutes: 60,
         }
     },
     created: function() {

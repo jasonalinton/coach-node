@@ -35,8 +35,8 @@
                       type="text"
                       placeholder="Blurb"
                       v-model.lazy="blurb"
-                      spellcheck="true"
-                      @blur="blurbBlurred"></textarea>
+                      spellcheck="true">
+            </textarea>
         </div>
     </div>
 </template>
@@ -52,11 +52,10 @@ export default {
     components: { DateTimeSelector },
     props: {
         logItemID: Number,
-        // logItem: Object,
         clearValues: Number,
         clearMinutes: {
             type: Number,
-            default: 15
+            default: 60
         }
     },
     data: function () {
@@ -74,13 +73,11 @@ export default {
     },
     created: function() {
        this.metricStore = useMetricStore();
-    //    this.setProps();
     },
     computed: {
         logItem() {
             if (this.metricStore) {
                 let logItem = this.metricStore.getLogItem(this.logItemID);
-                console.log(logItem);
                 return logItem;
             }
             return undefined;
@@ -138,7 +135,6 @@ export default {
             this.setTimeout(this.clearMinutes);
         },
         updateEntryDateTime,
-        blurbBlurred,
         clear() {
             this.setProps(true);
         },
@@ -171,7 +167,7 @@ export default {
                 this.updatedDateTime = this.entryDateTime.toJSON();
             }
         },
-        blurb(value, oldValue) {
+        blurb(value) {
             if (value == null || this.lastEntry.reason == value)
                 return;
             let model = {
@@ -213,6 +209,11 @@ function setProps(clear) {
                     let minutesSince = getDurationInMinutes(lastEntryDateTime, new Date());
                     let minutesLeft = this.clearMinutes - minutesSince;
                     this.setTimeout(minutesLeft);
+                } else {
+                    this.entryDateTime = undefined;
+                    this.updatedDateTime = undefined;
+                    this.blurb = null;
+                    this.showAdditionalValues = false;
                 }
             }
         }
@@ -237,10 +238,6 @@ function updateEntryDateTime(value) {
     this.updatedDateTime = value;
     this.entryDateTime = new Date(value);
     this.metricStore.logLogItem(model);
-}
-
-function blurbBlurred() {
-
 }
 
 </script>

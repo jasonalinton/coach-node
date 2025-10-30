@@ -255,12 +255,19 @@ body {
 .textbox, .textarea, .select, .date-picker {
     width: 100%;
     font-size: 14px;
-    line-height: 14px;
+    line-height: 16px;
     padding: 2px 8px;
     /* padding-top: 4px; */
     /* color: #343434; */
     color: #212529;
     border-radius: 4px;
+}
+
+@media only screen and (max-width: 576px) {
+    .textbox, .textarea, .select, .date-picker {
+        font-size: 16px;
+        line-height: 22px;
+    }
 }
 
 .textarea {

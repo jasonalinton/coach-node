@@ -6,6 +6,7 @@ import { getSocketConnection } from './socket'
 import { useGoalStore } from '@/store/goalStore'
 import { useTodoStore } from '@/store/todoStore'
 import { useRoutineStore } from '@/store/routineStore'
+import { postEndpoint } from '../api/api';
 
 let initialized = false;
 
@@ -61,14 +62,16 @@ export const useMetricStore = defineStore('metric', {
             return clone(this.logItems);
         },
         getLogItem(id) {
-            return this.logItems.find(x => x.id == id);
+            return clone(this.logItems.find(x => x.id == id));
         },
         async logLogItem(model) {
             let _this = this;
-            return logLogItem(model)
-            .then((logItem) => {
-                replaceOrAddItem(logItem, _this.logItems);
-            });
+            return postEndpoint("Metric", "LogLogItem", model)
+                .then((response) => {
+                    if (response.result)
+                        replaceOrAddItem(response.result, _this.logItems);
+                    this.onResponse(response);
+                });
         },
         async deleteLogEntry(logEntryID) {
             let _this = this;
@@ -76,6 +79,21 @@ export const useMetricStore = defineStore('metric', {
             .then((logItem) => {
                 replaceOrAddItem(logItem, _this.logItems);
             });
+        },
+        onResponse(response) {
+            if (response.updates)
+                this.runUpdates(response.updates);
+                return response.result;
+        },
+        runUpdates(updates) {
+            let _this = this;
+            if (updates.metrics) {
+                updates.metrics.forEach(metric => {
+                    replaceOrAddItem(metric, _this.metrics);
+                })
+                this.initializeItems(updates.metrics);
+                sortAsc(this.metrics);
+            }
         },
         connectSocket() {
             if (!initialized) {
