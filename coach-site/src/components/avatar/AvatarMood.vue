@@ -1,6 +1,6 @@
 <template>
     <div class="avatar-mood w-100">
-        <img src="/avatar/Avatar (Blue Underwear).jpg" width="140"/>
+        <img src="/avatar/mood/My Face.png" width="140"/>
         <div class="d-flex flex-column">
             <LogItemView v-if="moodLogItem" :logItemID="moodLogItem.id" />
         </div>
@@ -30,7 +30,6 @@ export default {
         moodLogItem() {
             if (this.metricStore) {
                 let logItem = this.metricStore.getLogItem(LOG_ITEMS.EMOTIONAL_MOOD);
-                console.log(logItem);
                 return logItem;
             }
             return undefined;

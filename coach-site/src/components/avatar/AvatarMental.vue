@@ -31,7 +31,6 @@ export default {
         energyLogItem() {
             if (this.metricStore) {
                 let logItem = this.metricStore.getLogItem(LOG_ITEMS.MENTAL_ENERGY);
-                console.log(logItem);
                 return logItem;
             }
             return undefined;
@@ -39,7 +38,6 @@ export default {
         clarityLogItem() {
             if (this.metricStore) {
                 let logItem = this.metricStore.getLogItem(LOG_ITEMS.MENTAL_CLARITY);
-                console.log(logItem);
                 return logItem;
             }
             return undefined;
