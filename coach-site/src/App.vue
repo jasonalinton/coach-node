@@ -296,6 +296,11 @@ body {
     border: 1px solid rgba(0, 0, 0, .08) !important;
 }
 
+.form-select-sm {
+    font-size: 14px;
+    line-height: 14px;
+}
+
 .add-btn {
     width: 55px;
     height: 28px;

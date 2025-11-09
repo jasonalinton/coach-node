@@ -71,33 +71,48 @@
         <div v-if="['UPC'].includes(tab) && upc.length > 0" 
              class="upc d-flex flex-column">
             <span class="text-start ms-2">UPC</span>
-            <div v-for="(item, index) in upc" :key="index"
-                    class="item d-flex flex-row align-items-center"
+            <FoodSearchItem v-for="(item, index) in upc" :key="index"
+                            :item="item" :meal="meal" />
+            <!-- <div v-for="(item, index) in upc" :key="index"
+                    class="item d-flex flex-column align-items-center"
                  @click="addFoodItem(item, 'upc')">
-                <img class="align-self-start" :src="item.thumbURL" height="40" width="40"/>
-                <div class="d-flex flex-column flex-grow-1">
-                    <span class="name text-start">{{ item.name }}</span>
-                    <div class="serving d-flex flex-row">
-                        <span>{{ item.brandName }}</span>
-                        <span>{{ item.quantity }}</span>
-                        <span class="ms-1">{{ item.unit }}</span>
-                    </div>
+                 <div class="d-flex flex-row">
+                     <img class="align-self-start" :src="item.thumbURL" height="40" width="40"/>
+                     <div class="d-flex flex-column flex-grow-1">
+                         <span class="name text-start">{{ item.name }}</span>
+                         <div class="serving d-flex flex-row">
+                             <span>{{ item.brandName }}</span>
+                             <span>{{ item.quantity }}</span>
+                             <span class="ms-1">{{ item.unit }}</span>
+                         </div>
+                     </div>
+                     <span class="float-end">{{ float(item.calories,0) }}</span>
+                 </div>
+                 <div class="input-wrrapper d-flex flex-row">
+                    <input class="quantity textbox ms-1" type="number" placeholder="#"
+                           v-model.trim.lazy="item.quantity"
+                           @click.stop />
+                    <select :id="`upc-search`" class="form-select panel-select" aria-label="select" v-model="item.unit"
+                            @click.stop> 
+                        <option :value="'Gram'">None</option> 
+                        <option v-for="(unit, index) in item.units" :key="index" :value="unit.unit">{{unit.unit}}</option> 
+                    </select>
                 </div>
-                <span class="float-end">{{ float(item.calories,0) }}</span>
-            </div>
+            </div> -->
         </div>
     </div>
 </template>
 
 <script>
-import { usePhysicalStore } from '../../../../store/physicalStore';
 import RadioButton from '../../../controls/button/RadioButton.vue';
+import FoodSearchItem from './FoodSearchItem.vue';
+import { usePhysicalStore } from '../../../../store/physicalStore';
 import { setTimeFromDate } from '../../../../../utility/timeUtility';
 import { float } from '../../../../../utility';
 
 export default {
     name: '',
-    components: { RadioButton },
+    components: { RadioButton, FoodSearchItem },
     props: {
         meal: Object
     },
@@ -179,7 +194,7 @@ async function addFoodItem(foodItem, type) {
         foodName: (['upc','recent'].includes(type)) ? foodItem.name : foodItem.food_name,
         nutritionixID: (type == "branded") ? foodItem.nix_item_id : undefined,
         unit: (['upc','recent'].includes(type)) ? foodItem.unit : foodItem.serving_unit,
-        quantity: this.quantity,
+        quantity: foodItem.quantity,
         dateString: datetime.toLocaleString(),
         foodItem: (['upc','recent'].includes(type)) ? foodItem : undefined
     }

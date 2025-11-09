@@ -56,11 +56,11 @@ export const usePhysicalStore = defineStore('physical', {
             return result;
         },
         async searchFoodUPC(upc) {
-            let result = await searchFoodUPC(upc);
-            return result;
+            return postEndpoint("Physical", "SearchFoodUPC", { upc })
+                .then(this.onResponse);
         },
         async addFoodItemToMeal(model) {
-            postEndpoint("Physical", "AddFoodItemToMeal", model)
+            return postEndpoint("Physical", "AddFoodItemToMeal", model)
                 .then(this.onResponse);
         },
         async logWater(amountFLOZ, dateTime, mealID) {
@@ -75,7 +75,7 @@ export const usePhysicalStore = defineStore('physical', {
         onResponse(response) {
             if (response.updates)
                 this.runUpdates(response.updates);
-                return response.result;
+            return response.result;
         },
         runUpdates(updates) {
             let _this = this;
