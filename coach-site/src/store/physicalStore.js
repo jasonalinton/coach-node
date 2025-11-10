@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { getSocketConnection } from './socket';
-import { getNutritionHistory, getMealsInRange, getRecentFoodItems, getRecentFoodItems2, getWaterLogs, foodSearchAutoComplete, searchFoodUPC, 
-    addFoodItemToMeal, logWater, setMealTime, removeFoodItem } from '../api/physicalAPI';
+import { getNutritionHistory, getMealsInRange, getWaterLogs, foodSearchAutoComplete, 
+    logWater, setMealTime, removeFoodItem } from '../api/physicalAPI';
 import { sortAsc, replaceOrAddItem, removeItemByID } from '../../utility';
 import { postEndpoint } from '../api/api';
 
@@ -44,12 +44,12 @@ export const usePhysicalStore = defineStore('physical', {
             );
         },
         async getRecentFoodItems() {
-            let result = await getRecentFoodItems();
-            return result;
+            return postEndpoint("Physical", "GetRecentFoodItems")
+                .then(this.onResponse);
         },
         async getRecentFoodItems2() {
-            let result = await getRecentFoodItems2();
-            return result;
+            return postEndpoint("Physical", "GetRecentFoodItems_Refactored")
+                .then(this.onResponse);
         },
         async getWaterLogs() {
             let result = await getWaterLogs();
@@ -61,6 +61,10 @@ export const usePhysicalStore = defineStore('physical', {
         },
         async searchFoodUPC(upc) {
             return postEndpoint("Physical", "SearchFoodUPC", { upc })
+                .then(this.onResponse);
+        },
+        async saveFoodItem(foodItem) {
+            return postEndpoint("Physical", "SaveFoodItem", { model: foodItem })
                 .then(this.onResponse);
         },
         async addFoodItemToMeal(model) {
@@ -143,6 +147,52 @@ export const usePhysicalStore = defineStore('physical', {
                     })
                     sortAsc(_this.meals);
                 });
+            }
+        },
+        createFoodItem() {
+            return {
+                id: null,
+                edamamID: null,
+                nutritionixID: null,
+                name: null,
+                brandName: null,
+                quantity: 1,
+                idUnit: null,
+                unit: null,
+                weight: 1,
+                grams: null,
+                upc: null,
+                thumbURL: null,
+                wasConsumed: false,
+                units: [],
+                calories: null,
+                carbohydrates: null,
+                protein: null,
+                fat: null,
+                calcium: null,
+                cholesterol: null,
+                monounsaturatedFat: null,
+                polyunsaturatedFat: null,
+                saturatedFat: null,
+                transFat: null,
+                iron: null,
+                fiber: null,
+                folate: null,
+                potassium: null,
+                magnesium: null,
+                sodium: null,
+                niacinB3: null,
+                phosphorus: null,
+                riboflavinB2: null,
+                sugars: null,
+                thiaminB1: null,
+                vitaminE: null,
+                vitaminA: null,
+                vitaminB12: null,
+                vitaminB6: null,
+                vitaminC: null,
+                vitaminD: null,
+                vitaminK: null
             }
         }
     },

@@ -42,3 +42,6 @@ String.prototype.toCamelCase = function() {
 String.prototype.capitalize = function() { 
   return this.charAt(0).toUpperCase() + this.slice(1);
 }
+Number.prototype.round = function() { 
+  return Math.round(this);
+}

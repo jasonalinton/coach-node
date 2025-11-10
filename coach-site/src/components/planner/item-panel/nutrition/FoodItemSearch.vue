@@ -5,8 +5,9 @@
                 <input id="food-search-input" class="title textbox" type="text" ref="text"  placeholder="Search"
                         v-model.trim.lazy="searchTerm" 
                         @keyup.enter="search"/>
-                <input id="quantity" class="quantity textbox ms-1" type="number" placeholder="#"
-                        v-model.trim.lazy="quantity" />
+                <button class="add-btn my-auto ms-1" type="button" @click="createFoodItem">
+                    <img class="m-auto" src="/icon/button/add.png" width="10" height="10"/>
+                </button>
             </div>
             <RadioButton :initiallySelected="tab" 
                          :options="tabs"
@@ -17,7 +18,7 @@
              class="recents d-flex flex-column">
             <span class="text-start ms-2">Recents</span>
             <div v-for="(item, index) in recents" :key="index"
-                    class="item d-flex flex-row align-items-center"
+                 class="item d-flex flex-row align-items-center"
                  @click="$emit('selectFoodItem', item)">
                 <img class="align-self-start" :src="item.thumbURL" height="40" width="40"/>
                 <div class="d-flex flex-column flex-grow-1">
@@ -30,6 +31,14 @@
                 </div>
                 <span class="float-end">{{ float(item.calories,0) }}</span>
             </div>
+        </div>
+        <!-- Recents2 -->
+        <div v-if="['Recent2'].includes(tab) && recents2.length > 0" 
+             class="recents d-flex flex-column">
+            <span class="text-start ms-2">Recents</span>
+            <FoodSearchItem v-for="(item, index) in recents2" :key="index"
+                            :item="item" :meal="meal"
+                            @selectFoodItem="$emit('selectFoodItem', $event)" />
         </div>
         <!-- Common -->
         <div v-if="['All', 'Common'].includes(tab) && common.length > 0"
@@ -68,11 +77,14 @@
             </div>
         </div>
         <!-- UPC -->
-        <div v-if="['UPC'].includes(tab) && upc.length > 0" 
-             class="upc d-flex flex-column">
-            <span class="text-start ms-2">UPC</span>
-            <FoodSearchItem v-for="(item, index) in upc" :key="index"
-                            :item="item" :meal="meal" />
+        <div class="upc d-flex flex-column">
+             <div v-if="['UPC'].includes(tab) && upc.length > 0"
+                  class="d-flex flex-column">
+                 <span class="text-start ms-2">UPC</span>
+                 <FoodSearchItem v-for="(item, index) in upc" :key="index"
+                                 :item="item" :meal="meal" />
+            </div>
+            <span v-if="noUPCResult == true">No Results</span>
         </div>
     </div>
 </template>
@@ -95,19 +107,21 @@ export default {
             physicalStore: undefined,
             searchTerm: "",
             quantity: 1,
-            tab: "Recent",
+            tab: "Recent2",
             tabs: [
                 'All',
                 'Recent',
+                'Recent2',
                 'UPC',
-                'Common',
-                'Branded'
+                // 'Common',
+                // 'Branded'
             ],
             recents: [],
             recents2: [],
             common: [],
             branded: [],
-            upc: []
+            upc: [],
+            noUPCResult: undefined
         }
     },
     created: async function() {
@@ -122,6 +136,7 @@ export default {
         clearResults,
         searchFoodItem,
         searchUPC,
+        createFoodItem,
         addFoodItem
     },
     watch: {
@@ -157,7 +172,18 @@ async function searchFoodItem() {
 
 async function searchUPC() {
     let result = await this.physicalStore.searchFoodUPC(this.searchTerm);
-    this.upc = result;
+    if (result) {
+        this.upc = result;
+        this.noUPCResult = false;
+    } else {
+        this.upc = [];
+        this.noUPCResult = true;
+    }
+}
+
+function createFoodItem() {
+    let foodItem = this.physicalStore.createFoodItem();
+    this.$emit('selectFoodItem', foodItem);
 }
 
 async function addFoodItem(foodItem, type) {

@@ -1,13 +1,14 @@
 <template>
     <div class="food-item-search-item item d-flex flex-column align-items-center">
-        <div class="d-flex flex-row justify-content-between align-items-center w-100">
+        <div class="d-flex flex-row justify-content-between align-items-center w-100"
+             @click="$emit('selectFoodItem', item)">
             <img class="align-self-start" :src="item.thumbURL" height="40" width="40"/>
             <div class="d-flex flex-column flex-grow-1">
                 <span class="name text-start">{{ item.name }}</span>
                 <div class="serving d-flex flex-row">
                     <span>{{ item.brandName }}</span>
-                    <span>{{ item.quantity }}</span>
-                    <span class="ms-1">{{ item.unit }}</span>
+                    <!-- <span>{{ item.quantity }}</span>
+                    <span class="ms-1">{{ item.unit }}</span> -->
                 </div>
             </div>
             <span class="float-end">{{ float(item.calories,0) }}</span>
@@ -18,7 +19,7 @@
                     v-model.trim.lazy="quantity" />
             <select class="form-select form-select-sm panel-select ms-1" aria-label="select" v-model="unit"
                     @click.stop> 
-                <option v-for="(unit, index) in item.units" :key="index" :value="index">{{unit.unit}}</option> 
+                <option v-for="(unit, index) in units" :key="index" :value="index">{{unit.text}}</option> 
             </select>
             <button class="add-btn my-auto ms-1" type="button" @click="addFoodItem">
                 <img class="m-auto" src="/icon/button/add.png" width="10" height="10"/>
@@ -42,12 +43,34 @@ export default {
     data: function () {
         return {
             physicalStore: undefined,
-            quantity: 1,
-            unit: 0
+            quantity: 1
         }
     },
     created: async function() {
        this.physicalStore = usePhysicalStore();
+
+       this.quantity = this.item.quantity;
+    },
+    computed: {
+        units() {
+            let units = [];
+            this.item.units.forEach(x => {
+                let unit = { ...x };
+                unit.text = `${x.unit} (${x.grams.round()}g)`;
+                units.push(unit);
+            });
+            return units;
+        },
+        unit() {
+            let unit = 0;
+            for (let i = 0; i < this.units.length; i++) {
+                if (this.units[i].isDefault) {
+                    unit = i;
+                    break;
+                }
+            }
+            return unit;
+        }
     },
     methods: {
         addFoodItem,
@@ -59,16 +82,14 @@ async function addFoodItem() {
     /* Set date to the same day as the meal */
     var datetime = new Date(this.meal.dateTime);
     setTimeFromDate(datetime, new Date());
-
-    this.item.units[this.unit].isSelected = true;
     
     let model = {
         foodItemID: this.item.id,
         mealID: (this.meal.id > 0) ? this.meal.id : undefined,
         meal: this.meal.name,
         foodName: this.item.name,
-        unit: this.item.units[this.unit].unit,
-        grams: this.item.units[this.unit].grams,
+        unit: this.units[this.unit].unit,
+        grams: this.units[this.unit].grams,
         quantity: this.quantity,
         dateString: datetime.toLocaleString(),
         dateTime: datetime,
@@ -76,7 +97,6 @@ async function addFoodItem() {
     }
 
     this.physicalStore.addFoodItemToMeal(model);
-    this.item.units[this.unit].isSelected = false;
 }
 
 </script>
