@@ -71,6 +71,11 @@
                 <FoodItemSearch v-show="selectedPanel == 'foodItemSearch'"
                                 :meal="activeMeal"
                                 :class="{ hide: selectedPanel != 'foodItemSearch'}" 
+                                @selectFoodItem="selectFoodItem"
+                                @back="back"/>
+                <FoodItemForm v-show="selectedPanel == 'foodItemForm'"
+                                :foodItem="activeFoodItem"
+                                :class="{ hide: selectedPanel != 'foodItemForm'}" 
                                 @back="back"/>
             </div>
         </div>
@@ -82,13 +87,14 @@ import { usePlannerStore } from '@/store/plannerStore'
 import { usePhysicalStore } from '@/store/physicalStore'
 import NutrientChart from './NutrientChart.vue';
 import MealItem from './MealItem.vue';
+import FoodItemForm from './FoodItemForm.vue';
 import FoodItemSearch from './FoodItemSearch.vue';
 import { today, endOfDay, setTimeFromDate } from '../../../../../utility/timeUtility';
 import { clone, float } from '../../../../../utility';
 
 export default {
     name: 'NutritionPanel',
-    components: { MealItem, FoodItemSearch, NutrientChart },
+    components: { MealItem, FoodItemSearch, FoodItemForm, NutrientChart },
     props: {
         showHead: {
             type: Boolean,
@@ -101,6 +107,7 @@ export default {
             physicalStore: undefined,
             selectedPanel: "home",
             activeMeal: undefined,
+            activeFoodItem: undefined,
             waterQuantity: undefined,
             isEditWater: false,
             isTimeValid: true,
@@ -217,6 +224,7 @@ export default {
     methods: {
         refresh,
         searchFoodItems,
+        selectFoodItem,
         back,
         float,
         setTimeFromDate,
@@ -241,10 +249,17 @@ function searchFoodItems(meal) {
     this.selectedPanel = "foodItemSearch";
 }
 
+function selectFoodItem(foodItem) {
+    this.activeFoodItem = foodItem;
+    this.selectedPanel = "foodItemForm";
+}
+
 function back() {
     if (this.selectedPanel == 'foodItemSearch') {
         this.selectedPanel = 'home';
-    }
+    } else if (this.selectedPanel == 'foodItemForm') {
+        this.selectedPanel = 'foodItemSearch';
+    } 
 }
 
 async function editWater() {

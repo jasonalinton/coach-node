@@ -18,7 +18,7 @@
             <span class="text-start ms-2">Recents</span>
             <div v-for="(item, index) in recents" :key="index"
                     class="item d-flex flex-row align-items-center"
-                 @click="addFoodItem(item, 'recent')">
+                 @click="$emit('selectFoodItem', item)">
                 <img class="align-self-start" :src="item.thumbURL" height="40" width="40"/>
                 <div class="d-flex flex-column flex-grow-1">
                     <span class="name text-start">{{ item.name }}</span>
@@ -73,32 +73,6 @@
             <span class="text-start ms-2">UPC</span>
             <FoodSearchItem v-for="(item, index) in upc" :key="index"
                             :item="item" :meal="meal" />
-            <!-- <div v-for="(item, index) in upc" :key="index"
-                    class="item d-flex flex-column align-items-center"
-                 @click="addFoodItem(item, 'upc')">
-                 <div class="d-flex flex-row">
-                     <img class="align-self-start" :src="item.thumbURL" height="40" width="40"/>
-                     <div class="d-flex flex-column flex-grow-1">
-                         <span class="name text-start">{{ item.name }}</span>
-                         <div class="serving d-flex flex-row">
-                             <span>{{ item.brandName }}</span>
-                             <span>{{ item.quantity }}</span>
-                             <span class="ms-1">{{ item.unit }}</span>
-                         </div>
-                     </div>
-                     <span class="float-end">{{ float(item.calories,0) }}</span>
-                 </div>
-                 <div class="input-wrrapper d-flex flex-row">
-                    <input class="quantity textbox ms-1" type="number" placeholder="#"
-                           v-model.trim.lazy="item.quantity"
-                           @click.stop />
-                    <select :id="`upc-search`" class="form-select panel-select" aria-label="select" v-model="item.unit"
-                            @click.stop> 
-                        <option :value="'Gram'">None</option> 
-                        <option v-for="(unit, index) in item.units" :key="index" :value="unit.unit">{{unit.unit}}</option> 
-                    </select>
-                </div>
-            </div> -->
         </div>
     </div>
 </template>
@@ -130,6 +104,7 @@ export default {
                 'Branded'
             ],
             recents: [],
+            recents2: [],
             common: [],
             branded: [],
             upc: []
@@ -138,6 +113,7 @@ export default {
     created: async function() {
        this.physicalStore = usePhysicalStore();
        this.recents = await this.physicalStore.getRecentFoodItems();
+       this.recents2 = await this.physicalStore.getRecentFoodItems2();
     },
     methods: {
         float,

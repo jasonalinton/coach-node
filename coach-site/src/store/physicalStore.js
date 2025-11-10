@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import { getSocketConnection } from './socket';
-import { getNutritionHistory, getMealsInRange, getRecentFoodItems, getWaterLogs, foodSearchAutoComplete, searchFoodUPC, 
+import { getNutritionHistory, getMealsInRange, getRecentFoodItems, getRecentFoodItems2, getWaterLogs, foodSearchAutoComplete, searchFoodUPC, 
     addFoodItemToMeal, logWater, setMealTime, removeFoodItem } from '../api/physicalAPI';
 import { sortAsc, replaceOrAddItem, removeItemByID } from '../../utility';
 import { postEndpoint } from '../api/api';
@@ -45,6 +45,10 @@ export const usePhysicalStore = defineStore('physical', {
         },
         async getRecentFoodItems() {
             let result = await getRecentFoodItems();
+            return result;
+        },
+        async getRecentFoodItems2() {
+            let result = await getRecentFoodItems2();
             return result;
         },
         async getWaterLogs() {

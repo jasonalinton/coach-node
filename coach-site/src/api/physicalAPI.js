@@ -57,6 +57,24 @@ export async function getRecentFoodItems() {
     });
 }
 
+export async function getRecentFoodItems2() {
+    return fetch(`${URL}/api/Physical/GetRecentFoodItems_Refactored`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+    })
+    .then((response) => response.json())
+    .then((data) => {
+        if (!data.errorMessage) {
+            return data;
+        } else {
+            this.errorMessage = data.errorMessage;
+        }
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+    });
+}
+
 export async function getWaterLogs() {
     return fetch(`${URL}/api/Physical/GetWaterLogs`, {
         method: 'POST',

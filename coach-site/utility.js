@@ -241,15 +241,17 @@ export function clone(item) {
   return JSON.parse(JSON.stringify(item));
 }
 
+// camelCase
 export function toCamelCase(str) {
     return str.replace(/(?:^\w|[A-Z]|\b\w)/g, function(word, index) {
       return index === 0 ? word.toLowerCase() : word.toUpperCase();
     }).replace(/\s+/g, '');
 }
 
+// CAPITALIZECASE
 export function capitalize(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
-  }
+}
 
 export function toDateString(dateTimeJSON) {
     let dateTimeArray = dateTimeJSON.split("T");
