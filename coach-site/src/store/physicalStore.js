@@ -9,6 +9,7 @@ let initialized = false;
 
 export const usePhysicalStore = defineStore('physical', {
     state: () => ({
+        foodItems: [],
         meals: [],
         mealHistories: [],
         waterLogs: []
@@ -47,9 +48,16 @@ export const usePhysicalStore = defineStore('physical', {
             return postEndpoint("Physical", "GetRecentFoodItems")
                 .then(this.onResponse);
         },
-        async getRecentFoodItems2() {
-            return postEndpoint("Physical", "GetRecentFoodItems_Refactored")
-                .then(this.onResponse);
+        getRecentFoodItems2() {
+            postEndpoint("Physical", "GetRecentFoodItems_Refactored")
+                .then(items => {
+                    this.onResponse(items);
+                    items.result.forEach(item => {
+                        replaceOrAddItem(item, this.foodItems);
+                    })
+                });
+
+            return this.foodItems;
         },
         async getWaterLogs() {
             let result = await getWaterLogs();
@@ -65,11 +73,17 @@ export const usePhysicalStore = defineStore('physical', {
         },
         async saveFoodItem(foodItem) {
             return postEndpoint("Physical", "SaveFoodItem", { model: foodItem })
-                .then(this.onResponse);
+                .then(response => {
+                    this.onResponse(response);
+                    replaceOrAddItem(response.result, this.foodItems);
+                });
         },
         async addFoodItemToMeal(model) {
             return postEndpoint("Physical", "AddFoodItemToMeal", model)
-                .then(this.onResponse);
+                .then(response => {
+                    this.onResponse(response);
+                    replaceOrAddItem(response.result, this.foodItems);
+                });
         },
         async logWater(amountFLOZ, dateTime, mealID) {
             logWater(amountFLOZ, dateTime, mealID);

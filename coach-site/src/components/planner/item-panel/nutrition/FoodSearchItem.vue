@@ -43,13 +43,16 @@ export default {
     data: function () {
         return {
             physicalStore: undefined,
-            quantity: 1
+            quantity: 1,
+            unit: 0
         }
     },
     created: async function() {
        this.physicalStore = usePhysicalStore();
 
        this.quantity = this.item.quantity;
+
+       this.setUnit();
     },
     computed: {
         units() {
@@ -61,21 +64,28 @@ export default {
             });
             return units;
         },
-        unit() {
-            let unit = 0;
-            for (let i = 0; i < this.units.length; i++) {
-                if (this.units[i].isDefault) {
-                    unit = i;
-                    break;
-                }
-            }
-            return unit;
+    },
+    watch: {
+        units() {
+            this.setUnit();
         }
     },
     methods: {
+        setUnit,
         addFoodItem,
         float
     },
+}
+
+function setUnit() {
+        let unit = 0;
+        for (let i = 0; i < this.units.length; i++) {
+            if (this.units[i].isDefault) {
+                unit = i;
+                break;
+            }
+        }
+        this.unit = unit;
 }
 
 async function addFoodItem() {

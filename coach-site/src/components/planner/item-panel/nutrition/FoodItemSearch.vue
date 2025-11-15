@@ -117,7 +117,6 @@ export default {
                 // 'Branded'
             ],
             recents: [],
-            recents2: [],
             common: [],
             branded: [],
             upc: [],
@@ -127,7 +126,16 @@ export default {
     created: async function() {
        this.physicalStore = usePhysicalStore();
        this.recents = await this.physicalStore.getRecentFoodItems();
-       this.recents2 = await this.physicalStore.getRecentFoodItems2();
+    },
+    computed: {
+        recents2() {
+            if (this.physicalStore) {
+                let recents = this.physicalStore.getRecentFoodItems2();
+                console.log(recents);
+                return recents;
+            }
+            return [];
+        }
     },
     methods: {
         float,
@@ -136,6 +144,7 @@ export default {
         clearResults,
         searchFoodItem,
         searchUPC,
+        addRecentItem,
         createFoodItem,
         addFoodItem
     },
@@ -184,6 +193,10 @@ async function searchUPC() {
 function createFoodItem() {
     let foodItem = this.physicalStore.createFoodItem();
     this.$emit('selectFoodItem', foodItem);
+}
+
+function addRecentItem(item) {
+    this.recents2.unshift(item);
 }
 
 async function addFoodItem(foodItem, type) {
