@@ -5,6 +5,8 @@
                 <input id="food-search-input" class="title textbox" type="text" ref="text"  placeholder="Search"
                         v-model.trim.lazy="searchTerm" 
                         @keyup.enter="search"/>
+                <input id="quantity" class="quantity textbox ms-1" type="number" placeholder="#"
+                        v-model.trim.lazy="quantity" />
                 <button class="add-btn my-auto ms-1" type="button" @click="createFoodItem">
                     <img class="m-auto" src="/icon/button/add.png" width="10" height="10"/>
                 </button>
@@ -19,7 +21,7 @@
             <span class="text-start ms-2">Recents</span>
             <div v-for="(item, index) in recents" :key="index"
                  class="item d-flex flex-row align-items-center"
-                 @click="$emit('selectFoodItem', item)">
+                 @click="addFoodItem(item, 'recent')">
                 <img class="align-self-start" :src="item.thumbURL" height="40" width="40"/>
                 <div class="d-flex flex-column flex-grow-1">
                     <span class="name text-start">{{ item.name }}</span>
@@ -209,7 +211,7 @@ async function addFoodItem(foodItem, type) {
         foodName: (['upc','recent'].includes(type)) ? foodItem.name : foodItem.food_name,
         nutritionixID: (type == "branded") ? foodItem.nix_item_id : undefined,
         unit: (['upc','recent'].includes(type)) ? foodItem.unit : foodItem.serving_unit,
-        quantity: foodItem.quantity,
+        quantity: this.quantity,
         dateString: datetime.toLocaleString(),
         foodItem: (['upc','recent'].includes(type)) ? foodItem : undefined
     }
