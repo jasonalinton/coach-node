@@ -1,7 +1,8 @@
 <template>
     <div class="d-flex flex-column flex-grow-1">
         <div class="hero">
-            <img class="img-fluid" src="/metric/physical/Badass Workout Photo.jpg" />
+            <!-- <img class="img-fluid" src="/metric/physical/Badass Workout Photo.jpg" /> -->
+            <WeightChart />
         </div>
         <div class="cards d-flex flex-row justify-content-center overflow-scroll">
             <div class="card">
@@ -37,10 +38,11 @@
 </template>
 
 <script>
+import WeightChart from './WeightChart.vue';
 
 export default {
     name: 'PhysicalView',
-    components: {  },
+    components: { WeightChart },
     props: {
         
     },

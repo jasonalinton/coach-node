@@ -12,7 +12,8 @@ export const usePhysicalStore = defineStore('physical', {
         foodItems: [],
         meals: [],
         mealHistories: [],
-        waterLogs: []
+        waterLogs: [],
+        bodyMeasurements: []
     }),
     getters: {
         
@@ -26,6 +27,11 @@ export const usePhysicalStore = defineStore('physical', {
                 _this.mealHistories = result.meals;
                 _this.waterLogs = result.waterLogs;
              });
+             postEndpoint("Physical", "GetBodyMeasurements")
+                .then(response => {
+                    this.bodyMeasurements = response.result
+                });
+
             initialized = true;
         },
         getMealsInRange(startAt, endAt, shouldRequestServer) {
@@ -62,6 +68,9 @@ export const usePhysicalStore = defineStore('physical', {
         async getWaterLogs() {
             let result = await getWaterLogs();
             return result;
+        },
+        getBodyMeasurements() {
+            return this.bodyMeasurements;
         },
         async foodSearchAutoComplete(searchTerm) {
             let result = await foodSearchAutoComplete(searchTerm);
