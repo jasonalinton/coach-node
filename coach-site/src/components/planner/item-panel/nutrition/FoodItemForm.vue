@@ -137,6 +137,9 @@ export default {
                 { name: 'VitaminC', },
                 { name: 'VitaminD', },
                 { name: 'VitaminK', },
+                { name: 'TCH', },
+                { name: 'CBD', },
+                { name: 'Alcohol', },
             ]
         }
     },
