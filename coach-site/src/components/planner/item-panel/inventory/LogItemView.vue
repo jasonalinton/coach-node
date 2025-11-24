@@ -1,5 +1,5 @@
 <template>
-    <div class="log-item d-flex flex-column">
+    <div v-if="logItem" class="log-item d-flex flex-column">
         <div class="d-flex flex-row justify-content-between">
             <div class="d-flex flex-row">
                 <div class="name"
@@ -35,7 +35,8 @@
                       type="text"
                       placeholder="Blurb"
                       v-model.lazy="blurb"
-                      spellcheck="true"></textarea>
+                      spellcheck="true">
+            </textarea>
         </div>
     </div>
 </template>
@@ -50,9 +51,12 @@ export default {
     name: 'LogItemView',
     components: { DateTimeSelector },
     props: {
-        logItem: Object,
+        logItemID: Number,
         clearValues: Number,
-        clearMinutes: Number
+        clearMinutes: {
+            type: Number,
+            default: 60
+        }
     },
     data: function () {
         return {
@@ -61,17 +65,23 @@ export default {
             fields: [],
             entryDateTime: undefined,
             updatedDateTime: undefined,
-            blurb: "",
+            blurb: null,
             hasValue: false,
             timeout: undefined,
-            showAdditionalValues: false
+            showAdditionalValues: false,
         }
     },
     created: function() {
        this.metricStore = useMetricStore();
-       this.setProps();
     },
     computed: {
+        logItem() {
+            if (this.metricStore) {
+                let logItem = this.metricStore.getLogItem(this.logItemID);
+                return logItem;
+            }
+            return undefined;
+        },
         value() {
             let value = "";
             this.fields.forEach(field => {
@@ -82,12 +92,11 @@ export default {
             return value;
         },
         lastEntry() {
-            return (this.logItem.entries) ? this.logItem.entries[this.logItem.entries.length-1] : undefined;
+            return (this.logItem && this.logItem.entries) ? this.logItem.entries[this.logItem.entries.length-1] : undefined;
         },
         isLevel() {
-            let logItem = this.logItem;
-            if (logItem) {
-                if (logItem.fields.length == 1 && logItem.fields[0].name.toLowerCase() == "level") {
+            if (this.logItem) {
+                if (this.logItem.fields.length == 1 && this.logItem.fields[0].name.toLowerCase() == "level") {
                     return true;
                 }
             }
@@ -147,6 +156,9 @@ export default {
         }
     },
     watch: {
+        logItem() {
+            this.setProps();
+        },
         clearValues() {
             this.clear();
         },
@@ -156,6 +168,8 @@ export default {
             }
         },
         blurb(value) {
+            if (value == null || this.lastEntry.reason == value)
+                return;
             let model = {
                 logItemID: this.logItem.id,
                 dateTime: this.entryDateTime,
@@ -195,6 +209,11 @@ function setProps(clear) {
                     let minutesSince = getDurationInMinutes(lastEntryDateTime, new Date());
                     let minutesLeft = this.clearMinutes - minutesSince;
                     this.setTimeout(minutesLeft);
+                } else {
+                    this.entryDateTime = undefined;
+                    this.updatedDateTime = undefined;
+                    this.blurb = null;
+                    this.showAdditionalValues = false;
                 }
             }
         }
@@ -202,7 +221,8 @@ function setProps(clear) {
     if (clear) {
         this.entryDateTime = undefined;
         this.updatedDateTime = undefined;
-        this.blurb = "";
+        this.blurb = null;
+        this.showAdditionalValues = false;
     }
     this.fields = fields;
 }

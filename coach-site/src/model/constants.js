@@ -157,3 +157,12 @@ export let GOAL_TYPE = {
     GOAL_TYPE: 182,
     FITNESS: 183,
 }
+
+export let LOG_ITEMS = {
+    EMOTIONAL_MOOD: 1,
+    MENTAL_ENERGY: 6,
+    MENTAL_CLARITY: 7,
+    PHYSICAL_ENERGY: 11,
+    PHYSICAL_SLEEPINESS: 12,
+
+}

@@ -255,12 +255,19 @@ body {
 .textbox, .textarea, .select, .date-picker {
     width: 100%;
     font-size: 14px;
-    line-height: 14px;
+    line-height: 16px;
     padding: 2px 8px;
     /* padding-top: 4px; */
     /* color: #343434; */
     color: #212529;
     border-radius: 4px;
+}
+
+@media only screen and (max-width: 576px) {
+    .textbox, .textarea, .select, .date-picker {
+        font-size: 16px;
+        line-height: 22px;
+    }
 }
 
 .textarea {
@@ -326,5 +333,26 @@ body {
 
 .background {
     background-color: white;
+}
+
+/* pills */
+.app-pill {
+    cursor: pointer;
+    padding: 4px 4px;
+    line-height: 14px;
+    font-size: 14px;
+    background-color: var(--pill-default);
+    border-radius: 4px;
+    border: transparent solid 1px;
+}
+.app-pill:hover {
+    border: var(--pill-border-hover) solid 1px;
+}
+.app-pill.selected {
+    border: var(--pill-border-hover) solid 1px;
+    background-color: var(--pill-background-selected);
+}
+.app-pill:active {
+    background-color: var(--pill-background-selected);
 }
 </style>
