@@ -83,15 +83,21 @@ export const usePhysicalStore = defineStore('physical', {
         async saveFoodItem(foodItem) {
             return postEndpoint("Physical", "SaveFoodItem", { model: foodItem })
                 .then(response => {
-                    this.onResponse(response);
                     replaceOrAddItem(response.result, this.foodItems);
+                    return this.onResponse(response);
                 });
         },
         async addFoodItemToMeal(model) {
             return postEndpoint("Physical", "AddFoodItemToMeal", model)
                 .then(response => {
-                    this.onResponse(response);
                     replaceOrAddItem(response.result, this.foodItems);
+                    return this.onResponse(response);
+                });
+        },
+        async replaceOGFoodItem(id_OG, id_New) {
+            return postEndpoint("Physical", "ReplaceOGFoodItem", {id_OG, id_New})
+                .then(response => {
+                    return this.onResponse(response);
                 });
         },
         async logWater(amountFLOZ, dateTime, mealID) {

@@ -1,6 +1,14 @@
 <template>
     <div v-if="item" class="food-item-form d-flex flex-column p-2 flex-grow-1 overflow-scroll">
         <div class="d-flex flex-column overflow-scroll">
+            <!-- ID -->
+            <span class="text-start ms-1 mb-2">{{ item.id }}</span>
+            <!-- Food Item 2 Id -->
+            <div v-if="item.isOG" class="form-floating mb-2">
+                <input type="number" class="form-control" :id="`food-item-form-fi2-id`" placeholder="Food Item 2 ID"
+                        v-model.lazy.trim="idFoodItem2">
+                <label :for="`food-item-form-fi2-id`">Food Item 2 ID</label>
+            </div>
             <!-- Name -->
             <div class="form-floating mb-2">
                 <input type="text" class="form-control" :id="`food-item-form-name`" placeholder="Name"
@@ -108,6 +116,7 @@ export default {
         return {
             physicalStore: undefined,
             item: undefined,
+            idFoodItem2: undefined,
             nutrients: [
                 { name: 'Calories', },
                 { name: 'Fat', },
@@ -193,17 +202,26 @@ function createUnit() {
 }
 
 function save() {
-    this.nutrients.forEach(x => {
-        if (this.item[x.name.toCamelCase()] == "") {
-            this.item[x.name.toCamelCase()] = null;
+    if (this.item.isOG) {
+        if (this.idFoodItem2) {
+            this.physicalStore.replaceOGFoodItem(this.item.id, this.idFoodItem2)
+            .then(() => { 
+                this.$emit('back');
+            });
         }
-    })
-
-    this.physicalStore.saveFoodItem(this.item)
-    .then(foodItem => { 
-        if (foodItem)
-            this.$emit('back');
-    })
+    } else {
+        this.nutrients.forEach(x => {
+            if (this.item[x.name.toCamelCase()] == "") {
+                this.item[x.name.toCamelCase()] = null;
+            }
+        });
+    
+        this.physicalStore.saveFoodItem(this.item)
+        .then(foodItem => { 
+            if (foodItem)
+                this.$emit('back');
+        });
+    }
 }
 
 </script>

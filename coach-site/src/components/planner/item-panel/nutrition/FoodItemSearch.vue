@@ -22,7 +22,8 @@
             <div v-for="(item, index) in recents" :key="index"
                  class="item d-flex flex-row align-items-center"
                  @click="addFoodItem(item, 'recent')">
-                <img class="align-self-start" :src="item.thumbURL" height="40" width="40"/>
+                <img class="align-self-start" :src="item.thumbURL" height="40" width="40"
+                     @click.prevent.stop="$emit('selectFoodItem', item)"/>
                 <div class="d-flex flex-column flex-grow-1">
                     <span class="name text-start">{{ item.name }}</span>
                     <div class="serving d-flex flex-row">
