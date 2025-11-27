@@ -90,7 +90,7 @@ export const usePhysicalStore = defineStore('physical', {
         async addFoodItemToMeal(model) {
             return postEndpoint("Physical", "AddFoodItemToMeal", model)
                 .then(response => {
-                    replaceOrAddItem(response.result, this.foodItems);
+                    replaceOrAddItem(response.result, this.meals);
                     return this.onResponse(response);
                 });
         },
@@ -133,11 +133,18 @@ export const usePhysicalStore = defineStore('physical', {
                 sortAsc(_this.meals);
             }
             if (updates.foodItems) {
-                
+                updates.foodItems.forEach(foodItem => {
+                    replaceOrAddItem(foodItem, this.foodItems);
+                });
             }
         },
         connectSocket() {
             if (!initialized) {
+                let coachConnection = getSocketConnection("coachHub");
+                coachConnection.on("SendUpdates", updateModel => {
+                    this.runUpdates(updateModel);
+                })
+
                 let connection = getSocketConnection("metricHub");
 
                 let _this = this;

@@ -39,6 +39,7 @@ import { useGoalStore } from '@/store/goalStore'
 import { useTodoStore } from '@/store/todoStore'
 import { useRoutineStore } from '@/store/routineStore'
 import { useUniversalStore } from '@/store/universalStore'
+import { createSocketConnection } from "./store/socket";
 // import { RouterView } from 'vue-router'
 
 export default {
@@ -124,6 +125,8 @@ async function initStores() {
     let goalStore = useGoalStore();
     let todoStore = useTodoStore();
     let routineStore = useRoutineStore();
+
+    createSocketConnection("coachHub");
 
     universalStore.initialize();
     eventStore.initialize();

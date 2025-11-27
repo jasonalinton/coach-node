@@ -134,7 +134,6 @@ export default {
         recents2() {
             if (this.physicalStore) {
                 let recents = this.physicalStore.getRecentFoodItems2();
-                console.log(recents);
                 return recents;
             }
             return [];

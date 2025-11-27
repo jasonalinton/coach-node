@@ -11,6 +11,15 @@ var hubConnections = {
 }
 
 export function getSocketConnection(hubName) {
+    // Create connection if it doesn't exist
+    if (hubConnections[hubName] == undefined) {
+        createSocketConnection(hubName);
+    }
+
+    return hubConnections[hubName];
+}
+
+export function createSocketConnection(hubName) {
     if (hubConnections[hubName] == undefined) {
         let connection = new HubConnectionBuilder()
             .withUrl(`${URL}/${hubName}`, {
@@ -28,6 +37,4 @@ export function getSocketConnection(hubName) {
 
         hubConnections[hubName] = connection;
     }
-
-    return hubConnections[hubName];
 }
