@@ -2,7 +2,7 @@
 // export const URL = "http://172.20.10.11:7104"; // Hotspot
 export const URL = "http://localhost:7104"
 // export const URL = "https://coach-eea3hnh7fje3gxhw.canadacentral-01.azurewebsites.net"
-import { getSocketConnection } from "../store/socket";
+import { isHubConnected } from "../store/socket";
 
 
 export async function postEndpoint(controller, endpoint, data) {
@@ -10,7 +10,7 @@ export async function postEndpoint(controller, endpoint, data) {
         method: 'POST',
         headers: { 
             'Content-Type': 'application/json',
-            'Return-Updates': true
+            'Return-Updates': !isSignalRConnected()
          },
         body: JSON.stringify(data)
     })
@@ -29,5 +29,6 @@ export async function postEndpoint(controller, endpoint, data) {
 }
 
 function isSignalRConnected() {
-
+    let isConnected = isHubConnected("coachHub");
+    return isConnected;
 }

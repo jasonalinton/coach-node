@@ -51,13 +51,11 @@ export const usePhysicalStore = defineStore('physical', {
             );
         },
         async getRecentFoodItems() {
-            return postEndpoint("Physical", "GetRecentFoodItems")
-                .then(this.onResponse);
+            return postEndpoint("Physical", "GetRecentFoodItems");
         },
         getRecentFoodItems2() {
             postEndpoint("Physical", "GetRecentFoodItems_Refactored")
                 .then(items => {
-                    this.onResponse(items);
                     items.result.forEach(item => {
                         replaceOrAddItem(item, this.foodItems);
                     })
@@ -77,8 +75,7 @@ export const usePhysicalStore = defineStore('physical', {
             return result;
         },
         async searchFoodUPC(upc) {
-            return postEndpoint("Physical", "SearchFoodUPC", { upc })
-                .then(this.onResponse);
+            return postEndpoint("Physical", "SearchFoodUPC", { upc });
         },
         async saveFoodItem(foodItem) {
             return postEndpoint("Physical", "SaveFoodItem", { model: foodItem })
@@ -148,22 +145,6 @@ export const usePhysicalStore = defineStore('physical', {
                 let connection = getSocketConnection("metricHub");
 
                 let _this = this;
-                connection.on("UpdateMeals", meals => {
-                    meals.forEach(meal => {
-                        replaceOrAddItem(meal, _this.meals);
-                        let mealHistory = {
-                            id: meal.id,
-                            name: meal.name,
-                            dateTime: meal.dateTime,
-                            calories: meal.calories,
-                            carbs: meal.carbohydrates,
-                            protein: meal.protein,
-                            fat: meal.fat
-                        }
-                        replaceOrAddItem(mealHistory, _this.mealHistories);
-                    })
-                    sortAsc(_this.meals);
-                });
                 connection.on("RemoveMeals", mealIDs => {
                     mealIDs.forEach(mealID => {
                         removeItemByID(mealID, _this.meals);

@@ -4,6 +4,7 @@ import { getRepetitiveTodoIterations } from '../api/todoAPI';
 import { getAllIterationsInRange, getUnplannedIterations, updateIteration, rescheduleIteration, toggleTaskCompletion, 
     attemptIteration, deleteIteration } from '../api/plannerAPI'
 import { removeItemByID, replaceOrAddItem, sortAsc } from '../../utility'
+import { postEndpoint } from '../api/api';
 
 let initialized = false;
 
@@ -77,48 +78,71 @@ export const useIterationStore = defineStore('iteration', {
             });
         },
         updateIteration(iterationID, text, points, startAt, endAt) {
-            updateIteration(iterationID, text, points, startAt, endAt);
+            let data = { iterationID, text, points, startAt, endAt };
+            return postEndpoint("Planner", "UpdateIteration", data)
+            .then(response => {
+                // replaceOrAddItem(response.result, this.iterations);
+                return this.onResponse(response);
+            });
         },
         rescheduleIteration(iterationID, startAt, endAt) {
-            rescheduleIteration(iterationID, startAt, endAt);
-        },
-        setCompletion(iterationID, attemptedAt, completedAt) {
-            let iteration = this.iterations.find(x => x.id == iterationID);
-            if (iteration) {
-                iteration.attemptedAt = (attemptedAt) ? attemptedAt.toJSON() : null;
-                iteration.completedAt = (completedAt) ? completedAt.toJSON() : null;
-
-                toggleTaskCompletion(iterationID, attemptedAt, completedAt);
-            }
+            let data = { iterationID, startAt, endAt };
+            return postEndpoint("Planner", "RescheduleIteration", data)
+            .then(response => {
+                // replaceOrAddItem(response.result, this.iterations);
+                return this.onResponse(response);
+            });
         },
         // This is the wrong name. Technically it's not toggling, its setting the values
         toggleCompletion(iterationID, attemptedAt, completedAt) {
-            toggleTaskCompletion(iterationID, attemptedAt, completedAt);
+            let data = { iterationID, attemptedAt, completedAt };
+            return postEndpoint("Planner", "ToggleTaskCompletion", data)
+            .then(response => {
+                // replaceOrAddItem(response.result, this.iterations);
+                return this.onResponse(response);
+            });
         },
         attemptIteration(iterationID, attemptedAt) {
-            attemptIteration(iterationID, attemptedAt);
+            let data = { iterationID, attemptedAt };
+            return postEndpoint("Planner", "AttemptIteration", data)
+            .then(response => {
+                // replaceOrAddItem(response.result, this.iterations);
+                return this.onResponse(response);
+            });
         },
         deleteIteration(iterationID) {
-            deleteIteration(iterationID);
+            let data = { iterationID };
+            return postEndpoint("Planner", "DeleteIteration", data)
+            .then(response => {
+                return this.onResponse(response);
+            });
+        },
+        onResponse(response) {
+            if (response.updates)
+                this.runUpdates(response.updates);
+            return response.result;
+        },
+        runUpdates(updates) {
+            let _this = this;
+            if (updates.iterations && updates.iterations.length > 0) {
+                updates.iterations.forEach(iteration => {
+                    replaceOrAddItem(iteration, _this.iterations);
+                })
+                sortAsc(_this.iterations);
+            }
+            if (updates.iterationIDsRemoved && updates.iterationIDsRemoved.length > 0) {
+                updates.iterationIDsRemoved.forEach(iterationID => {
+                    removeItemByID(iterationID, _this.iterations);
+                })
+                sortAsc(_this.iterations);
+            }
         },
         connectSocket() {
             if (!initialized) {
-                let connection = getSocketConnection("plannerHub");
-
-                let _this = this;
-                connection.on("UpdateIterations", iterations => {
-                    // this.initializeItems(iterations);
-                    iterations.forEach(iteration => {
-                        replaceOrAddItem(iteration, _this.iterations);
-                    })
-                    sortAsc(_this.iterations);
-                });
-                connection.on("RemoveIterations", iterationIDs => {
-                    iterationIDs.forEach(iterationID => {
-                        removeItemByID(iterationID, _this.iterations);
-                    })
-                    sortAsc(_this.iterations);
-                });
+                let coachConnection = getSocketConnection("coachHub");
+                coachConnection.on("SendUpdates", updateModel => {
+                    this.runUpdates(updateModel);
+                })
             }
         }
     },

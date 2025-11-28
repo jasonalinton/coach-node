@@ -123,7 +123,6 @@ export default {
         this.todoStore = todoStore.useTodoStore();
         let iterationStore = await import(`@/store/iterationStore`);
         this.iterationStore = iterationStore.useIterationStore();
-        this.iterationStore.getIterationsInRange(this.start, this.end, true);
     },
     computed: {
         date() {
