@@ -1,5 +1,5 @@
 import { URL } from '../api/api';
-import { HubConnectionBuilder } from '@microsoft/signalr';
+import { HubConnectionBuilder, HubConnectionState } from '@microsoft/signalr';
 
 var hubConnections = {
     coachHub: undefined,
@@ -33,8 +33,15 @@ export function createSocketConnection(hubName) {
         connection.serverTimeoutInMilliseconds = 120000;
 
         connection.start();
-            // .then(() => connection.invoke("SendMessage", "Hello"));
+        connection.onclose(async () => {
+            connection.start();
+        });
 
         hubConnections[hubName] = connection;
     }
+}
+
+export function isHubConnected(hubName) {
+    let connection = getSocketConnection(hubName);
+    return (connection.state == HubConnectionState.Connected);
 }
