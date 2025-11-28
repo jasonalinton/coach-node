@@ -85,7 +85,8 @@
                   class="d-flex flex-column">
                  <span class="text-start ms-2">UPC</span>
                  <FoodSearchItem v-for="(item, index) in upc" :key="index"
-                                 :item="item" :meal="meal" />
+                                 :item="item" :meal="meal"
+                                 @selectFoodItem="$emit('selectFoodItem', $event)" />
             </div>
             <span v-if="noUPCResult == true">No Results</span>
         </div>

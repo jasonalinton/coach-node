@@ -126,6 +126,44 @@ export default {
                 return today(new Date());
             }
         },
+        mealsInRange() {
+            if (this.date) {
+                let end = endOfDay(this.date);
+                let meals = this.physicalStore.meals;
+                meals = meals.filter(meal => 
+                +new Date(meal.dateTime) >= this.date && +new Date(meal.dateTime) <= end);
+                return clone(meals);
+            } else {
+                return [];
+            }
+        },
+        meals() {
+            let _this = this;
+            let id = 1;
+            return [ 'Breakfast', 'Lunch', 'Dinner', 'Snack'].map(name => {
+                let meal = _this.mealsInRange.find(x => x.name.toLowerCase() == name.toLowerCase());
+                let data = {};
+                if (meal) {
+                    data = {
+                        ...meal
+                    };
+                } else {
+                    data = {
+                        id: -1 * id++,
+                        name: name,
+                        dateTime: _this.date,
+                        foodItems: [],
+                        macros: {
+                            carbs: 0,
+                            protein: 0,
+                            fat: 0
+                        },
+                        water: 0
+                    };
+                }
+                return data;
+            })
+        },
         proteinConsumed() {
             if (this.mealsInRange) {
                 return this.mealsInRange
@@ -182,44 +220,6 @@ export default {
                 return [];
             }
         },
-        mealsInRange() {
-            if (this.date) {
-                let end = endOfDay(this.date);
-                let meals = this.physicalStore.meals;
-                meals = meals.filter(meal => 
-                +new Date(meal.dateTime) >= this.date && +new Date(meal.dateTime) <= end);
-                return clone(meals);
-            } else {
-                return [];
-            }
-        },
-        meals() {
-            let _this = this;
-            let id = 1;
-            return [ 'Breakfast', 'Lunch', 'Dinner', 'Snack'].map(name => {
-                let meal = _this.mealsInRange.find(x => x.name.toLowerCase() == name.toLowerCase());
-                let data = {};
-                if (meal) {
-                    data = {
-                        ...meal
-                    };
-                } else {
-                    data = {
-                        id: -1 * id++,
-                        name: name,
-                        dateTime: _this.date,
-                        foodItems: [],
-                        macros: {
-                            carbs: 0,
-                            protein: 0,
-                            fat: 0
-                        },
-                        water: 0
-                    };
-                }
-                return data;
-            })
-        }
     },
     methods: {
         refresh,

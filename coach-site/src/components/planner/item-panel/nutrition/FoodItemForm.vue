@@ -48,7 +48,7 @@
             <!-- Unit -->
             <div class="units d-flex flex-column mb-4">
                 <div class="d-flex">
-                    <span class="text-start">{{ `Units` }}</span>
+                    <span class="units-head text-start">{{ `Units` }}</span>
                     <!-- Add Unit - Button -->
                     <button class="add-btn my-auto ms-1" type="button" @click="createUnit">
                         <img class="m-auto" src="/icon/button/add.png" width="10" height="10"/>
@@ -56,12 +56,12 @@
                 </div>
                 <div v-for="(unit, index) in units"
                      class="food-item-unit d-flex flex-column mb-2">
-                    <div class="d-flex justify-content-between">
+                    <div class="d-flex justify-content-between align-items-center">
                         <span class="text-start ms-2 mb-1">{{ `Unit ${index + 1}` }}</span>
                         <!-- Is Default -->
                         <div class="d-flex flex-row justify-items-start mb-2">
                             <span class="checkbox" :class="{ 'selected': unit.isDefault }"
-                                  @click="setDefaultUnit(unit.id)">
+                                  @click="setDefaultUnit(unit)">
                                 Default
                             </span>
                         </div>
@@ -72,17 +72,26 @@
                         v-model.lazy.trim="unit.unit">
                         <label :for="`food-item-form-unit-unit-${index}`">Unit</label>
                     </div>
+                    <!-- Grams -->
+                    <div class="form-floating mb-2">
+                        <input type="number" class="form-control" :id="`food-item-form-unit-grams-${index}`" placeholder="Grams"
+                               :value="unit.grams" min="0"
+                               @input="onChange_Grams($event, unit)">
+                        <label :for="`food-item-form-unit-grams-${index}`">Grams</label>
+                    </div>
                     <div class="d-flex gap-2">
-                        <!-- Grams -->
+                        <!-- Serving Grams -->
                         <div class="form-floating mb-2">
-                            <input type="number" class="form-control" :id="`food-item-form-unit-grams-${index}`" placeholder="Grams"
-                            v-model.lazy.trim="unit.grams" min="0">
-                            <label :for="`food-item-form-unit-grams-${index}`">Grams</label>
+                            <input type="number" class="form-control" :class="{ invalid: unit.isValid == false }" :id="`food-item-form-unit-serving-grams-${index}`" placeholder="Serving Grams"
+                                   :value="unit.servingGrams" min="0"
+                                   @input="onChange_ServingGrams($event, unit)">
+                            <label :for="`food-item-form-unit-serving-grams-${index}`">Serving Grams</label>
                         </div>
                         <!-- Serving Quantity -->
                         <div class="form-floating mb-2">
-                            <input type="number" class="form-control" :id="`food-item-form-unit-serving-quantity-${index}`" placeholder="Serving Quantity"
-                            v-model.lazy.trim="unit.servingQuantity" min="0">
+                            <input type="number" class="form-control" :class="{ invalid: unit.isValid == false}" :id="`food-item-form-unit-serving-quantity-${index}`" placeholder="Serving Quantity"
+                                   v-model.lazy.trim="unit.servingQuantity" min="0"
+                                   @input="onChange_ServingQuantity($event, unit)">
                             <label :for="`food-item-form-unit-serving-quantity-${index}`">Serving Quantity</label>
                         </div>
                     </div>
@@ -156,52 +165,102 @@ export default {
         this.physicalStore = usePhysicalStore();
 
         if (this.foodItem)
-            this.item = clone(this.foodItem);
+            this.initializeItem(this.foodItem);
     },
     computed: {
-        // item() {
-        //     if (this.foodItem) {
-        //         return this.foodItem;
-        //     } 
-        //     else if (!this.foodItem && this.physicalStore) {
-        //         let foodItem = this.physicalStore.createFoodItem();
-        //         return foodItem;
-        //     }
-        // },
         units() {
             return this.item.units;
         }
     },
     methods: {
+        initializeItem,
         toCamelCase,
         setDefaultUnit,
         createUnit,
+        onChange_Grams,
+        onChange_ServingGrams,
+        onChange_ServingQuantity,
         save
     },
     watch: {
         foodItem(value) {
-            this.item = clone(value);
+            this.initializeItem(value);
         }
     }
 }
 
-function setDefaultUnit(id) {
+function initializeItem(model){
+    let item = clone(model);
+
+    // Add serving quantity prop
+    item.units.forEach(unit => {
+        unit.servingGrams = (unit.servingQuantity && unit.grams) ? unit.grams * unit.servingQuantity : undefined;
+    });
+
+    this.item = item;
+}
+
+function setDefaultUnit(unit) {
     this.item.units.forEach(unit => {
-        unit.isDefault = (unit.id == id) ? true : false;
-    })
+        unit.isDefault = false;
+    });
+    unit.isDefault = true;
 }
 
 function createUnit() {
+    let hasDefault = false;
+    this.item.units.forEach(unit => {
+        if (unit.isDefault) {
+            hasDefault = true;
+        };
+    })
+
     let unit = {
         unit: undefined,
         grams: undefined,
         servingQuantity: undefined,
-        isDefault: undefined
+        isDefault: (hasDefault) ? undefined : true
     };
     this.item.units.push(unit);
 }
 
+function onChange_Grams(event, unit) {
+    let grams = event.target.value;
+
+    unit.grams = grams;
+    if (unit.servingQuantity) {
+        unit.servingGrams = grams * unit.servingQuantity;
+        unit.isValid = true;
+    }
+}
+
+function onChange_ServingGrams(event, unit) {
+    let servingGrams = event.target.value;
+
+    unit.servingGrams = servingGrams;
+    if (unit.servingQuantity && servingGrams) {
+        unit.grams = servingGrams / unit.servingQuantity;
+        unit.isValid = true;
+    } else if (!unit.servingQuantity && !unit.servingGrams) {
+        unit.isValid = true;
+    }
+}
+
+function onChange_ServingQuantity(event, unit) {
+    let servingQuantity = event.target.value;
+
+    unit.servingQuantity = servingQuantity;
+    if (unit.servingGrams && servingQuantity) {
+        unit.grams = unit.servingGrams / servingQuantity;
+        unit.isValid = true;
+    } else if (!unit.servingQuantity && !unit.servingGrams) {
+        unit.isValid = true;
+    }
+}
+
 function save() {
+    let isValid = true;
+
     if (this.item.isOG) {
         if (this.idFoodItem2) {
             this.physicalStore.replaceOGFoodItem(this.item.id, this.idFoodItem2)
@@ -215,12 +274,24 @@ function save() {
                 this.item[x.name.toCamelCase()] = null;
             }
         });
-    
-        this.physicalStore.saveFoodItem(this.item)
-        .then(foodItem => { 
-            if (foodItem)
-                this.$emit('back');
-        });
+
+        this.item.units.forEach(unit => {
+            if (!unit.servingQuantity && unit.servingGrams) {
+                unit.isValid = false;
+                isValid = false;
+            }
+            if (unit.servingQuantity && !unit.servingGrams) {
+                unit.isValid = false;
+                isValid = false;
+            }
+        })
+        if (isValid) {
+            this.physicalStore.saveFoodItem(this.item)
+            .then(foodItem => { 
+                if (foodItem)
+                    this.$emit('back');
+            });
+        }
     }
 }
 
@@ -241,7 +312,7 @@ function save() {
     padding: 0px 8px;
 }
 
-.units span {
+.units-head {
     line-height: 28px;
 }
 
@@ -263,5 +334,9 @@ function save() {
 }
 .checkbox:active {
     background-color: var(--pill-background-selected);
+}
+
+input.invalid {
+    border-color: red;
 }
 </style>
