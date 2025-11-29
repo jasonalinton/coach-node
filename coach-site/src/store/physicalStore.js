@@ -51,7 +51,8 @@ export const usePhysicalStore = defineStore('physical', {
             );
         },
         async getRecentFoodItems() {
-            return postEndpoint("Physical", "GetRecentFoodItems");
+            return postEndpoint("Physical", "GetRecentFoodItems")
+            .then(response => response.result);
         },
         getRecentFoodItems2() {
             postEndpoint("Physical", "GetRecentFoodItems_Refactored")
