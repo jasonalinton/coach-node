@@ -56,8 +56,8 @@ export const usePhysicalStore = defineStore('physical', {
         },
         getRecentFoodItems2() {
             postEndpoint("Physical", "GetRecentFoodItems_Refactored")
-                .then(items => {
-                    items.result.forEach(item => {
+                .then(response => {
+                    response.result.forEach(item => {
                         replaceOrAddItem(item, this.foodItems);
                     })
                 });
@@ -76,7 +76,8 @@ export const usePhysicalStore = defineStore('physical', {
             return result;
         },
         async searchFoodUPC(upc) {
-            return postEndpoint("Physical", "SearchFoodUPC", { upc });
+            return postEndpoint("Physical", "SearchFoodUPC", { upc })
+            .then(response => response.result);
         },
         async saveFoodItem(foodItem) {
             return postEndpoint("Physical", "SaveFoodItem", { model: foodItem })
