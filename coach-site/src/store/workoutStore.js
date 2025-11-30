@@ -1,8 +1,6 @@
 import { defineStore } from 'pinia'
-import { getWorkoutInfo, getWorkout, getWorkouts, getExercises, getWorkoutIDFromEvent, getExerciseHistory,
-    saveExercise, addExercisesToWorkout, removeExerciseFromWorkout, saveWorkout, copyAndStartWorkout, 
-    saveSet, logSet, logAllSets, completeWorkout, repositionExercise } from '../api/workoutAPI'
-import { replaceOrAddItem, removeItemByID, sortAsc, sortNumAsc, getNextNewID } from '../../utility';
+import { getWorkoutInfo, getWorkout, getWorkouts, getExercises, getWorkoutIDFromEvent, getExerciseHistory } from '../api/workoutAPI'
+import { replaceOrAddItem, removeItemByID, sortAsc, sortNumAsc } from '../../utility';
 import { getSocketConnection } from './socket'
 import { postEndpoint } from '../api/api';
 
@@ -61,6 +59,35 @@ export const useWorkoutStore = defineStore('workout', {
                     }
                 });
             });
+        },
+        setDraggedProps(exerciseID) {
+            this.dragged.exerciseID = exerciseID;
+        },
+        clearDraggedProps() {
+            this.dragged.exerciseID = undefined;
+        },
+        selectWorkout(id) {
+            this.selectedWorkoutID = id;
+        },
+        getDisplaySettings(workoutID) {
+            var settings = this.displaySettings.find(x => x.workoutID == workoutID);
+            if (settings) {
+                return settings;
+            } else {
+                settings = {
+                    workoutID,
+                    sections: []
+                };
+                var workout = this.getWorkout(workoutID);
+                workout.sections.forEach(section => {
+                    settings.sections.push({
+                        id: section.id,
+                        isOpen: true
+                    });
+                });
+                this.displaySettings.push(settings);
+                return settings;
+            }
         },
         async getWorkoutIDFromEvent(eventID) {
             var id = await getWorkoutIDFromEvent(eventID);
@@ -193,9 +220,9 @@ export const useWorkoutStore = defineStore('workout', {
             }
 
         },
-        addExercisesToSection(idWorkout, idSection, exerciseIDs, position) {
+        addExercisesToSection(idWorkout, idWorkoutSection, exerciseIDs, position) {
             let workout = this.workouts.find(x => x.id == idWorkout);
-            let section = workout.sections.find(x => x.id == idSection);
+            let section = workout.sections.find(x => x.id == idWorkoutSection);
             
             // let idWorkoutExercise = getNextNewID(section.exercises, 'idWorkoutSection');
 
@@ -205,25 +232,10 @@ export const useWorkoutStore = defineStore('workout', {
             }
 
             // This must come before the next section or the saved position will be wrong
-            addExercisesToWorkout(exerciseIDs, idWorkout, idSection, position);
+            let data = { exerciseIDs, idWorkout, idWorkoutSection, position };
+            return postEndpoint("Physical", "AddExercisesToWorkout", data)
+                .then(this.onResponse);
 
-            // exerciseIDs.forEach(id => {
-            //     let workoutExercise = {
-            //         id,
-            //         idExercise: id,
-            //         idWorkoutExercise,
-            //         idWorkoutSection: idSection,
-            //         position: position++,
-            //         sets: [],
-            //         isPending: true
-            //     };
-            //     section.exercises.push(workoutExercise);
-            // })
-            // section.exercises = sortAsc(section.exercises, 'position');
-
-        },
-        removeExerciseFromWorkout(idWorkoutExercise) {
-            removeExerciseFromWorkout(idWorkoutExercise);
         },
         getActiveExercise(idWorkout) {
             let exercise;
@@ -268,109 +280,43 @@ export const useWorkoutStore = defineStore('workout', {
             return this.muscleGroups;
         },
         async saveExercise(model) {
-            return saveExercise(model);
+            return postEndpoint("Physical", "SaveExercise", model)
+                .then(this.onResponse);
         },
         async saveWorkout(model) {
-            let _this = this;
-            return saveWorkout(model)
-            .then(workout => {
-                if (workout) {
-                    replaceOrAddItem(workout, _this.workouts);
-                    sortAsc(_this.workouts);
-                    return {
-                        data: workout,
-                        success: true
-                    };
-                }
-            });
+            return postEndpoint("Physical", "SaveWorkout", model)
+                .then(this.onResponse);
         },
         async copyAndStartWorkout(workoutID, startAt) {
-            let _this = this;
-            return copyAndStartWorkout(workoutID, startAt)
-                .then(workout => {
-                    replaceOrAddItem(workout, _this.workouts);
-                    return {
-                        data: workout,
-                        success: true
-                    };
-                });
+            let data = { workoutID, startAt };
+            return postEndpoint("Physical", "CopyAndStartWorkout", data)
+                .then(this.onResponse);
         },
         async saveSet(model) {
-            let _this = this;
-            return saveSet(model)
-            .then(workout => {
-                if (workout) {
-                    replaceOrAddItem(workout, _this.workouts);
-                    sortAsc(_this.workouts);
-                    return {
-                        data: workout,
-                        success: true
-                    };
-                }
-            });
+            return postEndpoint("Physical", "SaveSet", model)
+                .then(this.onResponse);
         },
         async logSet(setID, completedAt) {
-            let _this = this;
-            return logSet(setID, completedAt)
-            .then(workout => {
-                if (workout) {
-                    replaceOrAddItem(workout, _this.workouts);
-                    sortAsc(_this.workouts);
-                    return {
-                        data: workout,
-                        success: true
-                    };
-                }
-            });
+            return postEndpoint("Physical", "LogSet", { setID, completedAt })
+                .then(this.onResponse);
         },
         async logAllSets(idWorkoutExercise) {
-            let _this = this;
-            return logAllSets(idWorkoutExercise)
-            .then(workout => {
-                if (workout) {
-                    replaceOrAddItem(workout, _this.workouts);
-                    sortAsc(_this.workouts);
-                    return {
-                        data: workout,
-                        success: true
-                    };
-                }
-            });
+            return postEndpoint("Physical", "LogAllSets", { idWorkoutExercise})
+                .then(this.onResponse);
         },
         async completeWorkout(workoutID, startAt, endAt, createEvent) {
-            return completeWorkout(workoutID, startAt, endAt, createEvent);
+            let data = { workoutID, startAt, endAt, createEvent };
+            return postEndpoint("Physical", "CompleteWorkout", data)
+                .then(this.onResponse);
         },
         async repositionExercise(exerciseID, sectionID, position) {
-            repositionExercise(exerciseID, sectionID, position);
+            let data = { exerciseID, sectionID, position };
+            return postEndpoint("Physical", "RepositionExercise", data)
+                .then(this.onResponse);
         },
-        setDraggedProps(exerciseID) {
-            this.dragged.exerciseID = exerciseID;
-        },
-        clearDraggedProps() {
-            this.dragged.exerciseID = undefined;
-        },
-        selectWorkout(id) {
-            this.selectedWorkoutID = id;
-        },
-        getDisplaySettings(workoutID) {
-            var settings = this.displaySettings.find(x => x.workoutID == workoutID);
-            if (settings) {
-                return settings;
-            } else {
-                settings = {
-                    workoutID,
-                    sections: []
-                };
-                var workout = this.getWorkout(workoutID);
-                workout.sections.forEach(section => {
-                    settings.sections.push({
-                        id: section.id,
-                        isOpen: true
-                    });
-                });
-                this.displaySettings.push(settings);
-                return settings;
-            }
+        async removeExerciseFromWorkout(idWorkoutExercise) {
+            return postEndpoint("Physical", "RemoveExerciseFromWorkout", { idWorkoutExercise})
+                .then(this.onResponse);
         },
         async createFitnessGoal(idGoalTimePairTodo, frequency, sets, reps, weight, time) {
             let model = { idGoalTimePairTodo, frequency, sets, reps, weight, time};
@@ -389,13 +335,19 @@ export const useWorkoutStore = defineStore('workout', {
         },
         runUpdates(updates) {
             let _this = this;
-            if (updates.workouts) {
+            if (updates.workouts && updates.workouts.length > 0) {
                 updates.workouts.forEach(workout => {
                     replaceOrAddItem(workout, _this.workouts);
                 })
                 sortAsc(_this.workouts);
             }
-            if (updates.exercises) {
+            if (updates.workoutIDsRemoved && updates.workoutIDsRemoved.length > 0) {
+                updates.workoutIDsRemoved.forEach(workoutID => {
+                    removeItemByID(workoutID, _this.workouts);
+                })
+                sortAsc(_this.workouts);
+            }
+            if (updates.exercises && updates.exercises.length > 0) {
                 updates.exercises.forEach(exercise => {
                     replaceOrAddItem(exercise, _this.exercises);
                 })
@@ -404,26 +356,9 @@ export const useWorkoutStore = defineStore('workout', {
         },
         connectSocket() {
             if (!initialized) {
-                let connection = getSocketConnection("metricHub");
-
-                let _this = this;
-                connection.on("UpdateWorkouts", workouts => {
-                    workouts.forEach(workout => {
-                        replaceOrAddItem(workout, _this.workouts);
-                    })
-                    sortAsc(_this.workouts);
-                });
-                connection.on("RemoveWorkouts", workoutIDs => {
-                    workoutIDs.forEach(workoutID => {
-                        removeItemByID(workoutID, _this.workouts);
-                    })
-                    sortAsc(_this.events);
-                });
-                connection.on("UpdateExercises", exercises => {
-                    exercises.forEach(exercise => {
-                        replaceOrAddItem(exercise, _this.exercises);
-                    })
-                    sortAsc(_this.exercises);
+                let coachConnection = getSocketConnection("coachHub");
+                coachConnection.on("SendUpdates", updateModel => {
+                    this.runUpdates(updateModel);
                 });
             }
         }

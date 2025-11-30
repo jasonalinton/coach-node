@@ -121,8 +121,8 @@ export default {
     computed: {
         eventt() { 
             if (this.eventStore) {
-                let event = this.eventStore.events.find(_event => _event.id == this._event.id);
-                return event;
+                let eventt = this.eventStore.events.find(_event => _event.id == this._event.id);
+                return eventt;
             } else {
                 return undefined;
             }

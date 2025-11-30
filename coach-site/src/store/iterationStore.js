@@ -1,8 +1,7 @@
 import { defineStore } from 'pinia'
 import { getSocketConnection } from './socket'
 import { getRepetitiveTodoIterations } from '../api/todoAPI';
-import { getAllIterationsInRange, getUnplannedIterations, updateIteration, rescheduleIteration, toggleTaskCompletion, 
-    attemptIteration, deleteIteration } from '../api/plannerAPI'
+import { getAllIterationsInRange, getUnplannedIterations } from '../api/plannerAPI'
 import { removeItemByID, replaceOrAddItem, sortAsc } from '../../utility'
 import { postEndpoint } from '../api/api';
 
@@ -113,9 +112,7 @@ export const useIterationStore = defineStore('iteration', {
         deleteIteration(iterationID) {
             let data = { iterationID };
             return postEndpoint("Planner", "DeleteIteration", data)
-            .then(response => {
-                return this.onResponse(response);
-            });
+                .then(this.onResponse);
         },
         onResponse(response) {
             if (response.updates)
@@ -142,7 +139,7 @@ export const useIterationStore = defineStore('iteration', {
                 let coachConnection = getSocketConnection("coachHub");
                 coachConnection.on("SendUpdates", updateModel => {
                     this.runUpdates(updateModel);
-                })
+                });
             }
         }
     },

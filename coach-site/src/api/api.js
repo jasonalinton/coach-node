@@ -19,7 +19,8 @@ export async function postEndpoint(controller, endpoint, data) {
         if (response.status.success) {
             return response;
         } else {
-            console.error('Error:', response.status.errorMessage);
+            console.error('Error:', response.status.message);
+            alert(response.status.message)
             return response;
         }
     })
