@@ -114,6 +114,8 @@ export default {
 };
 
 async function initStores() {
+    createSocketConnection("coachHub");
+
     this.appStore = useAppStore();
     this.plannerStore = usePlannerStore();
     
@@ -125,8 +127,6 @@ async function initStores() {
     let goalStore = useGoalStore();
     let todoStore = useTodoStore();
     let routineStore = useRoutineStore();
-
-    createSocketConnection("coachHub");
 
     universalStore.initialize();
     eventStore.initialize();

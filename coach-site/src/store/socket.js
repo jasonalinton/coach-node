@@ -3,11 +3,6 @@ import { HubConnectionBuilder, HubConnectionState } from '@microsoft/signalr';
 
 var hubConnections = {
     coachHub: undefined,
-    metricHub: undefined,
-    goalHub: undefined,
-    todoHub: undefined,
-    routineHub: undefined,
-    plannerHub: undefined,
 }
 
 export function getSocketConnection(hubName) {

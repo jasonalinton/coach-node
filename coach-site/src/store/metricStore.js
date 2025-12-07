@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia'
-import { getMetrics, getLogItems, logLogItem, deleteLogEntry } from '../api/metricAPI'
-import { repositionItem } from '../api/itemAPI';
-import { replaceOrAddItem, sortAsc, clone } from '../../utility';
+import { getMetrics, getLogItems, deleteLogEntry } from '../api/metricAPI'
+import { replaceOrAddItem, sortAsc, clone, capitalize } from '../../utility';
 import { getSocketConnection } from './socket'
 import { useGoalStore } from '@/store/goalStore'
 import { useTodoStore } from '@/store/todoStore'
@@ -48,8 +47,15 @@ export const useMetricStore = defineStore('metric', {
         getItem(id) {
             return this.metrics.find(x => x.id == id);
         },
-        repositionItem(parentType, itemType, goalID, metricID, newPosition) {
-            repositionItem(parentType, itemType, goalID, metricID, newPosition);
+        repositionItem(parentType, itemType, parentID, itemID, newPosition) {
+            var data = { newPosition };
+            data[`${parentType}ID`] = parentID;
+            data.itemID = itemID;
+        
+            itemType = capitalize(itemType);
+            parentType = capitalize(parentType);
+
+            return postEndpoint(parentType, `Reposition${itemType}In${parentType}`, data);
         },
         initializeLogItems() {
             let _this = this;
@@ -62,7 +68,8 @@ export const useMetricStore = defineStore('metric', {
             return clone(this.logItems);
         },
         getLogItem(id) {
-            return clone(this.logItems.find(x => x.id == id));
+            let logItem = this.logItems.find(x => x.id == id)
+            return logItem ? clone(this.logItems.find(x => x.id == id)) : undefined;
         },
         async logLogItem(model) {
             let _this = this;
@@ -70,7 +77,6 @@ export const useMetricStore = defineStore('metric', {
                 .then((response) => {
                     if (response.result)
                         replaceOrAddItem(response.result, _this.logItems);
-                    this.onResponse(response);
                 });
         },
         async deleteLogEntry(logEntryID) {
@@ -80,14 +86,9 @@ export const useMetricStore = defineStore('metric', {
                 replaceOrAddItem(logItem, _this.logItems);
             });
         },
-        onResponse(response) {
-            if (response.updates)
-                this.runUpdates(response.updates);
-                return response.result;
-        },
         runUpdates(updates) {
             let _this = this;
-            if (updates.metrics) {
+            if (updates.metrics && updates.metrics.length > 0) {
                 updates.metrics.forEach(metric => {
                     replaceOrAddItem(metric, _this.metrics);
                 })
@@ -97,15 +98,9 @@ export const useMetricStore = defineStore('metric', {
         },
         connectSocket() {
             if (!initialized) {
-                let connection = getSocketConnection("metricHub");
-
-                let _this = this;
-                connection.on("UpdateMetrics", metrics => {
-                    metrics.forEach(metric => {
-                        replaceOrAddItem(metric, _this.metrics);
-                    })
-                    this.initializeItems(metrics);
-                    sortAsc(_this.metrics);
+                let coachConnection = getSocketConnection("coachHub");
+                coachConnection.on("SendUpdates", updateModel => {
+                    this.runUpdates(updateModel);
                 });
             }
         }

@@ -1,13 +1,13 @@
 import { defineStore } from 'pinia'
 import { getGoals, saveGoal, saveGoalTimePair, addReason, getGoalsWithTimeframe, createAndMapItem, 
     mapItems, deleteTimePair, unmapTodoFromGoalTimePair } from '../api/goalAPI'
-import { repositionItem } from '../api/itemAPI';
-import { replaceOrAddItem, sortAsc } from '../../utility';
+import { capitalize, replaceOrAddItem, sortAsc } from '../../utility';
 import { getSocketConnection } from './socket'
 import { useMetricStore } from '@/store/metricStore'
 import { useTodoStore } from '@/store/todoStore'
 import { useRoutineStore } from '@/store/routineStore'
 import { GOAL_TYPE } from '../model/constants';
+import { postEndpoint } from '../api/api';
 
         
 
@@ -93,8 +93,15 @@ export const useGoalStore = defineStore('goal', {
             });
             return fitnessGoals;
         },
-        repositionItem(parentType, itemType, goalID, metricID, newPosition) {
-            repositionItem(parentType, itemType, goalID, metricID, newPosition);
+        repositionItem(parentType, itemType, parentID, itemID, newPosition) {
+            var data = { newPosition };
+            data[`${parentType}ID`] = parentID;
+            data.itemID = itemID;
+        
+            itemType = capitalize(itemType);
+            parentType = capitalize(parentType);
+
+            return postEndpoint(parentType, `Reposition${itemType}In${parentType}`, data);
         },
         createAndMapItem(goalID, itemType, itemText) {
             createAndMapItem(goalID, itemType, itemText);
@@ -133,17 +140,27 @@ export const useGoalStore = defineStore('goal', {
         addReason(id, datetime, text) {
             addReason(id, datetime, text);
         },
+        runUpdates(updates) {
+            let _this = this;
+            if (updates.goals && updates.goals.length > 0) {
+                updates.goals.forEach(goal => {
+                    replaceOrAddItem(goal, _this.goals);
+                })
+                this.initializeItems(updates.goals);
+                sortAsc(_this.goals);
+            }
+            if (updates.goalIDsRemoved && updates.goalIDsRemoved.length > 0) {
+                updates.goalIDsRemoved.forEach(goalID => {
+                    removeItemByID(goalID, _this.goals);
+                })
+                sortAsc(_this.goals);
+            }
+        },
         connectSocket() {
             if (!initialized) {
-                let connection = getSocketConnection("goalHub");
-
-                let _this = this;
-                connection.on("UpdateGoals", goals => {
-                    goals.forEach(goal => {
-                        replaceOrAddItem(goal, _this.goals);
-                    })
-                    this.initializeItems(goals);
-                    sortAsc(_this.goals);
+                let coachConnection = getSocketConnection("coachHub");
+                coachConnection.on("SendUpdates", updateModel => {
+                    this.runUpdates(updateModel);
                 });
             }
         }

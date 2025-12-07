@@ -2,12 +2,12 @@ import { defineStore } from 'pinia'
 import { getTodos, saveTodo, deleteTodo, createDefaultTask, createTask, mapItems, mapTypes, refreshRepetitionForRepeat, 
          createAndMapItem, deleteFutureRepetitionsForRepeat, deleteOrArchiveRepeat, deleteTodoTimePair, 
          toggleGoalTimePairTodoCompletion } from '../api/todoAPI';
-import { repositionItem } from '../api/itemAPI';
-import { replaceOrAddItem, removeItemByID, sortAsc } from '../../utility';
+import { replaceOrAddItem, removeItemByID, sortAsc, capitalize } from '../../utility';
 import { getSocketConnection } from './socket'
 import { useMetricStore } from '@/store/metricStore'
 import { useGoalStore } from '@/store/goalStore'
 import { useRoutineStore } from '@/store/routineStore'
+import { postEndpoint } from '../api/api';
 
 let initialized = false;
 
@@ -118,8 +118,15 @@ export const useTodoStore = defineStore('todo', {
         mapTypes(todoID, addedIDs, removedIDs) {
             mapTypes(todoID, addedIDs, removedIDs)
         },
-        repositionItem(parentType, itemType, goalID, metricID, newPosition) {
-            repositionItem(parentType, itemType, goalID, metricID, newPosition);
+        repositionItem(parentType, itemType, parentID, itemID, newPosition) {
+            var data = { newPosition };
+            data[`${parentType}ID`] = parentID;
+            data.itemID = itemID;
+        
+            itemType = capitalize(itemType);
+            parentType = capitalize(parentType);
+
+            return postEndpoint(parentType, `Reposition${itemType}In${parentType}`, data);
         },
         refreshRepetitionForRepeat(id, repeatID) {
             refreshRepetitionForRepeat(id, repeatID);
@@ -136,23 +143,27 @@ export const useTodoStore = defineStore('todo', {
         deleteTimePair(id) {
             deleteTodoTimePair(id);
         },
+        runUpdates(updates) {
+            let _this = this;
+            if (updates.todos && updates.todos.length > 0) {
+                updates.todos.forEach(todo => {
+                    replaceOrAddItem(todo, _this.todos);
+                });
+                this.initializeItems(updates.todos);
+                sortAsc(_this.todos);
+            }
+            if (updates.todoIDsRemoved && updates.todoIDsRemoved.length > 0) {
+                updates.todoIDsRemoved.forEach(todoID => {
+                    removeItemByID(todoID, _this.todos);
+                })
+                sortAsc(_this.todos);
+            }
+        },
         connectSocket() {
             if (!initialized) {
-                let connection = getSocketConnection("todoHub");
-
-                let _this = this;
-                connection.on("UpdateTodos", todos => {
-                    todos.forEach(todo => {
-                        replaceOrAddItem(todo, _this.todos);
-                    });
-                    this.initializeItems(todos);
-                    sortAsc(_this.todos);
-                });
-                connection.on("RemoveTodos", todoIDs => {
-                    todoIDs.forEach(todoID => {
-                        removeItemByID(todoID, _this.todos);
-                    })
-                    sortAsc(_this.todos);
+                let coachConnection = getSocketConnection("coachHub");
+                coachConnection.on("SendUpdates", updateModel => {
+                    this.runUpdates(updateModel);
                 });
             }
         }

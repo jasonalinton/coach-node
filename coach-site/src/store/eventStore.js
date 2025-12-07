@@ -46,13 +46,7 @@ export const useEventStore = defineStore('event', {
             return events;
         },
         async updateEvent(eventID, text, start, end) {
-            return postEndpoint("Event", "UpdateEvent", {eventID, text, start, end})
-                .then(this.onResponse);
-        },
-        onResponse(response) {
-            if (response.updates)
-                this.runUpdates(response.updates);
-                return response.result;
+            return postEndpoint("Event", "UpdateEvent", {eventID, text, start, end});
         },
         runUpdates(updates) {
             let _this = this;
@@ -101,47 +95,6 @@ export const useEventStore = defineStore('event', {
                 coachConnection.on("SendUpdates", updateModel => {
                     this.runUpdates(updateModel);
                 });
-                
-                // let _this = this;
-                // let connection = getSocketConnection("plannerHub");
-                // connection.on("UpdateEvents", events => {
-                //     // this.initializeItems(events);
-                //     events.forEach(event => {
-                //         replaceOrAddItem(event, _this.events);
-                //     })
-                //     sortAsc(_this.events);
-                // });
-                // connection.on("RemoveEvents", eventIDs => {
-                //     eventIDs.forEach(eventID => {
-                //         removeItemByID(eventID, _this.events);
-                //     })
-                //     sortAsc(_this.events);
-                // });
-
-                // // Replace iteration in event
-                // connection.on("UpdateIterations", iterations => {
-                //     iterations.forEach(iteration => {
-                //         _this.events.forEach(_event => {
-                //             var containsIteration = _event.iterations.some(_iteration => _iteration.id == iteration.id);
-                //             if (containsIteration) {
-                //                 replaceOrAddItem(iteration, _event.iterations);
-                //                 sortAsc(_event.iterations);
-                //             }
-                //         });                       
-                //     });
-                // });
-                // // Remove iteration in event
-                // connection.on("RemoveIterations", iterationIDs => {
-                //     iterationIDs.forEach(iterationID => {
-                //         _this.events.forEach(_event => {
-                //             var containsIteration = _event.iterations.some(_iteration => _iteration.id == iterationID);
-                //             if (containsIteration) {
-                //                 removeItemByID(iterationID, _event.iterations);
-                //                 sortAsc(_event.iterations);
-                //             }
-                //         });
-                //     })
-                // });
             }
         }
     },

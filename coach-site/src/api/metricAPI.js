@@ -55,25 +55,6 @@ export async function migrateItemMappings() {
     });
 }
 
-export async function logLogItem(model) {
-    return fetch(`${URL}/api/Metric/LogLogItem`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(model)
-    })
-    .then((response) => response.json())
-    .then((data) => {
-        if (!data.errorMessage) {
-            return data;
-        } else {
-            this.errorMessage = data.errorMessage;
-        }
-    })
-    .catch((error) => {
-        console.error('Error:', error);
-    });
-}
-
 export async function deleteLogEntry(logEntryID) {
     return fetch(`${URL}/api/Metric/DeleteLogEntry`, {
         method: 'POST',

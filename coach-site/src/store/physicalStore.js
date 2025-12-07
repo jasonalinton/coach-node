@@ -115,7 +115,8 @@ export const usePhysicalStore = defineStore('physical', {
         },
         runUpdates(updates) {
             let _this = this;
-            if (updates.meals) {
+            /* Meal */
+            if (updates.meals && updates.meals.length > 0) {
                 updates.meals.forEach(meal => {
                     replaceOrAddItem(meal, _this.meals);
                     let mealHistory = {
@@ -131,10 +132,37 @@ export const usePhysicalStore = defineStore('physical', {
                 })
                 sortAsc(_this.meals);
             }
-            if (updates.foodItems) {
+            if (updates.mealIDsRemoved && updates.mealIDsRemoved.length > 0) {
+                updates.mealIDsRemoved.forEach(mealID => {
+                    removeItemByID(mealID, _this.meals);
+                    removeItemByID(mealID, _this.mealHistories);
+                })
+                sortAsc(_this.meals);
+            }
+            /* Food Item */
+            if (updates.foodItems && updates.foodItems.length > 0) {
                 updates.foodItems.forEach(foodItem => {
                     replaceOrAddItem(foodItem, this.foodItems);
                 });
+            }
+            if (updates.foodItemIDsRemoved && updates.foodItemIDsRemoved.length > 0) {
+                updates.foodItemIDsRemoved.forEach(foodItemID => {
+                    removeItemByID(foodItemID, _this.foodItems);
+                })
+                sortAsc(_this.foodItems);
+            }
+            /* Water Log */
+            if (updates.waterLogs && updates.waterLogs.length > 0) {
+                updates.waterLogs.forEach(waterLog => {
+                    replaceOrAddItem(waterLog, _this.waterLogs);
+                })
+                sortAsc(_this.waterLogs);
+            }
+            if (updates.waterLogIDsRemoved && updates.waterLogIDsRemoved.length > 0) {
+                updates.waterLogIDsRemoved.forEach(waterLogID => {
+                    removeItemByID(waterLogID, _this.waterLogs);
+                })
+                sortAsc(_this.waterLogs);
             }
         },
         connectSocket() {
@@ -142,29 +170,6 @@ export const usePhysicalStore = defineStore('physical', {
                 let coachConnection = getSocketConnection("coachHub");
                 coachConnection.on("SendUpdates", updateModel => {
                     this.runUpdates(updateModel);
-                })
-
-                let connection = getSocketConnection("metricHub");
-
-                let _this = this;
-                connection.on("RemoveMeals", mealIDs => {
-                    mealIDs.forEach(mealID => {
-                        removeItemByID(mealID, _this.meals);
-                        removeItemByID(mealID, _this.mealHistories);
-                    })
-                    sortAsc(_this.meals);
-                });
-                connection.on("UpdateWaterLogs", waterLogs => {
-                    waterLogs.forEach(waterLog => {
-                        replaceOrAddItem(waterLog, _this.waterLogs);
-                    })
-                    sortAsc(_this.waterLogs);
-                });
-                connection.on("RemoveWaterLogs", waterLogIDs => {
-                    waterLogIDs.forEach(waterLogID => {
-                        removeItemByID(waterLogID, _this.waterLogs);
-                    })
-                    sortAsc(_this.meals);
                 });
             }
         },

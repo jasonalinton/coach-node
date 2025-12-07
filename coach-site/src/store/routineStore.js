@@ -1,12 +1,12 @@
 import { defineStore } from 'pinia'
 import { getRoutines, refreshRepetitionForRepeat, saveRoutine } from '../api/routineAPI'
-import { repositionItem } from '../api/itemAPI';
-import { replaceOrAddItem, sortAsc } from '../../utility';
+import { capitalize, replaceOrAddItem, sortAsc } from '../../utility';
 import { ROUTINETYPES } from '../model/constants';
 import { getSocketConnection } from './socket'
 import { useMetricStore } from '@/store/metricStore'
 import { useTodoStore } from '@/store/todoStore'
 import { useGoalStore } from '@/store/goalStore'
+import { postEndpoint } from '../api/api';
 
 let initialized = false;
 
@@ -51,8 +51,15 @@ export const useRoutineStore = defineStore('routine', {
             let taskRoutines = this.routines.filter(x => x.types.findIndex(x => x.id == ROUTINETYPES.TASKROUTINE) > -1);
             return taskRoutines;
         },
-        repositionItem(parentType, itemType, goalID, metricID, newPosition) {
-            repositionItem(parentType, itemType, goalID, metricID, newPosition);
+        repositionItem(parentType, itemType, parentID, itemID, newPosition) {
+            var data = { newPosition };
+            data[`${parentType}ID`] = parentID;
+            data.itemID = itemID;
+        
+            itemType = capitalize(itemType);
+            parentType = capitalize(parentType);
+
+            return postEndpoint(parentType, `Reposition${itemType}In${parentType}`, data);
         },
         refreshRepetitionForRepeat(id, repeatID) {
             refreshRepetitionForRepeat(id, repeatID);
@@ -63,17 +70,27 @@ export const useRoutineStore = defineStore('routine', {
         toggleIsTaskRoutine() {
 
         },
+        runUpdates(updates) {
+            let _this = this;
+            if (updates.routines && updates.routines.length > 0) {
+                updates.routines.forEach(routine => {
+                    replaceOrAddItem(routine, _this.routines);
+                })
+                this.initializeItems(updates.routines);
+                sortAsc(_this.routines);
+            }
+            if (updates.routineIDsRemoved && updates.routineIDsRemoved.length > 0) {
+                updates.routineIDsRemoved.forEach(routineID => {
+                    removeItemByID(routineID, _this.routines);
+                })
+                sortAsc(_this.routines);
+            }
+        },
         connectSocket() {
             if (!initialized) {
-                let connection = getSocketConnection("routineHub");
-
-                let _this = this;
-                connection.on("UpdateRoutines", routines => {
-                    routines.forEach(routine => {
-                        replaceOrAddItem(routine, _this.routines);
-                    })
-                    this.initializeItems(routines);
-                    sortAsc(_this.routines);
+                let coachConnection = getSocketConnection("coachHub");
+                coachConnection.on("SendUpdates", updateModel => {
+                    this.runUpdates(updateModel);
                 });
             }
         }
