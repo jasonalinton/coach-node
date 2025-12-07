@@ -91,8 +91,6 @@
 import TimeControl from '../../../controls/time/TimeControl.vue'
 import { clone, toDateString } from '../../../../../utility'
 import { MOMENT } from '../../../../model/constants'
-import { saveGoalTimePair } from '../../../../api/goalAPI'
-import { saveTodoTimePair } from '../../../../api/todoAPI'
 import { timeModelToString, firstDayOfWeek, lastDayOfWeek, firstDayOfMonth, lastDayOfMonth, endOfDay, firstDayOfYear, lastDayOfYear } from '../../../../../utility/timeUtility'
 import { TIMEFRAME } from '../../../../model/constants'
 import { timeframes, inheritanceTypes } from '../../../../model/types'
@@ -346,9 +344,9 @@ function save() {
     };
     
     if (this.itemType.toLowerCase() == "goal") {
-        saveGoalTimePair(timePair);
+        this.goalStore.saveTimePair(timePair);
     } else if (this.itemType.toLowerCase() == "todo") {
-        saveTodoTimePair(timePair);
+        this.todoStore.saveTimePair(timePair);
     }
 
     this.$emit("saveTimePair", timePair);

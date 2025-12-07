@@ -164,7 +164,6 @@ import TimeControl from '../../../controls/time/TimeControl.vue'
 import { clone, capitalize, toDateString, today } from '../../../../../utility'
 import { isNextDay, addDay, getNumberDateString } from '../../../../../utility/timeUtility'
 import { saveRoutineRepeat } from '../../../../api/routineAPI'
-import { saveTodoRepeat } from '../../../../api/todoAPI'
 
 let timeframes = [
     {
@@ -599,7 +598,7 @@ function save() {
     if (this.itemType.toLowerCase() == "routine") {
         saveRoutineRepeat(repeat);
     } else if (this.itemType.toLowerCase() == "todo") {
-        saveTodoRepeat(repeat);
+        this.todoStore.saveRepeat(repeat);
     }
 
     this.$emit("saveRepeat", repeat);
