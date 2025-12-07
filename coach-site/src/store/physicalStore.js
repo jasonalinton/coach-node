@@ -81,37 +81,26 @@ export const usePhysicalStore = defineStore('physical', {
         },
         async saveFoodItem(foodItem) {
             return postEndpoint("Physical", "SaveFoodItem", { model: foodItem })
-                .then(response => {
-                    replaceOrAddItem(response.result, this.foodItems);
-                    return this.onResponse(response);
-                });
+            .then(response => response.result);
         },
         async addFoodItemToMeal(model) {
             return postEndpoint("Physical", "AddFoodItemToMeal", model)
-                .then(response => {
-                    replaceOrAddItem(response.result, this.meals);
-                    return this.onResponse(response);
-                });
+            .then(response => response.result);
         },
         async replaceOGFoodItem(id_OG, id_New) {
-            return postEndpoint("Physical", "ReplaceOGFoodItem", {id_OG, id_New})
-                .then(response => {
-                    return this.onResponse(response);
-                });
+            return postEndpoint("Physical", "ReplaceOGFoodItem", {id_OG, id_New});
         },
         async logWater(amountFLOZ, dateTime, mealID) {
-            logWater(amountFLOZ, dateTime, mealID);
+            return postEndpoint("Physical", "LogWater", { amountFLOZ, dateTime, mealID })
+            .then(response => response.result);
         },
         async setMealTime(mealID, startAt, endAt) {
-            setMealTime(mealID, startAt, endAt);
+            return postEndpoint("Physical", "SetMealTime", { mealID, startAt, endAt })
+            .then(response => response.result);
         },
         async removeFoodItem(mealID, foodItemID) {
-            removeFoodItem(mealID, foodItemID);
-        },
-        onResponse(response) {
-            if (response.updates)
-                this.runUpdates(response.updates);
-            return response.result;
+            return postEndpoint("Physical", "RemoveFoodItem", { mealID, foodItemID })
+            .then(response => response.result);
         },
         runUpdates(updates) {
             let _this = this;

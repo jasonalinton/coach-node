@@ -3,11 +3,13 @@
 export const URL = "http://localhost:7104"
 // export const URL = "https://coach-eea3hnh7fje3gxhw.canadacentral-01.azurewebsites.net"
 import { isHubConnected } from "../store/socket";
+
 import { useMetricStore } from '@/store/metricStore'
 import { useGoalStore } from '@/store/goalStore'
 import { useTodoStore } from '@/store/todoStore'
 import { useRoutineStore } from '@/store/routineStore'
 import { useEventStore } from '@/store/eventStore'
+import { usePhysicalStore } from '@/store/physicalStore'
 
 export async function postEndpoint(controller, endpoint, data) {
     return fetch(`${URL}/api/${controller}/${endpoint}`, {
@@ -46,12 +48,14 @@ function onResponse(response) {
         let todoStore = useTodoStore();
         let routineStore = useRoutineStore();
         let eventStore = useEventStore();
+        let physicalStore = usePhysicalStore();
         
         metricStore.runUpdates(response.updates);
         goalStore.runUpdates(response.updates);
         todoStore.runUpdates(response.updates);
         routineStore.runUpdates(response.updates);
         eventStore.runUpdates(response.updates);
+        physicalStore.runUpdates(response.updates);
     }
     return response;
 }
