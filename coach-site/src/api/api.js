@@ -8,6 +8,7 @@ import { useMetricStore } from '@/store/metricStore'
 import { useGoalStore } from '@/store/goalStore'
 import { useTodoStore } from '@/store/todoStore'
 import { useRoutineStore } from '@/store/routineStore'
+import { useIterationStore } from '@/store/iterationStore'
 import { useEventStore } from '@/store/eventStore'
 import { usePhysicalStore } from '@/store/physicalStore'
 
@@ -47,6 +48,7 @@ function onResponse(response) {
         let goalStore = useGoalStore();
         let todoStore = useTodoStore();
         let routineStore = useRoutineStore();
+        let iterationStore = useIterationStore();
         let eventStore = useEventStore();
         let physicalStore = usePhysicalStore();
         
@@ -54,6 +56,7 @@ function onResponse(response) {
         goalStore.runUpdates(response.updates);
         todoStore.runUpdates(response.updates);
         routineStore.runUpdates(response.updates);
+        iterationStore.runUpdates(response.updates);
         eventStore.runUpdates(response.updates);
         physicalStore.runUpdates(response.updates);
     }

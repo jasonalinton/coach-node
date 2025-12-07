@@ -79,45 +79,28 @@ export const useIterationStore = defineStore('iteration', {
         updateIteration(iterationID, text, points, startAt, endAt) {
             let data = { iterationID, text, points, startAt, endAt };
             return postEndpoint("Planner", "UpdateIteration", data)
-            .then(response => {
-                // replaceOrAddItem(response.result, this.iterations);
-                return this.onResponse(response);
-            });
+            .then(response => response.result);
         },
         rescheduleIteration(iterationID, startAt, endAt) {
             let data = { iterationID, startAt, endAt };
             return postEndpoint("Planner", "RescheduleIteration", data)
-            .then(response => {
-                // replaceOrAddItem(response.result, this.iterations);
-                return this.onResponse(response);
-            });
+            .then(response => response.result);
         },
         // This is the wrong name. Technically it's not toggling, its setting the values
         toggleCompletion(iterationID, attemptedAt, completedAt) {
             let data = { iterationID, attemptedAt, completedAt };
             return postEndpoint("Planner", "ToggleTaskCompletion", data)
-            .then(response => {
-                // replaceOrAddItem(response.result, this.iterations);
-                return this.onResponse(response);
-            });
+            .then(response => response.result);
         },
         attemptIteration(iterationID, attemptedAt) {
             let data = { iterationID, attemptedAt };
             return postEndpoint("Planner", "AttemptIteration", data)
-            .then(response => {
-                // replaceOrAddItem(response.result, this.iterations);
-                return this.onResponse(response);
-            });
+            .then(response => response.result);
         },
         deleteIteration(iterationID) {
             let data = { iterationID };
             return postEndpoint("Planner", "DeleteIteration", data)
-                .then(this.onResponse);
-        },
-        onResponse(response) {
-            if (response.updates)
-                this.runUpdates(response.updates);
-            return response.result;
+            .then(response => response.result);
         },
         runUpdates(updates) {
             let _this = this;
