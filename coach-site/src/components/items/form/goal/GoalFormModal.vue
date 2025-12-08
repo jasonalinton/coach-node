@@ -139,7 +139,6 @@
 </template>
 
 <script>
-import { saveGoal } from '../../../../api/goalAPI';
 // import TimeframeControl from '../component/TimeframeControl.vue';
 import RepeatControl from '../component/RepeatControl.vue';
 import GoalTimePairControl from '../component/GoalTimePairControl.vue';
@@ -284,7 +283,7 @@ export default {
             this.timePairs.updated = [];
             this.timePairs.deletedIDs = [];
 
-            this.reasons = goal.blurbs.filter(x => x.type.id == this.BLURBTYPETYPE.REASON);
+            this.reasons = goal.blurbs.filter(x => x.idType == this.BLURBTYPE.REASON);
         },
         setSelectedRepeat(repeatID) {
             this.selectedRepeatID = repeatID;
@@ -382,7 +381,7 @@ export default {
                 id: this.id,
                 text: this.text
             };
-            saveGoal(model);
+            this.store.saveGoal(model);
             this.$emit("closeItemModal");
         },
         addItem(itemType, itemText) {
