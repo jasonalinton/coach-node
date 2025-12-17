@@ -123,7 +123,6 @@ export default {
         this.todoStore = todoStore.useTodoStore();
         let iterationStore = await import(`@/store/iterationStore`);
         this.iterationStore = iterationStore.useIterationStore();
-        this.iterationStore.getIterationsInRange(this.start, this.end, true);
     },
     computed: {
         date() {
@@ -258,6 +257,7 @@ export default {
             let repeatIDs = this.iterations.filter(x => x.isRepeat).map(x => x.repeatID);
             let viewModels = [];
 
+            // StartAt is beginning of Start[Date] & EndAt is beginning of End[Date]
             let iterations = this.iterations.filter(iteration => {
                 return +(new Date(iteration.startAt)) == +start && 
                 +startOfDay((new Date(iteration.endAt))) == +startOfDay(end)

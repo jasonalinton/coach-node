@@ -23,7 +23,6 @@ export default {
     data: function () {
         return {
             physicalStore: undefined,
-            mealData: [],
             chart: undefined,
             calorieSeries: undefined,
             calorieSeriesData: [],

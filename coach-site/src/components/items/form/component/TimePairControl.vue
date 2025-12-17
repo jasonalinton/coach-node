@@ -91,8 +91,6 @@
 import TimeControl from '../../../controls/time/TimeControl.vue'
 import { clone, toDateString } from '../../../../../utility'
 import { MOMENT } from '../../../../model/constants'
-import { saveGoalTimePair } from '../../../../api/goalAPI'
-import { saveTodoTimePair } from '../../../../api/todoAPI'
 import { timeModelToString, firstDayOfWeek, lastDayOfWeek, firstDayOfMonth, lastDayOfMonth, endOfDay, firstDayOfYear, lastDayOfYear } from '../../../../../utility/timeUtility'
 import { TIMEFRAME } from '../../../../model/constants'
 import { timeframes, inheritanceTypes } from '../../../../model/types'
@@ -182,33 +180,33 @@ function setTimeframe() {
     let end = this.updatedTimePair.endTime.value;
     if (value == this.TIMEFRAME.DAY) {
         if (start) {
-            end.dateTime = start.dateTime.toISOString();
+            end.dateTime = start.dateTime.toJSON();
         } else if (end) {
-            start.dateTime = end.dateTime.toISOString();
+            start.dateTime = end.dateTime.toJSON();
         }
     } else if (value == this.TIMEFRAME.WEEK) {
         if (start) {
-            start.dateTime = firstDayOfWeek(start.dateTime).toISOString();
-            end.dateTime = endOfDay(lastDayOfWeek(start.dateTime)).toISOString();
+            start.dateTime = firstDayOfWeek(start.dateTime).toJSON();
+            end.dateTime = endOfDay(lastDayOfWeek(start.dateTime)).toJSON();
         } else if (end) {
-            start.dateTime = firstDayOfWeek(end.dateTime).toISOString();
-            end.dateTime = endOfDay(lastDayOfWeek(end.dateTime)).toISOString();
+            start.dateTime = firstDayOfWeek(end.dateTime).toJSON();
+            end.dateTime = endOfDay(lastDayOfWeek(end.dateTime)).toJSON();
         }
     } else if (value == this.TIMEFRAME.MONTH) {
         if (start) {
-            start.dateTime = firstDayOfMonth(start.dateTime).toISOString();
-            end.dateTime = endOfDay(lastDayOfMonth(start.dateTime)).toISOString();
+            start.dateTime = firstDayOfMonth(start.dateTime).toJSON();
+            end.dateTime = endOfDay(lastDayOfMonth(start.dateTime)).toJSON();
         } else if (end) {
-            start.dateTime = firstDayOfMonth(end.dateTime).toISOString();
-            end.dateTime = endOfDay(lastDayOfMonth(end.dateTime)).toISOString();
+            start.dateTime = firstDayOfMonth(end.dateTime).toJSON();
+            end.dateTime = endOfDay(lastDayOfMonth(end.dateTime)).toJSON();
         }
     } else if (value == this.TIMEFRAME.YEAR) {
         if (start) {
-            start.dateTime = firstDayOfYear(start.dateTime).toISOString();
-            end.dateTime = endOfDay(lastDayOfYear(start.dateTime)).toISOString();
+            start.dateTime = firstDayOfYear(start.dateTime).toJSON();
+            end.dateTime = endOfDay(lastDayOfYear(start.dateTime)).toJSON();
         } else if (end) {
-            start.dateTime = lastDayOfYear(end.dateTime).toISOString();
-            end.dateTime = endOfDay(lastDayOfYear(end.dateTime)).toISOString();
+            start.dateTime = lastDayOfYear(end.dateTime).toJSON();
+            end.dateTime = endOfDay(lastDayOfYear(end.dateTime)).toJSON();
         }
     }
 }
@@ -271,27 +269,27 @@ function setTime(time, endpoint) {
             }
         } else if (this.updatedTimePair.idTimeframe == this.TIMEFRAME.WEEK) {
             if (endpoint == "start") {
-                start.dateTime = firstDayOfWeek(new Date(time)).toISOString();
-                end.dateTime = endOfDay(lastDayOfWeek(new Date(time))).toISOString();
+                start.dateTime = firstDayOfWeek(new Date(time)).toJSON();
+                end.dateTime = endOfDay(lastDayOfWeek(new Date(time))).toJSON();
             } else if (endpoint == "end") {
-                start.dateTime = firstDayOfWeek(new Date(time)).toISOString();
-                end.dateTime = endOfDay(lastDayOfWeek(new Date(time))).toISOString();
+                start.dateTime = firstDayOfWeek(new Date(time)).toJSON();
+                end.dateTime = endOfDay(lastDayOfWeek(new Date(time))).toJSON();
             }
         } else if (this.updatedTimePair.idTimeframe == this.TIMEFRAME.MONTH) {
             if (endpoint == "start") {
-                start.dateTime = firstDayOfMonth(new Date(time)).toISOString();
-                end.dateTime = endOfDay(lastDayOfMonth(new Date(time))).toISOString();
+                start.dateTime = firstDayOfMonth(new Date(time)).toJSON();
+                end.dateTime = endOfDay(lastDayOfMonth(new Date(time))).toJSON();
             } else if (endpoint == "end") {
-                start.dateTime = firstDayOfMonth(new Date(time)).toISOString();
-                end.dateTime = endOfDay(lastDayOfMonth(new Date(time))).toISOString();
+                start.dateTime = firstDayOfMonth(new Date(time)).toJSON();
+                end.dateTime = endOfDay(lastDayOfMonth(new Date(time))).toJSON();
             }
         } else if (this.updatedTimePair.idTimeframe == this.TIMEFRAME.YEAR) {
             if (endpoint == "start") {
-                start.dateTime = firstDayOfYear(new Date(time)).toISOString();
-                end.dateTime = endOfDay(lastDayOfYear(new Date(time))).toISOString();
+                start.dateTime = firstDayOfYear(new Date(time)).toJSON();
+                end.dateTime = endOfDay(lastDayOfYear(new Date(time))).toJSON();
             } else if (endpoint == "end") {
-                start.dateTime = lastDayOfYear(new Date(time)).toISOString();
-                end.dateTime = endOfDay(lastDayOfYear(new Date(time))).toISOString();
+                start.dateTime = lastDayOfYear(new Date(time)).toJSON();
+                end.dateTime = endOfDay(lastDayOfYear(new Date(time))).toJSON();
             }
         }
     } else {
@@ -346,9 +344,9 @@ function save() {
     };
     
     if (this.itemType.toLowerCase() == "goal") {
-        saveGoalTimePair(timePair);
+        this.goalStore.saveTimePair(timePair);
     } else if (this.itemType.toLowerCase() == "todo") {
-        saveTodoTimePair(timePair);
+        this.todoStore.saveTimePair(timePair);
     }
 
     this.$emit("saveTimePair", timePair);

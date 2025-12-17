@@ -104,6 +104,16 @@ export let EVENTTYPE = {
     REPETITIVE: 138
 };
 
+export let TODO_ACTIVITY_TYPE = {
+    LOG: 157,
+    SLEEP: 153,
+    BRIEFING: 154,
+    MEAL: 155,
+    WORKOUT: 156,
+    EXERCISE: 158,
+    WATER: 159,
+};
+
 export let BLURBTYPE = {
     ADVICE: 162,
     REASON: 163,
@@ -141,4 +151,18 @@ export let WORKOUT_VIEWS = {
     WORKOUT_FORM: "workoutForm",
     EXERCISE_LIST: "exerciseList",
     EXERCISE_FORM: "exerciseForm"
+}
+
+export let GOAL_TYPE = {
+    GOAL_TYPE: 182,
+    FITNESS: 183,
+}
+
+export let LOG_ITEMS = {
+    EMOTIONAL_MOOD: 1,
+    MENTAL_ENERGY: 6,
+    MENTAL_CLARITY: 7,
+    PHYSICAL_ENERGY: 11,
+    PHYSICAL_SLEEPINESS: 12,
+
 }

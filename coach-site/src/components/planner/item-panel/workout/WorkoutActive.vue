@@ -1,26 +1,59 @@
 <template>
     <div class="workout-active d-flex flex-column overflow-scroll"
          :class="{ 'is-active': isActive }">
-        <div class="label d-flex flex-row">
-            <img class="icon-button mb-2"
-                 src='/icon/previous.png' width="20" height="20"
-                 @click.prevent="back"/>
-            <span>{{ workout.name }}</span>
-        </div>
+         <div class="label d-flex flex-row justify-content-between">
+             <div class="d-flex flex-row">
+                 <img class="icon-button mb-2"
+                      src='/icon/previous.png' width="20" height="20"
+                      @click.prevent="back"/>
+                 <span>{{ workout.name }}</span>
+                </div>
+                <span class="fload-end me-2">{{ points }}</span>
+         </div>
         <div class="d-flex flex-column">
-            <WorkoutSection v-for="section in sections" :key="section.id" :section="section"
+            <WorkoutSection v-for="section in sections" :key="section.id" 
+                            :section="section" :isActive="isActive" :settings="sectionSettings.find(x => x.id == section.id)"
                             class="mt-2"/>
         </div>
+        <!-- Settings -->
+        <div v-if="!completion.isActive" class="settings">
+            <span class="text-start cursor-default"
+                @click="settings.isShown = !settings.isShown">Settings</span>
+            <div v-if="settings.isShown" class="d-flex flex-column mt-2">
+                <!-- Time -->
+                <div class="d-flex flex-column">
+                    <DateTimeSelector class="date-selector" :class="{ 'invalid': !completion.isValid }"
+                                        :dateTime="startAt" @onChange="setIterationTime($event, 'start')"/>
+                    <DateTimeSelector class="date-selector mt-2" :class="{ 'invalid': !completion.isValid }"
+                                        :dateTime="endAt" @onChange="setIterationTime($event, 'end')"/>
+                </div>
+                <!-- Is Template -->
+                <div class="d-flex flex-row justify-items-start mt-2">
+                    <input type="checkbox" id="is-template" v-model="workout.isTemplate" />
+                    <label class="ms-1" for="is-template">Is Template</label>
+                </div>
+                <!-- Save -->
+                <button type="button" class="btn btn-primary mt-2 mb-2" @click="saveSettings()">Save</button>
+                <!-- Delete -->
+                <button v-if="!settings.confimDelete" type="button" class="btn btn-danger mb-2" @click="settings.confimDelete = true">Delete</button>
+                <!-- Delete Confirmation -->
+                <div v-if="settings.confimDelete" class="d-flex flex-row mb-2 align-items-center">
+                    <span>Are you sure?</span>
+                    <button type="button" class="btn btn-warning ms-2" @click="settings.confimDelete = false">Cancel</button>
+                    <button type="button" class="btn btn-danger ms-2" @click="deleteWorkout">Delete</button>
+                </div>
+            </div>
+        </div>
         <!-- Completion Controls -->
-        <div v-if="isActive" class="completion d-flex flex-column justify-content-center position-sticky bottom-0 ps-2 pe-2 pb-1">
-            <QuickLogExercise />
-            <div class="clock d-flex flex-row justify-content-center align-items-center">
+        <div v-if="isActive" class="completion d-flex flex-column justify-content-center position-sticky bottom-0">
+            <QuickLogExercise  v-if="!completion.isActive" />
+            <div v-if="!completion.isActive" class="clock d-flex flex-row justify-content-center align-items-center">
                 <img class="icon-button me-2"
                         src='/icon/circle-stop.png' width="24" height="24"
                         @click.prevent="stopWorkout"/>
                 <div>{{ timeSinceStart }}</div>
             </div>
-            <div v-if="completion.isActive" class="form-group">
+            <div v-if="completion.isActive" class="form-group pt-2">
                     <!-- Time -->
                     <DateTimeSelector class="date-selector" :class="{ 'invalid': !completion.isValid }"
                                         :dateTime="startAt" @onChange="setIterationTime($event, 'start')"/>
@@ -28,8 +61,12 @@
                                         :dateTime="endAt" @onChange="setIterationTime($event, 'end')"/>
                     <!-- Create Event -->
                     <div class="d-flex flex-row justify-items-start mt-2">
-                        <input type="checkbox" id="create-event" v-model="completion.createEvent" />
-                        <label class="ms-1" for="create-event">Create Event</label>
+                        <span class="create-event" :class="{ 'selected': completion.createEvent }"
+                              @click="completion.createEvent = !completion.createEvent">
+                            Create Event
+                        </span>
+                        <!-- <input type="checkbox" id="create-event" v-model="completion.createEvent" />
+                        <label class="ms-1" for="create-event">Create Event</label> -->
                     </div>
                     <!-- Log Buttom -->
                     <div class="d-flex flex-row mt-2">
@@ -122,6 +159,16 @@ export default {
             } else {
                 return undefined;
             }
+        },
+        points() {
+            return (this.workout) ? this.workout.points : 0;
+        },
+        sectionSettings() {
+            if (this.workout) {
+                var settings = this.workoutStore.getDisplaySettings(this.workout.id);
+                return settings.sections;
+            }
+            return undefined;
         }
     },
     methods: {
@@ -130,6 +177,8 @@ export default {
         completeWorkout,
         setIterationTime,
         validateTimes,
+        deleteWorkout,
+        saveSettings,
         back() {
             this.appStore.onBackWorkoutPanel();
         }
@@ -153,8 +202,6 @@ export default {
     }
 }
 
-
-
 function stopWorkout() {
     if (!this.completion.isActive) {
         let sets = this.sections
@@ -171,10 +218,11 @@ function stopWorkout() {
                     }
                 }
             });
-            this.endAt = lastLoggedTime.toISOString();
+            this.endAt = lastLoggedTime.toJSON();
         }
         this.validateTimes();
         this.completion.isActive = !this.completion.isActive;
+        this.settings.isShown = false;
     }
 }
 
@@ -221,6 +269,38 @@ function validateTimes() {
     }
 }
 
+function deleteWorkout() {
+    let model = { 
+        id: this.id,
+        isDeleted: true,
+    };
+
+    this.workoutStore.saveWorkout(model);
+    this.appStore.onDoneWorkout();
+    this.back();
+}
+
+function saveSettings() {
+    let model = { 
+        id: this.id,
+        isUpdated: true,
+        startAt: {
+            isUpdated: this.startAt != undefined,
+            value: this.startAt
+        },
+        endAt: {
+            isUpdated: this.endAt != undefined,
+            value: this.endAt
+        },
+        isTemplate: {
+            isUpdated: true,
+            value: this.workout.isTemplate
+        },
+     };
+     
+     this.workoutStore.saveWorkout(model);
+}
+
 </script>
 
 <style scoped>
@@ -243,10 +323,44 @@ function validateTimes() {
 }
 
 .clock {
-    min-height: 40px;
+    min-height: 32px;
+    background-color: #292929;
+    color: rgba(255, 255, 255, 0.87);
+}
+
+.completion .form-group {
+    padding: 0 12px;
 }
 
 .date-selector.invalid {
     border: solid 1px red;
+}
+
+.settings-header {
+    padding-left: 12px;
+}
+
+.settings {
+    padding: 0 12px;
+}
+
+.create-event {
+    cursor: pointer;
+    padding: 4px 4px;
+    line-height: 14px;
+    font-size: 14px;
+    background-color: var(--pill-default);
+    border-radius: 4px;
+    border: transparent solid 1px;
+}
+.create-event:hover {
+    border: var(--pill-border-hover) solid 1px;
+}
+.create-event.selected {
+    border: var(--pill-border-hover) solid 1px;
+    background-color: var(--pill-background-selected);
+}
+.create-event:active {
+    background-color: var(--pill-background-selected);
 }
 </style>

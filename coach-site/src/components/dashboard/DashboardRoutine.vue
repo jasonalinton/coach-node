@@ -27,12 +27,12 @@ export default {
     },
     computed: {
         eventt() { 
-            if (this.eventStore) {
-                let event = this.eventStore.events.find(_event => _event.id == this._event.id);
-                return event;
-            } else {
+            // if (this.eventStore) {
+            //     let event = this.eventStore.events.find(_event => _event.id == this._event.id);
+            //     return event;
+            // } else {
                 return undefined;
-            }
+            // }
         },
         routineName() {
             return (this.eventt) ? this.eventt.text : "";

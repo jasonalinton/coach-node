@@ -41,8 +41,7 @@ import TodoPanelByRepetition from './TodoPanelByRepetition.vue';
 import TodoPanelByCustom from './TodoPanelByCustom.vue';
 import TodoPanelDefault from './TodoPanelDefault.vue';
 import IterationForm from '../component/form/IterationForm.vue';
-import { today } from '../../../../../utility/timeUtility';
-
+import { today, firstDayOfWeek, lastDayOfWeek, firstDayOfMonth, lastDayOfMonth } from '../../../../../utility/timeUtility';
 export default {
     name: 'TodoPanel',
     components: { ItemPanelNavbar, TodoPanelByMetric, TodoPanelBacklog, TodoPanelByRepetition,
@@ -66,6 +65,10 @@ export default {
 
         let plannerStore = await import(`@/store/plannerStore`);
         this.plannerStore = plannerStore.usePlannerStore();
+
+        let iterationStore = await import(`@/store/iterationStore`);
+        this.iterationStore = iterationStore.useIterationStore();
+        this.iterationStore.getIterationsInRange(this.start, this.end, true);
     },
     computed: {
         selectedDate() {
@@ -73,6 +76,12 @@ export default {
                 return this.plannerStore.selectedDate;
             }
             return today();
+        },
+        start() { 
+            return firstDayOfWeek(firstDayOfMonth(this.selectedDate));
+        },
+        end() { 
+            return lastDayOfWeek(lastDayOfMonth(this.selectedDate));
         },
         sortBy() {
             if (this.appStore) {

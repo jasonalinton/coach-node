@@ -1,6 +1,22 @@
 import moment from "moment";
 import date from 'date-and-time';
 
+export function dateOnly(datetime) {
+    let dateTimeJSON = datetime.toJSON();
+    let dateTimeArray = dateTimeJSON.split("T");
+    let dateArray = dateTimeArray[0].split("-");
+
+    return `${dateArray[0]}-${dateArray[1]}-${dateArray[2]}`;
+}
+
+export function timeOnly(datetime) {
+    let dateTimeJSON = datetime.toJSON();
+    let dateTimeArray = dateTimeJSON.split("T");
+    let timeArray = dateTimeArray[1].split(":");
+
+    return `${timeArray[0]}:${timeArray[1]}`;
+}
+
 export function formatInputDateTime(date = new Date()) {
     let datetimeString = date.toJSON();
     let dateTimeArray = datetimeString.split("T");

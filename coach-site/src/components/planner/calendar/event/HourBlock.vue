@@ -64,6 +64,7 @@ export default {
                 // events = events.filter(_event => {
                 //     return _event.text != "Morning Joy" && _event.text != "Morning Routine";
                 // });
+                
                 return events;
             } else {
                 return [];

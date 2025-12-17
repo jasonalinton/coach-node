@@ -1,15 +1,20 @@
 import { URL } from '../api/api';
-import { HubConnectionBuilder } from '@microsoft/signalr';
+import { HubConnectionBuilder, HubConnectionState } from '@microsoft/signalr';
 
 var hubConnections = {
-    metricHub: undefined,
-    goalHub: undefined,
-    todoHub: undefined,
-    routineHub: undefined,
-    plannerHub: undefined,
+    coachHub: undefined,
 }
 
 export function getSocketConnection(hubName) {
+    // Create connection if it doesn't exist
+    if (hubConnections[hubName] == undefined) {
+        createSocketConnection(hubName);
+    }
+
+    return hubConnections[hubName];
+}
+
+export function createSocketConnection(hubName) {
     if (hubConnections[hubName] == undefined) {
         let connection = new HubConnectionBuilder()
             .withUrl(`${URL}/${hubName}`, {
@@ -23,10 +28,15 @@ export function getSocketConnection(hubName) {
         connection.serverTimeoutInMilliseconds = 120000;
 
         connection.start();
-            // .then(() => connection.invoke("SendMessage", "Hello"));
+        connection.onclose(async () => {
+            connection.start();
+        });
 
         hubConnections[hubName] = connection;
     }
+}
 
-    return hubConnections[hubName];
+export function isHubConnected(hubName) {
+    let connection = getSocketConnection(hubName);
+    return (connection.state == HubConnectionState.Connected);
 }

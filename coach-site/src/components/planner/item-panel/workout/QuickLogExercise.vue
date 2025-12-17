@@ -1,27 +1,24 @@
 <template>
-    <div class="quick-log-exercise">
-        <div v-if="activeSet" class="d-flex flex-column">
-            <span class="exercise-name">{{ `${activeExercise.exercise.name}` }}</span>
-            <span class="variation-text" v-if="variationString">{{ variationString }}</span>
-            <div class="values d-flex flex-row">
-                <span v-if="reps">{{ `${reps} REPS` }}</span>
-                <span v-if="time">{{ `${time} SECS` }}</span>
-                <span v-if="hold">{{ `${hold} SECS` }}</span>
-                <span v-if="weight">{{ `${weight} SECS` }}</span>
-            </div>
+    <div class="quick-log-exercise ps-1 pt-1">
+        <div class="d-flex flex-row justify-content-between">
             <!-- Buttons -->
             <div class="d-flex flex-row justify-content-between">
                 <div class="d-flex flex-row">
-                    <!-- <img src="/icon/angle-left.png" width="48" height="48"/> -->
-                    <img src="/icon/previous.png" width="48" height="48"/>
-                    <img src="/icon/next.png" width="48" height="48"/>
-                    <!-- <img src="/icon/angle-right.png" width="48" height="48"/> -->
-                </div>
-                <div class="d-flex flex-row">
                     <img :class="{ 'is-logged': isLogged }" src="/icon/check-double.png" width="48" height="48"
-                         @click="logAllSets"/>
+                            @click="logAllSets"/>
                     <img :class="{ 'is-logged': isLogged }" src="/icon/check.png" width="48" height="48"
-                         @click="logSet"/>
+                            @click="logSet"/>
+                </div>
+            </div>
+            <!-- Text -->
+            <div v-if="activeSet" class="d-flex flex-column me-3">
+                <span class="exercise-name">{{ `${activeExercise.exercise.name}` }}</span>
+                <span class="variation-text" v-if="variationString">{{ variationString }}</span>
+                <div class="values d-flex flex-row">
+                    <span v-if="reps">{{ `${reps} REPS` }}</span>
+                    <span v-if="time">{{ `${time} SECS` }}</span>
+                    <span v-if="hold">{{ `${hold} SECS` }}</span>
+                    <span v-if="weight">{{ `${weight} SECS` }}</span>
                 </div>
             </div>
         </div>
@@ -158,7 +155,9 @@ export default {
 
 <style scoped>
 .quick-log-exercise {
-    background-color: #292929;
+    background-color: #292929; 
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
 }
 
 span {

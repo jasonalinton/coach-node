@@ -1,13 +1,11 @@
 import { defineStore } from 'pinia'
-import { getTodos, saveTodo, deleteTodo, createDefaultTask, createTask, mapItems, mapTypes, refreshRepetitionForRepeat, 
-         createAndMapItem, deleteFutureRepetitionsForRepeat, deleteOrArchiveRepeat, deleteTodoTimePair, 
-         toggleGoalTimePairTodoCompletion } from '../api/todoAPI';
-import { repositionItem } from '../api/itemAPI';
-import { replaceOrAddItem, removeItemByID, sortAsc } from '../../utility';
+import { getTodos } from '../api/todoAPI';
+import { replaceOrAddItem, removeItemByID, sortAsc, capitalize } from '../../utility';
 import { getSocketConnection } from './socket'
 import { useMetricStore } from '@/store/metricStore'
 import { useGoalStore } from '@/store/goalStore'
 import { useRoutineStore } from '@/store/routineStore'
+import { postEndpoint } from '../api/api';
 
 let initialized = false;
 
@@ -53,19 +51,24 @@ export const useTodoStore = defineStore('todo', {
             return this.todos.find(x => x.id == id);
         },
         saveTodo(model) {
-            saveTodo(model);
+            return postEndpoint("Todo", "SaveTodo", model)
+            .then(response => response.result);
         },
-        deleteTodo(todoID) {
-            deleteTodo(todoID);
+        deleteTodo(id) {
+            return postEndpoint("Todo", "DeleteTodo", { id })
+            .then(response => response.result);
         },
         createTask(todoID, date) {
-            createTask(todoID, date);
+            return postEndpoint("Todo", "CreateTaskForTodo", { todoID, date })
+            .then(response => response.result);
         },
         createDefaultTask(text, isComplete, datetime) {
-            createDefaultTask(text, isComplete, datetime);
+            return postEndpoint("Todo", "CreateDefaultTask", { text, isComplete, datetime })
+            .then(response => response.result);
         },
         createAndMapItem(todoID, itemType, itemText) {
-            createAndMapItem(todoID, itemType, itemText);
+            return postEndpoint("Todo", "CreateAndMapItemToTodo", { todoID, itemType, itemText })
+            .then(response => response.result);
         },
         saveText(todoID, text) {
             let model = {
@@ -74,7 +77,7 @@ export const useTodoStore = defineStore('todo', {
                     value: text
                 }
             };
-            saveTodo(model);
+            return this.saveTodo(model);
         },
         saveDescription(todoID, description) {
             let model = {
@@ -83,7 +86,7 @@ export const useTodoStore = defineStore('todo', {
                     value: description
                 }
             };
-            saveTodo(model);
+            return this.saveTodo(model);
         },
         savePoints(todoID, points) {
             let model = {
@@ -92,7 +95,7 @@ export const useTodoStore = defineStore('todo', {
                     value: points
                 }
             };
-            saveTodo(model);
+            return this.saveTodo(model);
         },
         saveType(todoID, typeID) {
             let model = {
@@ -101,7 +104,7 @@ export const useTodoStore = defineStore('todo', {
                     value: typeID
                 }
             };
-            saveTodo(model);
+            return this.saveTodo(model);
         },
         saveMedium(todoID, mediumID) {
             let model = {
@@ -110,49 +113,81 @@ export const useTodoStore = defineStore('todo', {
                     value: mediumID
                 }
             };
-            saveTodo(model);
+            return this.saveTodo(model);
         },
         mapItems(todoID, itemType, addedIDs, removedIDs) {
-            mapItems(todoID, itemType, addedIDs, removedIDs);
+            let data = { todoID, itemType, addedIDs, removedIDs };
+            return postEndpoint("Todo", "MapItemsToTodo", data)
+            .then(response => response.result);
         },
         mapTypes(todoID, addedIDs, removedIDs) {
-            mapTypes(todoID, addedIDs, removedIDs)
+            let data = { todoID, addedIDs, removedIDs };
+            return postEndpoint("Todo", "MapTypesToTodo", data)
+            .then(response => response.result);
         },
-        repositionItem(parentType, itemType, goalID, metricID, newPosition) {
-            repositionItem(parentType, itemType, goalID, metricID, newPosition);
+        repositionItem(parentType, itemType, parentID, itemID, newPosition) {
+            var data = { newPosition };
+            data[`${parentType}ID`] = parentID;
+            data.itemID = itemID;
+        
+            itemType = capitalize(itemType);
+            parentType = capitalize(parentType);
+
+            return postEndpoint(parentType, `Reposition${itemType}In${parentType}`, data);
         },
         refreshRepetitionForRepeat(id, repeatID) {
-            refreshRepetitionForRepeat(id, repeatID);
+            let data = { id, repeatID };
+            return postEndpoint("Todo", "RefreshRepetitionForTodo", data)
+            .then(response => response.result);
         },
         toggleGoalTimePairTodoCompletion(goalTimePairTodoID, completedAt) {
-            toggleGoalTimePairTodoCompletion(goalTimePairTodoID, completedAt);
+            let data = { goalTimePairTodoID, completedAt };
+            return postEndpoint("Todo", "ToggleGoalTimePairTodoCompletion", data)
+            .then(response => response.result);
         },
         deleteFutureRepetitionsForRepeat(id, repeatID, selectedDate) {
-            deleteFutureRepetitionsForRepeat(id, repeatID, selectedDate);
+            let data = { id, repeatID, selectedDate };
+            return postEndpoint("Todo", "DeleteFutureRepetitionsForTodo", data)
+            .then(response => response.result);
         },
-        deleteOrArchiveRepeat(repeatID) {
-            deleteOrArchiveRepeat(repeatID);
+        deleteOrArchiveRepeat(todoID, repeatID) {
+            let data = { todoID, repeatID };
+            return postEndpoint("Todo", "DeleteOrArchiveRepeat", data)
+            .then(response => response.result);
         },
         deleteTimePair(id) {
-            deleteTodoTimePair(id);
+            return postEndpoint("Todo", "DeleteTodoTimePair", { id })
+            .then(response => response.result);
+        },
+        saveTimePair(timePair) {
+            return postEndpoint("Todo", "SaveTodoTimePair", { timePair })
+            .then(response => response.result);
+        },
+        saveRepeat(repeat) {
+            return postEndpoint("Todo", "SaveTodoRepeat", { repeat })
+            .then(response => response.result);
+        },
+        runUpdates(updates) {
+            let _this = this;
+            if (updates.todos && updates.todos.length > 0) {
+                updates.todos.forEach(todo => {
+                    replaceOrAddItem(todo, _this.todos);
+                });
+                this.initializeItems(updates.todos);
+                sortAsc(_this.todos);
+            }
+            if (updates.todoIDsRemoved && updates.todoIDsRemoved.length > 0) {
+                updates.todoIDsRemoved.forEach(todoID => {
+                    removeItemByID(todoID, _this.todos);
+                })
+                sortAsc(_this.todos);
+            }
         },
         connectSocket() {
             if (!initialized) {
-                let connection = getSocketConnection("todoHub");
-
-                let _this = this;
-                connection.on("UpdateTodos", todos => {
-                    todos.forEach(todo => {
-                        replaceOrAddItem(todo, _this.todos);
-                    });
-                    this.initializeItems(todos);
-                    sortAsc(_this.todos);
-                });
-                connection.on("RemoveTodos", todoIDs => {
-                    todoIDs.forEach(todoID => {
-                        removeItemByID(todoID, _this.todos);
-                    })
-                    sortAsc(_this.todos);
+                let coachConnection = getSocketConnection("coachHub");
+                coachConnection.on("SendUpdates", updateModel => {
+                    this.runUpdates(updateModel);
                 });
             }
         }

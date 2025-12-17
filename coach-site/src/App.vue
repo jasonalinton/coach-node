@@ -41,6 +41,7 @@ import { useGoalStore } from '@/store/goalStore'
 import { useTodoStore } from '@/store/todoStore'
 import { useRoutineStore } from '@/store/routineStore'
 import { useUniversalStore } from '@/store/universalStore'
+import { createSocketConnection } from "./store/socket";
 // import { RouterView } from 'vue-router'
 
 export default {
@@ -116,6 +117,8 @@ export default {
 };
 
 async function initStores() {
+    createSocketConnection("coachHub");
+
     this.appStore = useAppStore();
     this.plannerStore = usePlannerStore();
     
@@ -162,7 +165,13 @@ function onResize() {
     --pill-background-selected: #BAD8F1;
     --task-color: #F4511E;
     --goal-color: #4285F4;
+    --workout-red: #E25555;
     --form-header-hover: #005A9E;
+    --hover-gray: #F5F5F5;
+    --active-gray: rgb(60, 64, 67, .1);
+    --dark-gray: darkgray;
+    --dark-gray-text: #3F3F3F;
+    --gray-text: #747474;
 }
 
 body { 
@@ -252,12 +261,19 @@ body {
 .textbox, .textarea, .select, .date-picker {
     width: 100%;
     font-size: 14px;
-    line-height: 14px;
+    line-height: 16px;
     padding: 2px 8px;
     /* padding-top: 4px; */
     /* color: #343434; */
     color: #212529;
     border-radius: 4px;
+}
+
+@media only screen and (max-width: 576px) {
+    .textbox, .textarea, .select, .date-picker {
+        font-size: 16px;
+        line-height: 22px;
+    }
 }
 
 .textarea {
@@ -293,6 +309,11 @@ body {
     border: 1px solid rgba(0, 0, 0, .08) !important;
 }
 
+.form-select-sm {
+    font-size: 14px;
+    line-height: 14px;
+}
+
 .add-btn {
     width: 55px;
     height: 28px;
@@ -318,5 +339,26 @@ body {
 
 .background {
     background-color: white;
+}
+
+/* pills */
+.app-pill {
+    cursor: pointer;
+    padding: 4px 4px;
+    line-height: 14px;
+    font-size: 14px;
+    background-color: var(--pill-default);
+    border-radius: 4px;
+    border: transparent solid 1px;
+}
+.app-pill:hover {
+    border: var(--pill-border-hover) solid 1px;
+}
+.app-pill.selected {
+    border: var(--pill-border-hover) solid 1px;
+    background-color: var(--pill-background-selected);
+}
+.app-pill:active {
+    background-color: var(--pill-background-selected);
 }
 </style>

@@ -8,6 +8,10 @@
              @click="selectView('exerciseList')">
             <span>Exercises</span>
         </div>
+        <div class="goal card"
+             @click="selectView('fitnessGoals')">
+            <span>Goals</span>
+        </div>
         <div class="skill card">
             <span>Skills</span>
         </div>

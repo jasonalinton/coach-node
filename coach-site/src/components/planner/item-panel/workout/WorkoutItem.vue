@@ -3,8 +3,12 @@
          @click="selectWorkout">
             <span class="image flex-shrink-0"></span>
             <div class="d-flex flex-column flex-grow-1">
-                <span class="name text-start">{{ workout.name }}</span>
-                <span v-if="isActive" class="time text-start">{{ timeSinceStart }}</span>
+                <span v-if="!workout.isTemplate" class="name text-start">{{ `${workout.name} - ${workout.points}` }}</span>
+                <span v-if="workout.isTemplate" class="name text-start">{{ `${workout.name}` }}</span>
+                <div v-if="isActive" class="d-flex flex-row justify-content-between">
+                    <span class="time text-start">{{ startAt }}</span>
+                    <span class="time text-start">{{ timeSinceStart }}</span>
+                </div>
                 <span v-if="isComplete" class="time text-start">{{ completedAt }}</span>
             </div>
             <img v-if="!isActive" class="start icon-button me-2 position-absolute end-0"
@@ -56,6 +60,14 @@ export default {
             }
             return false;
         },
+        startAt() {
+            if (this.isActive) {
+                let startAt = new Date(this.workout.iteration.startAt);
+                return toShortWeekdayString(startAt);
+            } else {
+                return undefined;
+            }
+        },
         timeSinceStart() {
             if (this.isActive) {
                 let startAt = new Date(this.workout.iteration.startAt);
@@ -79,7 +91,7 @@ export default {
 }
 
 function startWorkout() {
-    this.workoutStore.copyAndStartWorkout(this.workout.id)
+    this.workoutStore.copyAndStartWorkout(this.workout.id, new Date())
         .then((workout) => {
             this.$emit('selectWorkout', { id: workout.id } )
         });

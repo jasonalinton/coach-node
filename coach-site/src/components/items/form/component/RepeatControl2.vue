@@ -1,0 +1,677 @@
+<template>
+    <div>
+        <div v-if="!isEditing" class="wrapper d-flex flex-row justify-content-between"
+             :class="{ 'archived': isArchived}"
+             @click="onRepeatClicked">
+            <div class="d-flex flex-row">
+                <div class="d-flex flex-column">
+                    <img src="/icon/calendar-day.png" width="14" height="14"/>
+                    <span>{{ repeat.id }}</span>
+                </div>
+                <div class="timeframe d-flex flex-column">
+                    <div>
+                        <span>Every</span>
+                        <span>{{ (repeat.interval == 1) ? " " : ` ${repeat.interval} ` }}</span>
+                        <span class="blue">{{ (repeat.interval == 1) ? timeframe : `${timeframe}s` }}</span>
+                    </div>
+                    <div>
+                        <span class="blue">{{ frequency }}</span>
+                        <span> a </span>
+                        <span>{{ timeframe }}</span>
+                    </div>
+                    <div v-if="repeat.idTimeframe == 68 && repeat.dayIndecies.length > 0">
+                        <span>On </span>
+                        <span class="blue">{{ daysOfWeek }}</span>
+                    </div>
+                    <div v-if="repeat.idTimeframe == 69 && repeat.dayIndecies.length > 0">
+                        <span>On the </span>
+                        <span class="blue">{{ daysOfMonth }}</span>
+                    </div>
+                </div>
+            </div>
+            <button class="btn-close" type="button" aria-label="close"
+                    @click.stop="deleteOrArchive"></button>
+        </div>
+        <div v-if="isEditing" class="wrapper-edit d-flex flex-row">
+            <div>
+                <!-- Timeframe -->
+                <div class="d-flex flew-rowalign-middle mt-2">
+                    <div v-for="repetition in timeframes.filter(rep => rep.isActive)" v-bind:key="repetition.id" 
+                         class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" :id="repetition.text" :value="repetition.id" 
+                        v-model="updatedRepeat.idTimeframe"
+                               @click="onTimeFrameChanged">
+                        <label class="form-check-label" :for="repetition.text">{{ repetition.text }}</label>
+                    </div>
+                </div>
+                <!-- Interval -->
+                <div class="interval d-flex flew-row mb-1">
+                    <div class="d-flex flex-row">
+                        <span class="me-1">Every</span>
+                        <input class="form-control form-control-sm me-1" type="number" min="1" v-model="updatedRepeat.interval"
+                               :style="{'width': numInputWidth}" required/>
+                        <span class="me-1">{{ (updatedRepeat.interval == 1) ? timeframe : `${timeframe}s` }}</span>
+                        <input class="form-control form-control-sm me-1" type="number" v-model="updatedRepeat.frequency"
+                               :min="minFrequency" :max="maxFrequency"
+                               :style="{'width': numInputWidth}" required />
+                        <span class="me-1">times a</span>
+                        <span>{{ timeframe }}</span>
+                    </div>
+                </div>
+                <!-- Day of Week -->
+                <div v-if="updatedRepeat.idTimeframe == 68">
+                    <span class="head">Days of Week</span>
+                    <div>
+                        <span v-for="day in dow" :key="day.index" class="day" 
+                              :class="{ selected: day.isSelected }"
+                              @click="onDayClicked(day)">{{ day.alt }}</span>
+                    </div>
+                </div>
+                <!-- Day of Month -->
+                <div v-if="updatedRepeat.idTimeframe == 69">
+                    <span class="head">Days of Month</span>
+                    <div class="day-of-month d-flex flex-row flex-wrap">
+                        <span v-for="day in dom" :key="day.index" class="day" 
+                              :class="{ selected: day.isSelected }"
+                              @click="onDayClicked(day)">{{ day.index }}</span>
+                    </div>
+                </div>
+                <!-- Repeat Times -->
+                <div class="d-flex flex-column">
+                    <div class="d-flex flex-column">
+                        <TimeControl class="time-control"  :isValid="isValid.date"
+                                     label="Start Date" :time="updatedRepeat.startDate" :momentID="MOMENT.DATE"
+                                     title="Start Date" endpoint="Start" :canRemove="false"
+                                     @setTime="setTime">
+                        </TimeControl>
+                    </div>
+                    <div class="d-flex flex-column">
+                        <TimeControl class="time-control" :isValid="isValid.date"
+                                     label="End Date" :time="updatedRepeat.endDate" :momentID="MOMENT.DATE"
+                                     title="End Date" endpoint="End"
+                                     @addTime="addTime" @setTime="setTime" @removeTime="removeTime(updatedRepeat.endDate)">
+                        </TimeControl>
+                    </div>
+                </div>
+                <!-- Iteration -->
+                <div class="d-flex flex-column">
+                    <!-- Start -->
+                    <div class="d-flex flex-column">
+                        <TimeControl class="time-control" :isValid="isValid.time"
+                                    label="Start Time" :time="updatedRepeat.startTime" :momentID="MOMENT.TIME"
+                                    title="Start Time" endpoint="Start"
+                                    @addTime="addTime" @setTime="setTime">
+                        </TimeControl>
+                    </div>
+                    <!-- End -->
+                    <div class="d-flex flex-column">
+                        <TimeControl class="time-control" :isValid="isValid.time"
+                                    label="End Time" :time="updatedRepeat.endTime" :momentID="MOMENT.TIME"
+                                    title="End Time" endpoint="End"
+                                    @addTime="addTime" @setTime="setTime">
+                        </TimeControl>
+                    </div>
+                </div>
+                <!-- End - Iteration -->
+                <!-- Inheritance Type -->
+                <div class="d-flex flex-column mt-1">
+                    <select class="form-select panel-select" aria-label="select" v-model="updatedRepeat.idInheritance">
+                        <option v-for="inheritanceType in inheritanceTypes" v-bind:key="inheritanceType.id" :value="inheritanceType.id">{{inheritanceType.text}}</option> 
+                    </select> 
+                </div>
+                <!-- Points -->
+                <div class="points d-flex flex-row align-items-center mt-1">
+                    <span class="me-1">Points</span>
+                    <input class="form-control form-control-sm me-1" type="number" min="1" v-model="updatedRepeat.points"
+                            :style="{'width': '41px'}" required/>
+                </div>
+                <!-- Is Event Visible -->
+                <div class="form-check">
+                    <input class="form-check-input mt-1" type="checkbox" value="" id="isEventVisible" 
+                           v-model="updatedRepeat.isEventVisible">
+                    <label class="form-check-label float-start" for="isEventVisible">
+                        Is Event Visible
+                    </label>
+                </div>
+                <!-- Recommended -->
+                <div class="form-check">
+                    <input class="form-check-input mt-1" type="checkbox" value="" id="flexCheckDefault" 
+                           v-model="updatedRepeat.isRecommended">
+                    <label class="form-check-label float-start" for="flexCheckDefault">
+                        Recommended
+                    </label>
+                </div>
+                <!-- Buttons -->
+                <div class="d-flex flex-row justify-content-between">
+                    <div class="d-flex justify-content-start">
+                        <button class="btn btn-sm btn-link" type="button" @click="refreshRepetition">Refresh</button>
+                        <button class="btn btn-sm btn-link" type="button" @click="deleteFutureRepetitions">{{ deleteFutureText }}</button>
+                    </div>
+                    <div class="d-flex justify-content-end">
+                        <button class="btn btn-sm btn-link" type="button" @click="save">Save</button>
+                        <button class="btn btn-sm btn-link" type="button" @click="cancel">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+
+<script>
+import TimeControl from '../../../controls/time/TimeControl2.vue'
+import { clone, capitalize, today } from '../../../../../utility'
+import { dateOnly, getNumberDateString } from '../../../../../utility/timeUtility'
+import { saveRoutineRepeat } from '../../../../api/routineAPI'
+import { MOMENT } from '../../../../model/constants'
+
+let timeframes = [
+    {
+        id: 63,
+        text: "Day",
+        isActive: true
+    },
+    {
+        id: 68,
+        text: "Week",
+        isActive: true
+    },
+    {
+        id: 69,
+        text: "Month",
+        isActive: true
+    },
+    {
+        id: 72,
+        text: "Tri",
+        isActive: false
+    },
+    {
+        id: 74,
+        text: "Semi",
+        isActive: false
+    },
+    {
+        id: 75,
+        text: "Year",
+        isActive: false
+    },
+]
+
+let dow = [
+    {
+        index: 1,
+        text: "Sunday",
+        alt: "S",
+        isSelected: false
+    },
+    {
+        index: 2,
+        text: "Monday",
+        alt: "M",
+        isSelected: false
+    },
+    {
+        index: 3,
+        text: "Tuesday",
+        alt: "T",
+        isSelected: false
+    },
+    {
+        index: 4,
+        text: "Wednesday",
+        alt: "W",
+        isSelected: false
+    },
+    {
+        index: 5,
+        text: "Thursday",
+        alt: "T",
+        isSelected: false
+    },
+    {
+        index: 6,
+        text: "Friday",
+        alt: "F",
+        isSelected: false
+    },
+    {
+        index: 7,
+        text: "Saturday",
+        alt: "S",
+        isSelected: false
+    },
+]
+
+let inheritanceTypes = [
+    {
+        id: 140,
+        text: "Self"
+    },
+    {
+        id: 141,
+        text: "Children"
+    },
+    {
+        id: 142,
+        text: "Descendants"
+    },
+]
+
+export default {
+    name: "RepeatControl",
+    components: { TimeControl },
+    props: {
+        repeat: Object,
+        itemID: Number,
+        itemType: String,
+        canEdit: Boolean
+    },
+    data: function() {
+        return {
+            todoStore: undefined,
+            plannerStore: undefined,
+            timeframes: clone(timeframes),
+            MOMENT: clone(MOMENT),
+            inheritanceTypes: clone(inheritanceTypes),
+            updatedRepeat: undefined,
+            todoRepeats: [],
+            isEditing: false,
+            isValid: {
+                date: true,
+                time: true
+            },
+        }
+    },
+    created: async function() {
+        let todoStore = await import(`@/store/todoStore`);
+        this.todoStore = todoStore.useTodoStore();
+
+        let plannerStore = await import(`@/store/plannerStore`);
+        this.plannerStore = plannerStore.usePlannerStore();
+
+        if (this.repeat.id < 0) {
+            this.isEditing = true;
+        }
+    },
+    computed: {
+        selectedDate() {
+            return (this.plannerStore) ? this.plannerStore.selectedDate : today();
+        },
+        // If end date has passed repeat is considered archived
+        isArchived() {
+            if (this.repeat.endDate) {
+                let endDate = new Date(this.repeat.endDate);
+                if (+endDate < +today()) {
+                    return true;
+                }
+            }
+            return false;
+        },
+        timeframe() {
+            let repeat = (this.isEditing) ? this.updatedRepeat : this.repeat;
+            let timeframe = timeframes.find(x => x.id == repeat.idTimeframe).text;
+            return timeframe.toLowerCase();
+        },
+        frequency() {
+            let repeat = (this.isEditing) ? this.updatedRepeat : this.repeat;
+            if (repeat.frequency == 1) {
+                return "Once";
+            } else {
+                return `${repeat.frequency} times`;
+            }
+        },
+        daysOfWeek() {
+            let daysOfWeek = "";
+            if (this.repeat.idTimeframe == 68)  {
+                this.repeat.dayIndecies.forEach(x => {
+                    let dayOfWeek = this.dow.find(y => y.index == x).text;
+                    daysOfWeek += (`${dayOfWeek} `);
+                });
+            }
+            return daysOfWeek;
+        },
+        daysOfMonth() {
+            let daysOfMonth = "";
+            this.repeat.dayIndecies.forEach(dom => {
+                if (dom == 1) {
+                    daysOfMonth += "1st ";
+                } else if (dom == 2) {
+                    daysOfMonth += "2nd ";
+                } else if (dom == 3) {
+                    daysOfMonth += "3rd ";
+                } else if (dom > 3) {
+                    daysOfMonth += `${dom}th `;
+                }
+            });
+            return daysOfMonth;
+        },
+        dow() {
+            let days = [];
+            dow.forEach(dayOfWeek => {
+                let day = clone(dayOfWeek);
+                days.push(day);
+                if (this.updatedRepeat && this.updatedRepeat.idTimeframe == 68)  {
+                    day.isSelected = this.updatedRepeat.dayIndecies.includes(day.index);
+                }
+            })
+            return days;
+        },
+        dom() {
+            var days = [];
+            for (let i = 1; i <= 31; i++) {
+                let day = { index: i }
+                days.push(day);
+                if (this.updatedRepeat.idTimeframe == 69)  {
+                    day.isSelected = this.updatedRepeat.dayIndecies.includes(day.index);
+                }
+            }
+            return days;
+        },
+        numInputWidth() {
+            if (this.updatedRepeat.interval < 10) {
+                return "25px";
+            } else if (this.updatedRepeat.interval < 100){
+                return "34px";
+            } else {
+                return "41px";
+            }
+        },
+        minFrequency() {
+            return (this.updatedRepeat.dayIndecies.length > 0) ? this.updatedRepeat.dayIndecies.length : 1;
+        },
+        maxFrequency() {
+            if (this.updatedRepeat.idTimeframe == 68) {
+                return 7;
+            } else if (this.updatedRepeat.idTimeframe == 69){
+                return 31;
+            } else {
+                return "none";
+            }
+        },
+        deleteFutureText() {
+            if (this.plannerStore && this.selectedDate < today()) {
+                return `Delete Future ${getNumberDateString(this.selectedDate)}`;
+            }
+            return "Delete Future";
+        }
+    },
+    methods: {
+        initUpdatedRepeat,
+        onRepeatClicked,
+        onDayClicked,
+        onTimeFrameChanged,
+        addTime,
+        setTime,
+        removeTime,
+        validateTimes,
+        toggleTodoRepeat(todoRepeat) {
+            todoRepeat.isShown = !todoRepeat.isShown;
+        },
+        cancel() {
+            this.isEditing = false;
+            this.$emit("cancelRepeatEditing", this.repeat.id);
+        },
+        save,
+        deleteOrArchive,
+        refreshRepetition,
+        deleteFutureRepetitions
+    },
+    watch: {
+        isEditing(value) {
+            if (value == true) {
+                this.initUpdatedRepeat();
+            }
+        }
+    }
+}
+
+function initUpdatedRepeat() {
+    this.updatedRepeat = clone(this.repeat);
+    if (this.updatedRepeat.idTimeframe == 68)  {// Week
+        this.updatedRepeat.dayIndecies.forEach(index => {
+            let day = this.dow.find(_day => _day.index == index);
+            day.isSelected = true;
+        })
+    }
+    this.validateTimes();
+}
+
+function onRepeatClicked() {
+    if (this.canEdit) {
+        this.isEditing = true;
+        this.$emit("setSelectedRepeat", this.repeat.id);
+    }
+}
+
+function onDayClicked(day) {
+    day.isSelected = !day.isSelected;
+    if (day.isSelected) {
+        this.updatedRepeat.dayIndecies.push(day.index);
+        /* Make sure frequency isn't less than number of day indecies */
+        if (this.updatedRepeat.frequency < this.updatedRepeat.dayIndecies.length) {
+            this.updatedRepeat.frequency = this.updatedRepeat.dayIndecies.length;
+        }
+    } else {
+        let index = this.updatedRepeat.dayIndecies.findIndex(x => x == day.index);
+        this.updatedRepeat.dayIndecies.splice(index, 1);
+        // Lower frequency every time day is deselected. Min 1
+        if (this.updatedRepeat.frequency != 1) {
+            this.updatedRepeat.frequency -= 1; 
+        }
+    }
+    this.updatedRepeat.dayIndecies = this.updatedRepeat.dayIndecies.sort(function (a, b) {  return a - b;  });
+}
+
+function onTimeFrameChanged() {
+    this.updatedRepeat.interval = 1;
+    this.updatedRepeat.frequency = 1;
+    this.updatedRepeat.dayIndecies = [];
+}
+
+function addTime(endpoint, moment) {
+    let datetime = new Date();
+
+    if (moment.toLowerCase() == "date") {
+        this.updatedRepeat[`${endpoint.toLowerCase()}${capitalize(moment)}`] = dateOnly(datetime);
+    } else if (moment.toLowerCase() == "time") {
+        this.updatedRepeat[`${endpoint.toLowerCase()}${capitalize(moment)}`] = "12:00";
+    }
+
+    this.validateTimes();
+}
+
+function setTime(time, endpoint, moment) {
+    this.updatedRepeat[`${endpoint.toLowerCase()}${moment}`] = time;
+    this.validateTimes();
+}
+
+// TODO: enable this
+function removeTime(endpoint, moment) {
+    this.updatedRepeat[`${endpoint.toLowerCase()}${moment}`] = undefined;
+}
+
+function validateTimes() {
+    // If end date exists and is less than start date, invalidate
+    if (this.updatedRepeat.endDate && (+new Date(this.updatedRepeat.startDate) > +new Date(this.updatedRepeat.endDate))) {
+        this.isValid.date = false;
+    } else {
+        this.isValid.date = true;
+    }
+
+    // If start & end times exists and end time is less than or equal to start time, invalidate
+    if (this.updatedRepeat.startTime && this.updatedRepeat.endTime && (this.updatedRepeat.startTime >= this.updatedRepeat.endTime)) {
+        this.isValid.time = false;
+    } else {
+        this.isValid.time = true;
+    }
+
+    // TODO: Invalidate time if missing start or end
+}
+
+function save() {
+    if (!this.isValid.date || !this.isValid.time) {
+        return;
+    }
+
+    let repeat = {
+        id: this.updatedRepeat.id,
+        idInheritance: this.updatedRepeat.idInheritance,
+        isOwner: true,
+        itemID: this.itemID,
+        itemType: this.itemType.toLowerCase(),
+        idTimeframe: this.updatedRepeat.idTimeframe,
+        idType: this.updatedRepeat.idType,
+        points: this.updatedRepeat.points || null,
+        interval: this.updatedRepeat.interval,
+        frequency: this.updatedRepeat.frequency,
+        dayIndecies: this.updatedRepeat.dayIndecies,
+        startDate: this.updatedRepeat.startDate,
+        endDate: this.updatedRepeat.endDate,
+        startTime: this.updatedRepeat.startTime,
+        endTime: this.updatedRepeat.endTime,
+        isEventVisible: this.updatedRepeat.isEventVisible,
+        isRecommended: this.updatedRepeat.isRecommended,
+    };
+    
+    if (this.itemType.toLowerCase() == "routine") {
+        saveRoutineRepeat(repeat);
+    } else if (this.itemType.toLowerCase() == "todo") {
+        this.todoStore.saveRepeat(repeat);
+    }
+
+    this.$emit("saveRepeat", repeat);
+    this.isEditing = false;
+}
+
+function deleteOrArchive() {
+    this.todoStore.deleteOrArchiveRepeat(this.itemID, this.repeat.id);
+}
+
+function refreshRepetition() {
+    this.$emit('refreshRepetition', this.repeat.id);
+    this.isEditing = false;
+}
+
+function deleteFutureRepetitions() {
+    this.$emit('deleteFutureRepetitions', this.repeat.id, this.selectedDate);
+    this.isEditing = false;
+}
+
+</script>
+
+<style scoped>
+.wrapper {
+    padding: 4px 2px;
+    line-height: 18px;
+    text-align: start;
+    font-size: 12px;
+}
+
+.wrapper:hover {
+    background-color: #EFF6FC;
+}
+
+.archived {
+    background-color: lightpink;
+}
+
+.wrapper-edit {
+    border: solid 1px transparent;
+}
+/* .wrapper-edit:hover {
+    background-color: #EAEAEA;
+    border: solid 1px transparent;
+} */
+.wrapper-edit.invalid {
+    border: solid 1px red;
+}
+
+button.btn-close {
+    visibility: hidden;
+}
+
+.wrapper:hover button.btn-close {
+    visibility: visible;
+}
+
+.time-control {
+    border: solid 1px transparent;
+}
+.time-control.invalid {
+    border: solid 1px red;
+}
+
+img {
+    margin-top: 1px;
+}
+
+.timeframe {
+    margin-left: 3px;
+}
+
+.blue {
+    color: #3B99FC
+}
+
+.interval span, .frequency span {
+    text-align: center;
+    line-height: 30px;
+}
+
+.interval input, .frequency input {
+    line-height: 20px;
+    min-height: 30px;
+    /* padding: 4px; */
+}
+
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
+.head {
+    font-size: 20px;
+    text-align: start;
+    width: 100%;
+}
+
+.day-of-month {
+    max-width: 210px;
+    margin: auto;
+}
+
+.day {
+    width: 22px;
+    height: 22px;
+    border-radius: 11px;
+    display: inline-block;
+    margin: 0px 4px;
+    border: solid 1px transparent;
+    font-size: 14px;
+}
+.day:hover {
+    border: solid 1px #989898;
+}
+.day.selected {
+    background-color: #DCDCDC;
+}
+.day:hover {
+    border: solid 1px #989898;
+}
+
+.todo-repeat:hover {
+    background-color: #EFF6FC;
+}
+.todo-text {
+    line-height: 18px;
+    text-align: start;
+    font-size: 14px;
+}
+</style>

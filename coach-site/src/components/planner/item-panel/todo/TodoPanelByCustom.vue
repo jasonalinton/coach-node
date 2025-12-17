@@ -61,7 +61,6 @@ export default {
     created: async function() {
         let iterationStore = await import(`@/store/iterationStore`);
         this.iterationStore = iterationStore.useIterationStore();
-        this.iterationStore.getIterationsInRange(this.startAt, this.endAt, true);
     },
     data: function () {
         return {

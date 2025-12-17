@@ -81,7 +81,7 @@
                     <TimeControl class="time-control" :class="{ 'invalid': !updatedTimePair.startTime.isValid}"
                                  label="Start" :time="updatedTimePair.startTime.value" 
                                  title="Start" endpoint="Start" type="date" :canRemove="false" :isSet="!updatedTimePair.startTime.isRemoved"
-                                 @addTime="addTime" @setTime="setTime" @removeTime="removeTime(updatedTimePair.startTime)"/>
+                                 @addTime="addTime" @setTime="setTime"/>
                 </div>            
                 <div class="end d-flex flex-column">
                     <div class="d-flex flex-row justify-content-space-between">
@@ -136,7 +136,7 @@
 import TimeControl from '../../../controls/time/TimeControl.vue';
 import TodoFormItem from '../todo/TodoFormItem.vue';
 import { clone } from '../../../../../utility'
-import { timeModelToString, toDateString, firstDayOfWeek, lastDayOfWeek, firstDayOfMonth, 
+import { timeModelToString, today, firstDayOfWeek, lastDayOfWeek, firstDayOfMonth, 
     lastDayOfMonth, endOfDay, firstDayOfYear, lastDayOfYear } from '../../../../../utility/timeUtility'
 import { TIMEFRAME, MOMENT, TIMETYPE } from '../../../../model/constants'
 import { timeframes, inheritanceTypes } from '../../../../model/types'
@@ -279,44 +279,46 @@ function correctTimes() {
     let end = this.updatedTimePair.endTime.value;
     if (value == this.TIMEFRAME.DAY) {
         if (start) {
-            end.dateTime = new Date(start.dateTime).toISOString();
+            end.dateTime = new Date(start.dateTime).toJSON();
         } else if (end) {
-            start.dateTime = new Date(end.dateTime).toISOString();
+            start.dateTime = new Date(end.dateTime).toJSON();
         }
     } else if (value == this.TIMEFRAME.WEEK) {
         if (start) {
-            start.dateTime = firstDayOfWeek(start.dateTime).toISOString();
-            end.dateTime = endOfDay(lastDayOfWeek(start.dateTime)).toISOString();
+            start.dateTime = firstDayOfWeek(start.dateTime).toJSON();
+            end.dateTime = endOfDay(lastDayOfWeek(start.dateTime)).toJSON();
         } else if (end) {
-            start.dateTime = firstDayOfWeek(end.dateTime).toISOString();
-            end.dateTime = endOfDay(lastDayOfWeek(end.dateTime)).toISOString();
+            start.dateTime = firstDayOfWeek(end.dateTime).toJSON();
+            end.dateTime = endOfDay(lastDayOfWeek(end.dateTime)).toJSON();
         }
     } else if (value == this.TIMEFRAME.MONTH) {
         if (start) {
-            start.dateTime = firstDayOfMonth(start.dateTime).toISOString();
-            end.dateTime = endOfDay(lastDayOfMonth(start.dateTime)).toISOString();
+            start.dateTime = firstDayOfMonth(start.dateTime).toJSON();
+            end.dateTime = endOfDay(lastDayOfMonth(start.dateTime)).toJSON();
         } else if (end) {
-            start.dateTime = firstDayOfMonth(end.dateTime).toISOString();
-            end.dateTime = endOfDay(lastDayOfMonth(end.dateTime)).toISOString();
+            start.dateTime = firstDayOfMonth(end.dateTime).toJSON();
+            end.dateTime = endOfDay(lastDayOfMonth(end.dateTime)).toJSON();
         }
     } else if (value == this.TIMEFRAME.YEAR) {
         if (start) {
-            start.dateTime = firstDayOfYear(start.dateTime).toISOString();
-            end.dateTime = endOfDay(lastDayOfYear(start.dateTime)).toISOString();
+            start.dateTime = firstDayOfYear(start.dateTime).toJSON();
+            end.dateTime = endOfDay(lastDayOfYear(start.dateTime)).toJSON();
         } else if (end) {
-            start.dateTime = lastDayOfYear(end.dateTime).toISOString();
-            end.dateTime = endOfDay(lastDayOfYear(end.dateTime)).toISOString();
+            start.dateTime = lastDayOfYear(end.dateTime).toJSON();
+            end.dateTime = endOfDay(lastDayOfYear(end.dateTime)).toJSON();
         }
+    } else if (value == this.TIMEFRAME.MILESTONE) {
+        this.updatedTimePair.endTime.value = undefined;
     }
 
 
-    if (new Date(start.dateTime) != new Date(this.timePair.startTime.dateTime)) {
+    if (new Date(start.dateTime) != new Date(this.updatedTimePair.startTime.oldValue.dateTime)) {
         this.updatedTimePair.startTime.isEdited = true;
     } else {
         this.updatedTimePair.startTime.isEdited = false;
     }
 
-    if (new Date(end.dateTime) != new Date(this.timePair.endTime.dateTime)) {
+    if (new Date(end.dateTime) != new Date(this.updatedTimePair.endTime.oldValue.dateTime)) {
         this.updatedTimePair.endTime.isEdited = true;
     } else {
         this.updatedTimePair.endTime.isEdited = false;
@@ -342,7 +344,7 @@ function addTime(endpoint) {
     }
     var idMoment = this.MOMENT.DATETIME;
 
-    var dateTime = toDateString(new Date().toJSON());
+    var dateTime = today().toJSON();
     this.updatedTimePair[`${endpoint.toLowerCase()}Time`] = {
             isEdited: false,
             isRemoved: false,
@@ -384,27 +386,27 @@ function setTime(time, endpoint) {
             }
         } else if (this.updatedTimePair.idTimeframe == this.TIMEFRAME.WEEK) {
             if (endpoint == "start") {
-                start.dateTime = firstDayOfWeek(new Date(time)).toISOString();
-                end.dateTime = endOfDay(lastDayOfWeek(new Date(time))).toISOString();
+                start.dateTime = firstDayOfWeek(new Date(time)).toJSON();
+                end.dateTime = endOfDay(lastDayOfWeek(new Date(time))).toJSON();
             } else if (endpoint == "end") {
-                start.dateTime = firstDayOfWeek(new Date(time)).toISOString();
-                end.dateTime = endOfDay(lastDayOfWeek(new Date(time))).toISOString();
+                start.dateTime = firstDayOfWeek(new Date(time)).toJSON();
+                end.dateTime = endOfDay(lastDayOfWeek(new Date(time))).toJSON();
             }
         } else if (this.updatedTimePair.idTimeframe == this.TIMEFRAME.MONTH) {
             if (endpoint == "start") {
-                start.dateTime = firstDayOfMonth(new Date(time)).toISOString();
-                end.dateTime = endOfDay(lastDayOfMonth(new Date(time))).toISOString();
+                start.dateTime = firstDayOfMonth(new Date(time)).toJSON();
+                end.dateTime = endOfDay(lastDayOfMonth(new Date(time))).toJSON();
             } else if (endpoint == "end") {
-                start.dateTime = firstDayOfMonth(new Date(time)).toISOString();
-                end.dateTime = endOfDay(lastDayOfMonth(new Date(time))).toISOString();
+                start.dateTime = firstDayOfMonth(new Date(time)).toJSON();
+                end.dateTime = endOfDay(lastDayOfMonth(new Date(time))).toJSON();
             }
         } else if (this.updatedTimePair.idTimeframe == this.TIMEFRAME.YEAR) {
             if (endpoint == "start") {
-                start.dateTime = firstDayOfYear(new Date(time)).toISOString();
-                end.dateTime = endOfDay(lastDayOfYear(new Date(time))).toISOString();
+                start.dateTime = firstDayOfYear(new Date(time)).toJSON();
+                end.dateTime = endOfDay(lastDayOfYear(new Date(time))).toJSON();
             } else if (endpoint == "end") {
-                start.dateTime = lastDayOfYear(new Date(time)).toISOString();
-                end.dateTime = endOfDay(lastDayOfYear(new Date(time))).toISOString();
+                start.dateTime = lastDayOfYear(new Date(time)).toJSON();
+                end.dateTime = endOfDay(lastDayOfYear(new Date(time))).toJSON();
             }
         }
     } else {
@@ -422,8 +424,13 @@ function setTime(time, endpoint) {
     this.validateTimes();
 }
 
-function removeTime(time) {
-    time.isRemoved = true;
+function removeTime(time, moment) {
+    if (time.value.id) {
+        time.isEdited = false;
+        time.isRemoved = true;
+    } else {
+        this.updatedTimePair.endTime.value = undefined;
+    }
 }
 
 function validateTimes() {

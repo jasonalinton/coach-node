@@ -36,6 +36,8 @@
                         <span v-if="set.weight" class="ps-1">{{ `${set.weight} lbs` }}</span>
                     </div>
                 </div>
+                <span class="text-start mt-1">{{ `Reps Volume: ${day.volumeReps}` }}</span>
+                <span class="text-start mt-1">{{ `Weight Volumn: ${day.volumeWeight} lbs` }}</span>
             </div>
         </div>
     </div>

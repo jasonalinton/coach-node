@@ -1,5 +1,5 @@
 <template>
-    <div class="exercise-set d-flex flex-column flex-grow-1" :class="{ complete: isComplete }" style="gap:10px">
+    <div class="exercise-set d-flex flex-column flex-grow-1 mt-2" :class="{ complete: isComplete }">
         <div v-if="!showVariationSelector && variationString" class="d-flex flex-row"
              @click="showVariationSelector = true">
             <span class="variations text-start">{{variationString}}</span>
@@ -15,59 +15,43 @@
             </div>
         </div>
         <div class="d-flex flex-row flex-grow-1">
-            <span class="set-number" :class="{ active: isActive }"
-                    @click="activeSetID = set.id">{{ setNumber }}</span>
+            <span v-if="!isProcessing" class="set-number" :class="{ active: isActive }"
+            @click="activeSetID = set.id">{{ setNumber }}</span>
+            <div>
+                <div v-if="isProcessing" class="loader"></div>
+            </div>
             <div class="reps d-flex flex-column align-items-center">
-                <input class="prop form-control form-control-sm me-1" type="number" min="0" ref="repsInput"
+                <input class="prop form-control form-control-sm me-2" type="number" min="0" ref="repsInput"
                         v-model="set.reps"
                         :style="{'width': inputWidth(set.reps)}"
                         @keyup.enter.esc="doneEditing"
-                        @blur="save(set)"/>
-                <span class="text">REPS</span>
+                        @blur="blur"/>
+                <span class="field me-2">REPS</span>
             </div>
             <div class="time d-flex flex-column align-items-center">
-                <input class="prop form-control form-control-sm me-1" type="number" min="0" ref="timeInput"
+                <input class="prop form-control form-control-sm me-2" type="number" min="0" ref="timeInput"
                         v-model="set.timeSeconds"
                         :style="{'width': inputWidth(set.timeSeconds)}" 
                         @keyup.enter.esc="doneEditing"
-                        @blur="save(set)"/>
-                <span class="text">TIME</span>
-            </div>
-            <div class="hold d-flex flex-column align-items-center">
-                <input class="prop form-control form-control-sm me-1" type="number" min="0" ref="holdInput"
-                        v-model="set.holdSeconds"
-                        :style="{'width': inputWidth(set.holdSeconds)}" 
-                        @keyup.enter.esc="doneEditing"
-                        @blur="save(set)"/>
-                <span class="text">HOLD</span>
+                        @blur="blur"/>
+                <span class="field me-2">TIME</span>
             </div>
             <div class="weight d-flex flex-column align-items-center">
-                <input class="prop form-control form-control-sm me-1" type="number" min="0" ref="weightInput"
+                <input class="prop form-control form-control-sm me-2" type="number" min="0" ref="weightInput"
                         v-model="set.weight"
                         :style="{'width': inputWidth(set.weight)}" 
                         @keyup.enter.esc="doneEditing"
-                        @blur="save(set)"/>
-                <span class="text">LBS</span>
+                        @blur="blur"/>
+                <span class="fieldme-2">LBS</span>
             </div>
-            <img class="history-button"
-                    src='/icon/chart-line-solid.png' width="24" height="24"
-                    @click.prevent="showHistory"/>
-            <!-- <div class="rest d-flex flex-column align-items-center">
-                <input class="prop form-control form-control-sm me-1" type="number" min="0" ref="restInput"
-                        v-model="set.restSeconds"
-                        :style="{'width': inputWidth(set.restSeconds)}" 
-                        @keyup.enter.esc="doneEditing"
-                        @blur="save(set)"/>
-                <span class="text">REST</span>
-            </div> -->
             <!-- Edit & Delete Buttons -->
-            <div class="button-group d-flex flex-column">
+            <div class="button-group d-flex flex-column" :class="{ active: isActive }">
                 <img class="icon-button" 
                     src='/icon/edit-button.png' width="16" height="16"
                         @click.stop.prevent="showVariationSelector = !showVariationSelector"/>
                 <img class="icon-button" 
                     src='/icon/delete-button.png' width="16" height="16"
-                        @click="deleteSet"/>
+                        @click.stop="deleteSet"/>
             </div>
         </div>
     </div>
@@ -92,6 +76,7 @@ export default {
             appStore: undefined,
             workoutStore: undefined,
             showVariationSelector: false,
+            isProcessing: false
         }
     },
     created: function() {
@@ -151,19 +136,29 @@ export default {
                 this.workoutStore.saveSet(this.set);
             }
         },
-        showHistory() {
-            let variationIDs = this.set.variations.map(x => x.id);
-            this.appStore.selectExerciseHistory(this.idExercise, variationIDs);
-        },
         deleteSet() {
+            this.isProcessing = true;
             var data = { 
                 ...this.set,
                 isDeleted: true
             };
-            this.workoutStore.saveSet(data);
+            this.$emit('removeActiveSet');
+            this.workoutStore.saveSet(data)
+            .then(result => {
+                this.isProcessing = false;
+            });
+        },
+        blur(e) {
+            if (!e.relatedTarget || !e.relatedTarget.classList.contains("prop")) {
+                this.save();
+            }
         },
         save() {
-            this.workoutStore.saveSet(this.set);
+            this.isProcessing = true;
+            this.workoutStore.saveSet(this.set)
+            .then(result => {
+                this.isProcessing = false;
+            });
         }
     },
 }
@@ -171,19 +166,26 @@ export default {
 </script>
 
 <style scoped>
+.exercise-set {
+    gap: 4px;
+}
+
 .exercise-set.complete {
     opacity: .5;
 }
 
 .set-number {
+    margin-top: 2px;
+    margin-right: 4px;
     line-height: 30px;
-    width: 20px;
+    width: 30px;
     height: 30px;
-    border-radius: 10px;
+    border-radius: 15px;
+    font-size: 14px;
 }
 
 .set-number.active {
-    background-color: greenyellow;
+    background-color: var(--active-gray);
 }
 
 .variations {
@@ -192,11 +194,13 @@ export default {
 }
 
 .variations:not(.picks) {
-    margin-left: 24px;
+    max-width: 228px;
+    margin-left: 34px;
     line-height: 20px;
 }
 
 .variations.picks {
+    max-width: 278px;
     white-space: nowrap;
     overflow: scroll;
 }
@@ -215,6 +219,16 @@ export default {
     background-color: #c4c4c4;
 }
 
+.prop {
+    min-width: 68px;
+    text-align: center;
+    font-size: 16px;
+}
+
+.field {
+  font-size: 14px
+}
+
 /* Chrome, Safari, Edge, Opera */
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
@@ -225,6 +239,42 @@ input::-webkit-inner-spin-button {
 /* Firefox */
 input[type=number] {
   -moz-appearance: textfield;
+}
+
+.button-group {
+    margin-top: 2px;
+}
+
+.button-group:not(.active) {
+    visibility: hidden;
+}
+
+/* Loader */
+.loader {
+    margin-top: 2px;
+    margin-right: 4px;
+    width: 30px;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    border: 4px solid var(--workout-red);
+    animation:
+    l20-1 0.8s infinite linear alternate,
+    l20-2 1.6s infinite linear;
+}
+@keyframes l20-1{
+   0%    {clip-path: polygon(50% 50%,0       0,  50%   0%,  50%    0%, 50%    0%, 50%    0%, 50%    0% )}
+   12.5% {clip-path: polygon(50% 50%,0       0,  50%   0%,  100%   0%, 100%   0%, 100%   0%, 100%   0% )}
+   25%   {clip-path: polygon(50% 50%,0       0,  50%   0%,  100%   0%, 100% 100%, 100% 100%, 100% 100% )}
+   50%   {clip-path: polygon(50% 50%,0       0,  50%   0%,  100%   0%, 100% 100%, 50%  100%, 0%   100% )}
+   62.5% {clip-path: polygon(50% 50%,100%    0, 100%   0%,  100%   0%, 100% 100%, 50%  100%, 0%   100% )}
+   75%   {clip-path: polygon(50% 50%,100% 100%, 100% 100%,  100% 100%, 100% 100%, 50%  100%, 0%   100% )}
+   100%  {clip-path: polygon(50% 50%,50%  100%,  50% 100%,   50% 100%,  50% 100%, 50%  100%, 0%   100% )}
+}
+@keyframes l20-2{ 
+  0%    {transform:scaleY(1)  rotate(0deg)}
+  49.99%{transform:scaleY(1)  rotate(135deg)}
+  50%   {transform:scaleY(-1) rotate(0deg)}
+  100%  {transform:scaleY(-1) rotate(-135deg)}
 }
 
 </style>

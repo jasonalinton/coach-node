@@ -1,6 +1,10 @@
 import moment from "moment";
 import date from 'date-and-time';
 
+export function sum(array, prop) {
+    return array.reduce((accumulator, currentValue) => accumulator + currentValue[prop], 0,);
+}
+
 export function currency(number) {
     return new Intl.NumberFormat([ ], { style: 'currency', currency: 'USD', currencyDisplay: 'narrowSymbol' }).format(number);
 }
@@ -237,15 +241,17 @@ export function clone(item) {
   return JSON.parse(JSON.stringify(item));
 }
 
+// camelCase
 export function toCamelCase(str) {
     return str.replace(/(?:^\w|[A-Z]|\b\w)/g, function(word, index) {
       return index === 0 ? word.toLowerCase() : word.toUpperCase();
     }).replace(/\s+/g, '');
 }
 
+// CAPITALIZECASE
 export function capitalize(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
-  }
+}
 
 export function toDateString(dateTimeJSON) {
     let dateTimeArray = dateTimeJSON.split("T");

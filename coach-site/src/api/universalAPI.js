@@ -41,28 +41,3 @@ export async function getBriefingBlurbs(idTimeframe, datetime) {
         console.error('Error:', error);
     });
 }
-
-export async function addBriefingBlurb(text, datetime, idBlurbType, idMetric, idTimeframe) {
-    let data = { text, datetime, idBlurbType, idMetric, idTimeframe }
-
-    return fetch(`${URL}/api/Universal/AddBriefingBlurb`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-    })
-    .then(response => response.json())
-    .then((data) => {
-        if (data.status.success) {
-            return data.result;
-        } else {
-            console.error('Error:', data.status.errorMessage);
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-    });
-}
-
-export async function addMetricBlurb(idMetric, datetime, text, title) {
-    postEndpoint('AddMetricBlurb', {idMetric, datetime, text, title});
-}

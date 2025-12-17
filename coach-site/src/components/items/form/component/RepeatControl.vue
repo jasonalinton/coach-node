@@ -164,7 +164,6 @@ import TimeControl from '../../../controls/time/TimeControl.vue'
 import { clone, capitalize, toDateString, today } from '../../../../../utility'
 import { isNextDay, addDay, getNumberDateString } from '../../../../../utility/timeUtility'
 import { saveRoutineRepeat } from '../../../../api/routineAPI'
-import { saveTodoRepeat } from '../../../../api/todoAPI'
 
 let timeframes = [
     {
@@ -424,7 +423,6 @@ export default {
         setTime,
         removeTime,
         validateTimes,
-        correctTimes,
         toggleTodoRepeat(todoRepeat) {
             todoRepeat.isShown = !todoRepeat.isShown;
         },
@@ -550,7 +548,6 @@ function removeTime(time) {
 }
 
 function validateTimes() {
-    this.correctTimes();
     // If end repeat exists and end repeat is less than start repeat, invalidate
     if (this.updatedRepeat.endRepeat.value && 
         (+new Date(this.updatedRepeat.startRepeat.value.dateTime) 
@@ -577,44 +574,7 @@ function validateTimes() {
     }
 }
 
-/* Set date portion of start & end iterations to date of start repeat */
-function correctTimes() {
-    let startRepeatDate = new Date(this.updatedRepeat.startRepeat.value.dateTime);
-
-    let startIteration = this.updatedRepeat.startIteration;
-    if (startIteration && startIteration.value) {
-        let startIterationDate = new Date(startIteration.value.dateTime);
-        let isStartNextDay = isNextDay(new Date(), new Date(startIteration.value.dateTime.slice(0, -1))); // Used to correct timezone errors when re-setting date portion
-        startIterationDate.setUTCFullYear(startRepeatDate.getUTCFullYear(), startRepeatDate.getUTCMonth(), startRepeatDate.getUTCDate())
-        startIteration.value.dateTime = (isStartNextDay) ? addDay(startIterationDate).toISOString() : startIterationDate.toISOString();
-        if (startIteration.oldValue.id &&
-            new Date(startIteration.value.dateTime).getTime() 
-            != new Date(startIteration.oldValue.dateTime).getTime()) {
-            startIteration.isEdited = true;
-        } else {
-            startIteration.isEdited = false;
-        }
-    }
-
-    let endIteration = this.updatedRepeat.endIteration;
-    if (endIteration && endIteration.value) {
-        let endIterationDate = new Date(endIteration.value.dateTime);
-        let isEndNextDay = isNextDay(new Date(), new Date(endIteration.value.dateTime.slice(0, -1))); // Used to correct timezone errors when re-setting date portion
-        endIterationDate.setUTCFullYear(startRepeatDate.getUTCFullYear(), startRepeatDate.getUTCMonth(), startRepeatDate.getUTCDate())
-        endIteration.value.dateTime = (isEndNextDay) ? addDay(endIterationDate).toISOString() : endIterationDate.toISOString();
-        if (endIteration.oldValue.id &&
-            new Date(endIteration.value.dateTime).getTime() 
-            != new Date(endIteration.oldValue.dateTime).getTime()) {
-            endIteration.isEdited = true;
-        } else {
-            endIteration.isEdited = false;
-        }
-    }
-}
-
 function save() {
-    this.correctTimes();
-
     let repeat = {
         id: this.updatedRepeat.id,
         idInheritance: this.updatedRepeat.idInheritance,
@@ -638,7 +598,7 @@ function save() {
     if (this.itemType.toLowerCase() == "routine") {
         saveRoutineRepeat(repeat);
     } else if (this.itemType.toLowerCase() == "todo") {
-        saveTodoRepeat(repeat);
+        this.todoStore.saveRepeat(repeat);
     }
 
     this.$emit("saveRepeat", repeat);

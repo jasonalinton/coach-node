@@ -93,14 +93,14 @@ function onChange(value) {
     } else {
         if (this.type == "Date") {
             let date = new Date(value + " 00:00:00");
-            time = date.toISOString();
+            time = date.toJSON();
         } else if (this.type == "Time") {
             let dateString = this.toDateString(new Date().toJSON());
             let date = new Date(dateString + " " + value);
-            time = date.toISOString();
+            time = date.toJSON();
         } else if (this.type == "DateTime") {
             let date = new Date(value);
-            time = date.toISOString();
+            time = date.toJSON();
         }
         this.dateTimeString = value;
         this.$emit("setTime", time);

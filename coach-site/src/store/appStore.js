@@ -188,7 +188,7 @@ export const useAppStore = defineStore('app', {
         async setSelectedEvent(eevent) {
             if (eevent.type.id == EVENTTYPE.WORKOUT) {
                 let workoutStore = useWorkoutStore();
-                let workoutID = await getWorkoutIDFromEvent(eevent.id);
+                let workoutID = await workoutStore.getWorkoutIDFromEvent(eevent.id);
                 this.selectWorkout(workoutID);
                 this.itemPanel.selected = "workout";
             } else if (eevent.type.id == EVENTTYPE.TODO) {
@@ -259,6 +259,11 @@ export const useAppStore = defineStore('app', {
             this.itemPanel.workout.exerciseList.nextExercisePosition = undefined;
             this.itemPanel.workout.exerciseList.addedExerciseIDs = [];
             this.itemPanel.workout.exerciseList.isSelector = undefined;
+        },
+        onDoneWorkout() {
+            this.itemPanel.workout.selectedWorkoutID = undefined;
+            this.itemPanel.workout.selectedExerciseID = undefined;
+            this.itemPanel.workout.activeExerciseID = undefined;
         },
         onBackWorkoutPanel() {
             this.itemPanel.workout.selectedView = this.itemPanel.workout.panelQueue.pop();

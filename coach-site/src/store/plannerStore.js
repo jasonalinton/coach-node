@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { today, startOfDay } from '../../utility'
+import { dateOnly } from '../../utility/timeUtility';
 
 export const usePlannerStore = defineStore('planner', {
     state: () => ({
@@ -28,9 +29,13 @@ export const usePlannerStore = defineStore('planner', {
             return {
                 id: null,
                 routineRepeatID: null,
+                startDate: dateOnly(new Date()),
+                endDate: undefined,
+                startTime: undefined,
+                endTime: undefined,
                 startRepeat: {
                     id: null,
-                    dateTime: today(new Date()).toISOString(),
+                    dateTime: today(new Date()).toJSON(),
                     type: 80,
                     endPoint: 84,
                     moment: 87,
@@ -41,10 +46,6 @@ export const usePlannerStore = defineStore('planner', {
                 endRepeat: null,
                 startIteration: null,
                 endIteration: null,
-                // startDate: "2023-10-01T00:00:00Z",
-                // endDate: "2023-11-04T00:00:00Z",
-                // iterationStartTime: null,
-                // iterationEndTime: null,
                 duration: null,
                 type: 80,
                 timeframe: 63,
@@ -81,14 +82,14 @@ export const usePlannerStore = defineStore('planner', {
                 points: null,
                 startTime: {
                     id: null,
-                    dateTime: today(new Date()).toISOString(),
+                    dateTime: today(new Date()).toJSON(),
                     idType: 81,
                     idEndPoint: 84,
                     idMoment: 89
                 },
                 endTime: {
                     id: null,
-                    dateTime: today(new Date()).toISOString(),
+                    dateTime: today(new Date()).toJSON(),
                     idType: 81,
                     idEndPoint: 84,
                     idMoment: 89
