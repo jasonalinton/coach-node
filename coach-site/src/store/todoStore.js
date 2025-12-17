@@ -58,8 +58,8 @@ export const useTodoStore = defineStore('todo', {
             return postEndpoint("Todo", "DeleteTodo", { id })
             .then(response => response.result);
         },
-        createTask(todoID, date) {
-            return postEndpoint("Todo", "CreateTaskForTodo", { todoID, date })
+        createTask(todoID, datetime) {
+            return postEndpoint("Todo", "CreateTaskForTodo", { todoID, datetime })
             .then(response => response.result);
         },
         createDefaultTask(text, isComplete, datetime) {
