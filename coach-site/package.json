@@ -10,6 +10,7 @@
     "lint": "eslint --ext .js,.vue --ignore-path .gitignore --fix src"
   },
   "dependencies": {
+    "@editorjs/editorjs": "^2.30.8",
     "@fortawesome/fontawesome-free": "^5.15.3",
     "@microsoft/signalr": "^7.0.0",
     "@popperjs/core": "^2.11.8",
