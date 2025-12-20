@@ -125,7 +125,7 @@ export default {
         },
         saveBlurb() {
             if (this.newPost.isTextValid) {
-                let date = new Date(this.newPost.datetime).toISOString();
+                let date = new Date(this.newPost.datetime);
                 this.universalStore
                     .addMetricBlurb(this.idMetric, date, this.newPost.text, this.newPost.title);
             this.newPost.isShown = false;

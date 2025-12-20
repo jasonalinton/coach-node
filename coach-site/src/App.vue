@@ -12,8 +12,9 @@
                 <!-- <RouterView/> -->
                 <Planner v-show="selectedPage == 'planner'" />
                 <ItemTabs v-show="selectedPage == 'items'" />
-                <PhysicalView v-if="selectedPage == 'physical'" />
-                <EmotionalView v-if="selectedPage == 'emotional'" />
+                <BlogTimeline v-show="selectedPage == 'timeline'" />
+                <PhysicalView v-show="selectedPage == 'physical'" />
+                <EmotionalView v-show="selectedPage == 'emotional'" />
             </div>
             <div class="grid-right-panel">
                 <ItemPanel />
@@ -29,6 +30,7 @@ import LeftPanel from "./components/planner/left-panel/LeftPanel.vue";
 import ItemPanel from './components/planner/item-panel/ItemPanel.vue';
 import Planner from "./components/planner/Planner.vue";
 import ItemTabs from "./components/items/ItemTabs.vue";
+import BlogTimeline from "./components/blog/BlogTimeline.vue";
 import PhysicalView from "./components/metrics/physical/PhysicalView.vue";
 import EmotionalView from "./components/metrics/emotional/EmotionalView.vue";
 import { useAppStore } from '@/store/appStore'
@@ -53,6 +55,7 @@ export default {
         ItemPanel,
         Planner,
         ItemTabs,
+        BlogTimeline,
         PhysicalView,
         EmotionalView,
         // RouterView

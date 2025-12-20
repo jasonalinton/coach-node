@@ -1,7 +1,8 @@
 import { defineStore } from 'pinia';
 import { getSocketConnection } from './socket';
 import { getBriefingBlurbs } from '../api/universalAPI';
-import { replaceOrAddItem } from '../../utility';
+import { replaceOrAddItem, sortAsc } from '../../utility';
+import { getTimeframeEndpoints } from '../../utility/timeUtility';
 import { postEndpoint } from '../api/api';
 
 let initialized = false;
@@ -18,16 +19,31 @@ export const useUniversalStore = defineStore('universal', {
             this.connectSocket();
             initialized = true;
         },
-        async getBlurbsInMetric(idMetric, idTimeframe, datetime) {
+        getBlurbs(idTimeframe, datetime) {
             let _this = this;
-            return getBlurbsInMetric(idMetric, idTimeframe, datetime)
-                .then(result => {
-                    result.forEach(blurb => {
+            postEndpoint("Universal", "GetBlurbs", { idTimeframe, datetime})
+                .then(response => {
+                    response.result.forEach(blurb => {
                         replaceOrAddItem(blurb, _this.blurbs);
                     });
-                    return result;
+                    // sortAsc(_this.blurbs);
                 });
-            // return this.blurbs;
+            let {start, end} = getTimeframeEndpoints(idTimeframe, datetime);
+
+            return this.blurbs.filter(blurb => {
+                return (new Date(blurb.datetime)).getTime() >= start && (new Date(blurb.datetime)).getTime() <= end;
+            });
+        },
+        async getBlurbsInMetric(idMetric, idTimeframe, datetime) {
+            let _this = this;
+            return postEndpoint("Universal", "GetBlurbsInMetric", { idMetric, idTimeframe, datetime })
+                .then(response => {
+                    response.result.forEach(blurb => {
+                        replaceOrAddItem(blurb, _this.blurbs);
+                    });
+                    sortAsc(_this.blurbs);
+                    return response.result;
+                });
         },
         getBriefingBlurbs(idTimeframe, datetime) {
             let _this = this;
@@ -65,7 +81,8 @@ export const useUniversalStore = defineStore('universal', {
             }
         },
         addMetricBlurb(idMetric, datetime, text, title) {
-            addMetricBlurb(idMetric, datetime, text, title);
+            return postEndpoint("Universal", "AddMetricBlurb", { idMetric, datetime, text, title })
+                .then(response => response.result);
         },
         connectSocket() {
             if (!initialized) {

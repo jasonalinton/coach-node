@@ -1,5 +1,6 @@
 import moment from "moment";
 import date from 'date-and-time';
+import { TIMEFRAME } from "../src/model/constants";
 
 export function dateOnly(datetime) {
     let dateTimeJSON = datetime.toJSON();
@@ -206,6 +207,25 @@ export function lastDayOfMonth(dateTime) {
 
 export function lastDayOfYear(dateTime) {
     return moment(dateTime).endOf('year').toDate();
+}
+
+export function getTimeframeEndpoints(idTimeframe, datetime) {
+    let start;
+    let end;
+    if (idTimeframe == TIMEFRAME.DAY) {
+        start = datetime;
+        end = datetime;
+    }
+    if (idTimeframe == TIMEFRAME.WEEK) {
+        start = firstDayOfWeek(datetime);
+        end = lastDayOfWeek(datetime);
+    }
+    if (idTimeframe == TIMEFRAME.MONTH) {
+        start = firstDayOfMonth(datetime);
+        end = lastDayOfMonth(datetime);
+    }
+
+    return { start, end };
 }
 
 export function sunday(dateTime) {

@@ -11,6 +11,7 @@
                 <div class="d-flex flex-row">
                     <button class="btn btn-sm" type="button" @click="selectPage('planner')">Planner</button>
                     <button class="btn btn-sm" type="button" @click="selectPage('items')">Items</button>
+                    <button class="btn btn-sm" type="button" @click="selectPage('timeline')">Timeline</button>
                     <button class="btn btn-sm" type="button" @click="selectPage('physical')">Physical</button>
                     <button class="btn btn-sm" type="button" @click="selectPage('emotional')">Emotional</button>
                 </div>
