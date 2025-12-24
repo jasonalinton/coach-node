@@ -19,6 +19,17 @@ export const useUniversalStore = defineStore('universal', {
             this.connectSocket();
             initialized = true;
         },
+        getBlurb(id) {
+            let blurb = this.blurbs.find(x => x.id == id);
+            if (!blurb) {
+                let _this = this;
+                postEndpoint("Universal", "GetBlurb", { id })
+                    .then(response => {
+                        replaceOrAddItem(response.result, _this.blurbs);
+                    });
+            }
+            return blurb;
+        },
         getBlurbs(idTimeframe, datetime) {
             let _this = this;
             postEndpoint("Universal", "GetBlurbs", { idTimeframe, datetime})

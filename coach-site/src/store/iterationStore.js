@@ -76,8 +76,8 @@ export const useIterationStore = defineStore('iteration', {
                          iteration.idRoutine == null && iteration.idRoutineIteration == null);
             });
         },
-        updateIteration(iterationID, text, points, startAt, endAt) {
-            let data = { iterationID, text, points, startAt, endAt };
+        updateIteration(iterationID, text, blurb, points, startAt, endAt) {
+            let data = { iterationID, text, blurb, points, startAt, endAt };
             return postEndpoint("Planner", "UpdateIteration", data)
             .then(response => response.result);
         },

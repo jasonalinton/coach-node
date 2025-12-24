@@ -33,6 +33,13 @@
             <DateSelector class="date-selector mt-3" :class="{ 'invalid': !isValid }"
                           :date="iteration_updated.endAt" @onChange="iteration_updated.endAt = $event"></DateSelector>
         </div>
+        <div class="form-group mt-1">
+            <textarea class="textarea" 
+                v-model.lazy.trim="iteration_updated.blurb"
+                placeholder="Click to add blurb"
+                spellcheck="true">
+            </textarea>
+        </div>
         <div class="d-flex flew-row justify-content-end mt-3">
             <!-- Buttons -->
             <div class="form-group d-flex justify-content-end">
@@ -57,6 +64,7 @@ export default {
     data: function() {
         return {
             iterationStore: undefined,
+            universalStore: undefined,
             iteration_updated: undefined,
             isValid: true
         }
@@ -65,8 +73,20 @@ export default {
         let iterationStore = await import(`@/store/iterationStore`);
         this.iterationStore = iterationStore.useIterationStore();
 
+        let universalStore = await import(`@/store/universalStore`);
+        this.universalStore = universalStore.useUniversalStore();
+
         this.initUpdatedIteration();
     },
+    // computed: {
+    //     blurb() {
+    //         if (this.universalStore && this.iteration.blurbIds.length > 0) {
+    //             let blurb = this.universalStore.getBlurb(this.iteration.blurbIds[0]);
+    //             return blurb;
+    //         }
+    //         return undefined;
+    //     }
+    // },
     methods: {
         initUpdatedIteration,
         validateTimes,
@@ -93,6 +113,12 @@ function initUpdatedIteration() {
         points: this.iteration.points,
         startAt: this.iteration.startAt,
         endAt: this.iteration.endAt
+    };
+    if (this.iteration.blurbIds.length > 0) {
+        let blurb = this.universalStore.getBlurb(this.iteration.blurbIds[0]);
+        if (blurb) {
+            this.iteration_updated.blurb = blurb.text;
+        }
     }
 }
 
@@ -112,8 +138,8 @@ function save() {
     var title = this.iteration_updated.text.trim();
     if (title == "") return;
 
-    this.iterationStore.updateIteration(this.iteration_updated.id, this.iteration_updated.text, this.iteration_updated.points, 
-        this.iteration_updated.startAt, this.iteration_updated.endAt);
+    this.iterationStore.updateIteration(this.iteration_updated.id, this.iteration_updated.text, this.iteration_updated.blurb, 
+    this.iteration_updated.points, this.iteration_updated.startAt, this.iteration_updated.endAt);
 
     this.close();
 }
