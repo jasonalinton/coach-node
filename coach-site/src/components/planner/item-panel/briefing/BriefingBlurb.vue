@@ -4,7 +4,7 @@
         <TimeframeRadio :timeframe="timeframe" :isToggle="false" container="briefing-blurb"
                         @timeframeSelected="selectTimeframe" />
         <MetricSelector class="metric-selector mt-1" :selected="selectedMetrics"></MetricSelector>
-        <BlurbFormControl v-for="metric in metrics" :key="metric.id" :title="metric.title" :placeholder="`Click to add ${metric.title} blurb`" :blurbs="metric.prop"
+        <BlurbFormControl v-for="metric in metrics" :key="metric.id" :header="metric.title" :placeholder="`Click to add ${metric.title} blurb`" :blurbs="metric.prop"
                           class="mt-2" 
                           @addBlurb="addBlurb($event, metric.id)"
                           @saveBlurb="saveBlurb" />
@@ -143,14 +143,14 @@ export default {
             this.timeframe = timeframeText;
             this.universalStore.getBriefingBlurbs(this.idTimeframe, this.selectedDate);
         },
-        addBlurb(text, idMetric) {
-            this.universalStore.addBriefingBlurb(text, this.selectedDate, BLURBTYPE.BRIEFING, idMetric, this.idTimeframe)
+        addBlurb(blurb, idMetric) {
+            this.universalStore.addBriefingBlurb(blurb.text, this.selectedDate, BLURBTYPE.BRIEFING, idMetric, this.idTimeframe)
         },
-        saveBlurb(id, text) {
-            let index = this.blurbs.findIndex(x => x.id == id);
+        saveBlurb(blurb) {
+            let index = this.blurbs.findIndex(x => x.id == blurb.id);
             if (index > -1) {
-                let blurb = this.blurbs[index];
-                blurb.text = text;
+                let _blurb = this.blurbs[index];
+                _blurb.text = blurb.text;
             }
         }
     },

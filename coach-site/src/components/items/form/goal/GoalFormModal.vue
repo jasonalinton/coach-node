@@ -21,7 +21,7 @@
                     </div> -->
                 </div>
                 <div class="body row gx-0">
-                        <div class="blurb col-12 col-sm-12 col-md-4 col-lg-6 mt-2">
+                        <div class="blurb d-flex flex-column col-12 col-sm-12 col-md-4 col-lg-6 mt-2 gap-2">
                             <!-- Description -->
                             <div class="description d-flex flex-column">
                                 <div class="header d-flex flex-column">
@@ -37,8 +37,11 @@
                                           spellcheck="true"></textarea>
                             </div>
                             <!-- Reasons -->
-                            <BlurbFormControl title="Reasons" placeholder="Click to add Reason" :blurbs="reasons" 
+                            <BlurbFormControl header="Reasons" placeholder="Click to add Reason" :blurbs="reasons" 
                                               @addBlurb="addReason($event)" />
+                            <!-- Blurbs -->
+                            <BlurbFormControl header="Blurbs" placeholder="Click to add Blurb" :blurbs="blurbs" :showTitle="true"
+                                              @addBlurb="addBlurb($event)" />
                         </div>
                         <div class="items col-12 col-sm-6 col-md-4 col-lg-3 mt-2 form-column">
                             <!-- Parents -->
@@ -194,7 +197,7 @@ export default {
                 removedIDs: []
             },
             reasons: [],
-            reason: undefined,
+            blurbs: [],
             selectedRepeatID: undefined,
             selectedTimePairID: undefined,
             mapper: {
@@ -284,6 +287,7 @@ export default {
             this.timePairs.deletedIDs = [];
 
             this.reasons = goal.blurbs.filter(x => x.idType == this.BLURBTYPE.REASON);
+            this.blurbs = goal.blurbs.filter(x => x.idType == this.BLURBTYPE.BLURB);
         },
         setSelectedRepeat(repeatID) {
             this.selectedRepeatID = repeatID;
@@ -404,10 +408,19 @@ export default {
             newTimePair.id = (timePairs.length > 0 && timePairs[0].id < 0) ? timePairs[0].id - 1 : -1;
             this.timePairs.value.unshift(newTimePair);
         },
-        addReason(text) {
+        addReason(blurb) {
             if (this.id > 0) {
-                if (text.trim() != "") {
-                    this.store.addReason(this.id, new Date(), text);
+                if (blurb.text.trim() != "") {
+                    this.store.addReason(this.id, new Date(), blurb.text);
+                }
+            }
+        },
+        addBlurb(blurb) {
+            if (this.id > 0) {
+                if (blurb.text.trim() != "") {
+                    blurb.idType = BLURBTYPE.BLURB;
+
+                    this.store.addBlurb(this.id, blurb);
                 }
             }
         },

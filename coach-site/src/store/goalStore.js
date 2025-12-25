@@ -151,6 +151,17 @@ export const useGoalStore = defineStore('goal', {
             return postEndpoint("Goal", "AddReason", { id, datetime, text })
             .then(response => response.result);
         },
+        addBlurb(idGoal, blurb) {
+            let data = { 
+                idGoal, 
+                idBlurbType: blurb.idType, 
+                datetime: blurb.datetime,
+                text: blurb.text, 
+                title: blurb.title 
+            }
+            return postEndpoint("Goal", "AddBlurbToGoal", data)
+            .then(response => response.result);
+        },
         runUpdates(updates) {
             let _this = this;
             if (updates.goals && updates.goals.length > 0) {

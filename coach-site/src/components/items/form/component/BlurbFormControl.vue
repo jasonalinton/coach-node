@@ -5,7 +5,7 @@
              @mouseover="hovered = true">
             <div class="d-flex flex-row justify-content-between">
                 <div class="d-flex flex-row">
-                    <span class="form-head text-start">{{ title }}</span>
+                    <span class="form-head text-start">{{ header }}</span>
                     <img class="icon-button ms-1 mt-auto mb-auto" src="/icon/add-button.png" :width="14" :height="14" 
                          @click.stop="onAddBlurb" />
                 </div>
@@ -17,7 +17,10 @@
             <hr/>
         </div>
         <div v-if="isShown" class="d-flex flex-column">
-            <div v-if="showTextarea" class="d-flex flex-column">
+            <div v-if="showTextarea" class="d-flex flex-column gap-2">
+                <input v-if="showTitle" class="textbox text" type="text" placeholder="Title"
+                       v-model.lazy.trim="title" 
+                       spellcheck="true"/>
                 <textarea class="textarea" ref="textbox"
                           v-model.trim="text"
                           v-on:keyup.enter.ctrl="saveBlurb"
@@ -53,7 +56,7 @@ export default {
     name: 'BlurbFormControl',
     components: {  },
     props: {
-        title: {
+        header: {
             type: String,
             default: () => "Blurb"
         },
@@ -64,10 +67,15 @@ export default {
         placeholder: {
             type: String,
             default: () => ""
+        },
+        showTitle: {
+            type: Boolean,
+            default: () => false
         }
     },
     data: function () {
         return {
+            title: undefined,
             text: undefined,
             selectedID: undefined,
             isShown: true,
@@ -84,6 +92,7 @@ export default {
         }
     },
     methods: {
+        reset,
         onAddBlurb,
         editBlurb,
         cancelBlurb,
@@ -99,9 +108,14 @@ export default {
     },
 }
 
-function onAddBlurb() {
+function reset() {
     this.selectedID = undefined;
+    this.title = undefined;
     this.text = undefined;
+}
+
+function onAddBlurb() {
+    this.reset();
     this.showTextarea = true;
 }
 
@@ -112,23 +126,31 @@ function editBlurb(id) {
     if (index > -1) {
         let blurb = this.blurbs[index];
         this.text = blurb.text;
-    this.$refs["textbox"].focus();
+        this.showTextarea = true;
+        this.$refs["textbox"].focus();
     }
 }
 
 function cancelBlurb() {
-    this.text = undefined;
-    this.selectedID = undefined,
+    this.reset();
     this.$refs["textbox"].blur();
     this.showButtons = false;
     this.showTextarea = false;
 }
 
 function saveBlurb() {
+    let blurb = {
+        id: undefined,
+        title: this.title,
+        text: this.text,
+        datetime: new Date()
+    };
+
     if (!this.selectedID) {
-        this.$emit("addBlurb", this.text);
+        this.$emit("addBlurb", blurb);
     } else {
-        this.$emit("saveBlurb", this.selectedID, this.text);
+        blurb.id = this.selectedID;
+        this.$emit("saveBlurb", blurb);
     }
     this.cancelBlurb();
 }
