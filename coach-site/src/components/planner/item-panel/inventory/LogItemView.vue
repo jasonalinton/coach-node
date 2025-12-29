@@ -44,6 +44,7 @@
 <script>
 import DateTimeSelector from '../../../controls/select/DateTimeSelector.vue'
 import { useMetricStore } from '../../../../store/metricStore';
+import { useUniversalStore } from '../../../../store/universalStore';
 import { CONTROL } from '../../../../model/constants'
 import { subtractMinutes, getDurationInMinutes } from '../../../../../utility/timeUtility';
 
@@ -61,6 +62,7 @@ export default {
     data: function () {
         return {
             metricStore: undefined,
+            universalStore: undefined,
             CONTROL,
             fields: [],
             entryDateTime: undefined,
@@ -73,6 +75,7 @@ export default {
     },
     created: function() {
        this.metricStore = useMetricStore();
+       this.universalStore = useUniversalStore();
     },
     computed: {
         logItem() {
@@ -204,7 +207,12 @@ function setProps(clear) {
                 let clearCutoff = subtractMinutes(this.clearMinutes);
                 if (+lastEntryDateTime > +clearCutoff) {
                     field.value = lastValue.value;
-                    this.blurb = lastEntry.reason;
+                    if (lastEntry.idBlurb) {
+                        let blurb = this.universalStore.getBlurb(lastEntry.idBlurb);
+                        if (blurb) {
+                            this.blurb = blurb.text;
+                        }
+                    }
                     this.entryDateTime = lastEntryDateTime;
                     let minutesSince = getDurationInMinutes(lastEntryDateTime, new Date());
                     let minutesLeft = this.clearMinutes - minutesSince;

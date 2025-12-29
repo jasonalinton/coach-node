@@ -105,6 +105,11 @@ export default {
         saveBlurb,
         cancelBlurb
     },
+    watch: {
+        selectedDate() {
+            this.initBlurbs();
+        }
+    }
 }
 
 async function initBlurbs() {
