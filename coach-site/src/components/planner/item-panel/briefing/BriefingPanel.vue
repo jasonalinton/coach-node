@@ -4,6 +4,7 @@
             <div class="briefing-panel d-flex flex-column flex-grow-1 overflow-hidden">
                 <ItemPanelNavbar v-show="showHead" />
                 <div class="body d-flex flex-column flex-grow-1">
+                    <BriefingGoals />
                     <BriefingBlurb />
                 </div>
             </div>
@@ -13,11 +14,12 @@
 
 <script>
 import ItemPanelNavbar from '../../../mobile/navbar/ItemPanelNavbar.vue';
+import BriefingGoals from './BriefingGoals.vue';
 import BriefingBlurb from './BriefingBlurb.vue';
 
 export default {
     name: 'BriefingPanel',
-    components: { ItemPanelNavbar, BriefingBlurb },
+    components: { ItemPanelNavbar, BriefingGoals, BriefingBlurb },
     props: {
         showHead: {
             type: Boolean,
@@ -41,4 +43,4 @@ export default {
 
 <style scoped>
 
-</style>
+</style>./BriefingGoals.vue
