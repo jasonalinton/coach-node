@@ -126,6 +126,7 @@ export let BLURBTYPE = {
     REMINDER: 170,
     BRIEFING: 172,
     DEBRIEFING: 173,
+    ISSUE: 184
 };
 
 export let CALENDAR_TYPES = {

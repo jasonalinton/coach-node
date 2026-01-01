@@ -30,11 +30,45 @@
                           @focus="showButtons = true"
                           @blur="onTextareaBlur">
                 </textarea>
+                <!-- Goal-TimePair -->
+                <div class="d-flex flex-column mt-2">
+                    <span class="label text-start">Goal-TimePair IDs</span>
+                    <input class="textbox" type="number" min="1"
+                                v-on:keyup.enter="addGoalTimePair"
+                                spellcheck="true"/>
+                    <div class="d-flex flex-column">
+                        <div v-for="goalTimePairID in goalTimePairIDs" :key="goalTimePairID" class="d-flex flex-column">
+                            <div class="goal-time-pair d-flex justify-content-between">
+                                <span>{{ goalTimePairID }}</span>
+                                <button class="btn-close mt-auto mb-auto" type="button" aria-label="close"
+                                        @click.stop="removeGoalTimePair(goalTimePairID)"></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Goal-TimePair-Todo -->
+                <div class="d-flex flex-column mt-2">
+                    <span class="label text-start">Goal-TimePair-Todo IDs</span>
+                    <input class="textbox" type="number" min="1"
+                                v-on:keyup.enter="addGoalTimePairTodo"
+                                spellcheck="true"/>
+                    <div class="d-flex flex-column">
+                        <div v-for="goalTimePairTodoID in goalTimePairTodoIDs" :key="goalTimePairTodoID" class="d-flex flex-column">
+                            <div class="goal-time-pair d-flex justify-content-between">
+                                <span>{{ goalTimePairTodoID }}</span>
+                                <button class="btn-close mt-auto mb-auto" type="button" aria-label="close"
+                                        @click.stop="removeGoalTimePairTodo(goalTimePairTodoID)"></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Save Button -->
                 <div v-if="showButtons" class="d-flex flex-row mt-1 justify-content-end">
                     <button type="button" @click="saveBlurb">Save</button>
                     <button class="ms-1" type="button" @click="cancelBlurb">Cancel</button>
                 </div>
             </div>
+            <!-- Blurb Card -->
             <div class="d-flex flex-column">
                 <div v-for="blurb in blurbs_Sorted" :key="blurb.id"
                      class="blurb cursor-default d-flex flex-column mt-2"
@@ -42,6 +76,14 @@
                      @click="editBlurb(blurb.id)">
                     <!-- <span class="text-start">{{ getDateString(blurb.datetime) }}</span> -->
                     <span class="text-start">{{ blurb.text }}</span>
+                    <!-- Goal-TimePair IDs -->
+                    <div v-if="blurb.goalTimePairs.length > 0" class="goal-timepair d-flex flex-row gap-2">
+                        <span v-for="id in blurb.goalTimePairs.map(x => x.id)" :key="id">{{ id }}</span>
+                    </div>
+                    <!-- Goal-TimePair-Todo IDs -->
+                    <div v-if="blurb.goalTimePairTodos.length > 0" class="goal-timepair-todos d-flex flex-row gap-2">
+                        <span v-for="id in blurb.goalTimePairTodos.map(x => x.id)" :key="id">{{ id }}</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -75,25 +117,42 @@ export default {
     },
     data: function () {
         return {
+            universalStore: undefined,
             title: undefined,
             text: undefined,
             selectedID: undefined,
             isShown: true,
             showButtons: false,
             showTextarea: false,
+            goalTimePairIDs: [],
+            goalTimePairTodoIDs: []
         }
     },
-    created: function() {
-       
+    created: async function() {
+        let universalStore = await import(`@/store/universalStore`);
+        this.universalStore = universalStore.useUniversalStore();
     },
     computed: {
         blurbs_Sorted() {
-            return sortAsc([...this.blurbs], "position");
+            let blurbs = [];
+            if (this.universalStore) {
+                this.blurbs.forEach(_blurb => {
+                    let blurb = this.universalStore.getBlurb(_blurb.id);
+                    if (blurb) {
+                        blurbs.push(blurb);
+                    }
+                })
+            }
+            return sortAsc([...blurbs], "position");
         }
     },
     methods: {
         reset,
         onAddBlurb,
+        addGoalTimePair,
+        removeGoalTimePair,
+        addGoalTimePairTodo,
+        removeGoalTimePairTodo,
         editBlurb,
         cancelBlurb,
         saveBlurb,
@@ -112,6 +171,34 @@ function reset() {
     this.selectedID = undefined;
     this.title = undefined;
     this.text = undefined;
+    this.goalTimePairIDs = [];
+    this.goalTimePairTodoIDs = [];
+}
+
+function addGoalTimePair(e) {
+    var index = this.goalTimePairIDs.findIndex(x => x == e.target.value);
+    if (index == -1) {
+        this.goalTimePairIDs.push(e.target.value);
+    }
+    e.target.value = undefined;
+}
+
+function removeGoalTimePair(id) {
+    let index = this.goalTimePairIDs.findIndex(x => x == id);
+    this.goalTimePairIDs.splice(index, 1);
+}
+
+function addGoalTimePairTodo(e) {
+    var index = this.goalTimePairTodoIDs.findIndex(x => x == e.target.value);
+    if (index == -1) {
+        this.goalTimePairTodoIDs.push(e.target.value);
+    }
+    e.target.value = undefined;
+}
+
+function removeGoalTimePairTodo(id) {
+    let index = this.goalTimePairTodoIDs.findIndex(x => x == id);
+    this.goalTimePairTodoIDs.splice(index, 1);
 }
 
 function onAddBlurb() {
@@ -122,10 +209,13 @@ function onAddBlurb() {
 function editBlurb(id) {
     this.selectedID = id;
 
-    let index = this.blurbs.findIndex(x => x.id == id);
+    let index = this.blurbs_Sorted.findIndex(x => x.id == id);
     if (index > -1) {
-        let blurb = this.blurbs[index];
+        let blurb = this.blurbs_Sorted[index];
         this.text = blurb.text;
+        this.title = blurb.title;
+        this.goalTimePairIDs = [ ...blurb.goalTimePairs.map(x => x.id) ];
+        this.goalTimePairTodoIDs = [ ...blurb.goalTimePairTodos.map(x => x.id) ];
         this.showTextarea = true;
         this.$refs["textbox"].focus();
     }
@@ -143,7 +233,9 @@ function saveBlurb() {
         id: undefined,
         title: this.title,
         text: this.text,
-        datetime: new Date()
+        datetime: (!this.selectedID) ? new Date() : undefined,
+        goalTimePairIDs: this.goalTimePairIDs,
+        goalTimePairTodoIDs: this.goalTimePairTodoIDs,
     };
 
     if (!this.selectedID) {
@@ -218,12 +310,30 @@ hr {
     border: #979797 solid 1px;
 }
 
-button {
+button:not(.btn-close) {
     height: 25px;
     background-color: #BAD8F1;
     border: #3B99FC solid 1px;
     border-radius: 4px;
     font-size: 14px;
     line-height: 16px;
+}
+
+button.btn-close {
+    font-size: 8px;
+    visibility: hidden;
+}
+
+.goal-time-pair {
+    color: #3B99FC;
+    font-size: 14px;
+}
+
+.goal-time-pair:hover {
+    background-color: #EFF6FC;
+}
+
+.goal-time-pair:hover button.btn-close {
+    visibility: visible;
 }
 </style>

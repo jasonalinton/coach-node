@@ -38,10 +38,10 @@
                             </div>
                             <!-- Reasons -->
                             <BlurbFormControl header="Reasons" placeholder="Click to add Reason" :blurbs="reasons" 
-                                              @addBlurb="addReason($event)" />
+                                              @addBlurb="addReason($event)" @saveBlurb="updateBlurb($event)" />
                             <!-- Blurbs -->
                             <BlurbFormControl header="Blurbs" placeholder="Click to add Blurb" :blurbs="blurbs" :showTitle="true"
-                                              @addBlurb="addBlurb($event)" />
+                                              @addBlurb="addBlurb($event)" @saveBlurb="updateBlurb($event)" />
                         </div>
                         <div class="items col-12 col-sm-6 col-md-4 col-lg-3 mt-2 form-column">
                             <!-- Parents -->
@@ -411,7 +411,8 @@ export default {
         addReason(blurb) {
             if (this.id > 0) {
                 if (blurb.text.trim() != "") {
-                    this.store.addReason(this.id, new Date(), blurb.text);
+                    blurb.idType = BLURBTYPE.REASON;
+                    this.store.addBlurb(this.id, blurb);
                 }
             }
         },
@@ -419,8 +420,15 @@ export default {
             if (this.id > 0) {
                 if (blurb.text.trim() != "") {
                     blurb.idType = BLURBTYPE.BLURB;
-
                     this.store.addBlurb(this.id, blurb);
+                }
+            }
+        },
+        updateBlurb(blurb) {
+            if (this.id > 0) {
+                if (blurb.text.trim() != "") {
+                    blurb.idType = BLURBTYPE.BLURB;
+                    this.store.updateBlurb(blurb);
                 }
             }
         },

@@ -7,6 +7,7 @@
                 <div class="d-flex flex-row justify-content-between flex-grow-1">
                     <div class="d-flex flex-row">
                         <span class="id">{{ todo.id }}</span>
+                        <span v-if="mapperId" class="mapper-id">{{ mapperId }}</span>
                         <span class="text">{{ todo.text }}</span>
                     </div>
                     <button class="btn-close mt-auto mb-auto" type="button" aria-label="close"
@@ -34,6 +35,7 @@ export default {
     name: "TodoFormItem",
     components: { RepeatControl },
     props: {
+        mapperId: Number,
         id: Number,
         parentID: Number,
         parentType: String,
@@ -137,5 +139,15 @@ button.btn-close {
 
 .wrapper:hover button.btn-close {
     visibility: visible;
+}
+
+.mapper-id {
+    display: none;
+    margin-right: 3px;
+}
+
+
+.wrapper:hover .mapper-id {
+    display: initial;
 }
 </style>

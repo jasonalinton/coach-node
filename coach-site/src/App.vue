@@ -288,7 +288,7 @@ body {
     outline-style: none;
     -webkit-appearance: none;
     border: 1px solid rgba(0, 0, 0, .00);
-    resize: none;
+    resize: vertical;
 }
 
 .textbox:not(.accissible):focus, .textarea:not(.accissible):focus, 

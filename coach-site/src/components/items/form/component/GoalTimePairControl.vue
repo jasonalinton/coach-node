@@ -27,6 +27,8 @@
         </div>
         <!-- Edit View -->
         <div v-if="isEditing" class="wrapper-edit d-flex flex-column" :class="{ 'isValid': isValid}">
+            <!-- ID -->
+            <span class="label text-start">{{ timePair.id }}</span>
             <!-- Points -->
             <!-- <div class="points d-flex flex-column">
                 <span class="label text-start">Points</span>
@@ -100,11 +102,11 @@
                                v-on:keyup.enter="addTodo"
                                spellcheck="true"/>
                 <div class="d-flex flex-column">
-                    <TodoFormItem v-for="id in updatedTimePair.todoIDs" :key="id"
-                                :id="id" :parentID="itemID" parentType="goal" 
+                    <TodoFormItem v-for="gtpt in updatedTimePair.goalTimePairTodos" :key="gtpt.id"
+                                :id="gtpt.todoID" :mapper-id="gtpt.id" :parentID="itemID" parentType="goal" 
                                 :routineRepeatIDs="[]"
                                 :parentRepeatIDs="[]"
-                                @removeItem="removeTodo(id)"/>
+                                @removeItem="removeTodo(gtpt.todoID)"/>
                     <!-- <div v-for="todo in todos" :key="todo.id" 
                          class="todo d-flex flex-row">
                         <span>{{ todo.id }}</span>
