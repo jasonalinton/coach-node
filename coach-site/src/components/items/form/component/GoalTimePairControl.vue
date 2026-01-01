@@ -454,6 +454,11 @@ function addTodo() {
     var index = this.updatedTimePair.todoIDs.findIndex(x => x == this.todoID);
     if (index == -1) {
         this.updatedTimePair.todoIDs.push(this.todoID);
+        this.updatedTimePair.goalTimePairTodos.push({
+            id: undefined,
+            timePairID: this.updatedTimePair.id,
+            todoID: this.todoID
+        });
     }
     this.todoID = undefined;
 }
@@ -461,6 +466,9 @@ function addTodo() {
 function removeTodo(id) {
     let index = this.updatedTimePair.todoIDs.findIndex(x => x == id);
     this.updatedTimePair.todoIDs.splice(index, 1);
+    
+    index = this.updatedTimePair.goalTimePairTodos.findIndex(x => x.todoID == id);
+    this.updatedTimePair.goalTimePairTodos.splice(index, 1);
 }
 
 function save() {
