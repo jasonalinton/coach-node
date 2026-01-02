@@ -1,14 +1,14 @@
 <template>
     <div class="briefing-goals d-flex flex-column p-2">
-        <div v-for="goal in goals" :key="goal.id" class="d-flex flex-column">
-            <BriefingGoal :idGoal="goal.id" />
+        <h4 class="text-start" @click="isShown = !isShown">Goals</h4>
+        <div v-if="isShown" v-for="goalID in goalIDs" :key="goalIDs" class="d-flex flex-column">
+            <BriefingGoal class="mb-1" :idGoal="goalID" />
         </div>
     </div>
 </template>
 
 <script>
 import BriefingGoal from './BriefingGoal.vue';
-import { today } from '../../../../../utility/timeUtility';
 
 export default {
     name: 'BriefingGoals',
@@ -17,32 +17,18 @@ export default {
         idTimeframe: {
             type: Number,
             default: () => 55
+        },
+        goalIDs: {
+            type: Array,
+            default: () => []
         }
     },
     data: function () {
         return {
-            goalStore: undefined,
-            plannerStore: undefined,
+            isShown: true,
         }
     },
-    created: async function() {
-        let goalStore = await import(`@/store/goalStore`);
-        this.goalStore = goalStore.useGoalStore();
-
-        let plannerStore = await import(`@/store/plannerStore`);
-        this.plannerStore = plannerStore.usePlannerStore();
-    },
-    computed: {
-        selectedDate() {
-            return (this.plannerStore) ? this.plannerStore.selectedDate : today();
-        },
-        goals() {
-            if (this.goalStore) {
-                let goals = this.goalStore.getGoalsInTimeframe(this.idTimeframe, this.selectedDate);
-                return goals;
-            }
-            return [];
-        }
+    created: function() {
     },
     methods: {
         

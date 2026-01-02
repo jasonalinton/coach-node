@@ -1,5 +1,5 @@
 <template>
-    <div class="d-flex flex-column">
+    <div class="timeframe-radio d-flex flex-column">
         <div v-if="isToggle" class="btn-group" role="group" :aria-label="`moment`">
             <!-- eslint-disable-next-line vue/no-template-key -->
             <template v-for="timeframe in timeframesFirstRow" :key="-timeframe.id">
@@ -100,6 +100,10 @@ export default {
 </script>
 
 <style scoped>
+.timeframe-radio {
+    background-color: var(--background-color);
+}
+
 .btn-group {
     height: 24px;
 }

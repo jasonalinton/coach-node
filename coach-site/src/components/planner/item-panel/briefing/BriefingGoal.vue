@@ -1,9 +1,12 @@
 <template>
     <div v-if="goal" class="briefing-goal d-flex flex-column">
-        <span class="text-start goal">{{ goal.text }}</span>
-        <ul>
-            <li v-for="reason in reasons" :key="reason.id" class="text-start reason">{{ reason.text }}</li>
-        </ul>
+        <span @click="showBlurbs = !showBlurbs" class="text-start goal">{{ goal.text }}</span>
+        <div v-if="showBlurbs" class="blurbs">
+            <ul>
+                <li v-for="reason in reasons" :key="reason.id" 
+                    class="text-start reason mb-2">{{ reason.text }}</li>
+            </ul>
+        </div>
         <!-- <div class="d-flex flex-column">
             <p v-for="reason in reasons" :key="reason.id" class="text-start reason">{{ reason.text }}</p>
         </div> -->
@@ -30,6 +33,7 @@ export default {
             goalStore: undefined,
             plannerStore: undefined,
             universalStore: undefined,
+            showBlurbs: true,
         }
     },
     created: async function() {
@@ -109,5 +113,10 @@ export default {
 <style scoped>
 .goal {
     color: #3B99FC;
+}
+
+ul {
+    margin: 0px;
+    /* list-style-type: none; */
 }
 </style>

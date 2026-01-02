@@ -1,13 +1,13 @@
 <template>
-    <div class="briefing-blurb d-flex flex-column">
-        <!-- Toolbar -->
-        <TimeframeRadio :timeframe="timeframe" :isToggle="false" container="briefing-blurb"
-                        @timeframeSelected="selectTimeframe" />
-        <MetricSelector class="metric-selector mt-1" :selected="selectedMetrics"></MetricSelector>
-        <BlurbFormControl v-for="metric in metrics" :key="metric.id" :header="metric.title" :placeholder="`Click to add ${metric.title} blurb`" :blurbs="metric.prop"
-                          class="mt-2" 
-                          @addBlurb="addBlurb($event, metric.id)"
-                          @saveBlurb="saveBlurb" />
+    <div class="briefing-blurb d-flex flex-column p-2">
+        <h4 class="text-start" @click="isShown = !isShown">Blurbs</h4>
+        <div v-if="isShown" class="d-flex flex-column">
+            <MetricSelector class="metric-selector mt-1" :selected="selectedMetrics"></MetricSelector>
+            <BlurbFormControl v-for="metric in metrics" :key="metric.id" :header="metric.title" :placeholder="`Click to add ${metric.title} blurb`" :blurbs="metric.prop"
+                              class="mt-2" 
+                              @addBlurb="addBlurb($event, metric.id)"
+                              @saveBlurb="saveBlurb" />
+        </div>
     </div>
 </template>
 
@@ -16,24 +16,23 @@ import MetricSelector from '../component/MetricSelector.vue';
 import BlurbFormControl from '../../../items/form/component/BlurbFormControl.vue';
 import TimeframeRadio from '../component/TimeframeRadio.vue';
 import { sortAsc, today, clone } from '../../../../../utility';
-import { timeframes } from '../../../../model/types';
 import { BLURBTYPE, METRIC } from '../../../../model/constants';
 
 export default {
     name: 'BriefingBlurb',
     components: { TimeframeRadio, MetricSelector, BlurbFormControl },
     props: {
-        
+        idTimeframe: {
+            type: Number,
+            default: () => 55
+        }
     },
     data: function () {
         return {
             plannerStore: undefined,
             universalStore: undefined,
-            timeframes: clone(timeframes),
             METRIC: clone(METRIC),
             BLURBTYPE: clone(BLURBTYPE),
-            idTimeframe: 43,
-            timeframe: "day",
             selectedMetrics: {
                 physical: false,
                 emotional: false,
@@ -41,6 +40,7 @@ export default {
                 social: false,
                 financial: false
             },
+            isShown: false,
         }
     },
     created: async function() {
@@ -49,8 +49,6 @@ export default {
 
         let plannerStore = await import(`@/store/plannerStore`);
         this.plannerStore = plannerStore.usePlannerStore();
-
-        this.timeframeIDs = this.timeframes.filter(x => x.isActive).map(x => x.id);
 
         this.universalStore.getBriefingBlurbs(this.idTimeframe, this.selectedDate);
     },
@@ -136,13 +134,6 @@ export default {
         }
     },
     methods: {
-        selectTimeframe(timeframeText) {
-            let index = this.timeframes.findIndex(x => x.text.toLowerCase() == timeframeText.toLowerCase()); 
-            let timeframe = this.timeframes[index];
-            this.idTimeframe = timeframe.id;
-            this.timeframe = timeframeText;
-            this.universalStore.getBriefingBlurbs(this.idTimeframe, this.selectedDate);
-        },
         addBlurb(blurb, idMetric) {
             this.universalStore.addBriefingBlurb(blurb.text, this.selectedDate, BLURBTYPE.BRIEFING, idMetric, this.idTimeframe)
         },
@@ -154,15 +145,16 @@ export default {
             }
         }
     },
+    watch: {
+        idTimeframe(value) {
+            this.universalStore.getBriefingBlurbs(value, this.selectedDate);
+        }
+    }
 }
 
 </script>
 
 <style scoped>
-.briefing-blurb {
-    padding: 12px;
-}
-
 .metric-selector {
     margin-bottom: 16px;
 }
