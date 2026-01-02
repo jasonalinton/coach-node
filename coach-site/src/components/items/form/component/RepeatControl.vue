@@ -163,7 +163,6 @@
 import TimeControl from '../../../controls/time/TimeControl.vue'
 import { clone, capitalize, toDateString, today } from '../../../../../utility'
 import { isNextDay, addDay, getNumberDateString } from '../../../../../utility/timeUtility'
-import { saveRoutineRepeat } from '../../../../api/routineAPI'
 
 let timeframes = [
     {
@@ -270,6 +269,7 @@ export default {
     data: function() {
         return {
             todoStore: undefined,
+            routineStore: undefined,
             plannerStore: undefined,
             timeframes: clone(timeframes),
             inheritanceTypes: clone(inheritanceTypes),
@@ -282,6 +282,9 @@ export default {
     created: async function() {
         let todoStore = await import(`@/store/todoStore`);
         this.todoStore = todoStore.useTodoStore();
+
+        let routineStore = await import(`@/store/routineStore`);
+        this.routineStore = routineStore.useRoutineStore();
 
         let plannerStore = await import(`@/store/plannerStore`);
         this.plannerStore = plannerStore.usePlannerStore();
@@ -596,7 +599,7 @@ function save() {
     };
     
     if (this.itemType.toLowerCase() == "routine") {
-        saveRoutineRepeat(repeat);
+        this.routineStore.saveRepeat(repeat);
     } else if (this.itemType.toLowerCase() == "todo") {
         this.todoStore.saveRepeat(repeat);
     }

@@ -19,46 +19,6 @@ export async function getRoutines() {
     });
 }
 
-export async function saveRoutine(model) {
-    return fetch(`${URL}/api/Routine/SaveRoutine`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(model)
-    })
-    .then(response => response.json())
-    .then((data) => {
-        if (data.status.success) {
-            return data.result;
-        } else {
-            console.error('Error:', data.status.errorMessage);
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-    });
-}
-
-export async function saveRoutineRepeat(repeat) {
-    let data = { repeat };
-    
-    return fetch(`${URL}/api/Routine/SaveRoutineRepeat`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (!data.errorMessage) {
-            return data;
-        } else {
-            this.errorMessage = data.errorMessage;
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-    });
-}
-
 export async function mapTodos(routineID, addedIDs, removedIDs) {
     let data = { routineID, addedIDs, removedIDs };
     

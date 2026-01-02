@@ -33,7 +33,15 @@ app.mount("#app");
 // https://stackoverflow.com/questions/31096130/how-to-json-stringify-a-javascript-date-and-preserve-timezone
 // Send an unspecified date when serializing to JSON
 Date.prototype.toJSON = function(){ return moment(this).format().slice(0, -6); }
-String.prototype.toDate = function() { return new Date(this); }
+String.prototype.toDate = function() {
+  let array = this.split("T");
+  if (array.length == 2) {
+    return new Date(this); 
+  } else {
+    // String dates that don't have a time are converted to GMT (prevent that)
+    return new Date(this + "T00:00:00"); 
+  }
+}
 String.prototype.toCamelCase = function() { 
   return this.replace(/(?:^\w|[A-Z]|\b\w)/g, function(word, index) {
     return index === 0 ? word.toLowerCase() : word.toUpperCase();

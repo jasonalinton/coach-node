@@ -21,7 +21,7 @@ import TimeframeRadio from '../component/TimeframeRadio.vue';
 import BriefingGoals from './BriefingGoals.vue';
 import BriefingBlurb from './BriefingBlurb.vue';
 import { timeframes } from '../../../../model/types';
-import { clone } from '../../../../../utility';
+import { clone, today } from '../../../../../utility';
 
 export default {
     name: 'BriefingPanel',

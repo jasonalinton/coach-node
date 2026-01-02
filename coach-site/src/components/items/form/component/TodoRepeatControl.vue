@@ -120,7 +120,6 @@
 <script>
 import TimeControl from '../../../controls/time/TimeControl.vue'
 import { clone, capitalize } from '../../../../../utility'
-import { saveRoutineRepeat } from '../../../../api/routineAPI'
 
 let timeframes = [
     {
@@ -211,6 +210,7 @@ export default {
     data: function() {
         return {
             todoStore: null,
+            routineStore: undefined,
             timeframes: clone(timeframes),
             updatedRepeat: undefined,
             isEditing: false,
@@ -220,6 +220,9 @@ export default {
     created: async function() {
         let todoStore = await import(`@/store/todoStore`);
         this.todoStore = todoStore.useTodoStore();
+
+        let routineStore = await import(`@/store/routineStore`);
+        this.routineStore = routineStore.useRoutineStore();
     },
     computed: {
         timeframe() {
@@ -470,7 +473,7 @@ function save() {
         endIteration: this.updatedRepeat.endIteration
     };
 
-    saveRoutineRepeat(repeat);
+    this.routineStore.saveRepeat(repeat);
 
     this.$emit("saveRepeat", repeat);
     this.isEditing = false;

@@ -1,16 +1,18 @@
 <template>
-    <div class="routine-panel-by-task d-flex flex-column">
-        <span v-for="routine in taskRoutines" :key="routine.id">{{  routine.text }}</span>
+    <div class="routine-panel-by-task d-flex flex-column pt-2">
+        <TaskRoutineItem v-for="routine in taskRoutines" :key="routine.id" class="mb-3"
+                         :idRoutine="routine.id" />
     </div>
 </template>
 
 <script>
+import TaskRoutineItem from './TaskRoutineItem.vue';
 import { today, getDayOfWeekLong } from '../../../../../utility/timeUtility';
 import { REPETITION } from '../../../../model/constants';
 
 export default {
     name: 'RoutinePanelByTask',
-    components: {  },
+    components: { TaskRoutineItem },
     props: {
         
     },
@@ -41,11 +43,21 @@ export default {
                 routines = routines.filter(routine => {
                     let inTimeframe = false;
                     routine.repeats.forEach(repeat => {
-                        // If repeat doesn't start till the future
-                        if (!repeat.startRepeat || (repeat.startRepeat && new Date(repeat.startRepeat.dateTime) > this.selectedDate)) {
+                        /* Check is repeat is active */
+                        let isActive = false;
+                        routine.repeats.forEach(repeat => {
+                            if (+repeat.startDate.toDate() <= +this.selectedDate) {
+                                if (!repeat.endDate) {
+                                    isActive = true;
+                                } else if (+this.selectedDate <= +repeat.endDate.toDate()) {
+                                    isActive = true
+                                }
+                            }
+                        })
+                        if (!isActive) {
                             return;
                         }
-
+                        
                         if (repeat.idTimeframe == REPETITION.DAILY) {
                             inTimeframe = true;
                         } else if (repeat.idTimeframe == REPETITION.WEEKLY) {

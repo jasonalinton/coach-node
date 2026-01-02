@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { getRoutines, refreshRepetitionForRepeat, saveRoutine } from '../api/routineAPI'
+import { getRoutines, refreshRepetitionForRepeat } from '../api/routineAPI'
 import { capitalize, replaceOrAddItem, sortAsc } from '../../utility';
 import { ROUTINETYPES } from '../model/constants';
 import { getSocketConnection } from './socket'
@@ -48,7 +48,25 @@ export const useRoutineStore = defineStore('routine', {
             return this.routines.find(x => x.id == id);
         },
         getTaskRoutines() {
-            let taskRoutines = this.routines.filter(x => x.types.findIndex(x => x.id == ROUTINETYPES.TASKROUTINE) > -1);
+            let taskRoutines = this.routines.filter(x => x.isTaskRoutine);
+            return taskRoutines;
+        },
+        getTaskRoutinesForDay(datetime) {
+            let taskRoutines = this.routines.filter(routine => {
+                let isActive = false;
+                if (routine.isTaskRoutine) {
+                    routine.repeats.forEach(repeat => {
+                        if (+repeat.startDate.toDate() <= +datetime) {
+                            if (!repeat.endDate) {
+                                isActive = true;
+                            } else if (+datetime <= +repeat.endDate.toDate()) {
+                                isActive = true
+                            }
+                        }
+                    })
+                }
+                return isActive;
+            });
             return taskRoutines;
         },
         repositionItem(parentType, itemType, parentID, itemID, newPosition) {
@@ -65,10 +83,12 @@ export const useRoutineStore = defineStore('routine', {
             refreshRepetitionForRepeat(id, repeatID);
         },
         saveRoutine(model) {
-            saveRoutine(model);
+            return postEndpoint("Routine", "SaveRoutine", model)
+            .then(response => response.result);
         },
-        toggleIsTaskRoutine() {
-
+        saveRepeat(repeat) {
+            return postEndpoint("Routine", "SaveRoutineRepeat", { repeat })
+            .then(response => response.result);
         },
         runUpdates(updates) {
             let _this = this;

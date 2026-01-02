@@ -70,12 +70,11 @@
 </template>
 
 <script>
-import { saveRoutine, mapTodos, createAndMapItem } from '../../../../api/routineAPI';
+import { mapTodos, createAndMapItem } from '../../../../api/routineAPI';
 import RepeatControl from '../component/RepeatControl2.vue';
 import FormItemList from '../component/FormItemList.vue';
 import ItemMapper from '../component/ItemMapper.vue'
 import { clone, replaceItem, addOrReplaceItem, sortItems, sortAsc } from '../../../../../utility';
-import { ROUTINETYPES } from '../../../../model/constants'
 
 export default {
     name: "RoutineFormModal",
@@ -87,7 +86,6 @@ export default {
         return {
             store: null,
             initialized: false,
-            ROUTINETYPES: clone(ROUTINETYPES),
             text: undefined,
             isTaskRoutine: undefined,
             repeats: {
@@ -152,8 +150,7 @@ export default {
 
             this.text = (routine) ? routine.text : "";
 
-            let index = (routine) ? routine.types.findIndex(x => x.id == this.ROUTINETYPES.TASKROUTINE) : -1;
-            this.isTaskRoutine = (index > -1) ? true : false;
+            this.isTaskRoutine = routine.isTaskRoutine;
 
             this.repeats.value = (routine) ? clone(routine.repeats) : [],
             this.repeats.added = [];
@@ -197,7 +194,7 @@ export default {
                     text: this.text,
                     isTaskRoutine: this.isTaskRoutine
                 };
-                saveRoutine(model);
+                this.store.saveRoutine(model);
                 this.$emit("closeItemModal");
             }
         },
@@ -223,13 +220,6 @@ export default {
             this.store.refreshRepetitionForRepeat(this.id, repeatID)
         },
     },
-    watch: {
-        isTaskRoutine() {
-            if (this.initialized && this.id > -1) {
-                this.store.toggleIsTaskRoutine(this.id, this.isTaskRoutine);
-            }
-        }
-    }
 }
 </script>
 

@@ -161,7 +161,6 @@
 import TimeControl from '../../../controls/time/TimeControl2.vue'
 import { clone, capitalize, today } from '../../../../../utility'
 import { dateOnly, getNumberDateString } from '../../../../../utility/timeUtility'
-import { saveRoutineRepeat } from '../../../../api/routineAPI'
 import { MOMENT } from '../../../../model/constants'
 
 let timeframes = [
@@ -269,6 +268,7 @@ export default {
     data: function() {
         return {
             todoStore: undefined,
+            routineStore: undefined,
             plannerStore: undefined,
             timeframes: clone(timeframes),
             MOMENT: clone(MOMENT),
@@ -285,6 +285,9 @@ export default {
     created: async function() {
         let todoStore = await import(`@/store/todoStore`);
         this.todoStore = todoStore.useTodoStore();
+
+        let routineStore = await import(`@/store/routineStore`);
+        this.routineStore = routineStore.useRoutineStore();
 
         let plannerStore = await import(`@/store/plannerStore`);
         this.plannerStore = plannerStore.usePlannerStore();
@@ -534,7 +537,7 @@ function save() {
     };
     
     if (this.itemType.toLowerCase() == "routine") {
-        saveRoutineRepeat(repeat);
+        this.routineStore.saveRepeat(repeat);
     } else if (this.itemType.toLowerCase() == "todo") {
         this.todoStore.saveRepeat(repeat);
     }
