@@ -12,7 +12,7 @@
 <script>
 import { usePlannerStore } from '@/store/plannerStore'
 import { today, firstDayOfWeek, getDayOfWeekShort, getMonthShort,
-    getDate, addDay } from '../../../utility/timeUtility';
+    getDate, addDay } from '../../../../../utility/timeUtility';
 
 export default {
     name: 'CalendarToolbar',
@@ -73,4 +73,4 @@ export default {
 .date {
     font-size: 10px;
 }
-</style>
+</style>../../../../../utility/timeUtility

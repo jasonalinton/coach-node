@@ -126,6 +126,26 @@ export const useWorkoutStore = defineStore('workout', {
             }
             return this.workouts;
         },
+        getActiveWorkouts() {
+            let workouts = this.workouts.filter(workout => {
+                if (workout.iteration) {
+                    return (!workout.iteration.completedAt);
+                } else {
+                    return false;
+                }
+            });
+            return workouts;
+        },
+        getWorkoutsInDate(date) {
+            let workouts = this.workouts.filter(workout => {
+                if (workout.iteration && +workout.iteration.startAt.startOfDay() == +date) {
+                    return true;
+                } else {
+                    return false;
+                }
+            });
+            return workouts;
+        },
         getExercise(id) {
             return this.exercises.find(x => x.id == id);
         },

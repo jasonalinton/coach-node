@@ -78,7 +78,7 @@ export default {
             return [];
         },
         indirectIterations() {
-            if (this.goalStore && this.timeframeID == TIMEFRAME.DAY) {
+            if (this.goalStore && this.todoStore && this.iterationStore && this.timeframeID == TIMEFRAME.DAY) {
                 let objectArray = [];
                 // If timefrome is day
                 if (this.timeframeID == TIMEFRAME.DAY) {

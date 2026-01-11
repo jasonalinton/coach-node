@@ -97,9 +97,12 @@ export const useIterationStore = defineStore('iteration', {
             return postEndpoint("Planner", "AttemptIteration", data)
             .then(response => response.result);
         },
+        toggleVerification(iterationID, isVerified) {
+            return postEndpoint("Planner", "ToggleIterationVerification", { iterationID, isVerified })
+            .then(response => response.result);
+        },
         deleteIteration(iterationID) {
-            let data = { iterationID };
-            return postEndpoint("Planner", "DeleteIteration", data)
+            return postEndpoint("Planner", "DeleteIteration", { iterationID })
             .then(response => response.result);
         },
         runUpdates(updates) {

@@ -19,7 +19,7 @@
 </template>
 
 <script>
-import DashboardView from '../../../dashboard/DashboardView.vue';
+import DashboardView from './DashboardView.vue';
 import { today } from '../../../../../utility/timeUtility';
 
 export default {
