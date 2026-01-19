@@ -27,10 +27,25 @@ export default {
                     type: "iteration",
                     color: '#FC3B3B',
                     showPoints: true,
-                    isExpanded: false,
+                    isExpanded: true,
                     id: undefined,
                     ids: undefined,
                     items: [
+                        {
+                            category: "Year",
+                            label: "Year",
+                            type: "label",
+                            color: undefined,
+                            showPoints: true,
+                            isExpanded: true,
+                            items: [
+                                { type: "goal", color: '#1EBA31',id: 333, ids: undefined, label: "Dopamine", showPoints: true, isExpanded: false }, // Learn to regulate dopamine
+                                { type: "goal", color: '#1EBA31',id: 334, ids: undefined, label: "Dating", showPoints: true, isExpanded: false }, // Start dating casually
+                                { type: "goal", color: '#1EBA31',id: 335, ids: undefined, label: "Frequency", showPoints: true, isExpanded: false }, // Get on the right frequency
+                                { type: "goal", color: '#1EBA31',id: 336, ids: undefined, label: "Videos", showPoints: true, isExpanded: false }, // Make videos for goals
+                                { type: "goal", color: '#1EBA31',id: 338, ids: undefined, label: "Mom", showPoints: true, isExpanded: false }, // Get Mom on a stable routine
+                            ]
+                        },
                         {
                             category: "Main",
                             label: "Main",
