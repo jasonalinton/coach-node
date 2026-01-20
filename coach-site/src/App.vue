@@ -175,6 +175,8 @@ function onResize() {
     --dark-gray: darkgray;
     --dark-gray-text: #3F3F3F;
     --gray-text: #747474;
+
+    --item-hover: #F5F5F5;
 }
 
 body { 

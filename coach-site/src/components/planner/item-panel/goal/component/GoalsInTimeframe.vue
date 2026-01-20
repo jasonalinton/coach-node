@@ -8,7 +8,6 @@
         </div>
         <span v-else class="timeframe">{{ timeframe }}</span>
         <GoalTimeframeItem v-for="id in goalIDs" :key="id"
-                           class="mb-2"
                            :goalID="id" :timeframeID="timeframeID" />
         <GoalDailyTimeframeItem v-for="object in indirectIterations" :key="object.goalID" 
                                 :goalID="object.goalID" :iterationIDs="object.iterationIDs"/>
