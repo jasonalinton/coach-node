@@ -76,6 +76,10 @@ export const useIterationStore = defineStore('iteration', {
                          iteration.idRoutine == null && iteration.idRoutineIteration == null);
             });
         },
+        getIterationsForTodo(todoID) {
+            let iterations = this.iterations.filter(x => x.todoID == todoID);
+            return iterations;
+        },
         updateIteration(iterationID, text, blurb, points, startAt, endAt) {
             let data = { iterationID, text, blurb, points, startAt, endAt };
             return postEndpoint("Planner", "UpdateIteration", data)

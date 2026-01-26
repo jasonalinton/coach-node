@@ -39,13 +39,27 @@ Date.prototype.startOfDay = function() {
 Date.prototype.endOfDay = function() {
   return moment(this).endOf('day').millisecond(0).toDate();
 }
+Date.prototype.firstDayOfWeek = function() {
+  return moment(this).startOf('week').toDate();
+}
+Date.prototype.lastDayOfWeek = function() {
+  return moment(this).endOf('week').toDate();
+}
 String.prototype.startOfDay = function() {
   let date = this.toDate();
   return date.startOfDay();
 }
 String.prototype.endOfDay = function() {
   let date = this.toDate();
-  return date.endOfDay
+  return date.endOfDay()
+}
+String.prototype.firstDayOfWeek = function() {
+  let date = this.toDate();
+  return date.firstDayOfWeek();
+}
+String.prototype.lastDayOfWeek = function() {
+  let date = this.toDate();
+  return date.firstDayOfWeek()
 }
 String.prototype.toDate = function() {
   let array = this.split("T");

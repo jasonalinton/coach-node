@@ -148,6 +148,6 @@ export default {
 
 .points {
     width: 30px;
-    text-align: start;
+    text-align: end;
 }
 </style>

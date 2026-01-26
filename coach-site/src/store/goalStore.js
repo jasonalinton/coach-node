@@ -1,10 +1,11 @@
 import { defineStore } from 'pinia'
 import { getGoals, getGoalsWithTimeframe } from '../api/goalAPI'
-import { capitalize, replaceOrAddItem, sortAsc } from '../../utility';
+import { capitalize, replaceOrAddItem, sortAsc, sum } from '../../utility';
 import { getSocketConnection } from './socket'
 import { useMetricStore } from '@/store/metricStore'
 import { useTodoStore } from '@/store/todoStore'
 import { useRoutineStore } from '@/store/routineStore'
+import { useIterationStore } from '@/store/iterationStore'
 import { GOAL_TYPE } from '../model/constants';
 import { postEndpoint } from '../api/api';
 
@@ -105,6 +106,50 @@ export const useGoalStore = defineStore('goal', {
                 return isFitness;
             });
             return fitnessGoals;
+        },
+        getPoints(goalID) {
+            let iterationIDs = this.getIterationIDs(goalID);
+            let iterationStore = useIterationStore();
+            let iterations = iterationStore.iterations
+                .filter(task => iterationIDs.includes(task.id));
+            let iterations_Attempted = iterations.filter(task => task.completedAt || task.attemptedAt);
+            let iterations_WithPoints = iterations_Attempted.filter(x => x.points);
+            let points = sum(iterations_WithPoints, 'points');
+            return points;
+        },
+        getIterationIDs(goalID) {
+            let idsChecked = { goals: [], todos: [], iterations: [] };
+            this.getAncensorIterationsFromGoal(goalID, idsChecked);
+            return idsChecked.iterations;
+        },
+        getAncensorIterationsFromGoal(goalID, idsChecked) {
+            if (!idsChecked.goals.includes(goalID)) {
+                idsChecked.goals.push(goalID);
+                
+                /* Loop through todos */
+                let goal = this.goals.find(goal => goal.id == goalID);
+                goal.todoIDs.forEach(todoID => {
+                    this.getAncestorIterationsFromTodo(todoID, idsChecked);
+                })
+            }
+        },
+        getAncestorIterationsFromTodo(todoID, idsChecked) {
+            if (!idsChecked.todos.includes(todoID)) {
+                idsChecked.todos.push(todoID);
+                
+                /* Loop through todo's children */
+                let todoStore = useTodoStore();
+                let todo = todoStore.getItem(todoID);
+                todo.childIDs.forEach(childID => {
+                    this.getAncestorIterationsFromTodo(childID, idsChecked);
+                })
+                
+                /* Record iteration ids */
+                let iterationStore = useIterationStore();
+                let iterations = iterationStore.getIterationsForTodo(todoID); 
+                let iterationIDs = iterations.map(x => x.id);
+                idsChecked.iterations = idsChecked.iterations.concat(iterationIDs);
+            }
         },
         saveGoal(model) {
             return postEndpoint("Goal", "SaveGoal", model)

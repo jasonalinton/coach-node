@@ -1,5 +1,5 @@
 <template>
-    <div class="goal d-flex flex-column justify-content-center" v-if="goal"
+    <div v-if="goal" class="goal d-flex flex-column justify-content-center" 
          @click.stop="showToolbar = !showToolbar">
          <div class="head d-flex flex-column">
              <div class="d-flex flex-row align-items-center">
@@ -47,7 +47,8 @@
             <GoalTimeframeTodoItem v-for="gtpt in goalTimePairTodos" :key="gtpt.id"
                                    :todoID="gtpt.todoID" 
                                    :goalTimePairTodoID="gtpt.id"
-                                   :completedAt="gtpt.completedAt" />
+                                   :completedAt="gtpt.completedAt"
+                                   @click.stop/>
         </div>
         <div v-if="showChildren" class="d-flex flex-column">
             <GoalTimeframeItem v-for="id in childIDs" :key="id"
@@ -58,7 +59,8 @@
 
 <script>
 import GoalTimeframeTodoItem from './GoalTimeframeTodoItem.vue';
-import { today } from '../../../../../../utility/timeUtility';
+import { today, getTimeframeEndpoints } from '../../../../../../utility/timeUtility';
+import { sum } from '../../../../../../utility';
 
 export default {
     name: 'GoalTimeframeItem',
@@ -71,6 +73,7 @@ export default {
         return {
             plannerStore: undefined,
             goalStore: undefined,
+            iterationStore: undefined,
             isExpanded: false,
             showToolbar: false,
             showTasks: false,
@@ -87,6 +90,9 @@ export default {
 
         let goalStore = await import(`@/store/goalStore`);
         this.goalStore = goalStore.useGoalStore();
+
+        let iterationStore = await import(`@/store/iterationStore`);
+        this.iterationStore = iterationStore.useIterationStore();
     },
     computed: {
         selectedDate() {
@@ -106,7 +112,18 @@ export default {
             return (this.childIDs.length > 0);
         },
         points() {
-            return 4;
+            if (this.goalStore) {
+                let { start, end } = getTimeframeEndpoints(this.timeframeID, this.selectedDate);
+                let iterationIDs = this.goalStore.getIterationIDs(this.goalID);
+                let iterations = this.iterationStore.getIterationsInRange(start, end, false);
+                iterations = iterations.filter(task => iterationIDs.includes(task.id));
+                let iterations_Attempted = iterations.filter(task => task.completedAt || task.attemptedAt);
+                let iterations_WithPoints = iterations_Attempted.filter(x => x.points);
+                let points = sum(iterations_WithPoints, 'points');
+
+                return points;
+            }
+            return undefined;
         },
         goalTimePairTodos() {
             if (this.goal) {
