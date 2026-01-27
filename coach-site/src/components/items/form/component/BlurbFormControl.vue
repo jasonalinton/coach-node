@@ -304,6 +304,7 @@ hr {
     background-color: #F5F5F5;
     border-radius: 4px;
     border: transparent solid 1px;
+    white-space: pre-wrap;
 }
 
 .blurb.selected {

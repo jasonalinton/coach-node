@@ -176,6 +176,7 @@ export default {
 
 .blurb .text {
     font-size: 14px;
+    white-space: pre-wrap;
 }
 
 .blurb .textarea.invalid {
