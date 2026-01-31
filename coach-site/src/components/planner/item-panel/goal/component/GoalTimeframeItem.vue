@@ -136,7 +136,8 @@ export default {
         //     return undefined;
         // },
         points() {
-            let points = sum(this.iterations, 'points');
+            let iterations_Attempted = this.iterations.filter(task => task.completedAt || task.attemptedAt);
+            let points = sum(iterations_Attempted, 'points');
             return points;
         },
         goalTimePairTodos() {
