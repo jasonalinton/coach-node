@@ -78,10 +78,10 @@ export default {
             return today();
         },
         start() { 
-            return firstDayOfWeek(firstDayOfMonth(this.selectedDate));
+            return firstDayOfMonth(firstDayOfMonth(this.selectedDate));
         },
         end() { 
-            return lastDayOfWeek(lastDayOfMonth(this.selectedDate));
+            return lastDayOfMonth(lastDayOfMonth(this.selectedDate));
         },
         sortBy() {
             if (this.appStore) {

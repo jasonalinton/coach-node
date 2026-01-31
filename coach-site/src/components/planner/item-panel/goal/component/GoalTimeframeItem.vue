@@ -37,22 +37,27 @@
                  </div> -->
              </div>
          </div>
+         <!-- Toolbar -->
         <div v-if="showToolbar" class="progress-bar d-flex flex-row justify-content-start">
             <span class="bar"></span>
         </div>
-        <div v-if="showTasks" class="d-flex flex-column">
-            <span>Tasks</span>
+        <div v-if="showTasks" class="dropdown d-flex flex-column">
+            <div v-for="task in iterations" :key="task.id" 
+                 class="task d-flex flex-column">
+                 <span class="points">{{ `${task.points} pts` }}</span>
+                 <span>{{ task.text }}</span>
+            </div>
         </div>
-        <div v-if="showTodos" class="d-flex flex-column">
+        <div v-if="showTodos" class="dropdown d-flex flex-column">
             <GoalTimeframeTodoItem v-for="gtpt in goalTimePairTodos" :key="gtpt.id"
                                    :todoID="gtpt.todoID" 
                                    :goalTimePairTodoID="gtpt.id"
                                    :completedAt="gtpt.completedAt"
                                    @click.stop/>
         </div>
-        <div v-if="showChildren" class="d-flex flex-column">
+        <div v-if="showChildren" class="dropdown d-flex flex-column" :style="{ 'padding-left': `${level * 28}px`}">
             <GoalTimeframeItem v-for="id in childIDs" :key="id"
-                           :goalID="id" :timeframeID="timeframeID" />
+                           :goalID="id" :timeframeID="timeframeID" :level="level + 1" />
         </div>
     </div>
 </template>
@@ -67,7 +72,11 @@ export default {
     components: { GoalTimeframeTodoItem },
     props: {
         goalID: Number,
-        timeframeID: Number
+        timeframeID: Number,
+        level: {
+            type: Number,
+            default: () => 1
+        }
     },
     data: function () {
         return {
@@ -111,19 +120,23 @@ export default {
         showExpander() {
             return (this.childIDs.length > 0);
         },
-        points() {
-            if (this.goalStore) {
-                let { start, end } = getTimeframeEndpoints(this.timeframeID, this.selectedDate);
-                let iterationIDs = this.goalStore.getIterationIDs(this.goalID);
-                let iterations = this.iterationStore.getIterationsInRange(start, end, false);
-                iterations = iterations.filter(task => iterationIDs.includes(task.id));
-                let iterations_Attempted = iterations.filter(task => task.completedAt || task.attemptedAt);
-                let iterations_WithPoints = iterations_Attempted.filter(x => x.points);
-                let points = sum(iterations_WithPoints, 'points');
+        // points() {
+        //     if (this.goalStore) {
+        //         let { start, end } = getTimeframeEndpoints(this.timeframeID, this.selectedDate);
+        //         let iterationIDs = this.goalStore.getIterationIDs(this.goalID);
+        //         let iterations = this.iterationStore.getIterationsInRange(start, end, false);
+        //         iterations = iterations.filter(task => iterationIDs.includes(task.id));
+        //         let iterations_Attempted = iterations.filter(task => task.completedAt || task.attemptedAt);
+        //         let iterations_WithPoints = iterations_Attempted.filter(x => x.points);
+        //         let points = sum(iterations_WithPoints, 'points');
 
-                return points;
-            }
-            return undefined;
+        //         return points;
+        //     }
+        //     return undefined;
+        // },
+        points() {
+            let points = sum(this.iterations, 'points');
+            return points;
         },
         goalTimePairTodos() {
             if (this.goal) {
@@ -150,6 +163,18 @@ export default {
                 children = this.goalStore.goals.filter(x => this.goal.childIDs.includes(x.id));
             }
             return children.map(x => x.id);
+        },
+        iterations() {
+            if (this.goalStore) {
+                let { start, end } = getTimeframeEndpoints(this.timeframeID, this.selectedDate);
+                let iterationIDs = this.goalStore.getIterationIDs(this.goalID);
+                let iterations = this.iterationStore.getIterationsInRange(start, end, false);
+                iterations = iterations.filter(task => iterationIDs.includes(task.id));
+                let iterations_Attempted = iterations.filter(task => task.completedAt || task.attemptedAt);
+                let iterations_WithPoints = iterations_Attempted.filter(x => x.points);
+                return iterations_WithPoints;
+            }
+            return [];
         }
     },
     methods: {
@@ -208,10 +233,15 @@ function childrenClicked() {
     cursor: default;
     font-size: 14px;
     line-height: 22px;
+    /* padding: 8px 0px; */
 }
 
 .goal:hover {
     background-color: var(--item-hover);
+}
+
+.goal:not(.expanded) {
+    padding-bottom: 0px;
 }
 
 .head {
@@ -227,6 +257,7 @@ function childrenClicked() {
 
 .toolbar {
     margin-left: 20px;
+    /* padding-bottom: 8px; */
 }
 
 .points {
@@ -248,6 +279,7 @@ function childrenClicked() {
 .progress-bar {
     background-color: rgba(13,110,253,.25);
     height: 3px;
+    margin-left: 28px;
 }
 
 .progress-bar span {
@@ -257,5 +289,9 @@ function childrenClicked() {
 .bar {
     width: 50%;
     background-color: #3B99FC;
+}
+
+.task {
+    padding: 4px 0px 4px 56px;
 }
 </style>

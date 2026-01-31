@@ -224,6 +224,10 @@ export function getTimeframeEndpoints(idTimeframe, datetime) {
         start = firstDayOfMonth(datetime);
         end = lastDayOfMonth(datetime);
     }
+    if (idTimeframe == TIMEFRAME.YEAR) {
+        start = firstDayOfYear(datetime);
+        end = lastDayOfYear(datetime);
+    }
 
     return { start, end };
 }
