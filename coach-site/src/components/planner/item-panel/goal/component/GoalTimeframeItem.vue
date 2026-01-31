@@ -172,7 +172,8 @@ export default {
                 let iterationIDs = this.goalStore.getIterationIDs(this.goalID);
                 let iterations = this.iterationStore.getIterationsInRange(start, end, false);
                 iterations = iterations.filter(task => iterationIDs.includes(task.id));
-                let iterations_WithPoints = iterations.filter(x => x.points);
+                let iterations_Attempted = iterations.filter(task => task.completedAt || task.attemptedAt);
+                let iterations_WithPoints = iterations_Attempted.filter(x => x.points);
                 return iterations_WithPoints;
             }
             return [];
