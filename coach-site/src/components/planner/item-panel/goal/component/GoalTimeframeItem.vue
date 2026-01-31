@@ -43,9 +43,10 @@
         </div>
         <div v-if="showTasks" class="dropdown d-flex flex-column">
             <div v-for="task in iterations" :key="task.id" 
-                 class="task d-flex flex-column">
+                 class="task d-flex flex-column" :class="{ attempted: task.attemptedAt || task.completedAt }">
                  <span class="points">{{ `${task.points} pts` }}</span>
-                 <span>{{ task.text }}</span>
+                 <span class="text">{{ task.text }}</span>
+                 <span class="start">{{ startAt(task) }}</span>
             </div>
         </div>
         <div v-if="showTodos" class="dropdown d-flex flex-column">
@@ -64,7 +65,7 @@
 
 <script>
 import GoalTimeframeTodoItem from './GoalTimeframeTodoItem.vue';
-import { today, getTimeframeEndpoints } from '../../../../../../utility/timeUtility';
+import { today, getTimeframeEndpoints, getMonthDateYearShort } from '../../../../../../utility/timeUtility';
 import { sum } from '../../../../../../utility';
 
 export default {
@@ -170,8 +171,7 @@ export default {
                 let iterationIDs = this.goalStore.getIterationIDs(this.goalID);
                 let iterations = this.iterationStore.getIterationsInRange(start, end, false);
                 iterations = iterations.filter(task => iterationIDs.includes(task.id));
-                let iterations_Attempted = iterations.filter(task => task.completedAt || task.attemptedAt);
-                let iterations_WithPoints = iterations_Attempted.filter(x => x.points);
+                let iterations_WithPoints = iterations.filter(x => x.points);
                 return iterations_WithPoints;
             }
             return [];
@@ -182,6 +182,7 @@ export default {
         pointsClicked,
         todosClicked,
         childrenClicked,
+        startAt,
     },
 }
 
@@ -222,6 +223,14 @@ function childrenClicked() {
 
     this.showChildren = !this.showChildren;
     this.isExpanded = this.showChildren;
+}
+
+function startAt(task) {
+    if (task.startAt) {
+        let date = getMonthDateYearShort(task.startAt.toDate());
+        return date;
+    }
+    return "";
 }
 
 </script>
@@ -293,5 +302,18 @@ function childrenClicked() {
 
 .task {
     padding: 4px 0px 4px 56px;
+}
+
+.task .points {
+    padding-left: 0px;
+}
+
+.task.attempted .text {
+    text-decoration: line-through;
+}
+
+.task .start {
+    font-size: 10px;
+    line-height: 18px;
 }
 </style>
