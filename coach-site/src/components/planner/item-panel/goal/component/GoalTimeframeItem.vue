@@ -246,7 +246,7 @@ function childrenClicked() {
 
 .head {
     padding: 8px 0px;
-    padding-left: 10px;
+    padding-left: 5px;
 }
 
 .caret {
