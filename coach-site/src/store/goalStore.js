@@ -77,7 +77,7 @@ export const useGoalStore = defineStore('goal', {
 
                     let start = (timePair.startTime) ? new Date(timePair.startTime.dateTime) : undefined
                     let end = (timePair.endTime) ? new Date(timePair.endTime.dateTime) : undefined
-                    if ((start && +start <= +datetime) && (end && +end >= +datetime)) {
+                    if ((start && +start <= +datetime) && ((end && +end >= +datetime) || end == undefined)) {
                         return true;
                     }
                     return false;
@@ -125,11 +125,15 @@ export const useGoalStore = defineStore('goal', {
         getAncensorIterationsFromGoal(goalID, idsChecked) {
             if (!idsChecked.goals.includes(goalID)) {
                 idsChecked.goals.push(goalID);
+                let goal = this.goals.find(goal => goal.id == goalID);
                 
                 /* Loop through todos */
-                let goal = this.goals.find(goal => goal.id == goalID);
                 goal.todoIDs.forEach(todoID => {
                     this.getAncestorIterationsFromTodo(todoID, idsChecked);
+                })
+                /* Loop through goals */
+                goal.childIDs.forEach(goalID => {
+                    this.getAncensorIterationsFromGoal(goalID, idsChecked);
                 })
             }
         },
@@ -201,6 +205,10 @@ export const useGoalStore = defineStore('goal', {
                 }
             };
             this.saveGoal(model);
+        },
+        createIteration(idGoal, text, datetime) {
+            return postEndpoint("Goal", "CreateIterationForGoal", { idGoal, text, datetime })
+            .then(response => response.result);
         },
         saveTimePair(timePair) {
             return postEndpoint("Goal", "SaveGoalTimePair", { timePair })

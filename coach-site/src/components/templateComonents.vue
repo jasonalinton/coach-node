@@ -3,8 +3,10 @@
         <button type="button" class="btn btn-primary mb-2" @click="logAllSets">Log All Sets</button>
         
         <input class="textbox text" type="text" placeholder="Title"
-                           v-model.lazy.trim="newPost.title" 
-                           spellcheck="true"/>
+               v-model.lazy.trim="newPost.title" 
+               v-on:keyup.enter="addTask(false)"
+               v-on:keyup.esc="newTaskText = undefined"
+               spellcheck="true"/>
 
         <input class="mb-2" type="datetime-local" :value="newPost.datetime" @change="onChange"/>
         
