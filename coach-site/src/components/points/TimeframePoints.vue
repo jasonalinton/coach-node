@@ -59,6 +59,7 @@ export default {
                                 { type: "type", color: '#F4511E', id: 158, ids: undefined, label: "Exercise", showPoints: true, isExpanded: false }, // Exercise
                                 { type: "goal", color: '#4C6EF5',id: 80, ids: undefined, label: "Dance", showPoints: true, isExpanded: false }, // Dance/Become proficient at dance
                                 { type: "goal", color: '#1EBA31',id: 48, ids: undefined, label: "Coach", showPoints: true, isExpanded: false }, // Finish Coach 1.0
+                                { type: "goal", color: '#1a73e8',id: 347, ids: undefined, label: "Memorize", showPoints: true, isExpanded: false }, // Memorize Everything!
                             ]
                         },
                         {
