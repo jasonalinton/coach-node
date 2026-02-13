@@ -41,7 +41,7 @@ import TodoPanelByRepetition from './TodoPanelByRepetition.vue';
 import TodoPanelByCustom from './TodoPanelByCustom.vue';
 import TodoPanelDefault from './TodoPanelDefault.vue';
 import IterationForm from '../component/form/IterationForm.vue';
-import { today, firstDayOfWeek, lastDayOfWeek, firstDayOfMonth, lastDayOfMonth } from '../../../../../utility/timeUtility';
+import { today, firstDayOfMonth, lastDayOfMonth } from '../../../../../utility/timeUtility';
 export default {
     name: 'TodoPanel',
     components: { ItemPanelNavbar, TodoPanelByMetric, TodoPanelBacklog, TodoPanelByRepetition,

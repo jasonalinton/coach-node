@@ -6,11 +6,19 @@
                              :title="'events'" 
                              :sort="sort" 
                              @onSortChange="onSortChange" />
-            <!-- Body -->
-            <EventTodoPanel v-if="type == EVENTTYPE.TODO" 
-                            :_event="eventt" />
-            <EventRoutinePanel v-if="type == EVENTTYPE.ROUTINE"
-                               :_event="eventt" />
+            <template v-if="!iteration_Form">
+                <!-- Body -->
+                <EventTodoPanel v-if="type == EVENTTYPE.TODO" 
+                                :_event="eventt" 
+                                @editIteration="iteration => iteration_Form = iteration"/>
+                <EventRoutinePanel v-if="type == EVENTTYPE.ROUTINE"
+                                   :_event="eventt" 
+                                   @editIteration="iteration => iteration_Form = iteration"/>
+            </template>
+            <IterationForm v-if="iteration_Form" 
+                           :iteration="iteration_Form"
+                           @closeForm="iteration_Form = null">
+            </IterationForm>
         </div>
     </div>
 </template>
@@ -22,6 +30,7 @@ import ItemPanelHeader from '../component/ItemPanelHeader.vue';
 // import EventPanelByDate from './EventPanelByDate.vue';
 import EventTodoPanel from './EventTodoPanel.vue';
 import EventRoutinePanel from './EventRoutinePanel.vue';
+import IterationForm from '../component/form/IterationForm.vue';
 
 var sortItems = [
     { id: 1, text: "Metric" },
@@ -38,7 +47,11 @@ var sortItems = [
 
 export default {
     name: 'EventPanel',
-    components: { ItemPanelHeader, EventTodoPanel, EventRoutinePanel },
+    components: { 
+        ItemPanelHeader, 
+        EventTodoPanel, 
+        EventRoutinePanel, 
+        IterationForm },
     props: {
         props: Object,
         showHead: {
@@ -55,6 +68,7 @@ export default {
                 by: 'Date',
                 items: sortItems
             },
+            iteration_Form: null,
         }
     },
     created: function() {

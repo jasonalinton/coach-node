@@ -59,7 +59,8 @@
             <!-- Pending -->
             <ul v-if="incompleteIterations" class="item-list pending">
                 <li v-for="(iteration, index) in incompleteIterations" v-bind:key="iteration.id" :style="{ 'z-index': -index }">
-                    <ListItem :iteration="iteration"></ListItem>
+                    <ListItem :iteration="iteration"
+                              @onEdit="$emit('editIteration', $event)"/>
                 </li>
             </ul>
             <!-- Complete  -->
@@ -67,7 +68,9 @@
                 <div class="header">Completed ({{ completeIterations.length }})</div>
                 <ul v-if="completeIterations" class="item-list">
                     <li v-for="(iteration, index) in completeIterations" v-bind:key="index" :style="{ 'z-index': -index }">
-                        <ListItem class="complete" :iteration="iteration"></ListItem>
+                        <ListItem class="complete" 
+                                  :iteration="iteration"
+                                  @onEdit="$emit('editIteration', $event)"></ListItem>
                     </li>
                 </ul>
             </div>
