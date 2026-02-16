@@ -53,7 +53,7 @@ export const useTodoStore = defineStore('todo', {
         },
         getMemorizationTodos() {
             postEndpoint("Todo", "GetMemorizationTodos")
-            .then(response => this.runUpdates(response.updates));
+            .then(response => this.runUpdates({ todos: response }));
 
             let todos = this.todos
                 .filter(todo => todo.typeID == TODOTYPE.MEMORIZATION);

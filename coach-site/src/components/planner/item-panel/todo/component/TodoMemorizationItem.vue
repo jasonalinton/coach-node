@@ -15,6 +15,15 @@
                       @click="selectData(data)">
                 </span>
             </div>
+            <div v-if="selected" class="text-start">
+                {{ getLongDateString(selected.iteration.startAt) }}
+            </div>
+            <div v-if="showCompletionButton" class="d-flex flex-column">
+                <button class="btn btn-sm btn-primary mt-2 mb-2" type="button"
+                        @click="markComplete">
+                    Mark Complete
+                </button>
+            </div>
         </div>
         <div v-if="!selected && lastBlurb"
              class="blurb text-start">
@@ -27,18 +36,12 @@
                 spellcheck="true">
             </textarea>
         </div>
-        <div class="d-flex flex-column sticky-bottom">
-            <button class="btn" type="button"
-                    @click="markComplete">
-                Mark Complete
-            </button>
-        </div>
     </div>
 </template>
 
 <script>
-import { clone, sortDateAsc } from '../../../../../../utility';
-import { startOfDay } from '../../../../../../utility/timeUtility';
+import { clone, sortDateAsc, today } from '../../../../../../utility';
+import { startOfDay, getLongDateString } from '../../../../../../utility/timeUtility';
 import { addSecond, addDay } from '../../../../../../utility/timeUtility';
 import TodoMemorizationTimeline from './TodoMemorizationTimeline.vue';
 
@@ -55,7 +58,7 @@ export default {
             iterationStore: undefined,
             universalStore: undefined,
             timeline: undefined,
-            selected: undefined
+            selected: undefined,
         }
     },
     created: async function() {
@@ -95,9 +98,28 @@ export default {
                     }
                 }
             }
+        },
+        showCompletionButton() {
+            let showCompletionButton = false;
+            if (this.selected) {
+                Object.keys(this.timeline).reverse().forEach(key => {
+                    let item = this.timeline[key];
+                    // If active
+                    if (item.isActive) {
+                        showCompletionButton = true;
+                    }
+                    let iteration = item.iteration;
+                    // If before tomorrow
+                    if (iteration && iteration.startAt.toDate() < +today().endOfDay() && !iteration.attemptedAt) {
+                        showCompletionButton = true;
+                    }
+                });
+            }
+            return showCompletionButton;
         }
     },
     methods: {
+        getLongDateString,
         refreshTimeline,
         initTimeline,
         loopIterations,
@@ -117,6 +139,8 @@ export default {
 }
 
 function refreshTimeline() {
+    this.selected = undefined;
+
     this.timeline = {
         d0: {
             day: "D0",
@@ -193,11 +217,13 @@ function loopIterations(index) {
             } else {
                 if (+now >= +nextStart && +now <= nextEnd) {
                     data.isActive = true;
+                    this.selected = data;
                 }
             }
         } else {
             if (+startOfDay(start) == +startOfDay(now)) {
                 data.isActive = true;
+                this.selected = data;
             }
         }
         data.iteration = this.iterations[i];
@@ -297,11 +323,11 @@ function markComplete() {
     height: 100%;
 }
 
-.sticky-bottom {
+/* .sticky-bottom {
     position: -webkit-sticky;
     position: sticky;
     bottom: 0;
     z-index: 1020;
     background-color: white;
-}
+} */
 </style>
