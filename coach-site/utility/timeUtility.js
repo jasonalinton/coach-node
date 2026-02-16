@@ -313,6 +313,14 @@ export function month_short(dateTime = new Date()) {
     return date.format(dateTime, 'MMM');   
 }
 
+export function addSecond(dateTime = new Date(), seconds = 1) {
+    return moment(dateTime).add( seconds, 'second').toDate();   
+}
+
+export function subtractSecond(dateTime = new Date(), seconds = 1) {
+    return moment(dateTime).add( -seconds, 'second').toDate();   
+}
+
 export function addMinutes(minutes = 1, dateTime = new Date()) {
     return moment(dateTime).add( minutes, 'minute').toDate();   
 }

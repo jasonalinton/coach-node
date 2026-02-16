@@ -33,6 +33,7 @@
             <DateSelector class="date-selector mt-3" :class="{ 'invalid': !isValid }"
                           :date="iteration_updated.endAt" @onChange="iteration_updated.endAt = $event"></DateSelector>
         </div>
+        <!-- Blurb -->
         <div class="form-group mt-1">
             <textarea class="textarea" 
                 v-model.lazy.trim="iteration_updated.blurb"

@@ -102,6 +102,11 @@ export const useIterationStore = defineStore('iteration', {
             return postEndpoint("Planner", "AttemptIteration", data)
             .then(response => response.result);
         },
+        completeAndCreatSibling(iterationID, completedAt, newText, newStart, newEnd) {
+            let data = { iterationID, completedAt, newText, newStart, newEnd };
+            return postEndpoint("Planner", "CompleteAndCreatSibling", data)
+            .then(response => response.result);
+        },
         toggleVerification(iterationID, isVerified) {
             return postEndpoint("Planner", "ToggleIterationVerification", { iterationID, isVerified })
             .then(response => response.result);

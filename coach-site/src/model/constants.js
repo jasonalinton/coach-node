@@ -6,6 +6,14 @@ export let METRIC = {
     FINANCIAL: 5
 };
 
+export let TODOTYPE = {
+    REMINDER: 9,
+    TALLY: 10,
+    INVERSE: 11,
+    ERRAND: 12,
+    MEMORIZATION: 190
+};
+
 export let ROUTINETYPES = {
     TASKROUTINE: 13,
     LIFESTYLE: 14,

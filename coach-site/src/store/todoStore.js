@@ -6,6 +6,7 @@ import { useMetricStore } from '@/store/metricStore'
 import { useGoalStore } from '@/store/goalStore'
 import { useRoutineStore } from '@/store/routineStore'
 import { postEndpoint } from '../api/api';
+import { TODOTYPE } from '../model/constants';
 
 let initialized = false;
 
@@ -49,6 +50,14 @@ export const useTodoStore = defineStore('todo', {
         },
         getItem(id) {
             return this.todos.find(x => x.id == id);
+        },
+        getMemorizationTodos() {
+            postEndpoint("Todo", "GetMemorizationTodos")
+            .then(response => this.runUpdates(response.updates));
+
+            let todos = this.todos
+                .filter(todo => todo.typeID == TODOTYPE.MEMORIZATION);
+            return todos;
         },
         saveTodo(model) {
             return postEndpoint("Todo", "SaveTodo", model)

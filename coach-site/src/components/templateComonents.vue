@@ -15,6 +15,19 @@
                 placeholder="Click to add Description"
                 spellcheck="true"></textarea>
 
+        <div class="top d-flex flex-column sticky-top">
+            <div class="label d-flex flex-row mb-2">
+                <img class="icon-button mb-2"
+                        src='/icon/previous.png' width="20" height="20"
+                        @click.prevent="back"/>
+                <span>Exercises</span>
+                <img class="icon-button" src="/icon/add-button.png" :width="20" :height="20" 
+                    @click="selectExercises" />
+            </div>
+            <input id="name" class="textbox mb-2" type="text" ref="text"  placeholder="Workout Name"
+                    v-model.lazy.trim="name.value" 
+                    spellcheck="true"/>
+            </div>
     </div>
 </template>
 

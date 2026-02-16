@@ -1,0 +1,217 @@
+<template>
+    <div class="todo-memorization-timeline d-flex justify-content-evenly mb-3">
+        <span v-for="data in timeline" 
+              class="dot" 
+              :class="{ 'complete': isComplete(data), 'selected': data == selected, 'incomplete': isInComplete(data), 'is-active': data.isActive }"
+              @click="selectData(data)">
+        </span>
+    </div>
+</template>
+
+<script>
+import { clone, sortDateAsc } from '../../../../../../utility';
+import { addDay, addSecond, startOfDay } from '../../../../../../utility/timeUtility';
+
+
+export default {
+    name: 'TodoMemorizationTimeline',
+    components: {  },
+    props: {
+        idTodo: Number
+    },
+    data: function () {
+        return {
+            iterationStore: undefined,
+            timeline: undefined,
+            selected: undefined
+        }
+    },
+    created: async function() {
+        let iterationStore = await import(`@/store/iterationStore`);
+        this.iterationStore = iterationStore.useIterationStore();
+
+        this.refreshTimeline();
+    },
+    computed: {
+        iterations() {
+            if (this.iterationStore) {
+                let iterations = this.iterationStore.iterations.filter(task => task.todoID == this.idTodo);
+                iterations = clone(iterations);
+                return sortDateAsc(iterations, 'startAt');
+            }
+            return [];
+        },
+    },
+    methods: {
+        refreshTimeline,
+        initTimeline,
+        loopIterations,
+        isComplete,
+        isInComplete,
+        selectData
+    },
+    watch: {
+        iterations() {
+            this.refreshTimeline();
+            if (this.iterations.length > 0) {
+                this.initTimeline();
+            }
+        }
+    }
+}
+
+function refreshTimeline() {
+    this.timeline = {
+        d0: {
+            day: "D0",
+            nextDay: "D1",
+            daysToComplete: 1,
+            daysTillNext: 1,
+            iteration: undefined
+        },
+        d1: {
+            day: "D1",
+            nextDay: "D3",
+            daysToComplete: 1,
+            daysTillNext: 2,
+            iteration: undefined
+        },
+        d3: {
+            day: "D3",
+            nextDay: "D7",
+            daysToComplete: 1,
+            daysTillNext: 4,
+            iteration: undefined
+        },
+        d7: {
+            day: "D7",
+            nextDay: "D16",
+            daysToComplete: 2,
+            daysTillNext: 9,
+            iteration: undefined
+        },
+        d16: {
+            day: "D16",
+            nextDay: "D30",
+            daysToComplete: 2,
+            daysTillNext: 14,
+            iteration: undefined
+        },
+        d30: {
+            day: "D30",
+            nextDay: undefined,
+            daysToComplete: 2,
+            daysTillNext: undefined,
+            iteration: undefined
+        },
+    }
+}
+
+function initTimeline() {
+    let index = 0;
+    let succes;
+    
+    do {
+        succes = this.loopIterations(index);
+        if (!succes && index < this.iterations.length - 1) {
+            index++;
+            this.refreshTimeline();
+        } else {
+            index = -1;
+        }
+    } while (index > 0)
+}
+
+function loopIterations(index) {
+    let nextStart;
+    let nextEnd;
+    let now = new Date();
+
+    for (let i = index, d = 0; i < this.iterations.length; i++) {
+        /* Set iteration */
+        let data = this.timeline[`d${d}`];
+        let start = this.iterations[i].startAt.toDate();
+        if (i > index) {
+            if (+start < +nextStart || +start > nextEnd) {
+                return false;
+            } else {
+                if (+now >= +nextStart && +now <= nextEnd) {
+                    data.isActive = true;
+                }
+            }
+        } else {
+            if (+startOfDay(start) == +startOfDay(now)) {
+                data.isActive = true;
+            }
+        }
+        data.iteration = this.iterations[i];
+
+        // /* Set blurb */
+        // if (this.iterations[i].blurbIds.length > 0) {
+        //     let blurb = this.universalStore.getBlurb(this.iterations[i].blurbIds[0]);
+        //     if (blurb) {
+        //         this.iterations[i].blurb = blurb.text;
+        //     }
+        // } else {
+        //     this.iterations[i].blurb = undefined;
+        // }
+
+        if (d == 0) {
+            d = 1;
+        } else {
+            d = d + data.daysTillNext;
+        }
+        nextStart = addDay(start, data.daysTillNext);
+        nextEnd = addSecond(addDay(nextStart, data.daysToComplete), -1);
+    }
+
+    return true;
+}
+
+function isComplete(data) {
+    if (data.iteration) {
+        return data.iteration.attemptedAt != undefined;
+    } else {
+        return false;
+    }
+}
+
+function isInComplete(data) {
+    if (data.iteration) {
+        return data.iteration.attemptedAt == undefined;
+    } else {
+        return undefined;
+    }
+}
+
+function selectData(data) {
+    this.selected = (this.selected != data) ? data : undefined;
+}
+
+</script>
+
+<style scoped>
+.dot {
+    width: 16px;
+    height: 16px;
+    border-radius: 8px;
+    border: solid 1px beige;
+    background-color: lightgrey;
+}
+
+.dot.complete {
+    background-color: indianred;
+}
+
+.dot.incomplete {
+    background-color: orange
+}
+
+.dot.is-active.incomplete {
+    background-color: cornflowerblue;
+}
+
+.dot.selected {
+    border: solid 1px black;
+}
+</style>

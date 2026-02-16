@@ -38,6 +38,10 @@ export let todoTypes = [
         id: 12,
         text: "Errand"
     },
+    {
+        id: 190,
+        text: "Memorization"
+    },
 ]
 
 export let routineTypes = [
