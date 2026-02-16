@@ -81,8 +81,8 @@ export const useIterationStore = defineStore('iteration', {
             return iterations;
         },
         updateIteration(iterationID, text, blurb, points, startAt, endAt) {
-            let date = new Date();
-            let data = { iterationID, text, blurb, points, startAt, endAt, date };
+            let dateTime = new Date();
+            let data = { iterationID, text, blurb, points, startAt, endAt, dateTime };
             return postEndpoint("Planner", "UpdateIteration", data)
             .then(response => response.result);
         },
