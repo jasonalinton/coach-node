@@ -276,7 +276,7 @@ function markComplete() {
         let text = this.selected.iteration.text.replace(this.selected.day, this.selected.nextDay);
         let newStart = addDay(this.selected.iteration.startAt.toDate(), this.selected.daysTillNext);
         
-        this.iterationStore.completeAndCreatSibling(this.selected.iteration.id, now, text, newStart, newStart);
+        this.iterationStore.completeAndCreatSibling(this.selected.iteration.id, now, text, newStart, newStart, 3, this.selected.iteration.blurb);
     } else {
         this.iterationStore.toggleCompletion(this.selected.iteration.id, now, now)
     }
