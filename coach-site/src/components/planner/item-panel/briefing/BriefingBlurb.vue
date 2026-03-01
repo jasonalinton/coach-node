@@ -3,10 +3,13 @@
         <h4 class="text-start" @click="isShown = !isShown">Blurbs</h4>
         <div v-if="isShown" class="d-flex flex-column">
             <MetricSelector class="metric-selector mt-1" :selected="selectedMetrics"></MetricSelector>
-            <BlurbFormControl v-for="metric in metrics" :key="metric.id" :header="metric.title" :placeholder="`Click to add ${metric.title} blurb`" :blurbs="metric.prop"
-                              class="mt-2" 
-                              @addBlurb="addBlurb($event, metric.id)"
-                              @saveBlurb="saveBlurb" />
+            <div v-for="metric in metrics" :key="metric.id" class="briefing-blurb-metric d-flex flex-column">
+                <BlurbFormControl :header="metric.title" :placeholder="`Click to add ${metric.title} blurb`" 
+                                  :blurbs="metric.prop" :idBlurbType="BLURBTYPE.BRIEFING"
+                                  class="mt-2" 
+                                  @addBlurb="addBlurb($event, metric.id)"
+                                  @saveBlurb="saveBlurb" />
+            </div>
         </div>
     </div>
 </template>
@@ -71,26 +74,31 @@ export default {
             return [
                 {
                     id: this.METRIC.PHYSICAL,
+                    idBriefingType: 172,
                     title: "Physical",
                     prop: this.physicalBlurbs,
                 },
                 {
                     id: this.METRIC.SOCIAL,
+                    idBriefingType: undefined,
                     title: "Social",
                     prop: this.socialBlurbs,
                 },
                 {
                     id: this.METRIC.MENTAL,
+                    idBriefingType: undefined,
                     title: "Mental",
                     prop: this.mentalBlurbs,
                 },
                 {
                     id: this.METRIC.EMOTIONAL,
+                    idBriefingType: undefined,
                     title: "Emotional",
                     prop: this.emotionalBlurbs,
                 },
                 {
                     id: this.METRIC.FINANCIAL,
+                    idBriefingType: undefined,
                     title: "Financial",
                     prop: this.financialBlurbs,
                 },
@@ -135,7 +143,7 @@ export default {
     },
     methods: {
         addBlurb(blurb, idMetric) {
-            this.universalStore.addBriefingBlurb(blurb.text, this.selectedDate, BLURBTYPE.BRIEFING, idMetric, this.idTimeframe)
+            this.universalStore.addBriefingBlurb(blurb.text, this.selectedDate, blurb.idBlurbType, idMetric, this.idTimeframe)
         },
         saveBlurb(blurb) {
             let index = this.blurbs.findIndex(x => x.id == blurb.id);
@@ -143,6 +151,10 @@ export default {
                 let _blurb = this.blurbs[index];
                 _blurb.text = blurb.text;
             }
+        },
+        selectType(metric, id) {
+            metric.idBriefingType = undefined;
+            console.log(id);
         }
     },
     watch: {
@@ -158,5 +170,4 @@ export default {
 .metric-selector {
     margin-bottom: 16px;
 }
-
 </style>

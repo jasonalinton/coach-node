@@ -25,16 +25,8 @@
                     </div>
                 </div>
             </div>
-            <div v-for="blurb in blurbs" :key="blurb.id"
-                 class="blurb d-flex flex-column">
-                <span class="date">{{ blurb.date }}</span>
-                <span class="time">{{ blurb.time }}</span>
-                <span v-if="blurb.title" class="title">{{ blurb.title }}</span>
-                <span class="text">{{ blurb.text }}</span>
-                <div class="d-flex flex-row">
-                    <span v-for="(tag, index) in blurb.tags" :key="index" class="tag">{{ tag }}</span>
-                </div>
-            </div>
+            <BlurbCard v-for="blurbID in blurbIDs" :key="blurbID" :idBlurb="blurbID"
+                       class="blurb d-flex flex-column" />
         </div>
     </div>
 </template>
@@ -45,10 +37,11 @@ import { useUniversalStore } from '@/store/universalStore'
 import { TIMEFRAME } from '../../model/constants'
 import { toLongDateString, toShortTimeString, formatInputDateTime, getTimeframeEndpoints, today } from '../../../utility/timeUtility'
 import { sortDateDesc } from '../../../utility'
+import BlurbCard from './BlurbCard.vue'
 
 export default {
     name: 'BlogTimeline',
-    components: {  },
+    components: { BlurbCard },
     props: {
         
     },
@@ -77,23 +70,13 @@ export default {
         selectedDate() {
             return (this.plannerStore) ? this.plannerStore.selectedDate : today();
         },
-        blurbs() {
+        blurbIDs() {
             let blurbs = [];
             if (this.universalStore) {
                 blurbs = this.universalStore.blurbs;
                 blurbs = sortDateDesc(blurbs, 'datetime');
-                blurbs = blurbs.map(blurb => {
-                    return {
-                        id: blurb.id,
-                        date: toLongDateString(blurb.datetime),
-                        time: toShortTimeString(blurb.datetime),
-                        title:blurb.title,
-                        text: blurb.text,
-                        tags: []
-                    };
-                });
             }
-            return blurbs;
+            return blurbs.map(x => x.id);
         }
     },
     methods: {
@@ -176,44 +159,5 @@ function cancelBlurb() {
     border-radius: 4px;
     font-size: 14px;
     line-height: 16px;
-}
-
-.blurb {
-    background-color: #EDEDED;
-    padding: 15px 28px;
-    text-align: start;
-    margin: 22px auto 0 auto;
-    max-width: 720px;
-    width: 100%;
-}
-
-.blurb .date {
-    font-size: 12px;
-}
-
-.blurb .time {
-    font-size: 10px;
-    font-style: italic;
-    font-weight: bolder;
-}
-
-.blurb .title {
-    font-size: 28px;
-    line-height: 34px;
-    color: #4A90E2
-}
-
-.blurb .text {
-    font-size: 14px;
-    white-space: pre-wrap;
-}
-
-.blurb .textarea.invalid {
-    border: solid 1px red;
-}
-
-.blurb .tag {
-    font-size: 12px;
-    color: #F5A623;
 }
 </style>

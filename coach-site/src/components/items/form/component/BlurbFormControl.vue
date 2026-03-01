@@ -62,6 +62,17 @@
                         </div>
                     </div>
                 </div>
+                <!-- Briefing Type -->
+                <div v-if="idBlurbType == BLURBTYPE.BRIEFING || idBlurbType == BLURBTYPE.DEBRIEFING" class="briefing-type pills d-flex flex-row justify-content-between mt-1 gap-1">
+                    <span class="app-pill flex-grow-1" :class="{ 'selected': idBriefingType == BLURBTYPE.BRIEFING }"
+                          @click="idBriefingType = BLURBTYPE.BRIEFING">
+                        Briefing
+                    </span>
+                    <span class="app-pill flex-grow-1" :class="{ 'selected': idBriefingType == BLURBTYPE.DEBRIEFING }"
+                          @click="idBriefingType = BLURBTYPE.DEBRIEFING">
+                        Debriefing
+                    </span>
+                </div>
                 <!-- Save Button -->
                 <div v-if="showButtons" class="d-flex flex-row mt-1 justify-content-end">
                     <button type="button" @click="saveBlurb">Save</button>
@@ -92,7 +103,8 @@
 
 <script>
 import { getShortDateString } from '../../../../../utility/timeUtility';
-import { sortAsc } from '../../../../../utility';
+import { clone, sortAsc } from '../../../../../utility';
+import { BLURBTYPE } from '../../../../model/constants';
 
 export default {
     name: 'BlurbFormControl',
@@ -113,10 +125,12 @@ export default {
         showTitle: {
             type: Boolean,
             default: () => false
-        }
+        },
+        idBlurbType: Number
     },
     data: function () {
         return {
+            BLURBTYPE: clone(BLURBTYPE),
             universalStore: undefined,
             title: undefined,
             text: undefined,
@@ -125,12 +139,18 @@ export default {
             showButtons: false,
             showTextarea: false,
             goalTimePairIDs: [],
-            goalTimePairTodoIDs: []
+            goalTimePairTodoIDs: [],
+            idBriefingType: undefined
         }
     },
     created: async function() {
         let universalStore = await import(`@/store/universalStore`);
         this.universalStore = universalStore.useUniversalStore();
+
+        // If briefing blurb, defaut to briefing briefing type
+        if (this.idBlurbType == this.BLURBTYPE.BRIEFING || this.idBlurbType == this.BLURBTYPE.DEBRIEFING) {
+            this.idBriefingType = this.idBlurbType;
+        }
     },
     computed: {
         blurbs_Sorted() {
@@ -236,6 +256,7 @@ function saveBlurb() {
         datetime: (!this.selectedID) ? new Date() : undefined,
         goalTimePairIDs: this.goalTimePairIDs,
         goalTimePairTodoIDs: this.goalTimePairTodoIDs,
+        idBlurbType: this.idBriefingType
     };
 
     if (!this.selectedID) {
