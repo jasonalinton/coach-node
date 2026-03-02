@@ -29,11 +29,15 @@
                     </div>
                 </div>
             </div>
-            <button class="btn-close" type="button" aria-label="close"
-                    @click.stop="deleteOrArchive"></button>
+            <div class="d-felx flex-row gap-2">
+                <span>{{ type }}</span>
+                <button class="btn-close" type="button" aria-label="close"
+                        @click.stop="deleteOrArchive"></button>
+            </div>
         </div>
         <div v-if="isEditing" class="wrapper-edit d-flex flex-row">
             <div>
+                <div class="text-start">{{ updatedRepeat.id }}</div>
                 <!-- Timeframe -->
                 <div class="d-flex flew-rowalign-middle mt-2">
                     <div v-for="repetition in timeframes.filter(rep => rep.isActive)" v-bind:key="repetition.id" 
@@ -115,8 +119,14 @@
                 <!-- End - Iteration -->
                 <!-- Inheritance Type -->
                 <div class="d-flex flex-column mt-1">
-                    <select class="form-select panel-select" aria-label="select" v-model="updatedRepeat.idInheritance">
+                    <select class="form-select form-select-sm panel-select" aria-label="select" v-model="updatedRepeat.idInheritance">
                         <option v-for="inheritanceType in inheritanceTypes" v-bind:key="inheritanceType.id" :value="inheritanceType.id">{{inheritanceType.text}}</option> 
+                    </select> 
+                </div>
+                <!-- Todo Mapping Type -->
+                <div class="d-flex flex-column mt-1">
+                    <select class="form-select form-select-sm panel-select" aria-label="select" v-model="updatedRepeat.idTodoMappingType">
+                        <option v-for="todoMappingType in todoMappingTypes" v-bind:key="todoMappingType.id" :value="todoMappingType.id">{{todoMappingType.text}}</option> 
                     </select> 
                 </div>
                 <!-- Points -->
@@ -162,6 +172,7 @@ import TimeControl from '../../../controls/time/TimeControl2.vue'
 import { clone, capitalize, today } from '../../../../../utility'
 import { dateOnly, getNumberDateString } from '../../../../../utility/timeUtility'
 import { MOMENT } from '../../../../model/constants'
+import { inheritanceTypes, todoMappingTypes } from '../../../../model/types'
 
 let timeframes = [
     {
@@ -241,20 +252,6 @@ let dow = [
     },
 ]
 
-let inheritanceTypes = [
-    {
-        id: 140,
-        text: "Self"
-    },
-    {
-        id: 141,
-        text: "Children"
-    },
-    {
-        id: 142,
-        text: "Descendants"
-    },
-]
 
 export default {
     name: "RepeatControl",
@@ -273,6 +270,7 @@ export default {
             timeframes: clone(timeframes),
             MOMENT: clone(MOMENT),
             inheritanceTypes: clone(inheritanceTypes),
+            todoMappingTypes: clone(todoMappingTypes),
             updatedRepeat: undefined,
             todoRepeats: [],
             isEditing: false,
@@ -299,6 +297,12 @@ export default {
     computed: {
         selectedDate() {
             return (this.plannerStore) ? this.plannerStore.selectedDate : today();
+        },
+        type() {
+            if (this.repeat.routineRepeatID) {
+                return "Routine";
+            }
+            return undefined;
         },
         // If end date has passed repeat is considered archived
         isArchived() {
@@ -519,6 +523,7 @@ function save() {
     let repeat = {
         id: this.updatedRepeat.id,
         idInheritance: this.updatedRepeat.idInheritance,
+        idTodoMappingType: this.updatedRepeat.idTodoMappingType,
         isOwner: true,
         itemID: this.itemID,
         itemType: this.itemType.toLowerCase(),

@@ -35,6 +35,7 @@
         <div v-if="isEditing" 
              class="wrapper-edit d-flex flex-row" :class="{ 'isValid': isValid}">
             <div>
+                <span>{{ updatedRepeat.id }}</span>
                 <!-- Timeframe -->
                 <div class="d-flex flew-rowalign-middle mt-2">
                     <div v-for="repetition in timeframes.filter(rep => rep.isActive)" v-bind:key="repetition.id" 

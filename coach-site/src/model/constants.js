@@ -122,6 +122,13 @@ export let TODO_ACTIVITY_TYPE = {
     WATER: 159,
 };
 
+export let TODO_MAPPING_TYPE = {
+    GROUP: 186,
+    PACKAGE: 187,
+    SEQUENCE: 188,
+    CLASS: 189,
+};
+
 export let BLURBTYPE = {
     ADVICE: 162,
     REASON: 163,

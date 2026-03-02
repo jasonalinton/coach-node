@@ -300,3 +300,22 @@ export let workoutSectionTypes = [
         text: "Cool-Down/Mobility"
     },
 ]
+
+export let todoMappingTypes = [
+    {
+        id: 186,
+        text: "Group"
+    },
+    {
+        id: 187,
+        text: "Package"
+    },
+    {
+        id: 188,
+        text: "Sequence"
+    },
+    {
+        id: 189,
+        text: "Class"
+    },
+]
