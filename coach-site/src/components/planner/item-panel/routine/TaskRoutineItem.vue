@@ -1,18 +1,18 @@
 <template>
     <div v-if="routine" class="task-routine-item d-flex flex-column">
         <span class="text-start ps-2">{{ routine.text }}</span>
-        <span v-for="todo in todos" :key="todo.id" 
-              class="todo text-start ps-2">
-              {{ todo.text }}
-        </span>
+        <TaskRoutineListItem v-for="id in todoIDs" :key="d" 
+                             :idTodo="id" :idTodo_Root="id"
+                             :level="1" :idRoutineRepeat="repeatID" />
     </div>
 </template>
 
 <script>
+import TaskRoutineListItem from './TaskRoutineListItem.vue';
 
 export default {
     name: 'TaskRoutineItem',
-    components: {  },
+    components: { TaskRoutineListItem },
     props: {
         idRoutine: Number
     },
@@ -37,12 +37,11 @@ export default {
             }
             return undefined;
         },
-        todos() {
-            if (this.todoStore && this.routine) {
-                let todos = this.todoStore.getItemsByID(this.routine.todoIDs);
-                return todos;
-            }
-            return [];
+        todoIDs() {
+            return (this.routine) ? this.routine.todoIDs : [];
+        },
+        repeatID() {
+            return (this.routine) ? this.routine.repeats[0].id : undefined;
         }
     },
     methods: {
