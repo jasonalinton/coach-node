@@ -278,7 +278,11 @@ function markComplete() {
         
         this.iterationStore.completeAndCreatSibling(this.selected.iteration.id, now, text, newStart, newStart, 3, this.selected.iteration.blurb);
     } else {
-        this.iterationStore.toggleCompletion(this.selected.iteration.id, now, now)
+        // this.iterationStore.toggleCompletion(this.selected.iteration.id, now, now);
+        let text = this.selected.iteration.text.replace("D30", "D60");
+        let newStart = addDay(this.selected.iteration.startAt.toDate(), 30);
+        
+        this.iterationStore.completeAndCreatSibling(this.selected.iteration.id, now, text, newStart, newStart, 3, this.selected.iteration.blurb);
     }
 
 }
