@@ -18,6 +18,8 @@ export const useAppStore = defineStore('app', {
         windowWidth: undefined,
         windowHeight: undefined,
         windowOuterWidth: undefined,
+        bodyOuterHeight: undefined,
+        bodyOuterWidth: undefined,
         windowOuterHeight: undefined,
         browserType: undefined,
         isTouchscreen: undefined,
@@ -114,7 +116,9 @@ export const useAppStore = defineStore('app', {
         }
     }),
     getters: {
-        
+        bodyWidth() {
+            return this.bodyOuterWidth;
+        }
     },
     actions: {
         setWindowSize(width, height) {
@@ -130,6 +134,10 @@ export const useAppStore = defineStore('app', {
         setWindowOuterSize(width, height) {
             this.windowOuterWidth = width;
             this.windowOuterHeight = height;
+        },
+        setBodyOuterSize(width, height) {
+            this.bodyOuterWidth = width;
+            this.bodyOuterHeight = height;
         },
         onMenuButtonClicked() {
             if (this.navbar.active == "main") {

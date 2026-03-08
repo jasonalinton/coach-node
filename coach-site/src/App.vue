@@ -8,7 +8,7 @@
             <div class="grid-left-panel">
                 <LeftPanel />
             </div>
-            <div class="grid-body overflow-scroll">
+            <div class="grid-body overflow-scroll" ref="body">
                 <!-- <RouterView/> -->
                 <Planner v-show="selectedPage == 'planner'" />
                 <ItemTabs v-show="selectedPage == 'items'" />
@@ -154,6 +154,7 @@ async function initStores() {
 function onResize() {
     this.appStore.setWindowSize(window.innerWidth, window.innerHeight);
     this.appStore.setWindowOuterSize(window.outerWidth, window.outerHeight);
+    this.appStore.setBodyOuterSize(this.$refs['body'].clientWidth, this.$refs['body'].clientHeight);
 }
 </script>
 

@@ -1,13 +1,15 @@
 <template>
-    <div  class="weight-chart">
+    <div  class="weight-chart" ref="weight-chart-container">
         <div id="weight-chart" ref="weight-chart" class="mt-2"></div>
     </div>
 </template>
 
 <script>
+import { useAppStore } from '@/store/appStore'
 import { usePhysicalStore } from '@/store/physicalStore'
 import { createChart  } from "lightweight-charts";
 import { sortDateAsc, startOfDay } from '../../../../utility';
+import { addDay } from '../../../../utility/timeUtility';
 
 export default {
     name: '',
@@ -17,6 +19,7 @@ export default {
     },
     data: function () {
         return {
+            appStore: undefined,
             physicalStore: undefined,
             chart: undefined,
             weightGoal: 185,
@@ -26,17 +29,23 @@ export default {
         }
     },
     created: function() {
+        this.appStore = useAppStore();
         this.physicalStore = usePhysicalStore();
     },
     mounted() {
         this.createWeightChart();
     },
     computed: {
+        width() {
+            return (this.appStore && this.appStore.bodyOuterWidth) ? this.appStore.bodyOuterWidth : 0
+        },
         weightHistories() {
             let weights = [];
             if (this.physicalStore) {
                 let measurements = this.physicalStore.getBodyMeasurements();
                 if (measurements.length > 0) {
+                    let startDate = addDay(new Date(), -365);
+                    measurements = measurements.filter(x => +x.dateTime.toDate() >= +startDate);
                     measurements = sortDateAsc(measurements, 'dateTime');
                     let lastDate = new Date(1970, 0, 1);
                     measurements.forEach(measurement => {
@@ -99,15 +108,20 @@ export default {
         weightHistories: {
             handler(value) {
                 if (value.length && value.length > 0) {
-                    // this.setWeightSeries();
+                    this.setWeightSeries();
                 }
             },
             deep: true
         },
+        width() {
+            this.createWeightChart();
+        }
     }
 }
 
 function createWeightChart() {
+    let width = this.width;
+
     let chartOptions = {
         rightPriceScale: {
             visible: true,
@@ -118,7 +132,7 @@ function createWeightChart() {
         localization: {
             priceFormatter: p => p.toFixed(0),
         },
-        // width: 278, 
+        width, 
         height: 500
     };
 
