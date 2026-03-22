@@ -1,9 +1,9 @@
 import { defineStore } from 'pinia';
 import { getSocketConnection } from './socket';
-import { getNutritionHistory, getMealsInRange, getWaterLogs, foodSearchAutoComplete, 
-    logWater, setMealTime, removeFoodItem } from '../api/physicalAPI';
-import { sortAsc, replaceOrAddItem, removeItemByID } from '../../utility';
+import { getNutritionHistory, getMealsInRange, getWaterLogs } from '../api/physicalAPI';
+import { sortAsc, replaceOrAddItem, removeItemByID, addDay } from '../../utility';
 import { postEndpoint } from '../api/api';
+import { addYear } from '../../utility/timeUtility';
 
 let initialized = false;
 
@@ -22,7 +22,8 @@ export const usePhysicalStore = defineStore('physical', {
         async initialize() {
             let _this = this;
             this.connectSocket();
-            getNutritionHistory()
+            let now = new Date();
+            this.getNutritionHistory(null, addYear(now, -1), addDay(now, 1))
             .then(result => {  
                 _this.mealHistories = result.meals;
                 _this.waterLogs = result.waterLogs;
@@ -33,6 +34,10 @@ export const usePhysicalStore = defineStore('physical', {
                 });
 
             initialized = true;
+        },
+        async getNutritionHistory(idTimeframe, startAt, endAt) {
+            return postEndpoint("Physical", "GetNutritionHistory", { idTimeframe, startAt, endAt })
+            .then(response => response.result);
         },
         getMealsInRange(startAt, endAt, shouldRequestServer) {
             let _this = this;
@@ -72,8 +77,8 @@ export const usePhysicalStore = defineStore('physical', {
             return this.bodyMeasurements;
         },
         async foodSearchAutoComplete(searchTerm) {
-            let result = await foodSearchAutoComplete(searchTerm);
-            return result;
+            return postEndpoint("Physical", "FoodSearchAutoComplete", { query: searchTerm })
+            .then(response => response.result);
         },
         async searchFoodUPC(upc) {
             return postEndpoint("Physical", "SearchFoodUPC", { upc })
