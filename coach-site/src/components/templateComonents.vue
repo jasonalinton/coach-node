@@ -46,6 +46,76 @@
 </template>
 
 <script>
+
+export default {
+    name: 'TemplateComonents',
+    components: {  },
+    props: {
+        
+    },
+    data: function () {
+        return {
+            plannerStore: undefined,
+            iterationStore: undefined,
+            todoStore: undefined,
+            goalStore: undefined,
+        }
+    },
+    created: async function() {
+        let plannerStore = await import(`@/store/plannerStore`);
+        this.plannerStore = plannerStore.usePlannerStore();
+
+        let iterationStore = await import(`@/store/iterationStore`);
+        this.iterationStore = iterationStore.useIterationStore();
+
+        let todoStore = await import(`@/store/todoStore`);
+        this.todoStore = todoStore.useTodoStore();
+
+        let goalStore = await import(`@/store/goalStore`);
+        this.goalStore = goalStore.useGoalStore();
+    },
+    computed: {
+        selectedDate() {
+            return (this.plannerStore) ? this.plannerStore.selectedDate : today();
+        },
+        start() {
+            if (this.idTimeframe == TIMEFRAME.WEEK) {
+                return firstDayOfWeek(this.selectedDate);
+            } else if (this.idTimeframe == TIMEFRAME.MONTH) {
+                return firstDayOfMonth(this.selectedDate);
+            } else if (this.idTimeframe == TIMEFRAME.YEAR) {
+                return firstDayOfYear(this.selectedDate);
+            }
+            return this.selectedDate;
+        },
+        end() {
+            if (this.idTimeframe == TIMEFRAME.WEEK) {
+                return lastDayOfWeek(this.selectedDate);
+            } else if (this.idTimeframe == TIMEFRAME.MONTH) {
+                return lastDayOfMonth(this.selectedDate);
+            } else if (this.idTimeframe == TIMEFRAME.YEAR) {
+                return lastDayOfYear(this.selectedDate);
+            }
+            return this.selectedDate;
+        },
+        iterations() {
+            let iterations = [];
+            if (this.iterationStore) {
+                iterations = this.iterationStore.iterations;
+                iterations = iterations.filter(iteration => {
+                    return +(new Date(iteration.startAt)) >= +this.start && 
+                           +(new Date(iteration.endAt)) <= +this.end
+                });
+            }
+            return iterations;
+        }
+    },
+    methods: {
+        
+    },
+}
+
+
 function getDateTimeString() {
     let date = new Date(this.time.dateTime);
     let dateTimeJSON = date.toJSON();
