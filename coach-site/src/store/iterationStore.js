@@ -80,6 +80,16 @@ export const useIterationStore = defineStore('iteration', {
             let iterations = this.iterations.filter(x => x.todoID == todoID);
             return iterations;
         },
+        getIterationsOfTodoType(idType, startAt, endAt) {
+            let data = { idType, startAt, endAt };
+            return postEndpoint("Planner", "GetIterationsOfTodoType", data)
+            .then(response => {
+                response.result.forEach(iteration => replaceOrAddItem(iteration, this.iterations));
+                sortAsc(this.iterations, 'startAt');
+                return response.result;
+            })
+            .then(response => response.result);
+        },
         updateIteration(iterationID, text, blurb, points, startAt, endAt) {
             let dateTime = new Date();
             let data = { iterationID, text, blurb, points, startAt, endAt, dateTime };

@@ -3,35 +3,34 @@
         <div v-if="!selectedTodoID" class="mt-2">
             <div class="d-flex flex-column">
                 <h5>Active</h5>
-                <MemorizationItemCard v-for="data in activeItems" :key="data.id" 
+                <MemorizationItemCard v-for="id in items.active" :key="id" 
                                       class="mb-2" 
-                                      :id-todo="data.id"
-                                      @click.prevent="selectedTodoID = data.id" />
-
-            </div>
-            <div class="d-flex flex-column">
-                <h5>Pending</h5>
-                <MemorizationItemCard v-for="data in pendingItems" :key="data.id" 
-                                      class="mb-2" 
-                                      :id-todo="data.id"
-                                      @click.prevent="selectedTodoID = data.id" />
+                                      :id-todo="id"
+                                      @click.prevent="selectedTodoID = id" />
 
             </div>
             <div class="d-flex flex-column">
                 <h5>Missed</h5>
-                <MemorizationItemCard v-for="data in missedItems" :key="data.id" 
+                <MemorizationItemCard v-for="id in items.missed" :key="id" 
                                       class="mb-2" 
-                                      :id-todo="data.id"
-                                      @click.prevent="selectedTodoID = data.id" />
+                                      :id-todo="id"
+                                      @click.prevent="selectedTodoID = id" />
+
+            </div>
+            <div class="d-flex flex-column">
+                <h5>Pending</h5>
+                <MemorizationItemCard v-for="id in items.pending" :key="id" 
+                                      class="mb-2" 
+                                      :id-todo="id"
+                                      @click.prevent="selectedTodoID = id" />
 
             </div>
             <div class="d-flex flex-column">
                 <h5>Backlog</h5>
-                <MemorizationItemCard v-for="data in backlogItems" :key="data.id" 
+                <MemorizationItemCard v-for="id in items.backlog" :key="id" 
                                       class="mb-2" 
-                                      :id-todo="data.id"
-                                      @setStatus="setStatus(data, $event)"
-                                      @click.prevent="selectedTodoID = data.id" />
+                                      :id-todo="id"
+                                      @click.prevent="selectedTodoID = id" />
 
             </div>
         </div>
@@ -42,8 +41,9 @@
 </template>
 
 <script>
-import { sortDateDesc } from '../../../../../utility';
+import { sortDateAsc } from '../../../../../utility';
 import { today } from '../../../../../utility/timeUtility';
+import { TODOTYPE } from '../../../../model/constants';
 import MemorizationItemCard from './component/MemorizationItemCard.vue';
 import TodoMemorizationItem from './component/TodoMemorizationItem.vue';
 
@@ -67,62 +67,49 @@ export default {
         let iterationStore = await import(`@/store/iterationStore`);
         this.iterationStore = iterationStore.useIterationStore();
 
+        this.todoStore.getMemorizationTodos(true);
+        this.iterationStore.getIterationsOfTodoType(TODOTYPE.MEMORIZATION);
     },
     computed: {
-        todoDatas() {
-            let todoDatas = [];
-            if (this.todoStore && this.iterationStore) {
+        items() {
+            let items = {
+                active: [],
+                pending: [],
+                missed: [],
+                backlog: []
+            };
+
+            if (this.iterationStore) {
                 let todos = this.todoStore.getMemorizationTodos();
-                todos.forEach(todo => {
-                    let iterations = this.iterationStore.iterations.filter(task => task.todoID == todo.id);
-                    iterations = sortDateDesc(iterations, 'startAt');
-                    if (iterations.length > 0) {
-                        if (+iterations[0].startAt.toDate().startOfDay() < +today()) {
-                            /* Missed */
-                            let lastFour = iterations[0].text.substring(iterations[0].text.length - 4);
-                            if (lastFour != "(D30)") {
-                                todoDatas.push({
-                                    id: todo.id,
-                                    status: "missed"
-                                });
-                            }
-                        } else if (+iterations[0].startAt.toDate().startOfDay() == +today()) {
-                            /* Active */
-                            if (!iterations[0].attemptedAt) {
-                                todoDatas.push({
-                                    id: todo.id,
-                                    status: "active"
-                                })
-                            }
-                        } else if (!iterations[0].attemptedAt) {
-                            /* Pending */
-                            todoDatas.push({
-                                id: todo.id,
-                                status: "pending"
-                            })
+                let todoIDs_Mem = todos.map(todo => todo.id);
+                let iterations = this.iterationStore.iterations.filter(iteration => todoIDs_Mem.includes(iteration.todoID));
+                iterations = sortDateAsc(iterations, 'startAt');
+                // Set missed, active, and pending todo ids
+                iterations.forEach(iteration => {
+                    if (!iteration.attemptedAt && !iteration.completedAt) {
+                        // Missed
+                        if (+iteration.startAt.toDate().startOfDay() < +today() && 
+                            !items.missed.includes(iteration.todoID)) {
+                                items.missed.push(iteration.todoID);
                         }
-                    } else {
-                        /* Backlog */
-                        todoDatas.push({
-                            id: todo.id,
-                            status: "backlog"
-                        });
+                        // Active
+                        if (+iteration.startAt.toDate().startOfDay() == +today() && 
+                            !items.active.includes(iteration.todoID)) {
+                                items.active.push(iteration.todoID);
+                        }
+                        // Pending
+                        if (+iteration.startAt.toDate().startOfDay() > +today() && 
+                            !items.pending.includes(iteration.todoID)) {
+                                items.pending.push(iteration.todoID);
+                        }
                     }
+                    let index = todoIDs_Mem.findIndex(x => x == iteration.todoID);
+                    todoIDs_Mem.splice(index, 1);
                 });
+                // Set backlog todo ids
+                items.backlog = [...todoIDs_Mem];
             }
-            return todoDatas;
-        },
-        activeItems() { 
-            return this.todoDatas.filter(x => x.status == 'active'); 
-        },
-        pendingItems() { 
-            return this.todoDatas.filter(x => x.status == 'pending'); 
-        },
-        missedItems() { 
-            return this.todoDatas.filter(x => x.status == 'missed'); 
-        },
-        backlogItems() { 
-            return this.todoDatas.filter(x => x.status == 'backlog'); 
+            return items;
         },
     },
     methods: {
