@@ -9,12 +9,17 @@
 
 <script>
 import TypePoints from './TypePoints.vue';
-import { firstDayOfWeek, lastDayOfWeek } from '../../../utility/timeUtility';
+import { firstDayOfWeek, lastDayOfWeek, firstDayOfMonth, lastDayOfMonth, firstDayOfYear, lastDayOfYear } from '../../../utility/timeUtility';
+import { TIMEFRAME } from '../../model/constants';
 
 export default {
     name: 'TimeframePoints',
     components: { TypePoints },
     props: {
+        idTimeframe: {
+            type: Number,
+            default: () => TIMEFRAME.WEEK 
+        },
         selectedDate: Date,
     },
     data: function () {
@@ -89,10 +94,24 @@ export default {
     },
     computed: {
         start() {
-            return firstDayOfWeek(this.selectedDate);
+            if (this.idTimeframe == TIMEFRAME.WEEK) {
+                return firstDayOfWeek(this.selectedDate);
+            } else if (this.idTimeframe == TIMEFRAME.MONTH) {
+                return firstDayOfMonth(this.selectedDate);
+            } else if (this.idTimeframe == TIMEFRAME.YEAR) {
+                return firstDayOfYear(this.selectedDate);
+            }
+            return this.selectedDate;
         },
         end() {
-            return lastDayOfWeek(this.selectedDate);
+            if (this.idTimeframe == TIMEFRAME.WEEK) {
+                return lastDayOfWeek(this.selectedDate);
+            } else if (this.idTimeframe == TIMEFRAME.MONTH) {
+                return lastDayOfMonth(this.selectedDate);
+            } else if (this.idTimeframe == TIMEFRAME.YEAR) {
+                return lastDayOfYear(this.selectedDate);
+            }
+            return this.selectedDate;
         },
         iterations() {
             let iterations = [];
