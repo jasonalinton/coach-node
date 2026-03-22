@@ -1,9 +1,9 @@
 import { defineStore } from 'pinia';
 import { getSocketConnection } from './socket';
-import { getBriefingBlurbs } from '../api/universalAPI';
 import { replaceOrAddItem, sortAsc } from '../../utility';
 import { getTimeframeEndpoints } from '../../utility/timeUtility';
 import { postEndpoint } from '../api/api';
+import { BLURBTYPE } from '../model/constants';
 
 let initialized = false;
 
@@ -45,26 +45,33 @@ export const useUniversalStore = defineStore('universal', {
                 return (new Date(blurb.datetime)).getTime() >= start && (new Date(blurb.datetime)).getTime() <= end;
             });
         },
-        async getBlurbsInMetric(idMetric, idTimeframe, datetime) {
+        getBlurbsInMetric(idMetric, idTimeframe, datetime) {
             let _this = this;
-            return postEndpoint("Universal", "GetBlurbsInMetric", { idMetric, idTimeframe, datetime })
-                .then(response => {
-                    response.result.forEach(blurb => {
-                        replaceOrAddItem(blurb, _this.blurbs);
-                    });
-                    sortAsc(_this.blurbs);
-                    return response.result;
+            postEndpoint("Universal", "GetBlurbsInMetric", { idMetric, idTimeframe, datetime })
+            .then(response => {
+                response.result.forEach(blurb => {
+                    replaceOrAddItem(blurb, _this.blurbs);
                 });
+                sortAsc(_this.blurbs);
+                return response.result;
+            });
+            
+            let blurbs = this.blurbs.filter(blurb => blurb.idMetric == idMetric);
+            return blurbs;
         },
         getBriefingBlurbs(idTimeframe, datetime) {
             let _this = this;
-            getBriefingBlurbs(idTimeframe, datetime)
-                .then(result => {
-                    result.forEach(blurb => {
-                        replaceOrAddItem(blurb, _this.blurbs);
-                    })
+            postEndpoint("Universal", "GetBriefingBlurbs", { idTimeframe, datetime })
+            .then(response => {
+                response.result.forEach(blurb => {
+                    replaceOrAddItem(blurb, _this.blurbs);
                 });
-            return this.blurbs;
+                sortAsc(_this.blurbs);
+                return response.result;
+            });
+            
+            let blurbs = this.blurbs.filter(blurb => blurb.idType == BLURBTYPE.BRIEFING || blurb.idType == BLURBTYPE.DEBRIEFING);
+            return blurbs;
         },
         addBriefingBlurb(text, datetime, idBlurbType, idMetric, idTimeframe) {
             let data = { text, datetime, idBlurbType, idMetric, idTimeframe };

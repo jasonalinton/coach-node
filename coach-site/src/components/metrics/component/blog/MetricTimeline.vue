@@ -37,7 +37,7 @@
 import { usePlannerStore } from '@/store/plannerStore'
 import { useUniversalStore } from '@/store/universalStore'
 import { TIMEFRAME } from '../../../../model/constants'
-import { toLongDateString, toShortTimeString, formatInputDateTime } from '../../../../../utility/timeUtility'
+import { toLongDateString, toShortTimeString, formatInputDateTime, today } from '../../../../../utility/timeUtility'
 import { sortDateDesc } from '../../../../../utility'
 
 export default {
@@ -64,48 +64,33 @@ export default {
         this.plannerStore = usePlannerStore();
         this.universalStore = useUniversalStore();
 
-        this.initBlurbs();
+        this.universalStore.getBlurbsInMetric(this.idMetric, TIMEFRAME.MONTH, this.selectedDate);
     },
     computed: {
         selectedDate() {
             return (this.plannerStore) ? this.plannerStore.selectedDate : today();
         },
-        // blurbs() {
-        //     let blurbs = await this.universalStore
-        //         .getBlurbsInMetric(this.idMetric, TIMEFRAME.MONTH, this.selectedDate);
-
-        //     blurbs.forEach(blurb => {
-        //         let blurb_new = {
-        //             id: blurb.id,
-        //             date: toLongDateString(blurb.datetime),
-        //             time: toShortTimeString(blurb.datetime),
-        //             title: "Title",
-        //             text: blurb.text,
-        //             tags: []
-        //         };
-        //         this.blurbs.push(blurb_new);
-        //     });
-        // }
+        blurbs() {
+            let blurbs = [];
+            if (this.universalStore) {
+                let blurbsModels = this.universalStore.blurbs.filter(blurb => blurb.idMetric == this.idMetric);
+                blurbsModels = sortDateDesc(blurbsModels, 'datetime');
+                blurbsModels.forEach(blurb => {
+                    let blurb_new = {
+                        id: blurb.id,
+                        date: toLongDateString(blurb.datetime),
+                        time: toShortTimeString(blurb.datetime),
+                        title:blurb.title,
+                        text: blurb.text,
+                        tags: []
+                    };
+                    blurbs.push(blurb_new);
+                });
+            }
+            return blurbs;
+        }
     },
     methods: {
-        async initBlurbs() {
-            let blurbs = await this.universalStore
-                .getBlurbsInMetric(this.idMetric, TIMEFRAME.MONTH, this.selectedDate);
-
-            blurbs = sortDateDesc(blurbs, 'datetime');
-
-            blurbs.forEach(blurb => {
-                let blurb_new = {
-                    id: blurb.id,
-                    date: toLongDateString(blurb.datetime),
-                    time: toShortTimeString(blurb.datetime),
-                    title:blurb.title,
-                    text: blurb.text,
-                    tags: []
-                };
-                this.blurbs.push(blurb_new);
-            });
-        },
         refreshNewPost() {
             this.newPost.title = undefined;
             this.newPost.text = undefined;
@@ -135,6 +120,11 @@ export default {
             this.newPost.isShown = false;
         }
     },
+    watch: {
+        selectedDate() {
+            this.universalStore.getBlurbsInMetric(this.idMetric, TIMEFRAME.MONTH, this.selectedDate);
+        }
+    }
 }
 
 </script>
@@ -151,7 +141,7 @@ export default {
 
 .blurb {
     background-color: #EDEDED;
-    padding: 15px 28px;
+    padding: 15px 22px;
     text-align: start;
     margin: 22px auto 0 auto;
     max-width: 720px;
@@ -169,7 +159,8 @@ export default {
 }
 
 .blurb .title {
-    font-size: 28px;
+    font-size: 22px;
+    font-weight: 400;
     line-height: 34px;
     color: #4A90E2
 }

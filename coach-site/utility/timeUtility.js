@@ -341,6 +341,10 @@ export function addMonth(dateTime = new Date(), months = 1) {
     return moment(dateTime).add( months, 'month').toDate();   
 }
 
+export function addYear(dateTime = new Date(), years = 1) {
+    return moment(dateTime).add( years, 'year').toDate();   
+}
+
 export function subtractMonth(dateTime = new Date(), months = 1) {
     return moment(dateTime).add( -months, 'month').toDate();   
 }

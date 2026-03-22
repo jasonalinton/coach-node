@@ -14,7 +14,10 @@
                 <ItemTabs v-show="selectedPage == 'items'" />
                 <BlogTimeline v-show="selectedPage == 'timeline'" />
                 <PhysicalView v-show="selectedPage == 'physical'" />
+                <MentalView v-show="selectedPage == 'mental'" />
                 <EmotionalView v-show="selectedPage == 'emotional'" />
+                <SocialView v-show="selectedPage == 'social'" />
+                <FinancialView v-show="selectedPage == 'financial'" />
             </div>
             <div class="grid-right-panel">
                 <ItemPanel />
@@ -32,7 +35,10 @@ import Planner from "./components/planner/Planner.vue";
 import ItemTabs from "./components/items/ItemTabs.vue";
 import BlogTimeline from "./components/blog/BlogTimeline.vue";
 import PhysicalView from "./components/metrics/physical/PhysicalView.vue";
+import MentalView from "./components/metrics/mental/MentalView.vue";
 import EmotionalView from "./components/metrics/emotional/EmotionalView.vue";
+import SocialView from "./components/metrics/social/SocialView.vue";
+import FinancialView from "./components/metrics/financial/FinancialView.vue";
 import { useAppStore } from '@/store/appStore'
 import { usePlannerStore } from '@/store/plannerStore'
 import { useEventStore } from '@/store/eventStore'
@@ -57,7 +63,10 @@ export default {
         ItemTabs,
         BlogTimeline,
         PhysicalView,
+        MentalView,
         EmotionalView,
+        SocialView,
+        FinancialView
         // RouterView
     },
     data: function () {

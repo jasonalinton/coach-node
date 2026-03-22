@@ -72,7 +72,7 @@ export default {
 <style scoped>
 .blurb {
     background-color: #EDEDED;
-    padding: 15px 28px;
+    padding: 15px 22px;
     text-align: start;
     margin: 22px auto 0 auto;
     max-width: 720px;
@@ -90,7 +90,8 @@ export default {
 }
 
 .blurb .title {
-    font-size: 28px;
+    font-size: 22px;
+    font-weight: 400;
     line-height: 34px;
     color: #4A90E2
 }
