@@ -9,6 +9,7 @@
                                     @timeframeSelected="selectTimeframe" />
                     <BriefingGoals :idTimeframe="idTimeframe" :goalIDs="goalIDs" />
                     <BriefingBlurb :idTimeframe="idTimeframe" />
+                    <DebriefingPoints />
                 </div>
             </div>
         </div>
@@ -20,12 +21,13 @@ import ItemPanelNavbar from '../../../mobile/navbar/ItemPanelNavbar.vue';
 import TimeframeRadio from '../component/TimeframeRadio.vue';
 import BriefingGoals from './BriefingGoals.vue';
 import BriefingBlurb from './BriefingBlurb.vue';
+import DebriefingPoints from './DebriefingPoints.vue';
 import { timeframes } from '../../../../model/types';
 import { clone, today } from '../../../../../utility';
 
 export default {
     name: 'BriefingPanel',
-    components: { ItemPanelNavbar, TimeframeRadio, BriefingGoals, BriefingBlurb },
+    components: { ItemPanelNavbar, TimeframeRadio, BriefingGoals, BriefingBlurb, DebriefingPoints },
     props: {
         showHead: {
             type: Boolean,

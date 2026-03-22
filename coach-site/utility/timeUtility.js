@@ -293,6 +293,11 @@ export function getShortTimeString(datetime = new Date()) {
     return date.format(datetime, 'h:mm A');
 }
 
+// Ex. 1/24
+export function getMonthDate(date = new Date()) {
+    return moment(date).format("M/D"); // Ex. 1/24
+}
+
 export function year(dateTime = new Date()) {
     return date.format(dateTime, 'YYYY');   
 }
@@ -335,6 +340,14 @@ export function addDay(dateTime = new Date(), days = 1) {
 
 export function subtractDay(dateTime = new Date(), days = 1) {
     return moment(dateTime).add( -days, 'day').toDate();   
+}
+
+export function addWeek(dateTime = new Date(), weeks = 1) {
+    return moment(dateTime).add( weeks, 'week').toDate();   
+}
+
+export function subtracWeek(dateTime = new Date(), weeks = 1) {
+    return moment(dateTime).add( -weeks, 'week').toDate();   
 }
 
 export function addMonth(dateTime = new Date(), months = 1) {

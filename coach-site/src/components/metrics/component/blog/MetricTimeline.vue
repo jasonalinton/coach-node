@@ -50,7 +50,6 @@ export default {
         return {
             plannerStore: undefined,
             universalStore: undefined,
-            blurbs: [],
             newPost: {
                 isShown: false,
                 datetime: undefined,
