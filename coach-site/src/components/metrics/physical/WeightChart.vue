@@ -44,8 +44,8 @@ export default {
             if (this.physicalStore) {
                 let measurements = this.physicalStore.getBodyMeasurements();
                 if (measurements.length > 0) {
-                    let startDate = addDay(new Date(), -365);
-                    measurements = measurements.filter(x => +x.dateTime.toDate() >= +startDate);
+                    // let startDate = addDay(new Date(), -365);
+                    // measurements = measurements.filter(x => +x.dateTime.toDate() >= +startDate);
                     measurements = sortDateAsc(measurements, 'dateTime');
                     let lastDate = new Date(1970, 0, 1);
                     measurements.forEach(measurement => {

@@ -25,8 +25,8 @@ export const usePhysicalStore = defineStore('physical', {
             let now = new Date();
             this.getNutritionHistory(null, addYear(now, -1), addDay(now, 1))
             .then(result => {  
-                _this.mealHistories = result.meals;
-                _this.waterLogs = result.waterLogs;
+                this.mealHistories = result.meals;
+                this.waterLogs = result.waterLogs;
              });
              postEndpoint("Physical", "GetBodyMeasurements")
                 .then(response => {
