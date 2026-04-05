@@ -30,6 +30,7 @@
                         </li>
                         <li v-for="(vm, index) in todayPending" v-bind:key="vm.id" :style="{ 'z-index': -index }">
                             <HierarchicalListItem :viewModel="vm"
+                                                  :level="2"
                                                   @onEdit="$emit('editIteration', $event)" />
                         </li>
                     </ul>
