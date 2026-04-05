@@ -1,11 +1,13 @@
 <template>
-    <div>
+    <div class="repeat-control-2">
         <div v-if="!isEditing" class="wrapper d-flex flex-row justify-content-between"
              :class="{ 'archived': isArchived}"
              @click="onRepeatClicked">
             <div class="d-flex flex-row">
                 <div class="d-flex flex-column">
                     <img src="/icon/calendar-day.png" width="14" height="14"/>
+                    <span v-if="repeat.parentID">{{ repeat.parentID }}</span>
+                    <!-- ID -->
                     <span>{{ repeat.id }}</span>
                 </div>
                 <div class="timeframe d-flex flex-column">
@@ -37,7 +39,13 @@
         </div>
         <div v-if="isEditing" class="wrapper-edit d-flex flex-row">
             <div>
-                <div class="text-start">{{ updatedRepeat.id }}</div>
+                <!-- IDs -->
+                <div v-if="updatedRepeat.parentID" class="id text-start">Parent ID: {{ updatedRepeat.parentID }}</div>
+                <div class="d-flex gap-2">
+                    <div class="id text-start">ID: {{ updatedRepeat.id }}</div>
+                    <!-- Is Owner? -->
+                    <div class="id text-start">{{ (updatedRepeat.isOwner) ? 'Owner' : 'Descendant' }}</div>
+                </div>
                 <!-- Timeframe -->
                 <div class="d-flex flew-rowalign-middle mt-2">
                     <div v-for="repetition in timeframes.filter(rep => rep.isActive)" v-bind:key="repetition.id" 
@@ -171,7 +179,7 @@
 import TimeControl from '../../../controls/time/TimeControl2.vue'
 import { clone, capitalize, today } from '../../../../../utility'
 import { dateOnly, getNumberDateString } from '../../../../../utility/timeUtility'
-import { MOMENT } from '../../../../model/constants'
+import { INHERITANCE, MOMENT, TODO_MAPPING_TYPE } from '../../../../model/constants'
 import { inheritanceTypes, todoMappingTypes } from '../../../../model/types'
 
 let timeframes = [
@@ -276,7 +284,8 @@ export default {
             isEditing: false,
             isValid: {
                 date: true,
-                time: true
+                time: true,
+                todoMappingType: true
             },
         }
     },
@@ -427,6 +436,22 @@ export default {
         isEditing(value) {
             if (value == true) {
                 this.initUpdatedRepeat();
+            }
+        },
+        'updatedRepeat.idInheritance'(value) {
+            if (value == INHERITANCE.SELF) {
+                if (this.updatedRepeat.idTodoMappingType != TODO_MAPPING_TYPE.CLASS 
+                    && this.updatedRepeat.idTodoMappingType != TODO_MAPPING_TYPE.GROUP) {
+                        this.updatedRepeat.idTodoMappingType = TODO_MAPPING_TYPE.GROUP
+                }
+            }
+        },
+        'updatedRepeat.idTodoMappingType'(value) {
+            if (value == TODO_MAPPING_TYPE.PACKAGE || value == TODO_MAPPING_TYPE.SEQUENCE) {
+                if (this.updatedRepeat.idInheritance != INHERITANCE.CHILDREN 
+                    && this.updatedRepeat.idInheritance != INHERITANCE.DESCENDANTS) {
+                        this.updatedRepeat.idInheritance = INHERITANCE.CHILDREN
+                }
             }
         }
     }
@@ -611,6 +636,10 @@ button.btn-close {
 
 img {
     margin-top: 1px;
+}
+
+.id {
+    font-size: 12px
 }
 
 .timeframe {
