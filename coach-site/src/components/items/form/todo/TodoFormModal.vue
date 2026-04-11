@@ -139,7 +139,7 @@
                 </div>
             </div>
             <div v-if="!mapper.isShown" class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @click="createTask">Create Task</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @click="createTask">{{`Create Task ${dateString}`}}</button>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 <button type="button" class="btn btn-primary" @click="save">Save</button>
             </div>
@@ -154,6 +154,7 @@ import FormItemList from '../component/FormItemList.vue';
 import ItemMapper from '../component/ItemMapper.vue'
 import { clone, replaceItem, addOrReplaceItem, sortItems, sortAsc } from '../../../../../utility';
 import { metrics, todoTypes, mediums, todoActivityTypes } from '../../../../model/types';
+import { today, toShortWeekdayString } from '../../../../../utility/timeUtility';
 
 export default {
     name: "TodoFormModal",
@@ -235,6 +236,15 @@ export default {
         this.setProps(todo);
     },
     computed: {
+        selectedDate() {
+            return (this.plannerStore) ? this.plannerStore.selectedDate : today();
+        },
+        dateString() {
+            if (+this.selectedDate != +today()) {
+                return `(${toShortWeekdayString(this.selectedDate, true)})`;
+            }
+            return "";
+        },
         todo() {
             if (this.store) {
                 let todo = this.store.getItem(this.id);
