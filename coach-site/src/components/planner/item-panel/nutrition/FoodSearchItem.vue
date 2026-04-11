@@ -11,7 +11,7 @@
                     <span class="ms-1">{{ item.unit }}</span> -->
                 </div>
             </div>
-            <span class="float-end">{{ float(item.calories,0) }}</span>
+            <span class="float-end">{{ calories }}</span>
         </div>
         <!-- unit dropdown -->
         <div class="input-wrrapper d-flex flex-row w-100 mt-1">
@@ -64,6 +64,9 @@ export default {
             });
             return units;
         },
+        calories() {
+            return float(this.quantity * this.item.calories * this.units[this.unit].grams, 0);
+        }
     },
     watch: {
         units() {
@@ -73,19 +76,18 @@ export default {
     methods: {
         setUnit,
         addFoodItem,
-        float
     },
 }
 
 function setUnit() {
-        let unit = 0;
-        for (let i = 0; i < this.units.length; i++) {
-            if (this.units[i].isDefault) {
-                unit = i;
-                break;
-            }
+    let unit = 0;
+    for (let i = 0; i < this.units.length; i++) {
+        if (this.units[i].isDefault) {
+            unit = i;
+            break;
         }
-        this.unit = unit;
+    }
+    this.unit = unit;
 }
 
 async function addFoodItem() {

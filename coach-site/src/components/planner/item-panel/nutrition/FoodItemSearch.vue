@@ -3,7 +3,7 @@
         <div class="pt-2 ms-2 me-2 mb-2 sticky-top head">
             <div class="d-flex flex-row mb-2">
                 <input id="food-search-input" class="title textbox" type="text" ref="text"  placeholder="Search"
-                        v-model.trim.lazy="searchTerm" 
+                        v-model.trim="searchTerm" 
                         @keyup.enter="search"/>
                 <input id="quantity" class="quantity textbox ms-1" type="number" placeholder="#"
                         v-model.trim.lazy="quantity" />
@@ -19,7 +19,7 @@
         <div v-if="['Recent'].includes(tab) && recents.length > 0" 
              class="recents d-flex flex-column">
             <span class="text-start ms-2">Recents</span>
-            <div v-for="(item, index) in recents" :key="index"
+            <div v-for="(item, index) in getFilteredItems(recents)" :key="index"
                  class="item d-flex flex-row align-items-center"
                  @click="addFoodItem(item, 'recent')">
                 <img class="align-self-start" :src="item.thumbURL" height="40" width="40"
@@ -39,7 +39,7 @@
         <div v-if="['Recent2'].includes(tab) && recents2.length > 0" 
              class="recents d-flex flex-column">
             <span class="text-start ms-2">Recents</span>
-            <FoodSearchItem v-for="(item, index) in recents2" :key="index"
+            <FoodSearchItem v-for="(item, index) in getFilteredItems(recents2)" :key="index"
                             :item="item" :meal="meal"
                             @selectFoodItem="$emit('selectFoodItem', $event)" />
         </div>
@@ -149,11 +149,13 @@ export default {
         searchUPC,
         addRecentItem,
         createFoodItem,
-        addFoodItem
-    },
-    watch: {
-        searchTerm() {
-            this.search();
+        addFoodItem,
+        getFilteredItems(items) {
+            let filtered = items.filter(x => 
+                x.name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+                ( x.brandName && x.brandName.toLowerCase().includes(this.searchTerm.toLowerCase())) ||
+                (x.upc && x.upc.toLowerCase().includes(this.searchTerm.toLowerCase())));
+            return filtered;
         }
     },
 }
