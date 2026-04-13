@@ -90,6 +90,59 @@ export let mediums = [
     },
 ]
 
+// NOTE: Not really a type. Global constant determined by index
+export let dow = [
+    {
+        id: 1,
+        index: 1,
+        text: "Sunday",
+        alt: "S",
+        isSelected: false
+    },
+    {
+        id: 2,
+        index: 2,
+        text: "Monday",
+        alt: "M",
+        isSelected: false
+    },
+    {
+        id: 3,
+        index: 3,
+        text: "Tuesday",
+        alt: "T",
+        isSelected: false
+    },
+    {
+        id: 4,
+        index: 4,
+        text: "Wednesday",
+        alt: "W",
+        isSelected: false
+    },
+    {
+        id: 5,
+        index: 5,
+        text: "Thursday",
+        alt: "T",
+        isSelected: false
+    },
+    {
+        id: 6,
+        index: 6,
+        text: "Friday",
+        alt: "F",
+        isSelected: false
+    },
+    {
+        id: 7,
+        index: 7,
+        text: "Saturday",
+        alt: "S",
+        isSelected: false
+    },
+]
+
 export let timeframes = [
     {
         id: 43,

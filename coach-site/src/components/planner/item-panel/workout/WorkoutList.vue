@@ -82,8 +82,7 @@ export default {
     },
     methods: {
         createWorkout() {
-            this.selectedWorkoutID = -1;
-            this.selectedPanel = "workoutForm";
+            this.appStore.selectWorkoutView("workoutForm");
         },
         selectWorkout(id) {
             this.appStore.selectWorkout(id);

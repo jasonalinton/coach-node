@@ -1,16 +1,125 @@
 import { defineStore } from 'pinia'
 import { today, startOfDay } from '../../utility'
 import { dateOnly } from '../../utility/timeUtility';
+import { postEndpoint } from '../api/api';
+import { REPETITION, TIMEFRAME } from '../model/constants';
 
 export const usePlannerStore = defineStore('planner', {
     state: () => ({
         currentTime: new Date(),
-        selectedDate: today(new Date())
+        selectedDate: today(new Date()),
+        repeats: [],
+        timePairs: []
     }),
     getters: {
-        
+        activeRepeats() {
+            let repeats = this.repeats.filter(repeat => {
+                // If start date is before selected date
+                if (repeat.startDate && +repeat.startDate.toDate() <= +this.selectedDate) {
+                    if (repeat.endDate) {
+                        if (+repeat.endDate.toDate() >= +this.selectedDate) {
+                            return true
+                        }
+                    } else {
+                        return true; // If no end date
+                    }
+                }
+            })
+            return repeats;
+        }
     },
     actions: {
+        initialize() {
+            this.getRepeatsAndTimePairs();
+        },
+        getRepeatsAndTimePairs() {
+            return postEndpoint("Planner", "GetRepeatsAndTimepairs")
+                .then(response => {
+                    this.repeats = response.result.repeats;
+                    this.timePairs = response.result.timePairs;
+                });
+        },
+        getActiveRepeats(idTimeframe, selectedDate) {
+            let idRepetition = 0;
+            if (idTimeframe == TIMEFRAME.DAY) {
+                idRepetition = REPETITION.DAILY;
+            } else if (idTimeframe == TIMEFRAME.WEEK) {
+                idRepetition = REPETITION.WEEKLY;
+            } else if (idTimeframe == TIMEFRAME.MONTH) {
+                idRepetition = REPETITION.MONTHLY;
+            } else if (idTimeframe == TIMEFRAME.YEAR) {
+                idRepetition = REPETITION.ANUALLY;
+            }
+
+            let repeats = this.repeats.filter(repeat => {
+                if (repeat.idTimeframe != idRepetition) {
+                    return false;
+                }
+
+                // TODO: HANDLE IRREGULAR TIMEFRAMES
+
+                // If start date is before selected date
+                if (repeat.startDate && +repeat.startDate.toDate() <= +selectedDate) {
+                    if (repeat.endDate) {
+                        if (+repeat.endDate.toDate() >= +selectedDate) {
+                            return true
+                        }
+                    } else {
+                        return true; // If no end date
+                    }
+                }
+            })
+            return repeats;
+        },
+        getActiveTimePairs(idTimeframe, selectedDate) {
+            let timePairs = this.timePairs.filter(timePair => {
+                if (idTimeframe) {
+                    if (timePair.idTimeframe != idTimeframe) {
+                        return false;
+                    }
+                }
+
+                // TODO: HANDLE IRREGULAR TIMEFRAMES
+
+                // If start date is before selected date
+                if (timePair.startAt && +timePair.startAt.toDate() <= +selectedDate) {
+                    if (timePair.endAt) {
+                        if (+timePair.endAt.toDate() >= +selectedDate) {
+                            return true
+                        }
+                    } else {
+                        return true; // If no end date
+                    }
+                }
+            })
+            return timePairs;
+        },
+        isRepeatPlannedOnDate(id, selectedDate) {
+            let repeat = this.repeats.find(x => x.id == id);
+            let isActive = false;
+            if (repeat.startDate && +repeat.startDate.toDate() <= +selectedDate) {
+                if (repeat.endDate) {
+                    if (+repeat.endDate.toDate() >= +selectedDate) {
+                        isActive = true
+                    }
+                } else {
+                    isActive = true; // If no end date
+                }
+            }
+            if (!isActive) {
+                return false;
+            }
+            if (repeat.idTimeframe == REPETITION.WEEKLY) {
+                let dow = selectedDate.getDay() + 1;
+                let isOnDay = repeat.dayIndecies.some(x => x == dow);
+                return isOnDay;
+            }
+            if (repeat.idTimeframe == REPETITION.MONTHLY) {
+                let date = selectedDate.getDate();
+                let isOnDay = repeat.dayIndecies.some(x => x == date);
+                return isOnDay;
+            }
+        },
         startClock() {
             this.currentTime = new Date();
             let seconds = this.currentTime.getSeconds();
@@ -99,6 +208,6 @@ export const usePlannerStore = defineStore('planner', {
                 isEventVisible: false,
                 todoIDs: [],
             }
-        }
+        },
     },
 })

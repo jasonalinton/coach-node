@@ -1,5 +1,11 @@
 <template>
     <div>
+        <div class="d-flex flex-row">
+            <span></span>
+        </div>
+        <div class="d-flex flex-column">
+            <span></span>
+        </div>
         <!-- Button -->
         <button type="button" class="btn btn-primary mb-2" @click="logAllSets">Log All Sets</button>
         
@@ -46,6 +52,7 @@
 </template>
 
 <script>
+import { firstDayOfWeek, firstDayOfMonth, firstDayOfYear, lastDayOfWeek, lastDayOfMonth, lastDayOfYear } from '../../../../../utility/timeUtility';
 
 export default {
     name: 'TemplateComonents',
@@ -55,6 +62,7 @@ export default {
     },
     data: function () {
         return {
+            appStore: undefined,
             plannerStore: undefined,
             iterationStore: undefined,
             todoStore: undefined,
@@ -62,6 +70,9 @@ export default {
         }
     },
     created: async function() {
+        let appStore = await import(`@/store/appStore`);
+        this.appStore = appStore.useAppStore();
+
         let plannerStore = await import(`@/store/plannerStore`);
         this.plannerStore = plannerStore.usePlannerStore();
 

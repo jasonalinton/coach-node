@@ -143,6 +143,7 @@ async function initStores() {
     let todoStore = useTodoStore();
     let routineStore = useRoutineStore();
 
+    this.plannerStore.initialize();
     universalStore.initialize();
     eventStore.initialize();
     iterationStore.initialize();

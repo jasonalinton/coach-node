@@ -4,6 +4,7 @@ import { getRepetitiveTodoIterations } from '../api/todoAPI';
 import { getAllIterationsInRange, getUnplannedIterations } from '../api/plannerAPI'
 import { removeItemByID, replaceOrAddItem, sortAsc } from '../../utility'
 import { postEndpoint } from '../api/api';
+import { getTimeframeEndpoints } from '../../utility/timeUtility';
 
 let initialized = false;
 
@@ -44,6 +45,12 @@ export const useIterationStore = defineStore('iteration', {
             }
             return this.iterations.filter(iteration => {
                 return (new Date(iteration.startAt)).getTime() >= startAt && (new Date(iteration.startAt)).getTime() <= endAt;
+            });
+        },
+        getIterationsInTimeframe(idTimeframe, selectedDate) {
+            var { start, end } = getTimeframeEndpoints(idTimeframe, selectedDate);
+            return this.iterations.filter(iteration => {
+                return (new Date(iteration.startAt)).getTime() >= start && (new Date(iteration.startAt)).getTime() <= end;
             });
         },
         getRepetitiveTodoIterations(startAt, endAt) {
