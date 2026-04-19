@@ -61,6 +61,30 @@ export const useTodoStore = defineStore('todo', {
                 .filter(todo => todo.typeID == TODOTYPE.MEMORIZATION);
             return todos;
         },
+        getDescendantIDs(id) {
+            let descentIDs = [];
+            let todo = this.todos.find(x => x.id == id);
+            todo.childIDs.forEach(childID => {
+                this.getDescendantIDsLopp(childID, descentIDs);
+            })
+            return descentIDs;
+        },
+        getDescendantIDsLopp(id, descentIDs) {
+            let _id = descentIDs.includes(id);
+            if (!_id) {
+                descentIDs.push(id);
+                let todo = this.todos.find(x => x.id == id);
+                if (todo == undefined) {
+                    return; // Todo is deleted
+                }
+                console.log(todo.text);
+                todo.childIDs.forEach(childID => {
+                    this.getDescendantIDsLopp(childID, descentIDs);
+                })
+            } else {
+                return;
+            }
+        },
         saveTodo(model) {
             return postEndpoint("Todo", "SaveTodo", model)
             .then(response => response.result);

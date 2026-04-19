@@ -1,7 +1,7 @@
 <template>
     <div v-if="routine" class="task-routine-item d-flex flex-column">
         <span class="text-start ps-2">{{ routine.text }}</span>
-        <TaskRoutineListItem v-for="id in todoIDs" :key="d" 
+        <TaskRoutineListItem v-for="id in todoIDs" :key="id" 
                              :idTodo="id" :idTodo_Root="id"
                              :level="1" :idRoutineRepeat="repeatID" />
     </div>
