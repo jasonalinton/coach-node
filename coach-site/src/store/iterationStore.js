@@ -50,7 +50,8 @@ export const useIterationStore = defineStore('iteration', {
         getIterationsInTimeframe(idTimeframe, selectedDate) {
             var { start, end } = getTimeframeEndpoints(idTimeframe, selectedDate);
             return this.iterations.filter(iteration => {
-                return (new Date(iteration.startAt)).getTime() >= start && (new Date(iteration.startAt)).getTime() <= end;
+                return (new Date(iteration.startAt)).getTime() >= start && (new Date(iteration.startAt)).getTime() <= end
+                    && iteration.idTimeframe && iteration.idTimeframe == idTimeframe;
             });
         },
         getRepetitiveTodoIterations(startAt, endAt) {
@@ -106,6 +107,16 @@ export const useIterationStore = defineStore('iteration', {
         rescheduleIteration(iterationID, startAt, endAt) {
             let data = { iterationID, startAt, endAt };
             return postEndpoint("Planner", "RescheduleIteration", data)
+            .then(response => response.result);
+        },
+        completeTimePairIteration(idTodo, idTimePair, text, points, datetime, startAt, endAt) {
+            let data = { idTodo, idTimePair, text, points, datetime, startAt, endAt };
+            return postEndpoint("Planner", "CompleteTimePairIteration", data)
+            .then(response => response.result);
+        },
+        completeRepeatIteration(idTodo, idRepeat, text, points, datetime, startAt, endAt) {
+            let data = { idTodo, idRepeat, text, points, datetime, startAt, endAt };
+            return postEndpoint("Planner", "CompleteRepeatIteration", data)
             .then(response => response.result);
         },
         // This is the wrong name. Technically it's not toggling, its setting the values

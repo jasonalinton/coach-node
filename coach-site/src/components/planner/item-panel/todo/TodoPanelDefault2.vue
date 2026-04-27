@@ -9,46 +9,9 @@
             <!-- Pending -->
             <div class="d-flex flex-column flex-grow-1">
                 <!-- Today -->
-                <div class="d-flex flex-column">
-                    <div class="d-flex flex-row">
-                        <span v-if="isToday" class="timeframe">Today</span>
-                        <span v-if="!isToday" class="timeframe">Day</span>
-                        <span class="dash">-</span>
-                        <span class="date">{{ date }}</span>
-                    </div>
-                    <ul class="item-list pending">
-                        <li v-if="newTaskText != undefined">
-                            <!-- New Task -->
-                            <div class="new-task d-flex flex-row align-items-center">
-                                <ItemCheckbox :width="40" :height="40" @onChecked="addTask(true)"></ItemCheckbox>
-                                <input id="newTask" ref="newTask" class="form-control form-control-sm" type="text" 
-                                    v-model="newTaskText"
-                                    v-on:keyup.enter="addTask(false)"
-                                    v-on:keyup.esc="newTaskText = undefined"
-                                    autofocus/>
-                            </div>
-                        </li>
-                        <li v-for="(vm, index) in todayPending" v-bind:key="vm.id" :style="{ 'z-index': -index }">
-                            <HierarchicalListItem :viewModel="vm"
-                                                  :level="2"
-                                                  @onEdit="$emit('editIteration', $event)" />
-                        </li>
-                    </ul>
-                </div>
+                <TodoPanelTimeframe class="d-flex flex-column" :idTimeframe="TIMEFRAME.DAY" />
                 <!-- Week -->
-                <div v-if="weekPending.length > 0" class="d-flex flex-column">
-                    <div class="d-flex flex-row">
-                        <span class="timeframe">Week</span>
-                    </div>
-                    <ul class="item-list pending">
-                        <li v-for="(vm, index) in weekPending" v-bind:key="vm.id" :style="{ 'z-index': -index }">
-                            <HierarchicalListItem :viewModel="vm"
-                                                  :level="2"
-                                                  @onEdit="$emit('editIteration', $event)" />
-                        </li>
-                    </ul>
-                </div>
-
+                <TodoPanelTimeframe class="d-flex flex-column" :idTimeframe="TIMEFRAME.WEEK" />
             </div>
             <!-- Complete  -->
             <div class="complete d-flex flex-column">
@@ -98,13 +61,14 @@ import AddTaskButton from '../component/AddTaskButton.vue'
 // import IconButton from '../../../controls/button/IconButton.vue'
 import ItemCheckbox from '../component/ItemCheckbox.vue';
 import HierarchicalListItem from '../component/HierarchicalListItem.vue'
+import TodoPanelTimeframe from './TodoPanelTimeframe.vue';
 import { sortAsc, sortTrueOnBottom, clone } from '../../../../../utility';
 import { toShortWeekdayString, isToday, startOfDay, firstDayOfWeek, lastDayOfWeek, firstDayOfMonth, lastDayOfMonth } from '../../../../../utility/timeUtility';
 import { TIMEFRAME } from '../../.././../model/constants';
 
 export default {
-    name: 'TodoPanelDefault',
-    components: { AddTaskButton, ItemCheckbox, HierarchicalListItem },
+    name: 'TodoPanelDefault2',
+    components: { AddTaskButton, ItemCheckbox, HierarchicalListItem, TodoPanelTimeframe },
     props: {
         selectedDate: Date,
     },

@@ -1,17 +1,17 @@
 <template>
-    <div class="todo-panel-timeframe d-flex flex-column">
+    <div class="todo-panel-timeframe d-flex flex-column mt-2">
         <div class="d-flex flex-row">
             <span class="timeframe">{{ timeframe }}</span>
-        </div>
-        <div v-if="showRepeat" class="d-flex flex-column">
-            <span>Repeats</span>
-            <RepeatListItem v-for="repeat in repeats" :key="repeat.id" :idRepeat="repeat.id" :idTimeframe="idTimeframe" />
-            <!-- <span v-for="repeat in repeats" :key="repeat.id">{{ repeat.id }}</span> -->
+            <div v-if="idTimeframe == TIMEFRAME.DAY" class="d-flex flex-row">
+                <span class="dash">-</span>
+                <span class="date">{{ date }}</span>
+            </div>
         </div>
         <div class="d-flex flex-column">
-            <span>Time-Pairs</span>
             <TimePairListItem v-for="timePair in timePairs" :key="timePair.id" :idTimePair="timePair.id" />
-            <!-- <span v-for="timePair in timePairs" :key="timePair.id">{{ timePair.id }}</span> -->
+        </div>
+        <div v-if="showRepeat" class="d-flex flex-column">
+            <RepeatListItem v-for="repeat in repeats" :key="repeat.id" :idRepeat="repeat.id" :idTimeframe="idTimeframe" />
         </div>
     </div>
 </template>
@@ -21,7 +21,7 @@ import RepeatListItem from './RepeatListItem.vue';
 import TimePairListItem from './TimePairListItem.vue';
 import { timeframes } from '../../../../model/types';
 import { TIMEFRAME } from '../../../../model/constants';
-import { dow } from '../../../../../utility/timeUtility';
+import { dow, isToday, toShortWeekdayString, today } from '../../../../../utility/timeUtility';
  
 export default {
     name: 'TodoPanelTimeframe',
@@ -33,6 +33,8 @@ export default {
         return {
             appStore: undefined,
             plannerStore: undefined,
+            iterationStore: undefined,
+            TIMEFRAME,
             showDayIndices: false
         }
     },
@@ -42,14 +44,27 @@ export default {
 
         let plannerStore = await import(`@/store/plannerStore`);
         this.plannerStore = plannerStore.usePlannerStore();
+
+        let iterationStore = await import(`@/store/iterationStore`);
+        this.iterationStore = iterationStore.useIterationStore();
     },
     computed: {
         selectedDate() {
             return (this.plannerStore) ? this.plannerStore.selectedDate : today();
         },
+        date() {
+            return toShortWeekdayString(this.selectedDate, true);
+        },
         timeframe() {
-            let timeframe = timeframes.find(x => x.id == this.idTimeframe);
-            return timeframe.text;
+            if (this.idTimeframe == TIMEFRAME.DAY) {
+                return (this.isToday) ? "Today" : "Day"
+            } else {
+                let timeframe = timeframes.find(x => x.id == this.idTimeframe);
+                return timeframe.text;
+            }
+        },
+        isToday() {
+            return isToday(this.selectedDate);
         },
         repeats() {
             if (this.plannerStore && this.appStore) {
@@ -103,9 +118,16 @@ export default {
             }
         },
         timePairs() {
-            if (this.plannerStore) {
+            if (this.plannerStore && this.iterationStore) {
                 let timePairs = this.plannerStore.getActiveTimePairs(this.idTimeframe, this.selectedDate);
-                return timePairs;
+                let timePairIDs = timePairs.map(x => x.id);
+
+                let iterations = this.iterationStore.getIterationsInTimeframe(this.idTimeframe, this.selectedDate)
+                    .filter(x => x.idTodoTimePair && !timePairIDs.includes(x.id));
+                timePairIDs = iterations.map(x => x.idTodoTimePair);
+                let timePairs2 = this.plannerStore.timePairs.filter(x => timePairIDs.includes(x.id));
+
+                return [...timePairs, ...timePairs2];
             }
         },
         showRepeat() {
@@ -129,12 +151,19 @@ export default {
 </script>
 
 <style scoped>
-
 span.timeframe {
     padding-left: 20px;
     color: #3B99FC;
     font-size: 14px;
     font-weight: 500;
+}
+span.date {
+    font-size: 14px;
+    font-weight: 500;
+}
+span.dash {
+    margin: 0 4px;
+    line-height: 21px;
 }
 
 </style>

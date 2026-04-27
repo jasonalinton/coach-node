@@ -55,9 +55,10 @@ export const useAppStore = defineStore('app', {
                 showRecommended: true,
                 showHierarchy: true,
                 sort: {
-                    by: 'Default',
+                    by: 'Default2',
                     items: [
                         { id: 1, text: "Default" },
+                        { id: 1, text: "Default2" },
                         { id: 2, text: "Backlog" },
                         { id: 3, text: "Custom" },
                         { id: 4, text: "Repetition" },

@@ -24,6 +24,10 @@
                                     :selectedDate="selectedDate"
                                     @editIteration="iteration => iteration_Form = iteration">
                 </TodoPanelDefault>
+                <TodoPanelDefault2 v-if="sortBy=='Default2'" 
+                                    :selectedDate="selectedDate"
+                                    @editIteration="iteration => iteration_Form = iteration">
+                </TodoPanelDefault2>
                 <TodoPanelMemorization v-if="sortBy=='Memorization'" />
             </template>
             <IterationForm v-if="iteration_Form" 
@@ -41,13 +45,14 @@ import TodoPanelBacklog from './TodoPanelBacklog.vue';
 import TodoPanelByRepetition from './TodoPanelByRepetition.vue';
 import TodoPanelByCustom from './TodoPanelByCustom.vue';
 import TodoPanelDefault from './TodoPanelDefault.vue';
+import TodoPanelDefault2 from './TodoPanelDefault2.vue';
 import TodoPanelMemorization from './TodoPanelMemorization.vue';
 import IterationForm from '../component/form/IterationForm.vue';
 import { today, firstDayOfMonth, lastDayOfMonth } from '../../../../../utility/timeUtility';
 export default {
     name: 'TodoPanel',
     components: { ItemPanelNavbar, TodoPanelByMetric, TodoPanelBacklog, TodoPanelByRepetition,
-        TodoPanelByCustom, TodoPanelDefault, TodoPanelMemorization, IterationForm, },
+        TodoPanelByCustom, TodoPanelDefault, TodoPanelDefault2,TodoPanelMemorization, IterationForm, },
     props: {
         showHead: {
             type: Boolean,
