@@ -1,27 +1,50 @@
 <template>
-    <div class="hour-block position-relative" :style="{ 'height': `${blockHeight}px` }">
+    <div class="hour-block position-relative d-flex flex-wrap align-items-baseline" :style="{ 'height': `${blockHeight}px` }">
         <span v-if="isCurrentHour" class="time circle" :style="{ 'top': `${timeTop - 4}px`}"></span>
         <span v-if="isCurrentHour" class="time line" :style="{ 'top': `${timeTop}px`}"></span>
-        <Event v-for="(_event, index) in events" :key="index"
-               :_event="_event"
-               :minuteHeight="minuteHeight"
-               :zIndex="zIndex">
-        </Event>
+        <template v-for="(item, index) in items">
+            <Event v-if="item.type == 'event'" :key="index"
+                   :style="{'width': 100/events.length + '% !important'}"
+                   :_event="item.data"
+                   :minuteHeight="minuteHeight"
+                   :zIndex="zIndex">
+            </Event>
+            <Task v-if="item.type == 'iteration'" :task="item.data"></Task>
+        </template>
     </div>
 </template>
 
 <script>
 import Event from './Event.vue'
+import Task from '../Task.vue';
 import { startOfDay } from '../../../../../utility/timeUtility';
+import { TIMEFRAME } from '../../../../model/constants';
 
 export default {
-    components: { Event },
+    components: { Event, Task },
     name: "HourBlock",
     props: {
         date: Date,
         hour: Object,
         blockHeight: Number,
         zIndex: Number
+    },
+    data: function () {
+        return {
+            plannerStore: undefined,
+            eventStore: undefined,
+            iterationStore: undefined,
+        };
+    },
+    created: async function() {
+        let plannerStore = await import(`@/store/plannerStore`);
+        this.plannerStore = plannerStore.usePlannerStore();
+
+        let eventStore = await import(`@/store/eventStore`);
+        this.eventStore = eventStore.useEventStore();
+
+        let iterationStore = await import(`@/store/iterationStore`);
+        this.iterationStore = iterationStore.useIterationStore();
     },
     computed: {
         timeTop() {
@@ -48,6 +71,20 @@ export default {
                 return false;
             }
         },
+        items() {
+            let items = [];
+            if (this.events) {
+                items = items.concat(this.events.map(event => {
+                    return { type: "event", data: event }
+                }));
+            }
+            if (this.iterations) {
+                items = items.concat(this.iterations.map(iteration => {
+                    return { type: "iteration", data: iteration }
+                }));
+            }
+            return items;
+        },
         events() {
             if (this.eventStore) {
                 let start = startOfDay(this.date);
@@ -59,30 +96,26 @@ export default {
                 events = events.filter(event => {
                     return (new Date(event.startAt)).getTime() >= start && (new Date(event.startAt)).getTime() <= end;
                 });
-
-                /* TEMP: Remove Moring Joy & Morning Routines */
-                // events = events.filter(_event => {
-                //     return _event.text != "Morning Joy" && _event.text != "Morning Routine";
-                // });
                 
                 return events;
             } else {
                 return [];
             }
-        }
-    },
-    data: function () {
-        return {
-            plannerStore: undefined,
-            eventStore: undefined
-        };
-    },
-    created: async function() {
-        let plannerStore = await import(`@/store/plannerStore`);
-        this.plannerStore = plannerStore.usePlannerStore();
+        },
+        iterations() {
+            if (this.iterationStore) {
+                let start = startOfDay(this.date);
+                start.setHours(this.hour.military);
+                let end = startOfDay(this.date);
+                end.setHours(this.hour.military, 59, 59, 59);
 
-        let eventStore = await import(`@/store/eventStore`);
-        this.eventStore = eventStore.useEventStore();
+                let iterations = this.iterationStore.getIterationsInTimeframe(TIMEFRAME.DAY, this.date);
+                iterations = iterations.filter(x => +x.startAt.toDate().getTime() >= start && +x.startAt.toDate().getTime() <= end)
+
+                return iterations;
+            }
+            return undefined;
+        },
     },
     methods: {
         

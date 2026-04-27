@@ -9,48 +9,25 @@
             <!-- Pending -->
             <div class="d-flex flex-column flex-grow-1">
                 <!-- Today -->
-                <TodoPanelTimeframe class="d-flex flex-column" :idTimeframe="TIMEFRAME.DAY" />
+                <TodoPanelTimeframe class="d-flex flex-column" 
+                                    :idTimeframe="TIMEFRAME.DAY" 
+                                    @editIteration="$emit('editIteration', $event)"/>
                 <!-- Week -->
-                <TodoPanelTimeframe class="d-flex flex-column" :idTimeframe="TIMEFRAME.WEEK" />
+                <TodoPanelTimeframe class="d-flex flex-column" 
+                                    :idTimeframe="TIMEFRAME.WEEK" 
+                                    @editIteration="$emit('editIteration', $event)"/>
             </div>
             <!-- Complete  -->
             <div class="complete d-flex flex-column">
                 <div class="header float-start">Completed ({{ completeCount }})</div>
-                <!-- Today - Complete -->
-                <div v-if="todayComplete.length > 0" class="d-flex flex-column">
-                    <div class="d-flex flex-row justify-content-between">
-                        <div class="d-flex flex-row">
-                            <span v-if="isToday" class="timeframe">Today</span>
-                            <span v-if="!isToday" class="timeframe">Day</span>
-                            <span class="dash">-</span>
-                            <span class="date">{{ date }}</span>
-                        </div>
-                        <!-- Points -->
-                        <div class="d-flex flex-row">
-                            <span class="points">{{ todayPoints.text }}</span>
-                        </div>
-                    </div>
-                    <ul class="item-list">
-                        <li v-for="(vm, index) in todayComplete" v-bind:key="vm.id" :style="{ 'z-index': -index }">
-                            <HierarchicalListItem :viewModel="vm"
-                                                  :level="2"
-                                                  @onEdit="$emit('editIteration', $event)" />
-                        </li>
-                    </ul>
-                </div>
-                <!-- Week - Complete -->
-                <div v-if="weekComplete.length > 0" class="d-flex flex-column">
-                    <div class="d-flex flex-row">
-                        <span class="timeframe">Week</span>
-                    </div>
-                    <ul class="item-list pending">
-                        <li v-for="(vm, index) in weekComplete" v-bind:key="vm.id" :style="{ 'z-index': -index }">
-                            <HierarchicalListItem :viewModel="vm"
-                                                  :level="2"
-                                                  @onEdit="$emit('editIteration', $event)" />
-                        </li>
-                    </ul>
-                </div>
+                <!-- Today -->
+                <TodoPanelTimeframe class="d-flex flex-column" 
+                                    :idTimeframe="TIMEFRAME.DAY" :showComplete="true"  
+                                    @editIteration="$emit('editIteration', $event)"/>
+                <!-- Week -->
+                <TodoPanelTimeframe class="d-flex flex-column" 
+                                    :idTimeframe="TIMEFRAME.WEEK" :showComplete="true" 
+                                    @editIteration="$emit('editIteration', $event)"/>
             </div>
         </div>
     </div>

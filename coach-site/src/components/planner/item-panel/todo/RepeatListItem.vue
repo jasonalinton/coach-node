@@ -158,12 +158,8 @@ export default {
                 } else { // If no iteration, or if iteration is incomlete
                     return true;
                 }
-            } else {
-                if (this.iteration && this.iteration.attemptedAt) { // If has attempted iteration
-                    return true;
-                } else { // If no iteration, or if iteration is incomlete
-                    return false;
-                }
+            } else if (this.showComplete) {
+                return (this.isComplete);
             }
         },
         repeat() {
@@ -314,10 +310,7 @@ function markIncomplete() {
 }
 
 function onEdit() {
-    let iteration =  clone(this.iteration);
-    delete iteration.__typename;
-    
-    this.$emit('onEdit', iteration);
+    this.$emit('edit', this.iteration);
 }
 
 function onDelete() {

@@ -8,10 +8,14 @@
             </div>
         </div>
         <div class="d-flex flex-column">
-            <TimePairListItem v-for="timePair in timePairs" :key="timePair.id" :idTimePair="timePair.id" />
+            <TimePairListItem v-for="timePair in timePairs" :key="timePair.id" 
+                              :idTimePair="timePair.id" :showComplete="showComplete" 
+                              @edit="$emit('editIteration', $event)" />
         </div>
         <div v-if="showRepeat" class="d-flex flex-column">
-            <RepeatListItem v-for="repeat in repeats" :key="repeat.id" :idRepeat="repeat.id" :idTimeframe="idTimeframe" />
+            <RepeatListItem v-for="repeat in repeats" :key="repeat.id" 
+                            :idRepeat="repeat.id" :idTimeframe="idTimeframe" :showComplete="showComplete"
+                            @edit="$emit('editIteration', $event)" />
         </div>
     </div>
 </template>
@@ -27,7 +31,11 @@ export default {
     name: 'TodoPanelTimeframe',
     components: { RepeatListItem, TimePairListItem },
     props: {
-        idTimeframe: Number
+        idTimeframe: Number,
+        showComplete: {
+            type: Boolean,
+            default: () => false
+        }
     },
     data: function () {
         return {

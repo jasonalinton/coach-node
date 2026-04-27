@@ -214,7 +214,7 @@ export function getTimeframeEndpoints(idTimeframe, datetime) {
     let end;
     if (idTimeframe == TIMEFRAME.DAY) {
         start = datetime;
-        end = datetime;
+        end = endOfDay(datetime);
     }
     if (idTimeframe == TIMEFRAME.WEEK) {
         start = firstDayOfWeek(datetime);

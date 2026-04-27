@@ -27,11 +27,11 @@
         </div>
         <!-- Time -->
         <div class="form-group mt-1">
-            <DateSelector class="date-selector mt-1" :class="{ 'invalid': !isValid }"
-                          :date="iteration_updated.startAt" @onChange="iteration_updated.startAt = $event"></DateSelector>
+            <DateTimeSelector class="date-selector mt-1" :class="{ 'invalid': !isValid }"
+                          :dateTime="iteration_updated.startAt" @onChange="iteration_updated.startAt = $event"></DateTimeSelector>
             <!-- <span v-if="!iteration.startAt" class="error float-start mb-2">Iteration must have start</span> -->
-            <DateSelector class="date-selector mt-3" :class="{ 'invalid': !isValid }"
-                          :date="iteration_updated.endAt" @onChange="iteration_updated.endAt = $event"></DateSelector>
+            <DateTimeSelector class="date-selector mt-3" :class="{ 'invalid': !isValid }"
+                          :dateTime="iteration_updated.endAt" @onChange="iteration_updated.endAt = $event"></DateTimeSelector>
         </div>
         <!-- Blurb -->
         <div class="form-group mt-1">
@@ -54,11 +54,11 @@
 </template>
 
 <script>
-import DateSelector from "../../../../controls/select/DateSelector.vue"
+import DateTimeSelector from "../../../../controls/select/DateTimeSelector.vue"
 
 export default {
     name: "IterationForm",
-    components: { DateSelector },
+    components: { DateTimeSelector },
     props: {
         iteration: Object
     },
