@@ -50,7 +50,7 @@ import AddTaskButton from '../component/AddTaskButton.vue'
 import ListItem from '../component/ListItem.vue'
 import { replaceItem, removeItem, today, sortAsc } from '../../../../../utility';
 import TimeframeRadio from '../component/TimeframeRadio.vue';
-import { firstDayOfWeek, lastDayOfWeek, firstDayOfMonth, lastDayOfMonth } from '../../../../../utility/timeUtility';
+import { firstDayOfWeek, lastDayOfWeek, firstDayOfMonth, lastDayOfMonth, endOfDay } from '../../../../../utility/timeUtility';
 
 export default {
     name: 'TodoPanelByCustom',
@@ -91,8 +91,8 @@ export default {
         },
         end() { 
             if (this.timeframe == 'day')
-                return this.selectedDate;
-                // return endOfDay(this.selectedDate);
+                // return this.selectedDate;
+                return endOfDay(this.selectedDate);
             else if (this.timeframe == 'week')
                 return lastDayOfWeek(this.selectedDate);
             else if (this.timeframe == 'month')

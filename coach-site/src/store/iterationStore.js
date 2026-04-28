@@ -5,7 +5,6 @@ import { getAllIterationsInRange, getUnplannedIterations } from '../api/plannerA
 import { removeItemByID, replaceOrAddItem, sortAsc } from '../../utility'
 import { postEndpoint } from '../api/api';
 import { getTimeframeEndpoints } from '../../utility/timeUtility';
-import { getTimeframeEndpoints } from '../../utility/timeUtility';
 
 let initialized = false;
 
