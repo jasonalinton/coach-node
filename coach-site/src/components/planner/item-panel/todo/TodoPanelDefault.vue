@@ -1,7 +1,5 @@
 <template>
     <div class="default d-flex flex-column flex-grow-1 overflow-scroll">
-        <TodoPanelTimeframe class="d-flex flex-column flex-grow-1" :idTimeframe="43" />
-        <TodoPanelTimeframe class="d-flex flex-column flex-grow-1" :idTimeframe="48" />
         <!-- Toolbar -->
         <div class="toolbar d-flex flex-row justify-content-between align-items-center">
             <AddTaskButton @click="initNewTask"></AddTaskButton>
@@ -100,14 +98,13 @@ import AddTaskButton from '../component/AddTaskButton.vue'
 // import IconButton from '../../../controls/button/IconButton.vue'
 import ItemCheckbox from '../component/ItemCheckbox.vue';
 import HierarchicalListItem from '../component/HierarchicalListItem.vue'
-import TodoPanelTimeframe from './TodoPanelTimeframe.vue';
 import { sortAsc, sortTrueOnBottom, clone } from '../../../../../utility';
 import { toShortWeekdayString, isToday, startOfDay, firstDayOfWeek, lastDayOfWeek, firstDayOfMonth, lastDayOfMonth } from '../../../../../utility/timeUtility';
 import { TIMEFRAME } from '../../.././../model/constants';
 
 export default {
     name: 'TodoPanelDefault',
-    components: { AddTaskButton, ItemCheckbox, HierarchicalListItem, TodoPanelTimeframe },
+    components: { AddTaskButton, ItemCheckbox, HierarchicalListItem },
     props: {
         selectedDate: Date,
     },
