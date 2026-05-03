@@ -56,6 +56,7 @@ export default {
                 { type: "goal", color: '#1EBA31',id: 334, ids: undefined, label: "Dating", showPoints: true, isExpanded: false }, // Start dating casually
                 { type: "goal", color: '#1EBA31',id: 335, ids: undefined, label: "Frequency", showPoints: true, isExpanded: false }, // Get on the right frequency
                 { type: "goal", color: '#1EBA31',id: 336, ids: undefined, label: "Videos", showPoints: true, isExpanded: false }, // Make videos for goals
+                { type: "goal", color: '#4C6EF5',id: 80, ids: undefined, label: "Dance", showPoints: true, isExpanded: false }, // Dance/Become proficient at dance
                 { type: "goal", color: '#1EBA31',id: 338, ids: undefined, label: "Mom", showPoints: true, isExpanded: false }, // Get Mom on a stable routine
                 { type: "goal", color: '#1EBA31',id: 48, ids: undefined, label: "Coach", showPoints: true, isExpanded: false }, // Finish Coach 1.0
             ],
