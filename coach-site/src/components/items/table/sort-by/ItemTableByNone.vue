@@ -228,8 +228,8 @@ export default {
                 if (this.searchTerm == "") {
                     return items;
                 } else {
-                    let _this = this;
-                    return items.filter(x => x.text.toLowerCase().includes(_this.searchTerm.toLowerCase()))
+                    const searchTermLower = this.searchTerm.toLowerCase();
+                    return items.filter(x => x.text.toLowerCase().includes(searchTermLower))
                 }
             } else {
                 return [];
