@@ -2,16 +2,18 @@
     <div id="app" >
         <AppMobile v-if="isExtraSmall"/>
         <div v-else :class="['grid-container', leftPanelVisibility, itemPanelVisibility]">
-            <div class="nav-bar overflow-scroll">
+            <div class="nav-bar d-flex overflow-scroll">
+                <!-- <span>{{ page }}</span> -->
                 <PlannerNavbar/>
             </div>
             <div class="grid-left-panel">
                 <LeftPanel />
             </div>
             <div class="grid-body overflow-scroll" ref="body">
-                <!-- <RouterView/> -->
+                <!-- <RouterView /> -->
                 <Planner v-show="selectedPage == 'planner'" />
                 <ItemTabs v-show="selectedPage == 'items'" />
+                <GoalForm v-show="selectedPage == 'goalForm'" :id="selectedId_GoalForm" />
                 <BlogTimeline v-show="selectedPage == 'timeline'" />
                 <PhysicalView v-show="selectedPage == 'physical'" />
                 <MentalView v-show="selectedPage == 'mental'" />
@@ -33,6 +35,7 @@ import LeftPanel from "./components/planner/left-panel/LeftPanel.vue";
 import ItemPanel from './components/planner/item-panel/ItemPanel.vue';
 import Planner from "./components/planner/Planner.vue";
 import ItemTabs from "./components/items/ItemTabs.vue";
+import GoalForm from "./components/items/form/goal/GoalForm.vue";
 import BlogTimeline from "./components/blog/BlogTimeline.vue";
 import PhysicalView from "./components/metrics/physical/PhysicalView.vue";
 import MentalView from "./components/metrics/mental/MentalView.vue";
@@ -61,6 +64,7 @@ export default {
         ItemPanel,
         Planner,
         ItemTabs,
+        GoalForm,
         BlogTimeline,
         PhysicalView,
         MentalView,
@@ -69,6 +73,9 @@ export default {
         FinancialView
         // RouterView
     },
+    // defineProps: {
+    //     page: String
+    // },
     data: function () {
         return {
             itemsPage: {
@@ -76,6 +83,7 @@ export default {
             },
             appStore: undefined,
             plannerStore: undefined,
+            selectedId_GoalForm: undefined,
         };
     },
     created: async function () {
@@ -105,6 +113,15 @@ export default {
             return (this.appStore) ? this.appStore.itemPanel.selected : "todo";
         },
         selectedPage() {
+            // if (this.appStore) {
+            //     if (this.page) {
+            //         return this.page;
+            //     } else {
+            //         return this.appStore.navbar.selectedPage;
+            //     }
+            // } else {
+            //     return "planner";
+            // }
             return (this.appStore) ? this.appStore.navbar.selectedPage : "planner";
         },
         showLeftPanel() {
@@ -113,17 +130,26 @@ export default {
     },
     methods: {
         initStores,
-        onResize
+        onResize,
+        selectPage(page) {
+            this.appStore.selectPage(page)
+        },
     },
     watch: {
-        selectedPage(page) {
-            if (page == 'planner') {
-                this.appStore.setLeftPanelVisibility(true);
-            } else if (page == 'items') {
-                this.appStore.setLeftPanelVisibility(false);
-            } else if (page == 'physical') {
-                this.appStore.setLeftPanelVisibility(false);
-            }
+        '$route.query.page'(newPage) {
+            this.selectPage(newPage);
+        },
+        '$route.query.showLeft'(showLeft) {
+            if (showLeft === undefined) return;
+            this.appStore.setLeftPanelVisibility(JSON.parse(showLeft));
+        },
+        '$route.query.showRight'(showRight) {
+            if (showRight === undefined) return;
+            this.appStore.setLeftPanelVisibility(JSON.parse(showRight));
+        },
+        '$route.query.selectedId_GoalForm'(selectedGoalId) {
+            if (selectedGoalId === undefined) return;
+            this.selectedId_GoalForm = parseInt(selectedGoalId);
         }
     },
 };

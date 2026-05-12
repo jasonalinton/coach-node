@@ -6,20 +6,37 @@ import { createPinia } from 'pinia'
 
 const app = createApp(App)
 
-import { createMemoryHistory, createRouter } from 'vue-router'
+import { createWebHistory, createRouter } from 'vue-router'
 import Planner from './components/planner/Planner.vue'
 import ItemTabs from './components/items/ItemTabs.vue'
 import PhysicalView from './components/metrics/physical/PhysicalView.vue'
+import TodoPanel from './components/planner/item-panel/todo/TodoPanel.vue'
+import GoalPanel from './components/planner/item-panel/goal/GoalPanel.vue'
 
 const routes = [
-  { path: '/', component: Planner },
-  { path: '/planner', component: Planner },
-  { path: '/items', component: ItemTabs },
+  { 
+    path: '/:page', 
+    component: Planner,
+    props: true,
+   },
+  { 
+    component: Planner,
+    // path: '/planner', 
+    props: route => ({ page: route.query.page, showLeft: route.query.showLeft }), 
+    path: '/', 
+    // props: { page: }, 
+    name: 'planner',
+  },
+  { 
+    path: '/items/:type', 
+    component: ItemTabs, 
+    name: 'items'
+  },
   { path: '/physical-view', component: PhysicalView },
 ]
 
 const router = createRouter({
-  history: createMemoryHistory(),
+  history: createWebHistory(),
   routes,
 })
 

@@ -9,8 +9,10 @@
                     <a class="navbar-brand float-left" href="#">Inventory Planner</a>
                 </div>
                 <div class="d-flex flex-row">
-                    <button class="btn btn-sm" type="button" @click="selectPage('planner')">Planner</button>
-                    <button class="btn btn-sm" type="button" @click="selectPage('items')">Items</button>
+                    <RouterLink class="btn btn-sm" :to="{path: '/planner', query: {page: 'planner', showLeft: true}}">Planner</RouterLink>
+                    <RouterLink class="btn btn-sm" :to="{path: '/items', query: {page: 'items', showLeft: false}}">Items</RouterLink>
+                    <!-- <button class="btn btn-sm" type="button" @click="selectPlanner">Planner</button>
+                    <button class="btn btn-sm" type="button" @click="selectItems">Items</button> -->
                     <button class="btn btn-sm" type="button" @click="selectPage('timeline')">Timeline</button>
                     <button class="btn btn-sm" type="button" @click="selectPage('physical')">Physical</button>
                     <button class="btn btn-sm" type="button" @click="selectPage('mental')">Mental</button>
