@@ -13,7 +13,7 @@
                               :src="(isExpanded) ? `/icon/icon-expanded.png` : `/icon/icon-collapsed-right.png`"
                               width="14" height="14"
                               @click.stop="expanderClicked" />
-                        <div>{{ goal.text }}</div>
+                        <div class="goal-text" @click.stop="showGoalForm">{{ goal.text }}</div>
                     </div>
                 </div>
                 <div v-if="showToolbar" class="d-flex flex-column">
@@ -247,6 +247,7 @@ export default {
         onNewTaskClicked,
         onNewChildClicked,
         onSetToTimeframe,
+        showGoalForm
     },
 }
 
@@ -362,6 +363,10 @@ function onSetToTimeframe(idTimeframe) {
 
     this.showContext = false;
 }
+
+function showGoalForm() {
+    this.$router.push({ path: '/', query: { page: 'goalForm', selectedId_GoalForm: this.goalID }});
+}
 </script>
 
 <style scoped>
@@ -391,6 +396,10 @@ function onSetToTimeframe(idTimeframe) {
     margin-right: 4px;
     min-width: 14px;
     min-height: 14px;
+}
+
+.goal-text:hover {
+    text-decoration: underline;
 }
 
 .toolbar {
