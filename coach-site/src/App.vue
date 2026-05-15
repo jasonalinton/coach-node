@@ -14,6 +14,7 @@
                 <Planner v-show="selectedPage == 'planner'" />
                 <ItemTabs v-show="selectedPage == 'items'" />
                 <GoalForm v-show="selectedPage == 'goalForm'" :id="selectedId_GoalForm" />
+                <TodoForm v-show="selectedPage == 'todoForm'" :id="selectedId_TodoForm" />
                 <BlogTimeline v-show="selectedPage == 'timeline'" />
                 <PhysicalView v-show="selectedPage == 'physical'" />
                 <MentalView v-show="selectedPage == 'mental'" />
@@ -36,6 +37,7 @@ import ItemPanel from './components/planner/item-panel/ItemPanel.vue';
 import Planner from "./components/planner/Planner.vue";
 import ItemTabs from "./components/items/ItemTabs.vue";
 import GoalForm from "./components/items/form/goal/GoalForm.vue";
+import TodoForm from "./components/items/form/todo/TodoForm.vue";
 import BlogTimeline from "./components/blog/BlogTimeline.vue";
 import PhysicalView from "./components/metrics/physical/PhysicalView.vue";
 import MentalView from "./components/metrics/mental/MentalView.vue";
@@ -65,6 +67,7 @@ export default {
         Planner,
         ItemTabs,
         GoalForm,
+        TodoForm,
         BlogTimeline,
         PhysicalView,
         MentalView,
@@ -84,6 +87,7 @@ export default {
             appStore: undefined,
             plannerStore: undefined,
             selectedId_GoalForm: undefined,
+            selectedId_TodoForm: undefined,
         };
     },
     created: async function () {
@@ -150,7 +154,11 @@ export default {
         '$route.query.selectedId_GoalForm'(selectedGoalId) {
             if (selectedGoalId === undefined) return;
             this.selectedId_GoalForm = parseInt(selectedGoalId);
-        }
+        },
+        '$route.query.selectedId_TodoForm'(selectedTodoId) {
+            if (selectedTodoId === undefined) return;
+            this.selectedId_TodoForm = parseInt(selectedTodoId);
+        },
     },
 };
 

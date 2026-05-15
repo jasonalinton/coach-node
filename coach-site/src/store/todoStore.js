@@ -7,12 +7,14 @@ import { useGoalStore } from '@/store/goalStore'
 import { useRoutineStore } from '@/store/routineStore'
 import { postEndpoint } from '../api/api';
 import { TODOTYPE } from '../model/constants';
+import Todo from '../model/item/Todo';
 
 let initialized = false;
 
 export const useTodoStore = defineStore('todo', {
     state: () => ({
-        todos: []
+        todos: [],
+        todoModels: [],
     }),
     getters: {
         
@@ -25,8 +27,12 @@ export const useTodoStore = defineStore('todo', {
             return promise;
         },
         async fill() {
-            return getTodos()
-                .then(res => this.todos = res);
+            return getTodos().then(res => {
+                this.todos = res;
+                res.forEach(todo => {
+                    this.todoModels.push(new Todo(todo));
+                });
+            });
         },
         initializeItems(todos) {
             let metricStore = useMetricStore();
@@ -50,6 +56,9 @@ export const useTodoStore = defineStore('todo', {
         },
         getItem(id) {
             return this.todos.find(x => x.id == id);
+        },
+        getItemModel(id) {
+            return this.todoModels.find(x => x.id == id);
         },
         getMemorizationTodos(shouldRequestServer) {
             if (shouldRequestServer) {
@@ -84,6 +93,23 @@ export const useTodoStore = defineStore('todo', {
             } else {
                 return;
             }
+        },
+        newTodo() {
+            let negativeIDs = this.todoModels.filter(x => x.id < 0).map(x => x.id);
+            let nextID = (negativeIDs.length > 0) ? Math.min(...negativeIDs) + - 1 : -1;
+            let newTodo = new Todo({ id: nextID });
+            this.todoModels.push(newTodo);
+            return newTodo.data;
+        },
+        removeVersion(id, component) {
+            let todoModel = this.todoModels.find(x => x.id == id);
+            if (todoModel) {
+                todoModel.versions = todoModel.versions.filter(v => v.component !== component);
+            }
+        },
+        removeNewTodo(id) {5
+            removeItemByID(id, this.todos);
+            removeItemByID(id, this.todoModels);
         },
         saveTodo(model) {
             return postEndpoint("Todo", "SaveTodo", model)

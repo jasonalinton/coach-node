@@ -1,6 +1,6 @@
 <template>
-    <div :id="`todo-form-${id}`" class="modal-content">
-        <div class="modal-header">
+    <div v-if="todoClone" :id="`todo-form-${id}`" class="d-flex flex-column h-100">
+        <div class="d-flex">
             <span class="me-2">Todo {{ (todo) ? todo.id : "" }}</span>
             <span class="activity-type" :style="{ 'background-color': activityTypeColor || 'lightskyblue' }">{{ activityType }}</span>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -8,53 +8,48 @@
         <div>
 
         </div>
-        <div class="modal-body">
-            <div v-if="!mapper.isShown" class="container-fluid">
-                <div class="row g-2">
-                    <div class="col-12">
-                        <div class="d-flex flex-column">
-                            <!-- Text -->
-                            <div class="text-wrapper">
-                                <input id="text" class="textbox" type="text" placeholder="Title"
-                                    v-model.lazy.trim="text.value" 
-                                    spellcheck="true"/>
-                            </div>
-                            <!-- Toolbar -->
-                            <div class="toolbar d-flex flex-row mt-1">
-                                <!-- Metrics -->
-                                <div class="metrics d-flex flex-row">
-                                    <span v-for="metric in metrics" :key="metric.id"
-                                            class="metric" :class="{ 'active': hasMetric(metric.id)}"
-                                            @click="toggleMetric(metric.id)">{{ metric.text }}</span>
-                                </div>
-                                <!-- Points -->
-                                <div class="input-wrrapper d-flex flex-row">
-                                    <label class="me-1" :for="`todo-${id}-points`">Points</label>
-                                    <input type="number" class="form-control form-control-sm" :id="`todo-${id}-points`"
-                                            :value="points.value"
-                                            @blur="points.value = $event.target.value">
-                                </div>
-                                <!-- Type -->
-                                <div class="input-wrrapper d-flex flex-row">
-                                    <label class="me-1" :for="`todo-${id}-type`">Type</label>
-                                    <select :id="`todo-${id}-type`" class="form-select form-select-sm" aria-label="select" v-model="typeID.value"> 
-                                        <option :value="null">None</option> 
-                                        <option v-for="todoType in todoTypes" v-bind:key="todoType.id" :value="todoType.id">{{todoType.text}}</option> 
-                                    </select>
-                                </div>
-                                <!-- Meduim -->
-                                <div class="input-wrrapper d-flex flex-row">
-                                    <label class="me-1" :for="`todo-${id}-type`">Meduim</label>
-                                    <select :id="`todo-${id}-type`" class="form-select form-select-sm" aria-label="select" v-model="mediumID.value"> 
-                                        <option :value="null">None</option> 
-                                        <option v-for="medium in mediums" v-bind:key="medium.id" :value="medium.id">{{medium.text}}</option> 
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
+        <div v-if="!mapper.isShown" class="d-flex flex-column">
+            <div class="d-flex flex-column">
+                <!-- Text -->
+                <div class="text-wrapper">
+                    <input id="text" class="textbox" type="text" placeholder="Title"
+                        v-model.lazy.trim="todoClone.text" 
+                        spellcheck="true"/>
+                </div>
+                <!-- Toolbar -->
+                <div class="toolbar d-flex flex-row mt-1">
+                    <!-- Metrics -->
+                    <div class="metrics d-flex flex-row">
+                        <span v-for="metric in metrics" :key="metric.id"
+                                class="metric" :class="{ 'active': hasMetric(metric.id)}"
+                                @click="toggleMetric(metric.id)">{{ metric.text }}</span>
+                    </div>
+                    <!-- Points -->
+                    <div class="input-wrrapper d-flex flex-row">
+                        <label class="me-1" :for="`todo-${id}-points`">Points</label>
+                        <input type="number" class="form-control form-control-sm" :id="`todo-${id}-points`"
+                                :value="points.value"
+                                @blur="points.value = $event.target.value">
+                    </div>
+                    <!-- Type -->
+                    <div class="input-wrrapper d-flex flex-row">
+                        <label class="me-1" :for="`todo-${id}-type`">Type</label>
+                        <select :id="`todo-${id}-type`" class="form-select form-select-sm" aria-label="select" v-model="typeID.value"> 
+                            <option :value="null">None</option> 
+                            <option v-for="todoType in todoTypes" v-bind:key="todoType.id" :value="todoType.id">{{todoType.text}}</option> 
+                        </select>
+                    </div>
+                    <!-- Meduim -->
+                    <div class="input-wrrapper d-flex flex-row">
+                        <label class="me-1" :for="`todo-${id}-type`">Meduim</label>
+                        <select :id="`todo-${id}-type`" class="form-select form-select-sm" aria-label="select" v-model="mediumID.value"> 
+                            <option :value="null">None</option> 
+                            <option v-for="medium in mediums" v-bind:key="medium.id" :value="medium.id">{{medium.text}}</option> 
+                        </select>
                     </div>
                 </div>
-                <div class="row g-2 pt-2">
+            </div>
+                <div class="d-flex g-2 pt-2">
                     <div class="col-12 col-sm-4">
                         <!-- Description -->
                         <div class="d-flex flex-column">
@@ -120,7 +115,6 @@
                         </div>
                     </div>
                 </div>
-            </div>
             <div v-if="mapper.isShown" class="container">
                 <div class="row g-2">
                     <div class="col-12">
@@ -164,6 +158,7 @@ export default {
         return {
             store: null,
             plannerStore: null,
+            todoClone: undefined,
             metrics: clone(metrics),
             todoTypes: clone(todoTypes),
             mediums: clone(mediums),
@@ -229,13 +224,20 @@ export default {
 
         let plannerStore = await import(`@/store/plannerStore`);
         this.plannerStore = plannerStore.usePlannerStore();
-
-        let todo = this.store.getItem(this.id);
-        this.setProps(todo);
     },
     computed: {
         selectedDate() {
             return (this.plannerStore) ? this.plannerStore.selectedDate : today();
+        },
+        componentName() {
+            return `todo-form-${this.id}`;
+        },
+        todoModel() {
+            if (this.store) {
+                return this.store.getItemModel(this.id);
+            } else {
+                return undefined;
+            }
         },
         dateString() {
             if (+this.selectedDate != +today()) {
@@ -300,6 +302,12 @@ export default {
                 }
             }
             return undefined;
+        },
+        textUpdated() {
+            if (this.todoClone.text != this.todoModel.data.text) {
+                return true;
+            }
+            return false;
         }
     },
     methods: {
@@ -484,6 +492,14 @@ export default {
         },
     },
     watch: {
+        todoModel(todo) {
+            // handler(todo) {
+                if (todo) {
+                    this.todoClone = this.todoModel.clone(this.componentName);
+                }
+            // },
+            // deep: true
+        },
         'text.value'(value) {
             if (value != this.text.oldValue) {
                 this.text.isUpdated = true;
@@ -524,6 +540,14 @@ export default {
                 this.isUpdated = false;
             }
         },
+    },
+    unmounted() {
+        if (this.todoClone) {
+            this.todoClone.removeVersion(this.componentName);
+        }
+        if (this.todoClone && this.todoClone.id < 0) {
+            this.store.removeNewTodo(this.todoClone.id);
+        }
     }
 }
 </script>

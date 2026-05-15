@@ -22,7 +22,7 @@
                                 <img v-if="showChildren" class="caret-down" 
                                      src='/icon/caret-down.png' width="8" height="5"/>
                             </div>
-                            <span class="text flex-fill">{{ iteration.text }}</span>
+                            <span class="text flex-fill" @click.stop="showTodoForm">{{ iteration.text }}</span>
                         </div>           
                     </div>
                 </div>
@@ -51,6 +51,7 @@
 <script>
 import ItemCheckbox from './ItemCheckbox.vue';
 import { clone } from '../../../../../utility'
+import it from 'date-and-time/locale/it';
 
 /* 
 Parent Types
@@ -115,6 +116,7 @@ export default {
         },
     },
     methods: {
+        showTodoForm,
         markComplete,
         markIncomplete,
         onEdit,
@@ -126,6 +128,10 @@ export default {
             this.iteration = this.viewModel.iterations[0];
         }
     }
+}
+
+function showTodoForm() {
+    this.$router.push({ path: '/', query: { page: 'todoForm', selectedId_TodoForm: this.viewModel.todoID }});
 }
 
 function toggleChildren() {
@@ -248,6 +254,10 @@ function onDelete() {
     /* height: 14px;
     line-height: 15px; */
     line-height: 22px;
+}
+
+.iteration .text:hover {
+    text-decoration: underline;
 }
 
 .children {
