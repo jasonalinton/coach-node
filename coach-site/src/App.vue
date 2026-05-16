@@ -76,6 +76,7 @@ export default {
             },
             appStore: undefined,
             plannerStore: undefined,
+            eventStore: undefined,
         };
     },
     created: async function () {
@@ -83,13 +84,17 @@ export default {
     },
     beforeUnmount () {
         if (typeof window !== 'undefined') {
-            window.removeEventListener('resize', this.onResize, { passive: true })
+            window.removeEventListener('resize', this.onResize, { passive: true });
+            document.removeEventListener('mouseup', this.resetEventStartY, { passive: true })
         }
     },
-
     mounted () {
         this.onResize()
-        window.addEventListener('resize', this.onResize, { passive: true })
+        window.addEventListener('resize', this.onResize, { passive: true });
+        window.addEventListener('mouseup', this.resetEventStartY, { passive: true });
+        // document.addEventListener('mousemove', (e) => {
+        //     this.appStore.setMouseXY(e.clientX, e.clientY);
+        // });
     },
     computed: {
         leftPanelVisibility() {
@@ -113,7 +118,8 @@ export default {
     },
     methods: {
         initStores,
-        onResize
+        onResize,
+        resetEventStartY
     },
     watch: {
         selectedPage(page) {
@@ -135,7 +141,7 @@ async function initStores() {
     this.plannerStore = usePlannerStore();
     
     let universalStore = useUniversalStore();
-    let eventStore = useEventStore();
+    this.eventStore = useEventStore();
     let iterationStore = useIterationStore();
     let physicalStore = usePhysicalStore();
     let metricStore = useMetricStore();
@@ -145,7 +151,7 @@ async function initStores() {
 
     this.plannerStore.initialize();
     universalStore.initialize();
-    eventStore.initialize();
+    this.eventStore.initialize();
     iterationStore.initialize();
     physicalStore.initialize();
     let metricPromise = metricStore.initialize();
@@ -165,6 +171,12 @@ function onResize() {
     this.appStore.setWindowSize(window.innerWidth, window.innerHeight);
     this.appStore.setWindowOuterSize(window.outerWidth, window.outerHeight);
     this.appStore.setBodyOuterSize(this.$refs['body'].clientWidth, this.$refs['body'].clientHeight);
+}
+
+function resetEventStartY() {
+    if (this.eventStore) {
+        this.eventStore.startY = undefined;
+    }
 }
 </script>
 

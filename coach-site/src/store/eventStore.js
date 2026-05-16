@@ -8,7 +8,10 @@ let initialized = false;
 
 export const useEventStore = defineStore('event', {
     state: () => ({
-        events: []
+        events: [],
+        mouseX: undefined,
+        mouseY: undefined,
+        startY: undefined
     }),
     getters: {
     },
@@ -19,6 +22,10 @@ export const useEventStore = defineStore('event', {
         },
         async fill() {
             this.events = await getEvents();
+        },
+        setMouseXY(x, y) {
+            this.mouseX = x;
+            this.mouseY = y;
         },
         getEvent(id, shouldRequestServer) {
             const _this = this;

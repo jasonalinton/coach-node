@@ -61,6 +61,10 @@ export let routineTypes = [
         id: 16,
         text: "Housekeeping"
     },
+    {
+        id: 191,
+        text: "Block Routine"
+    },
 ]
 
 export let mediums = [

@@ -1,20 +1,27 @@
 <template>
-    <div class="event cursor-default position-relative d-flex w-100"
+    <div class="event cursor-default d-flex flex-column w-100"
          :class="[size, successStatus]"
-         :style="{ 'top': `${top}px`, 'padding-top': `${paddingTopBottom}px`, 
-                   'padding-bottom': `${paddingTopBottom}px`, 'z-index': 1, 'background-color': color}"
-            @click="selectEvent"
-            @drop="onDrop($event)" @dragover.prevent @dragenter.prevent>
+         :style="{ 'top': `${top}px`, 'z-index': 1, 'background-color': color}"
+         @click="selectEvent"
+         @drop="onDrop($event)" @dragstart="onDragStart" @dragover.prevent @dragenter.prevent :draggable="resizing == undefined">
+        <div class="top-anchor" :style="{ 'height': `${paddingTopBottom}px` }"
+             @mousedown.stop="onDragStart_Top"
+             @click.stop></div>
+        <div class="event-body d-flex flex-column">
             <div :class="['d-flex', 'overflow-scroll', flexDirection]"
-                 :style="{ 'height': `${height-(paddingTopBottom*2)}px`}">
+                :style="{ 'height': `${height-(paddingTopBottom*2)}px`}">
                 <div class="title">
-                   {{ _event.text }}
-                   <span v-if="size == 'sm'">,</span>
+                    {{ _event.text }}
+                    <span v-if="size == 'sm'">,</span>
                 </div>
                 <div class="time">
                     {{ getTimeString(new Date(_event.startAt))}}
                 </div>
             </div>
+        </div>
+        <div class="bottom-anchor" :style="{ 'height': `${paddingTopBottom}px` }"
+             @mousedown.stop="onDragStart_Bottom"
+             @click.stop></div>
     </div>
 </template>
 
@@ -36,14 +43,41 @@ export default {
         return {
             appStore: undefined,
             plannerStore: undefined,
+            eventStore: undefined,
+            resizing: undefined,
+            currentY: undefined,
+            initialStart: undefined,
+            initialEnd: undefined
         }
     },
-    created: function() {
+    created: async function() {
         this.appStore = useAppStore();
         this.plannerStore = usePlannerStore();
+
+        let eventStore = await import(`@/store/eventStore`);
+        this.eventStore = eventStore.useEventStore();
     },
+    // mounted () {
+    //     document.addEventListener('keydown', this.escapeListener);
+    // },
+    // beforeUnmount () {
+    //     if (typeof document !== 'undefined') {
+    //         document.removeEventListener('keydown', this.escapeListener, { passive: true })
+    //     }
+    // },
     computed: {
         minutes() { return getDurationInMinutes(new Date(this._event.startAt), new Date(this._event.endAt)); },
+        mouseY() { return (this.eventStore) ? this.eventStore.mouseY : undefined; },
+        startY: {
+            get() {
+                return this.eventStore ? this.eventStore.startY : undefined;
+            },
+            set(value) {
+                if (this.eventStore) {
+                    this.eventStore.startY = value;
+                }
+            }
+        },
         height() {
             return this.minuteHeight * this.minutes;
         },
@@ -124,14 +158,147 @@ export default {
     methods: {
         getDurationInMinutes,
         getTimeString,
+        onDragStart_Bottom,
+        onDrag_Bottom,
+        updateBottom,
+        onDragStart_Top,
+        onDrag_Top,
+        updateTop,
+        onDragEnd,
+        onDragStart,
         onDrop,
+        escapeListener,
         selectEvent
+    },
+    watch: {
+        mouseY() {
+            this.onDrag_Top();
+            this.onDrag_Bottom();
+        },
+        startY() {
+            if (this.startY == undefined) {
+                if (this.resizing == "top") {
+                    this.updateTop();
+                } else if (this.resizing == "bottom") {
+                    this.updateBottom();
+                }
+            }
+        }
     }
 }
 
-function onDrop(ev) {
-    ev.preventDefault();
+function onDragStart_Bottom(ev) {
+    this.resizing = "bottom";
+    this.startY = ev.clientY;
+    this.initialEnd = this._event.endAt;
+    console.log("Drag started at: " + this.startY);
+}
+
+function onDrag_Bottom(ev) {
     
+    if (this.resizing == "bottom") {
+        console.log("Dragging at: " + this.eventStore.mouseY);
+        this.currentY = this.mouseY;
+        let deltaY = this.currentY - this.startY;
+        console.log(deltaY);
+        let x = 0;
+        if (this.minutes > 15) {
+            x = -this.minutes + 15;
+        }
+        if (deltaY > x) {
+            let minutes = Math.round(deltaY / this.minuteHeight);
+            console.log("Minutes: " + minutes);
+            let minutes15 = Math.floor(minutes / 15) * 15;
+            let newEndAt = new Date(new Date(this.initialEnd).getTime() + minutes15 * 60000);
+            this._event.endAt = newEndAt.toJSON();
+        }
+    }
+}
+
+function updateBottom() {
+    let newEndAt = new Date(this._event.endAt);
+    let mins = this._event.endAt.toDate().getMinutes();
+    let mins15 = Math.round(mins / 15) * 15;
+    newEndAt.setMinutes(mins15);
+
+    this._event.endAt = newEndAt.toJSON();
+    this.eventStore.updateEvent(this._event.id, this._event.title, this._event.startAt, this._event.endAt)
+    this.onDragEnd();
+}
+
+function onDragStart_Top(ev) {
+    this.resizing = "top";
+    this.startY = ev.clientY;
+    this.initialStart = this._event.startAt;
+    console.log("Drag started at: " + this.startY);
+}
+
+function onDrag_Top(ev) {
+    if (this.resizing == "top") {
+        console.log("Dragging top at: " + this.mouseY);
+        this.currentY = this.mouseY;
+        let deltaY = this.currentY - this.startY;
+        console.log(deltaY);
+        let x = 0;
+        if (this.minutes > 15) {
+            x = this.minutes - 15;
+        }
+        if (deltaY < x) {
+            let minutes = Math.round(deltaY / this.minuteHeight);
+            console.log("Minutes: " + minutes);
+            let minutes15 = Math.floor(minutes / 15) * 15;
+            let newStartAt = new Date(new Date(this.initialStart).getTime() + minutes15 * 60000);
+            this._event.startAt = newStartAt.toJSON();
+        }
+    }
+}
+
+function updateTop() {
+    let newStartAt = new Date(this._event.startAt);
+    let mins = this._event.startAt.toDate().getMinutes();
+    let mins15 = Math.round(mins / 15) * 15;
+    newStartAt.setMinutes(mins15);
+
+    this._event.startAt = newStartAt.toJSON();
+    this.onDragEnd();
+}
+
+function onDragEnd(ev) {
+    this.resizing = undefined;
+    this.startY = undefined;
+    this.currentY = undefined;
+    this.initialStart = undefined;
+    this.initialEnd = undefined;
+    console.log("Drag ended");
+}
+
+function escapeListener(event) {
+    if (event.key === 'Escape') {
+        this.onDragEnd();
+    }
+}
+
+function onDragStart(ev) {
+    let data = {
+        type: "event",
+        id: this._event.id
+    };
+    data = JSON.stringify(data);
+
+    // ev.dataTransfer.setDragImage(blank, 0, 0);
+
+    console.log("Drag Started");
+    ev.target.classList.add("drag");
+    ev.dataTransfer.dropEffect = 'move';
+    ev.dataTransfer.effectAllowed = 'move';
+    ev.dataTransfer.setData("text", data);
+}
+
+function onDrop(ev) {
+    if (this.startY) {
+        return;
+    }
+    ev.preventDefault();    
     let data = ev.dataTransfer.getData("text");
     data = JSON.parse(data);
 
@@ -151,7 +318,7 @@ function onDrop(ev) {
 
 function selectEvent() {
     this.appStore.setSelectedEvent(this._event);
-    this.plannerStore.selectDate(new Date(this._event.startAt));
+    // this.plannerStore.selectDate(new Date(this._event.startAt));
 }
 </script>
 
@@ -160,7 +327,6 @@ function selectEvent() {
     border: 1px white solid;
     border-radius: 3px;
     /* background-color: #039BE5; */
-    padding-left: 8px;
     color: white;
     min-height: 16px;
     line-height: 14px;
@@ -189,8 +355,16 @@ function selectEvent() {
     border-left: 5px solid red
 }
 
+.event-body {
+    padding-left: 8px;
+}
+
 .title {
     font-weight: bold;
     margin-right: 4px;
+}
+
+.top-anchor:hover, .bottom-anchor:hover {
+    cursor: s-resize;
 }
 </style>

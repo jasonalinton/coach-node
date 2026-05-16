@@ -21,6 +21,8 @@ export const useAppStore = defineStore('app', {
         bodyOuterHeight: undefined,
         bodyOuterWidth: undefined,
         windowOuterHeight: undefined,
+        mouseX: undefined,
+        mouseY: undefined,
         browserType: undefined,
         isTouchscreen: undefined,
         isExtraSmall: undefined,
@@ -50,12 +52,13 @@ export const useAppStore = defineStore('app', {
                 title: "Briefing"
             },
             todo: {
+                selectedTask: undefined,
                 showRepeat: true,
                 showTimeline: false,
                 showRecommended: true,
                 showHierarchy: true,
                 sort: {
-                    by: 'Default2',
+                    by: 'Default',
                     items: [
                         { id: 1, text: "Default" },
                         { id: 1, text: "Default2" },
@@ -140,6 +143,10 @@ export const useAppStore = defineStore('app', {
             this.bodyOuterWidth = width;
             this.bodyOuterHeight = height;
         },
+        setMouseXY(x, y) {
+            this.mouseX = x;
+            this.mouseY = y;
+        },
         onMenuButtonClicked() {
             if (this.navbar.active == "main") {
                 if (this.isTabBarShown) {
@@ -210,6 +217,10 @@ export const useAppStore = defineStore('app', {
                 this.itemPanel.event.type = EVENTTYPE.ROUTINE;
                 this.itemPanel.event.event = eevent;
             }
+        },
+        setSelectedTask(task) {
+            this.itemPanel.selected = "todo";
+            this.itemPanel.todo.selectedTask = task;
         },
         toggleTabBar() {
             this.isTabBarShown = !this.isTabBarShown;

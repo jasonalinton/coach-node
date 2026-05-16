@@ -27,7 +27,7 @@ export const useIterationStore = defineStore('iteration', {
         //     return getIterations().then(res => this.iterations = res);
         // },
         getIteration(id) {
-            return this.iterations.find(x => x.id = id);
+            return this.iterations.find(x => x.id == id);
         },
         getIterations() {
             return this.iterations;

@@ -1,5 +1,6 @@
 <template>
-    <div class="d-flex flex-column">
+    <div class="d-flex flex-column"
+         @mousemove="onMouseMove">
         <div v-for="(hour, index) in hours" :key="index" class="text-start">
             <HourBlock :hour="hour" 
                        :date="date"
@@ -21,22 +22,31 @@ export default {
         date: Date,
         blockHeight: Number,
     },
-    created: function() {
+    created: async function() {
         this.initHours();
+
+        let eventStore = await import(`@/store/eventStore`);
+        this.eventStore = eventStore.useEventStore();
     },
     data: function() {
         return {
             hours: [],
+            eventStore: undefined,
         }
     },
     methods: {
         initHours,
-        getHoursObjectArray
+        getHoursObjectArray,
+        onMouseMove
     }
 }
 
 function initHours() {
     this.hours = this.getHoursObjectArray();
+}
+
+function onMouseMove(ev) {
+    this.eventStore.setMouseXY(ev.clientX, ev.clientY);
 }
 </script>
 
