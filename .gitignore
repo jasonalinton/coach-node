@@ -134,3 +134,6 @@ pnpm-debug.log*
 
 # Except
 !/coach-site/dist
+
+# coach-server isn't used anymore
+coach-server/
