@@ -129,6 +129,7 @@ pnpm-debug.log*
 *.sw?
 
 /live/
+coach-server/
 
 .db
 
