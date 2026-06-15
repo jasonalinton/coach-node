@@ -16,6 +16,53 @@
                      @click.prevent="showHistory"/>
             </div>
         </div>
+        <!-- Settings -->
+        <div class="exercise-settings d-flex flex-column ms-auto me-auto mt-3">
+            <!-- Circuit -->
+            <div class="circuit d-flex flex-row align-items-center mt-1">
+                <span class="setting-label me-1">Circuit</span>
+                <input class="form-control form-control-sm me-1" type="number" min="0" v-model="circuit" />
+            </div>
+            <!-- Position -->
+            <div class="position d-flex flex-row align-items-center mt-1">
+                <span class="setting-label me-1">Position</span>
+                <input class="form-control form-control-sm me-1" type="number" min="0" v-model="position" />
+            </div>
+            <!-- Tempo -->
+            <div class="tempo d-flex flex-row align-items-center mt-1">
+                <span class="setting-label me-1"
+                      @click="toggleTempoType">Tempo</span>
+                <div v-if="tempoType == TEMPTYPES.FOURDIGIT" class="d-flex flex-row align-items-center">
+                    <input class="form-control form-control-sm me-1" type="number" min="0" v-model="tempo4DigitCode.eccentric"
+                            :style="{'width': '41px'}"/>
+                    <span class="me-1">-</span>
+                    <input class="form-control form-control-sm me-1" type="number" min="0" v-model="tempo4DigitCode.bottomIso"
+                            :style="{'width': '41px'}"/>
+                    <span class="me-1">-</span>
+                    <input class="form-control form-control-sm me-1" type="number" min="0" v-model="tempo4DigitCode.concentric"
+                            :style="{'width': '41px'}"/>
+                    <span class="me-1">-</span>
+                    <input class="form-control form-control-sm me-1" type="number" min="0" v-model="tempo4DigitCode.topIso"
+                            :style="{'width': '41px'}"/>
+                </div>
+                <div v-else-if="tempoType == TEMPTYPES.CONTRACTRELAX" class="d-flex flex-row align-items-center">
+                    <input class="form-control form-control-sm me-1" type="number" min="0" v-model="tempoCR.contract"
+                            :style="{'width': '41px'}"/>
+                    <span class="me-1">-</span>
+                    <input class="form-control form-control-sm me-1" type="number" min="0" v-model="tempoCR.relax"
+                            :style="{'width': '41px'}"/>
+                </div>
+                <div v-else-if="tempoType == TEMPTYPES.BPM" class="d-flex flex-row align-items-center">
+                    <input class="form-control form-control-sm me-1" type="number" min="0" v-model="tempoBPM" />
+                </div>
+            </div>
+            <!-- Rest -->
+            <div class="rest d-flex flex-row align-items-center mt-1">
+                <span class="setting-label me-1">Rest</span>
+                <input class="form-control form-control-sm me-1" type="number" v-model="restSeconds" />
+            </div>
+            <button type="button" class="btn btn-warning mt-2 flex-grow-1" @click="save">Save</button>
+        </div>
         <!-- Sets -->
         <div class="exercise-sets d-flex flex-column ms-auto me-auto mt-3">
             <ExerciseSet v-for="(set, index) in sets" :key="set.id" 
@@ -70,12 +117,20 @@ export default {
             activeSetID: undefined,
             restRemaining: undefined,
             restIntervalID: undefined,
-            isProcessing: false
+            isProcessing: false,
+            tempoType: undefined,
+            TEMPTYPES: {
+                FOURDIGIT: 1,
+                CONTRACTRELAX: 2,
+                BPM: 3
+            }
         }
     },
     created: function() {
         this.appStore = useAppStore();
         this.workoutStore = useWorkoutStore();
+
+        // this.setRest();
     },
     computed: {
         id() {
@@ -116,12 +171,100 @@ export default {
             }
             return [];
         },
-        restSeconds() {
-            if (this.workoutExercise) {
-                return this.workoutExercise.restSeconds;
+        restSeconds: {
+            get() {
+                if (this.workoutExercise) {
+                    return this.workoutExercise.restSeconds;
+                }
+                return undefined;
+            },
+            set(value) {
+                if (this.workoutExercise) {
+                    this.workoutExercise.restSeconds = value;
+                }
+            }
+        },
+        circuit: {
+            get() {
+                if (this.workoutExercise) {
+                    return this.workoutExercise.circuit;
+                }
+                return undefined;
+            },
+            set(value) {
+                if (this.workoutExercise) {
+                    this.workoutExercise.circuit = value;
+                }
+            }
+        },
+        position: {
+            get() {
+                if (this.workoutExercise) {
+                    return this.workoutExercise.position;
+                }
+                return undefined;
+            },
+            set(value) {
+                if (this.workoutExercise) {
+                    this.workoutExercise.position = value;
+                }
+            }
+        },
+        // tempoType: {
+        //     get() {
+        //         if (this.workoutExercise) {
+        //             if (this.workoutExercise.tempo_CR) {
+        //                 return this.TEMPTYPES.CONTRACTRELAX;
+        //             }
+        //             if (this.workoutExercise.tempo_bpm) {
+        //                 return this.TEMPTYPES.BPM;
+        //             }
+        //             return this.TEMPTYPES.FOURDIGIT;
+        //         }
+        //         return undefined;
+        //     },
+        //     set(value) {
+        //         if (this.workoutExercise) {
+        //             this.workoutExercise.position = value;
+        //         }
+        //     }
+        // }, 
+        tempo4DigitCode() {
+            if (this.tempoType && this.tempoType == this.TEMPTYPES.FOURDIGIT) {
+                if (this.workoutExercise.tempo_4DigitCode == undefined) {
+                    return {
+                        eccentric: 1,
+                        bottomIso: 1,
+                        concentric: 1,
+                        topIso: 1
+                    }
+                }
+                let tempo = this.workoutExercise.tempo_4DigitCode.split("-").map(t => parseInt(t));
+                return {
+                    eccentric: tempo[0],
+                    bottomIso: tempo[1], // Bottom Isometric Hold
+                    concentric: tempo[2],
+                    topIso: tempo[3] // Top Isometric Hold
+                }
             }
             return undefined;
         },
+        tempoCR() {
+            if (this.tempoType && this.tempoType == this.TEMPTYPES.CONTRACTRELAX) {
+                let tempo = this.workoutExercise.tempo_CR.split("-").map(t => parseInt(t));
+                return {
+                    contract: tempo[0],
+                    relax: tempo[1]
+                }
+            }
+            return undefined;
+        },
+        tempoBPM() {
+            if (this.tempoType && this.tempoType == this.TEMPTYPES.BPM) {
+                return this.workoutExercise.tempo_bpm;
+            }
+            return undefined;
+        },        
         // restRemaining() {
         //     if (this.restStart) {
         //         return timeSince(this.restStart, this.now);
@@ -153,6 +296,27 @@ export default {
                 this.workoutStore.saveSet(newSet);
             }
         },
+        setTempoType(tempoType) {
+            if (!tempoType) {
+                if (this.workoutExercise) {
+                    if (this.workoutExercise.tempo_CR) {
+                        this.tempoType = this.TEMPTYPES.CONTRACTRELAX;
+                    }
+                    if (this.workoutExercise.tempo_bpm) {
+                        this.tempoType = this.TEMPTYPES.BPM;
+                    }
+                    this.tempoType = this.TEMPTYPES.FOURDIGIT;
+                }
+                this.tempoType =  null;
+            }
+        },
+        toggleTempoType() {
+            if (this.tempoType) {
+                this.tempoType = (this.tempoType % Object.keys(this.TEMPTYPES).length) + 1;
+            } else {
+                this.setTempoType();
+            }
+        },
         showHistory() {
             let variationIDs = [];
             this.appStore.selectExerciseHistory(this.exercise.id, variationIDs);
@@ -162,16 +326,23 @@ export default {
             this.isProcessing = true;
             let index = this.sets.findIndex(x => x.id == this.activeSetID);
 
-            if (this.restSeconds) {
-                this.restRemaining = this.restSeconds;
-                var _this = this
-                this.restIntervalID = setInterval(function () {
-                    _this.restRemaining--;
-                }, 1000);
-            }
-
             let set = this.sets[index];
             let completedAt = (set.iteration) ? undefined : new Date();
+
+            if (this.restSeconds) {
+                let setIndex = this.sets.findIndex(s => s.id == this.activeSetID);
+                if (setIndex < this.sets.length -1) {
+                    let timeSinceLastSet = (new Date() - completedAt) / 1000;
+                    if (timeSinceLastSet < this.restSeconds) {
+                        this.restRemaining = this.restSeconds;
+                        var _this = this
+                        this.restIntervalID = setInterval(function () {
+                            _this.restRemaining--;
+                        }, 1000);
+                    }
+                }
+            }
+            
             this.activeSetID = undefined;
             this.workoutStore.logSet(set.id, completedAt)
             .then(result => {
@@ -186,18 +357,24 @@ export default {
                 this.isProcessing = false;
             });
         },
+        resetRest,
+        setRest,
+        save
     },
     watch: {
         restRemaining(value) {
             if (value != undefined && value == 0) {
-                clearInterval(this.restIntervalID);
-                this.restIntervalID = undefined;
-                this.restRemaining = undefined;
+                this.resetRest();
             }
         },
         sets(value) {
             if (value.length > 0) {
                 this.setActiveSet();
+            }
+        },
+        workoutExercise() {
+            if (this.tempoType == undefined) {
+                this.setTempoType();
             }
         }
     }
@@ -215,6 +392,44 @@ function setActiveSet() {
         }
     });
     this.activeSetID = activeSetID;
+
+    this.setRest();
+}
+
+function resetRest() {
+    clearInterval(this.restIntervalID);
+    this.restIntervalID = undefined;
+    this.restRemaining = undefined;
+}
+
+function setRest() {
+    if (this.restSeconds && this.activeSetID) {
+        // Get last set
+        let lastSetIndex = this.sets.findIndex(s => s.id == this.activeSetID) - 1;
+        if (lastSetIndex == -1) {
+            return;
+        }
+
+        if (this.sets[lastSetIndex].iteration && this.sets[lastSetIndex].iteration.completedAt) {
+            let timeSinceLastSet = (new Date() - new Date(this.sets[lastSetIndex].iteration.completedAt)) / 1000;
+            let rest = this.restSeconds - parseInt(timeSinceLastSet);
+    
+            if (rest > 0) {
+                this.resetRest();
+                this.restRemaining = rest;
+                var _this = this
+                this.restIntervalID = setInterval(function () {
+                    _this.restRemaining--;
+                }, 1000);
+            }
+        }
+    }
+}
+
+function save() {
+    this.workoutStore.saveWorkoutExercise(this.id, this.circuit, this.position, 
+        `${this.tempo4DigitCode.eccentric}-${this.tempo4DigitCode.bottomIso}-${this.tempo4DigitCode.concentric}-${this.tempo4DigitCode.topIso}`, 
+        this.tempoCR, this.tempoBPM, this.restSeconds);
 }
 
 </script>
@@ -235,6 +450,12 @@ function setActiveSet() {
 
 .history-button {
     
+}
+
+.setting-label {
+    font-weight: 600;
+    min-width: 60px;
+    text-align: start;
 }
 
 .btn {

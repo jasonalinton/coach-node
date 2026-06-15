@@ -307,6 +307,19 @@ export const useWorkoutStore = defineStore('workout', {
             return postEndpoint("Physical", "SaveWorkout", model)
                 .then(this.onResponse);
         },
+        async saveWorkoutExercise(id, circuit, position, tempo_4DigitCode, tempo_CR, tempo_BPM, restSeconds) {
+            let model = {
+                workoutExerciseID: id,
+                circuit,
+                position,
+                tempo_4DigitCode,
+                tempo_CR,
+                tempo_BPM,
+                restSeconds
+            }
+            return postEndpoint("Physical", "SaveWorkoutExercise", model)
+                .then(this.onResponse);
+        },
         async copyAndStartWorkout(workoutID, startAt) {
             let data = { workoutID, startAt };
             return postEndpoint("Physical", "CopyAndStartWorkout", data)
