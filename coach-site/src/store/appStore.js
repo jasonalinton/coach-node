@@ -258,7 +258,7 @@ export const useAppStore = defineStore('app', {
         },
         selectExercise(id) {
             this.itemPanel.workout.selectedExerciseID = id;
-            this.selectWorkoutView("workoutExercise")
+            this.selectWorkoutView("workoutExercise2")
         },
         setActiveExercise(id) {
             this.itemPanel.workout.activeExerciseID = id;
