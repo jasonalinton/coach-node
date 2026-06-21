@@ -1,15 +1,5 @@
 <template>
     <div class="wdl">
-
-        <!-- Nav Bar -->
-        <div class="wdl-nav">
-            <div class="wdl-nav-spacer"></div>
-            <span class="wdl-nav-title">Workout</span>
-            <div class="wdl-profile-icon">
-                <i class="fa-regular fa-user" style="font-size:14px;color:#6b7280"></i>
-            </div>
-        </div>
-
         <!-- Scrollable content -->
         <div class="wdl-scroll">
 
@@ -20,7 +10,7 @@
                         <span class="wdl-active-label">Active Workout</span>
                         <span class="wdl-active-name">{{ activeWorkout?.name || 'Upper Body Hypertrophy' }}</span>
                         <div class="wdl-active-time">
-                            <i class="fa-regular fa-clock" style="font-size:12px;color:#fff"></i>
+                            <img :src="icons.clock" class="wdl-icon-xs" alt="" />
                             <span class="wdl-timer-text">{{ elapsedFormatted }}</span>
                         </div>
                     </div>
@@ -115,7 +105,7 @@
                 <div class="wdl-card wdl-neglected-card">
                     <span class="wdl-sub-label wdl-sub-red">Neglected Goals</span>
                     <div v-for="goal in neglectedGoals" :key="goal" class="wdl-neglect-row">
-                        <i class="fa-solid fa-circle-exclamation" style="font-size:14px;color:#ef4444;flex-shrink:0"></i>
+                        <img :src="icons.alertCircle" class="wdl-icon-sm" alt="" style="flex-shrink:0" />
                         <span class="wdl-neglect-text">{{ goal }}</span>
                     </div>
                 </div>
@@ -192,16 +182,16 @@
         <!-- Footer Nav -->
         <div class="wdl-footer">
             <button class="wdl-nav-tab wdl-nav-active">
-                <i class="fa-solid fa-house" style="font-size:20px"></i>
+                <img :src="icons.home" class="wdl-icon-nav" alt="Home" />
             </button>
             <button class="wdl-nav-tab">
-                <i class="fa-solid fa-chart-simple" style="font-size:20px"></i>
+                <img :src="icons.barChart" class="wdl-icon-nav" alt="Stats" />
             </button>
             <button class="wdl-nav-tab">
-                <i class="fa-regular fa-circle-plus" style="font-size:20px"></i>
+                <img :src="icons.plusCircle" class="wdl-icon-nav" alt="Add" />
             </button>
             <button class="wdl-nav-tab">
-                <i class="fa-regular fa-user" style="font-size:20px"></i>
+                <img :src="icons.userFooter" class="wdl-icon-nav" alt="Profile" />
             </button>
         </div>
 
@@ -210,12 +200,28 @@
 
 <script>
 import bodyAvatar from '@/assets/body-avatar.png';
+import iconUser from '@/assets/icons/icon-user.svg';
+import iconClock from '@/assets/icons/icon-clock.svg';
+import iconAlertCircle from '@/assets/icons/icon-alert-circle.svg';
+import iconHome from '@/assets/icons/icon-home.svg';
+import iconBarChart from '@/assets/icons/icon-bar-chart.svg';
+import iconPlusCircle from '@/assets/icons/icon-plus-circle.svg';
+import iconUserFooter from '@/assets/icons/icon-user-footer.svg';
 
 export default {
     name: 'WorkoutDashboardLite',
     data() {
         return {
             avatarUrl: bodyAvatar,
+            icons: {
+                user: iconUser,
+                clock: iconClock,
+                alertCircle: iconAlertCircle,
+                home: iconHome,
+                barChart: iconBarChart,
+                plusCircle: iconPlusCircle,
+                userFooter: iconUserFooter,
+            },
             activeWorkout: null,
             elapsedSeconds: 42,
             elapsedTimer: null,
@@ -294,6 +300,11 @@ export default {
 </script>
 
 <style scoped>
+/* ─── Icons ─── */
+.wdl-icon-xs  { width: 14px; height: 14px; object-fit: contain; }
+.wdl-icon-sm  { width: 18px; height: 18px; object-fit: contain; }
+.wdl-icon-nav { width: 24px; height: 24px; object-fit: contain; }
+
 /* ─── Root ─── */
 .wdl {
     background: #fafafa;

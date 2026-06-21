@@ -34,9 +34,9 @@ import { useAppStore } from '@/store/appStore'
 import { useWorkoutStore } from '@/store/workoutStore';
 import ItemPanelHeader from '../component/ItemPanelHeader.vue';
 import WorkoutList from './WorkoutList.vue';
-import WorkoutDashboardLite from './WorkoutDashboardLite.vue';
 import WorkoutDashboard from './WorkoutDashboard.vue';
 import WorkoutPanelDashboard from './WorkoutPanelDashboard.vue';
+import WorkoutDashboardLite from './WorkoutDashboardLite.vue';
 import WorkoutForm from './WorkoutForm.vue';
 import WorkoutActive from './WorkoutActive.vue';
 import ActiveWorkout from './ActiveWorkout.vue';
@@ -55,7 +55,7 @@ var sortItems = [
 export default {
     name: 'WorkoutPanel',
     components: { ItemPanelHeader, WorkoutList, WorkoutForm, WorkoutActive, ActiveWorkout,
-        WorkoutDashboard, WorkoutPanelDashboard, ExerciseList, WorkoutExercise, WorkoutExercise2, WorkoutExercise3, ExerciseHistory, FitnessGoals },
+        WorkoutDashboard, WorkoutPanelDashboard, WorkoutDashboardLite, ExerciseList, WorkoutExercise, WorkoutExercise2, WorkoutExercise3, ExerciseHistory, FitnessGoals },
     props: {
         selectedDate: Date,
         showHead: {
