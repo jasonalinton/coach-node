@@ -1,7 +1,7 @@
 <template>
     <div id="app" >
         <AppMobile v-if="isExtraSmall"/>
-        <div v-else :class="['grid-container', leftPanelVisibility, itemPanelVisibility]">
+        <div v-else class="grid-container" :style="{ gridTemplateColumns: gridColumns }">
             <div class="nav-bar overflow-scroll">
                 <PlannerNavbar/>
             </div>
@@ -20,6 +20,7 @@
                 <FinancialView v-show="selectedPage == 'financial'" />
             </div>
             <div class="grid-right-panel">
+                <div class="panel-resize-handle" @mousedown="startPanelResize"></div>
                 <ItemPanel />
             </div>
         </div>
@@ -77,6 +78,9 @@ export default {
             appStore: undefined,
             plannerStore: undefined,
             eventStore: undefined,
+            itemPanelWidth: parseInt(localStorage.getItem('item-panel-width') || '352'),
+            _resizeStartX: 0,
+            _resizeStartWidth: 0,
         };
     },
     created: async function () {
@@ -101,10 +105,15 @@ export default {
             return (this.showLeftPanel) ? `show-left-panel` : 'hide-left-panel'
         },
         isExtraSmall() {
-            return (this.appStore) ?this.appStore.isExtraSmall : true;
+            return (this.appStore) ? this.appStore.isExtraSmall : true;
         },
         itemPanelVisibility() {
             return (this.appStore.itemPanel.selected) ? 'show-item-panel' : 'hide-item-panel'
+        },
+        gridColumns() {
+            const left = this.showLeftPanel ? '242px' : '0px';
+            const right = this.appStore?.itemPanel?.selected ? `${this.itemPanelWidth}px` : '57px';
+            return `${left} auto ${right}`;
         },
         selectedItemPanel() {
             return (this.appStore) ? this.appStore.itemPanel.selected : "todo";
@@ -119,7 +128,26 @@ export default {
     methods: {
         initStores,
         onResize,
-        resetEventStartY
+        resetEventStartY,
+        startPanelResize(e) {
+            this._resizeStartX = e.clientX;
+            this._resizeStartWidth = this.itemPanelWidth;
+            document.addEventListener('mousemove', this._onPanelResize);
+            document.addEventListener('mouseup', this._stopPanelResize);
+            document.body.style.userSelect = 'none';
+            document.body.style.cursor = 'col-resize';
+        },
+        _onPanelResize(e) {
+            const delta = this._resizeStartX - e.clientX;
+            this.itemPanelWidth = Math.max(280, Math.min(800, this._resizeStartWidth + delta));
+        },
+        _stopPanelResize() {
+            document.removeEventListener('mousemove', this._onPanelResize);
+            document.removeEventListener('mouseup', this._stopPanelResize);
+            document.body.style.userSelect = '';
+            document.body.style.cursor = '';
+            localStorage.setItem('item-panel-width', this.itemPanelWidth);
+        },
     },
     watch: {
         selectedPage(page) {
@@ -217,20 +245,18 @@ body {
     grid-template-rows: 64px auto;
 }
 
-.show-left-panel.show-item-panel {
-    grid-template-columns: 242px auto 352px;
+.panel-resize-handle {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 4px;
+    height: 100%;
+    cursor: col-resize;
+    z-index: 10;
 }
 
-.show-left-panel.hide-item-panel {
-    grid-template-columns: 242px auto 57px;
-}
-
-.hide-left-panel.show-item-panel {
-    grid-template-columns: 0px auto 352px;
-}
-
-.hide-left-panel.hide-item-panel {
-    grid-template-columns: 0px auto 57px;
+.panel-resize-handle:hover {
+    background-color: rgba(0, 0, 0, 0.08);
 }
 
 .nav-bar {
@@ -260,7 +286,8 @@ body {
     grid-row: 1 / span 2;
     grid-column: 3;
     overflow-y: hidden;
-    height: 100%
+    height: 100%;
+    position: relative;
 }
 
 /* @font-face {
