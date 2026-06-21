@@ -1,6 +1,6 @@
 <template>
     <div class="item-panel-wrapper row g-0">
-        <div class="col h-100" :style="{'border-left': '1px solid rgba(220, 220, 220, .5)'}">
+        <div class="col-auto h-100" :style="{'border-left': '1px solid rgba(220, 220, 220, .5)'}">
             <div :style="{'width': '100%', 'height': '64px', 'border-bottom': '1px solid rgba(220, 220, 220, .5)'}"></div>
             <!-- <div :style="{'width': '56px', 'height': '258px', 'padding-left': '8px', 'overflow': 'hidden'}"> -->
             <div :style="{'width': '56px', 'padding-left': '8px', 'overflow': 'hidden'}">
@@ -66,7 +66,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-auto h-100">
+        <div class="col h-100" style="min-width: 0">
             <DashboardPanel v-show="selectedPanel == 'dashboard'" class="item-panel"/>
             <BriefingPanel v-show="selectedPanel == 'briefing'" class="item-panel"/>
             <MetricPanel v-show="selectedPanel == 'metric'" class="item-panel"/>
@@ -144,8 +144,8 @@ function setSelectedPanel(panel) {
 .item-panel-wrapper { 
     height: 100%;
 }
-.item-panel { 
-    width: 295px;
+.item-panel {
+    width: 100%;
     box-shadow: 7px 0px 9px 5px rgba(0,0,0,.5);
     height: 100%;
     overflow-y: scroll;
