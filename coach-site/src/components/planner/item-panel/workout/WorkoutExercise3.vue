@@ -27,40 +27,63 @@
                 </button>
             </div>
 
-            <!-- Toolbar toggle -->
-            <div class="px-3 mb-2">
-                <button class="we3-toolbar-toggle" @click="toolbarVisible = !toolbarVisible">
-                    <i class="fa-solid me-1" :class="toolbarVisible ? 'fa-chevron-down' : 'fa-chevron-up'"></i>
-                    {{ toolbarVisible ? 'Hide toolbar' : 'Show toolbar' }}
+            <!-- Toolbar (inline pills) -->
+            <div class="we3-toolbar-pills">
+                <button class="we3-pill" @click="openHistory">
+                    <i class="fa-solid fa-clock-rotate-left we3-pill-icon"></i>History
+                </button>
+                <button class="we3-pill" @click="startRest">
+                    <i class="fa-solid fa-hourglass-half we3-pill-icon"></i>Rest
+                </button>
+                <button class="we3-pill">
+                    <i class="fa-solid fa-right-left we3-pill-icon"></i>Replace
+                </button>
+                <button class="we3-pill">
+                    <i class="fa-regular fa-note-sticky we3-pill-icon"></i>Notes
+                </button>
+                <button class="we3-pill">
+                    <i class="fa-solid fa-weight-scale we3-pill-icon"></i>Units
+                </button>
+                <button class="we3-pill" @click="openSettings">
+                    <i class="fa-solid fa-ellipsis we3-pill-icon"></i>More
                 </button>
             </div>
 
-            <!-- Toolbar -->
-            <div v-show="toolbarVisible" class="we3-toolbar px-3 pb-4">
-                <div class="we3-tool" @click="openHistory">
-                    <div class="we3-tool-icon"><i class="fa-solid fa-clock-rotate-left"></i></div>
-                    <span class="we3-tool-label">History</span>
+            <!-- Tempo display -->
+            <div v-if="tempoDisplay" class="we3-tempo-bar">
+                <div class="we3-tempo-sep"></div>
+                <div class="we3-tempo-content">
+                    <div class="we3-tempo-left">
+                        <!-- Label row -->
+                        <div class="we3-tempo-label-row">
+                            <i class="fa-solid fa-music we3-tempo-icon-sm"></i>
+                            <span class="we3-tempo-label">TEMPO</span>
+                            <span class="we3-tempo-type-badge">{{ tempoTypeName }}</span>
+                        </div>
+                        <!-- Phase values -->
+                        <div class="we3-tempo-values">
+                            <template v-for="(val, i) in tempoPhases" :key="i">
+                                <span class="we3-tempo-val"
+                                      :class="{ 'we3-tempo-val-active': isTempoPlaying && tempoPhase === i }">
+                                    {{ isTempoPlaying && tempoPhase === i ? tempoPhaseRemaining : val }}
+                                </span>
+                                <span v-if="i < tempoPhases.length - 1" class="we3-tempo-sep-char"> - </span>
+                            </template>
+                            <span v-if="!tempoPhases.length" class="we3-tempo-val">{{ tempoDisplay }}</span>
+                        </div>
+                        <!-- Phase labels -->
+                        <div v-if="tempoPhaseLabels.length" class="we3-tempo-phase-labels">
+                            <span v-for="(lbl, i) in tempoPhaseLabels" :key="i"
+                                  :class="{ 'we3-phase-lbl-active': isTempoPlaying && tempoPhase === i }">
+                                {{ lbl }}
+                            </span>
+                        </div>
+                    </div>
+                    <button class="we3-tempo-play-circle" @click="toggleTempo">
+                        <i class="fa-solid" :class="isTempoPlaying ? 'fa-stop' : 'fa-play'"></i>
+                    </button>
                 </div>
-                <div class="we3-tool" @click="startRest">
-                    <div class="we3-tool-icon"><i class="fa-solid fa-hourglass-half"></i></div>
-                    <span class="we3-tool-label">Rest</span>
-                </div>
-                <div class="we3-tool">
-                    <div class="we3-tool-icon"><i class="fa-solid fa-right-left"></i></div>
-                    <span class="we3-tool-label">Replace</span>
-                </div>
-                <div class="we3-tool">
-                    <div class="we3-tool-icon"><i class="fa-regular fa-note-sticky"></i></div>
-                    <span class="we3-tool-label">Notes</span>
-                </div>
-                <div class="we3-tool">
-                    <div class="we3-tool-icon"><i class="fa-solid fa-weight-scale"></i></div>
-                    <span class="we3-tool-label">Units</span>
-                </div>
-                <div class="we3-tool" @click="openSettings">
-                    <div class="we3-tool-icon"><i class="fa-solid fa-ellipsis"></i></div>
-                    <span class="we3-tool-label">More</span>
-                </div>
+                <div class="we3-tempo-sep"></div>
             </div>
 
             <!-- Sets table -->
@@ -520,7 +543,6 @@ export default {
             showInfo: false,
             showSettings: false,
             showHistorySheet: false,
-            toolbarVisible: true,
             unit: 'kg',
             historyTab: 'Weight',
             historyTabs: ['Reps', 'Weight', 'Time', 'Volume'],
@@ -628,6 +650,31 @@ export default {
                 return [Number(this.localTempoCR.contract) || 0, Number(this.localTempoCR.relax) || 0];
             }
             return [];
+        },
+        tempoTypeName() {
+            if (this.tempoType === this.TEMPTYPES.FOURDIGIT) return '4-Digit';
+            if (this.tempoType === this.TEMPTYPES.CONTRACTRELAX) return 'Contract-Relax';
+            if (this.tempoType === this.TEMPTYPES.BPM) return 'BPM';
+            return '';
+        },
+        tempoPhaseLabels() {
+            if (this.tempoType === this.TEMPTYPES.FOURDIGIT) return ['Ecc', 'Bot', 'Con', 'Top'];
+            if (this.tempoType === this.TEMPTYPES.CONTRACTRELAX) return ['Con', 'Rel'];
+            return [];
+        },
+        tempoDisplay() {
+            if (!this.tempoType) return null;
+            if (this.tempoType === this.TEMPTYPES.FOURDIGIT) {
+                const t = this.localTempo;
+                return `${t.eccentric} - ${t.bottomIso} - ${t.concentric} - ${t.topIso}`;
+            }
+            if (this.tempoType === this.TEMPTYPES.CONTRACTRELAX) {
+                return `${this.localTempoCR.contract} - ${this.localTempoCR.relax}`;
+            }
+            if (this.tempoType === this.TEMPTYPES.BPM) {
+                return `${this.localTempoBPM} BPM`;
+            }
+            return null;
         },
     },
     watch: {
@@ -951,54 +998,170 @@ export default {
 }
 
 /* ─── Toolbar toggle ─── */
-.we3-toolbar-toggle {
-    background: #1a1a1a;
-    border: none;
-    border-radius: 999px;
-    color: #8e8e93;
-    font-size: 12px;
-    font-family: 'Outfit', system-ui, sans-serif;
-    font-weight: 500;
-    padding: 6px 10px;
-    cursor: pointer;
+/* ─── Toolbar pills ─── */
+.we3-toolbar-pills {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 0 20px 16px;
+    scrollbar-width: none;
+}
+
+.we3-toolbar-pills::-webkit-scrollbar { display: none; }
+
+.we3-pill {
+    flex-shrink: 0;
     display: inline-flex;
     align-items: center;
-    gap: 4px;
+    gap: 6px;
+    background: #262626;
+    border: none;
+    border-radius: 999px;
+    color: #fff;
+    font-size: 13px;
+    font-family: 'Outfit', system-ui, sans-serif;
+    font-weight: 500;
+    padding: 10px 14px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s;
 }
 
-/* ─── Toolbar ─── */
-.we3-toolbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
+.we3-pill:hover { background: #303030; }
+
+.we3-pill-icon {
+    font-size: 13px;
+    color: #fff;
 }
 
-.we3-tool {
+/* ─── Tempo display bar ─── */
+.we3-tempo-bar {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: 6px;
-    cursor: pointer;
 }
 
+.we3-tempo-sep {
+    height: 1px;
+    background: #29292e;
+    width: 100%;
+}
+
+.we3-tempo-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #19191c;
+    padding: 14px 20px;
+    min-height: 72px;
+    gap: 12px;
+}
+
+.we3-tempo-left {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    overflow: hidden;
+}
+
+.we3-tempo-label-row {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.we3-tempo-icon-sm {
+    font-size: 10px;
+    color: #8e8e93;
+}
+
+.we3-tempo-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: #8e8e93;
+    letter-spacing: 0.08em;
+}
+
+.we3-tempo-type-badge {
+    background: #002125;
+    border-radius: 4px;
+    color: #00e5ff;
+    font-size: 9px;
+    font-weight: 700;
+    padding: 2px 6px;
+}
+
+.we3-tempo-values {
+    display: flex;
+    align-items: baseline;
+    white-space: nowrap;
+}
+
+.we3-tempo-val {
+    font-size: 18px;
+    font-weight: 800;
+    color: #fff;
+    min-width: 16px;
+    transition: color 0.2s;
+}
+
+.we3-tempo-val-active {
+    color: #00e5ff;
+}
+
+.we3-tempo-sep-char {
+    font-size: 18px;
+    font-weight: 800;
+    color: #fff;
+    padding: 0 1px;
+}
+
+.we3-tempo-phase-labels {
+    display: flex;
+    gap: 10px;
+}
+
+.we3-tempo-phase-labels span {
+    font-size: 9px;
+    font-weight: 500;
+    color: #66666b;
+    transition: color 0.2s;
+}
+
+.we3-phase-lbl-active {
+    color: #00e5ff !important;
+}
+
+.we3-tempo-play-circle {
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: #00e5ff;
+    border: none;
+    color: #0d0d0d;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.15s;
+    box-shadow: 0 0 16px rgba(0, 229, 255, 0.35);
+}
+
+.we3-tempo-play-circle:hover { background: #00cfee; }
+
+/* kept for info panel toolbar */
 .we3-tool-icon {
-    background: #1a1a1a;
-    border-radius: 22px;
+    background: none;
+    border-radius: 0;
     width: 44px;
     height: 44px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 18px;
-    color: #8e8e93;
-}
-
-.we3-tool-icon.sm {
-    width: 44px;
-    height: 44px;
     font-size: 16px;
-    border-radius: 0;
-    background: none;
+    color: #8e8e93;
 }
 
 .we3-tool-label {
