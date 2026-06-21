@@ -7,6 +7,7 @@
                              @onSortChange="onSortChange">
             </ItemPanelHeader>
             <WorkoutDashboard v-if="selectedView == 'dashboard' && designVariants.workoutDashboard == 'WorkoutDashboard'"/>
+            <WorkoutDashboardLite v-if="selectedView == 'dashboard' && designVariants.workoutDashboard == 'WorkoutDashboardLite'"/>
             <WorkoutPanelDashboard v-if="selectedView == 'dashboard' && designVariants.workoutDashboard == 'WorkoutPanelDashboard'"
                                    @selectView="selectView"/>
             <WorkoutList v-if="selectedView == 'workoutList'"
@@ -33,6 +34,7 @@ import { useAppStore } from '@/store/appStore'
 import { useWorkoutStore } from '@/store/workoutStore';
 import ItemPanelHeader from '../component/ItemPanelHeader.vue';
 import WorkoutList from './WorkoutList.vue';
+import WorkoutDashboardLite from './WorkoutDashboardLite.vue';
 import WorkoutDashboard from './WorkoutDashboard.vue';
 import WorkoutPanelDashboard from './WorkoutPanelDashboard.vue';
 import WorkoutForm from './WorkoutForm.vue';
@@ -106,6 +108,7 @@ export default {
                     items: [
                         { id: 1, text: 'WorkoutPanelDashboard' },
                         { id: 2, text: 'WorkoutDashboard' },
+                        { id: 3, text: 'WorkoutDashboardLite' },
                     ]
                 };
             }
