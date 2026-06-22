@@ -4,6 +4,8 @@
         <div class="header d-flex flex-row align-items-center pt-2 pb-2 sticky-top">
             <img class="icon-button me-2" src="/icon/previous.png" width="20" height="20" @click.prevent="back" />
             <span class="fw-semibold">{{ name }}</span>
+            <span v-if="localCircuit != null" class="ms-auto me-1 text-muted small">C{{ localCircuit }}</span>
+            <span v-if="localPosition != null" class="me-2 text-muted small">P{{ localPosition }}</span>
         </div>
 
         <!-- Media -->

@@ -5,6 +5,8 @@
                  src='/icon/previous.png' width="20" height="20"
                  @click.prevent="back"/>
             <span>{{ name }}</span>
+            <span v-if="circuit != null" class="ms-auto me-1 text-muted small">C{{ circuit }}</span>
+            <span v-if="position != null" class="me-2 text-muted small">P{{ position }}</span>
         </div>
         <!-- Demo -->
         <div class="media position-relative">
