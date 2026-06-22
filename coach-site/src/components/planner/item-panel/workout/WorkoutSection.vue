@@ -65,6 +65,10 @@ export default {
                     exercises.push(exercise);
                 })
             }
+            exercises.sort((a, b) => {
+                if ((a.circuit ?? 0) !== (b.circuit ?? 0)) return (a.circuit ?? 0) - (b.circuit ?? 0);
+                return (a.position ?? 0) - (b.position ?? 0);
+            });
             return exercises;
         }
     },
