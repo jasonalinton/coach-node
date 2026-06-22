@@ -70,8 +70,8 @@ export default {
             customSortBy: 'Custom',
             designVariants: {
                 workoutDashboard: 'WorkoutDashboard',
-                workoutActive: 'ActiveWorkout',
-                workoutExercise: 'WorkoutExercise',
+                workoutActive: 'WorkoutActive',
+                workoutExercise: 'WorkoutExercise2',
             },
             title: "Workout Dashboard",
             activePanel: "dashboard",
@@ -95,6 +95,11 @@ export default {
             this.customSortBy = workoutPanelSortBy_Store;
         } else {
             localStorage.setItem(`workout-panel-sort-by`, this.customSortBy);
+        }
+
+        const savedVariants = localStorage.getItem('workout-panel-design-variants');
+        if (savedVariants) {
+            Object.assign(this.designVariants, JSON.parse(savedVariants));
         }
     },
     computed: {
@@ -154,6 +159,7 @@ function onSortChange(sortBy) {
         this.customSortBy = sortBy;
         localStorage.setItem(`workout-panel-sort-by`, sortBy);
     }
+    localStorage.setItem('workout-panel-design-variants', JSON.stringify(this.designVariants));
 }
 
 function selectView(value) {
