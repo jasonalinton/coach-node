@@ -163,13 +163,7 @@ export default {
         },
         sets() {
             if (this.workoutExercise) {
-                let sets = this.workoutExercise.sets.map(set => {
-                    return {
-                        idWorkoutSectionExercise: this.workoutExercise.idWorkoutExercise,
-                        ...set
-                    }
-                });
-                return sets;
+                return this.workoutStore.getSets(this.workoutExercise.idWorkoutExercise);
             }
             return [];
         },

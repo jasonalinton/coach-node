@@ -24,6 +24,9 @@ export const useWorkoutStore = defineStore('workout', {
     getters: {
         getDragged() {
             return this.dragged;
+        },
+        getSets: (state) => (idWorkoutSectionExercise) => {
+            return state.sets.filter(s => s.idWorkoutSectionExercise == idWorkoutSectionExercise);
         }
     },
     actions: {
@@ -44,6 +47,11 @@ export const useWorkoutStore = defineStore('workout', {
                 this.variations = res.variations;
                 this.muscleGroups = res.muscleGroups;
                 this.muscles = res.muscles;
+                this.sets = res.workouts.flatMap(w =>
+                    w.sections.flatMap(s =>
+                        s.exercises.flatMap(e => e.sets ?? [])
+                    )
+                );
             });
             return promise;
         },
@@ -371,7 +379,9 @@ export const useWorkoutStore = defineStore('workout', {
             if (updates.workouts && updates.workouts.length > 0) {
                 updates.workouts.forEach(workout => {
                     replaceOrAddItem(workout, _this.workouts);
-                })
+                    workout.sections.flatMap(s => s.exercises.flatMap(e => e.sets ?? []))
+                        .forEach(set => replaceOrAddItem(set, _this.sets));
+                });
                 sortAsc(_this.workouts);
             }
             if (updates.workoutIDsRemoved && updates.workoutIDsRemoved.length > 0) {
@@ -385,6 +395,16 @@ export const useWorkoutStore = defineStore('workout', {
                     replaceOrAddItem(exercise, _this.exercises);
                 })
                 sortAsc(_this.exercises);
+            }
+            if (updates.sets && updates.sets.length > 0) {
+                updates.sets.forEach(set => {
+                    replaceOrAddItem(set, _this.sets);
+                });
+            }
+            if (updates.setIDsRemoved && updates.setIDsRemoved.length > 0) {
+                updates.setIDsRemoved.forEach(setID => {
+                    removeItemByID(setID, _this.sets);
+                });
             }
         },
         connectSocket() {

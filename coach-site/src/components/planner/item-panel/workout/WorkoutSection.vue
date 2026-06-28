@@ -50,8 +50,8 @@ export default {
     },
     computed: {
         sectionName() {
-            let sectionType = this.workoutSectionTypes.find(x => x.id == this.section.id);
-            return sectionType.text;
+            let sectionType = this.workoutSectionTypes.find(x => x.id == this.section.idSectionType);
+            return sectionType ? sectionType.text : '';
         },
         exercises() {
             let exercises = [];
