@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { getWorkoutInfo, getWorkout, getWorkouts, getExercises, getWorkoutIDFromEvent, getExerciseHistory } from '../api/workoutAPI'
 import { replaceOrAddItem, removeItemByID, sortAsc, sortNumAsc } from '../../utility';
-import { getSocketConnection } from './socket'
+import { getSocketConnection, deferUpdate } from './socket'
 import { postEndpoint } from '../api/api';
 
 let initialized = false;
@@ -368,23 +368,20 @@ export const useWorkoutStore = defineStore('workout', {
         },
         runUpdates(updates) {
             let _this = this;
-            if (updates.workouts && updates.workouts.length > 0) {
-                updates.workouts.forEach(workout => {
-                    replaceOrAddItem(workout, _this.workouts);
-                })
-                sortAsc(_this.workouts);
+            if (updates.workouts?.length > 0 || updates.workoutIDsRemoved?.length > 0) {
+                let workouts = [..._this.workouts];
+                if (updates.workouts?.length > 0) {
+                    updates.workouts.forEach(workout => replaceOrAddItem(workout, workouts));
+                }
+                if (updates.workoutIDsRemoved?.length > 0) {
+                    updates.workoutIDsRemoved.forEach(id => removeItemByID(id, workouts));
+                }
+                deferUpdate(() => { _this.workouts = sortAsc(workouts); });
             }
-            if (updates.workoutIDsRemoved && updates.workoutIDsRemoved.length > 0) {
-                updates.workoutIDsRemoved.forEach(workoutID => {
-                    removeItemByID(workoutID, _this.workouts);
-                })
-                _this.workouts = sortAsc([..._this.workouts]);
-            }
-            if (updates.exercises && updates.exercises.length > 0) {
-                updates.exercises.forEach(exercise => {
-                    replaceOrAddItem(exercise, _this.exercises);
-                })
-                sortAsc(_this.exercises);
+            if (updates.exercises?.length > 0) {
+                let exercises = [..._this.exercises];
+                updates.exercises.forEach(exercise => replaceOrAddItem(exercise, exercises));
+                deferUpdate(() => { _this.exercises = sortAsc(exercises); });
             }
         },
         connectSocket() {

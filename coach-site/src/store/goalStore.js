@@ -1,7 +1,8 @@
 import { defineStore } from 'pinia'
+import { markRaw } from 'vue'
 import { getGoals, getGoalsWithTimeframe } from '../api/goalAPI'
 import { capitalize, replaceOrAddItem, sortAsc, sum } from '../../utility';
-import { getSocketConnection } from './socket'
+import { getSocketConnection, deferUpdate } from './socket'
 import { useMetricStore } from '@/store/metricStore'
 import { useTodoStore } from '@/store/todoStore'
 import { useRoutineStore } from '@/store/routineStore'
@@ -33,21 +34,21 @@ export const useGoalStore = defineStore('goal', {
         },
         async fill() {
             let promise = getGoals().then(res => this.goals = res);
-            this.initializeItems();
             return promise;
         },
-        initializeItems(goals) {
+        initializeItems(goals, allGoals) {
             let metricStore = useMetricStore();
             let todoStore = useTodoStore();
             let routineStore = useRoutineStore();
 
-            goals = goals || this.goals;
+            allGoals = allGoals || this.goals;
+            goals = goals || allGoals;
             goals.forEach(goal => {
-                goal.parents = this.goals.filter(x => goal.parentIDs.includes(x.id));
-                goal.children = this.goals.filter(x => goal.childIDs.includes(x.id));
-                goal.metrics = metricStore.getItems().filter(x => goal.metricIDs.includes(x.id));
-                goal.todos = todoStore.getItems().filter(x => goal.todoIDs.includes(x.id));
-                goal.routines = routineStore.getItems().filter(x => goal.routineIDs.includes(x.id));
+                goal.parents  = markRaw(allGoals.filter(x => goal.parentIDs.includes(x.id)));
+                goal.children = markRaw(allGoals.filter(x => goal.childIDs.includes(x.id)));
+                goal.metrics  = markRaw(metricStore.getItems().filter(x => goal.metricIDs.includes(x.id)));
+                goal.todos    = markRaw(todoStore.getItems().filter(x => goal.todoIDs.includes(x.id)));
+                goal.routines = markRaw(routineStore.getItems().filter(x => goal.routineIDs.includes(x.id)));
             })
         },
         getItems() {
@@ -57,14 +58,12 @@ export const useGoalStore = defineStore('goal', {
             return this.goals.find(x => x.id == id);
         },
         getTimeframeItems(start, end) {
-            let _this = this;
             return getGoalsWithTimeframe(start, end)
                 .then(goals => {
-                    goals.forEach(goal => {
-                        replaceOrAddItem(goal, _this.goals);
-                    })
-                    this.initializeItems(goals);
-                    _this.goals = sortAsc([..._this.goals]);
+                    let allGoals = [...this.goals];
+                    goals.forEach(goal => replaceOrAddItem(goal, allGoals));
+                    this.initializeItems(goals, allGoals);
+                    this.goals = sortAsc(allGoals);
                     return goals;
                 });
         },
@@ -237,20 +236,19 @@ export const useGoalStore = defineStore('goal', {
             .then(response => response.result);
         },
         runUpdates(updates) {
-            let _this = this;
-            if (updates.goals && updates.goals.length > 0) {
-                updates.goals.forEach(goal => {
-                    replaceOrAddItem(goal, _this.goals);
-                })
-                this.initializeItems(updates.goals);
-                _this.goals = sortAsc([..._this.goals]);
+            const hasGoals = updates.goals?.length > 0;
+            const hasRemovals = updates.goalIDsRemoved?.length > 0;
+            if (!hasGoals && !hasRemovals) return;
+
+            let goals = [...this.goals];
+            if (hasGoals) {
+                updates.goals.forEach(goal => replaceOrAddItem(goal, goals));
+                this.initializeItems(updates.goals, goals);
             }
-            if (updates.goalIDsRemoved && updates.goalIDsRemoved.length > 0) {
-                updates.goalIDsRemoved.forEach(goalID => {
-                    removeItemByID(goalID, _this.goals);
-                })
-                _this.goals = sortAsc([..._this.goals]);
+            if (hasRemovals) {
+                updates.goalIDsRemoved.forEach(id => removeItemByID(id, goals));
             }
+            deferUpdate(() => { this.goals = sortAsc(goals); });
         },
         connectSocket() {
             if (!initialized) {

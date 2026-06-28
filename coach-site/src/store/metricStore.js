@@ -1,7 +1,8 @@
 import { defineStore } from 'pinia'
+import { markRaw } from 'vue'
 import { getMetrics, getLogItems, deleteLogEntry } from '../api/metricAPI'
 import { replaceOrAddItem, sortAsc, clone, capitalize } from '../../utility';
-import { getSocketConnection } from './socket'
+import { getSocketConnection, deferUpdate } from './socket'
 import { useGoalStore } from '@/store/goalStore'
 import { useTodoStore } from '@/store/todoStore'
 import { useRoutineStore } from '@/store/routineStore'
@@ -27,18 +28,19 @@ export const useMetricStore = defineStore('metric', {
         async fill() {
             return getMetrics().then(res => this.metrics = res);
         },
-        initializeItems(metrics) {
+        initializeItems(metrics, allMetrics) {
             let goalStore = useGoalStore();
             let todoStore = useTodoStore();
             let routineStore = useRoutineStore();
 
-            metrics = metrics || this.metrics;
+            allMetrics = allMetrics || this.metrics;
+            metrics = metrics || allMetrics;
             metrics.forEach(metric => {
-                metric.parents = this.metrics.filter(x => metric.parentIDs.includes(x.id));
-                metric.children = this.metrics.filter(x => metric.childIDs.includes(x.id));
-                metric.goals = goalStore.getItems().filter(x => metric.goalIDs.includes(x.id));
-                metric.todos = todoStore.getItems().filter(x => metric.todoIDs.includes(x.id));
-                metric.routines = routineStore.getItems().filter(x => metric.routineIDs.includes(x.id));
+                metric.parents  = markRaw(allMetrics.filter(x => metric.parentIDs.includes(x.id)));
+                metric.children = markRaw(allMetrics.filter(x => metric.childIDs.includes(x.id)));
+                metric.goals    = markRaw(goalStore.getItems().filter(x => metric.goalIDs.includes(x.id)));
+                metric.todos    = markRaw(todoStore.getItems().filter(x => metric.todoIDs.includes(x.id)));
+                metric.routines = markRaw(routineStore.getItems().filter(x => metric.routineIDs.includes(x.id)));
             })
         },
         getItems() {
@@ -87,14 +89,12 @@ export const useMetricStore = defineStore('metric', {
             });
         },
         runUpdates(updates) {
-            let _this = this;
-            if (updates.metrics && updates.metrics.length > 0) {
-                updates.metrics.forEach(metric => {
-                    replaceOrAddItem(metric, _this.metrics);
-                })
-                this.initializeItems(updates.metrics);
-                this.metrics = sortAsc([...this.metrics]);
-            }
+            if (!updates.metrics?.length) return;
+
+            let metrics = [...this.metrics];
+            updates.metrics.forEach(metric => replaceOrAddItem(metric, metrics));
+            this.initializeItems(updates.metrics, metrics);
+            deferUpdate(() => { this.metrics = sortAsc(metrics); });
         },
         connectSocket() {
             if (!initialized) {

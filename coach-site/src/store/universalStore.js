@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { getSocketConnection } from './socket';
+import { getSocketConnection, deferUpdate } from './socket';
 import { replaceOrAddItem, sortAsc } from '../../utility';
 import { getTimeframeEndpoints } from '../../utility/timeUtility';
 import { postEndpoint } from '../api/api';
@@ -49,10 +49,9 @@ export const useUniversalStore = defineStore('universal', {
             let _this = this;
             postEndpoint("Universal", "GetBlurbsInMetric", { idMetric, idTimeframe, datetime })
             .then(response => {
-                response.result.forEach(blurb => {
-                    replaceOrAddItem(blurb, _this.blurbs);
-                });
-                _this.blurbs = sortAsc([..._this.blurbs]);
+                let blurbs = [..._this.blurbs];
+                response.result.forEach(blurb => replaceOrAddItem(blurb, blurbs));
+                _this.blurbs = sortAsc(blurbs);
                 return response.result;
             });
 
@@ -63,10 +62,9 @@ export const useUniversalStore = defineStore('universal', {
             let _this = this;
             postEndpoint("Universal", "GetBriefingBlurbs", { idTimeframe, datetime })
             .then(response => {
-                response.result.forEach(blurb => {
-                    replaceOrAddItem(blurb, _this.blurbs);
-                });
-                _this.blurbs = sortAsc([..._this.blurbs]);
+                let blurbs = [..._this.blurbs];
+                response.result.forEach(blurb => replaceOrAddItem(blurb, blurbs));
+                _this.blurbs = sortAsc(blurbs);
                 return response.result;
             });
 
@@ -84,19 +82,14 @@ export const useUniversalStore = defineStore('universal', {
             return response.result;
         },
         runUpdates(updates) {
-            let _this = this;
-            if (updates.blurbs && updates.blurbs.length > 0) {
-                updates.blurbs.forEach(blurb => {
-                    replaceOrAddItem(blurb, _this.blurbs);
-                })
-                _this.blurbs = sortAsc([..._this.blurbs]);
-            }
-            if (updates.blurbIDsRemoved && updates.blurbIDsRemoved.length > 0) {
-                updates.blurbIDsRemoved.forEach(blurbID => {
-                    removeItemByID(blurbID, _this.blurbs);
-                })
-                _this.blurbs = sortAsc([..._this.blurbs]);
-            }
+            const hasBlurbs = updates.blurbs?.length > 0;
+            const hasRemovals = updates.blurbIDsRemoved?.length > 0;
+            if (!hasBlurbs && !hasRemovals) return;
+
+            let blurbs = [...this.blurbs];
+            if (hasBlurbs) updates.blurbs.forEach(blurb => replaceOrAddItem(blurb, blurbs));
+            if (hasRemovals) updates.blurbIDsRemoved.forEach(id => removeItemByID(id, blurbs));
+            deferUpdate(() => { this.blurbs = sortAsc(blurbs); });
         },
         addMetricBlurb(idMetric, datetime, text, title) {
             return postEndpoint("Universal", "AddMetricBlurb", { idMetric, datetime, text, title })
