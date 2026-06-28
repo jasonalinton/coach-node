@@ -282,7 +282,7 @@ export default {
         sets() {
             if (this.workoutExercise) {
                 return this.workoutExercise.sets.map(set => ({
-                    idWorkoutExercise: this.workoutExercise.idWorkoutExercise,
+                    idWorkoutSectionExercise: this.workoutExercise.idWorkoutExercise,
                     ...set,
                 }));
             }
@@ -425,7 +425,7 @@ export default {
             } else {
                 this.workoutStore.saveSet({
                     id: nextID,
-                    idWorkoutExercise: this.workoutExercise.idWorkoutExercise,
+                    idWorkoutSectionExercise: this.workoutExercise.idWorkoutExercise,
                 });
             }
         },

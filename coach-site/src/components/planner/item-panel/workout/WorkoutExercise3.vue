@@ -603,7 +603,7 @@ export default {
         sets() {
             if (this.workoutExercise) {
                 return this.workoutExercise.sets.map(set => ({
-                    idWorkoutExercise: this.workoutExercise.idWorkoutExercise,
+                    idWorkoutSectionExercise: this.workoutExercise.idWorkoutExercise,
                     ...set,
                 }));
             }

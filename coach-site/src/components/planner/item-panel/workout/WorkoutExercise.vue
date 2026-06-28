@@ -165,7 +165,7 @@ export default {
             if (this.workoutExercise) {
                 let sets = this.workoutExercise.sets.map(set => {
                     return {
-                        idWorkoutExercise: this.workoutExercise.idWorkoutExercise,
+                        idWorkoutSectionExercise: this.workoutExercise.idWorkoutExercise,
                         ...set
                     }
                 });
@@ -293,7 +293,7 @@ export default {
             } else {
                 let newSet = {
                     id: nextID,
-                    idWorkoutExercise: this.workoutExercise.idWorkoutExercise
+                    idWorkoutSectionExercise: this.workoutExercise.idWorkoutExercise
                 };
                 this.workoutStore.saveSet(newSet);
             }

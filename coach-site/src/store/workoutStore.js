@@ -309,7 +309,7 @@ export const useWorkoutStore = defineStore('workout', {
         },
         async saveWorkoutExercise(id, circuit, position, tempo_4DigitCode, tempo_CR, tempo_BPM, restSeconds) {
             let model = {
-                workoutExerciseID: id,
+                workoutSectionExerciseID: id,
                 circuit,
                 position,
                 tempo_4DigitCode,
@@ -334,7 +334,7 @@ export const useWorkoutStore = defineStore('workout', {
                 .then(this.onResponse);
         },
         async logAllSets(idWorkoutExercise) {
-            return postEndpoint("Physical", "LogAllSets", { idWorkoutExercise})
+            return postEndpoint("Physical", "LogAllSets", { idWorkoutSectionExercise: idWorkoutExercise })
                 .then(this.onResponse);
         },
         async completeWorkout(workoutID, startAt, endAt, createEvent) {
@@ -348,7 +348,7 @@ export const useWorkoutStore = defineStore('workout', {
                 .then(this.onResponse);
         },
         async removeExerciseFromWorkout(idWorkoutExercise) {
-            return postEndpoint("Physical", "RemoveExerciseFromWorkout", { idWorkoutExercise})
+            return postEndpoint("Physical", "RemoveExerciseFromWorkout", { idWorkoutSectionExercise: idWorkoutExercise })
                 .then(this.onResponse);
         },
         async createFitnessGoal(idGoalTimePairTodo, frequency, sets, reps, weight, time) {
