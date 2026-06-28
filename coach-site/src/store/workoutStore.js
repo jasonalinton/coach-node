@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { getWorkoutInfo, getWorkout, getWorkouts, getExercises, getWorkoutIDFromEvent, getExerciseHistory } from '../api/workoutAPI'
 import { replaceOrAddItem, removeItemByID, sortAsc, sortNumAsc } from '../../utility';
-import { getSocketConnection } from './socket'
+import { getSocketConnection, deferUpdate } from './socket'
 import { postEndpoint } from '../api/api';
 
 let initialized = false;
@@ -376,36 +376,33 @@ export const useWorkoutStore = defineStore('workout', {
         },
         runUpdates(updates) {
             let _this = this;
-            if (updates.workouts && updates.workouts.length > 0) {
-                updates.workouts.forEach(workout => {
-                    replaceOrAddItem(workout, _this.workouts);
-                    workout.sections.flatMap(s => s.exercises.flatMap(e => e.sets ?? []))
-                        .forEach(set => replaceOrAddItem(set, _this.sets));
-                });
-                sortAsc(_this.workouts);
+            let sets = [..._this.sets];
+            if (updates.workouts?.length > 0 || updates.workoutIDsRemoved?.length > 0) {
+                let workouts = [..._this.workouts];
+                if (updates.workouts?.length > 0) {
+                    updates.workouts.forEach(workout => {
+                        replaceOrAddItem(workout, workouts);
+                        workout.sections.flatMap(s => s.exercises.flatMap(e => e.sets ?? []))
+                            .forEach(set => replaceOrAddItem(set, sets));
+                    });
+                }
+                if (updates.workoutIDsRemoved?.length > 0) {
+                    updates.workoutIDsRemoved.forEach(id => removeItemByID(id, workouts));
+                }
+                deferUpdate(() => { _this.workouts = sortAsc(workouts); });
             }
-            if (updates.workoutIDsRemoved && updates.workoutIDsRemoved.length > 0) {
-                updates.workoutIDsRemoved.forEach(workoutID => {
-                    removeItemByID(workoutID, _this.workouts);
-                })
-                sortAsc(_this.workouts);
+            if (updates.exercises?.length > 0) {
+                let exercises = [..._this.exercises];
+                updates.exercises.forEach(exercise => replaceOrAddItem(exercise, exercises));
+                deferUpdate(() => { _this.exercises = sortAsc(exercises); });
             }
-            if (updates.exercises && updates.exercises.length > 0) {
-                updates.exercises.forEach(exercise => {
-                    replaceOrAddItem(exercise, _this.exercises);
-                })
-                sortAsc(_this.exercises);
+            if (updates.sets?.length > 0) {
+                updates.sets.forEach(set => replaceOrAddItem(set, sets));
             }
-            if (updates.sets && updates.sets.length > 0) {
-                updates.sets.forEach(set => {
-                    replaceOrAddItem(set, _this.sets);
-                });
+            if (updates.setIDsRemoved?.length > 0) {
+                updates.setIDsRemoved.forEach(setID => removeItemByID(setID, sets));
             }
-            if (updates.setIDsRemoved && updates.setIDsRemoved.length > 0) {
-                updates.setIDsRemoved.forEach(setID => {
-                    removeItemByID(setID, _this.sets);
-                });
-            }
+            deferUpdate(() => { _this.sets = sets; });
         },
         connectSocket() {
             if (!initialized) {

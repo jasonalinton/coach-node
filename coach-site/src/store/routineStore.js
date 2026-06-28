@@ -1,8 +1,9 @@
 import { defineStore } from 'pinia'
+import { markRaw } from 'vue'
 import { getRoutines, refreshRepetitionForRepeat } from '../api/routineAPI'
 import { capitalize, replaceOrAddItem, sortAsc } from '../../utility';
 import { ROUTINETYPES } from '../model/constants';
-import { getSocketConnection } from './socket'
+import { getSocketConnection, deferUpdate } from './socket'
 import { useMetricStore } from '@/store/metricStore'
 import { useTodoStore } from '@/store/todoStore'
 import { useGoalStore } from '@/store/goalStore'
@@ -27,18 +28,19 @@ export const useRoutineStore = defineStore('routine', {
         async fill() {
             return getRoutines().then(res => this.routines = res);
         },
-        initializeItems(routines) {
+        initializeItems(routines, allRoutines) {
             let metricStore = useMetricStore();
             let todoStore = useTodoStore();
             let goalStore = useGoalStore();
 
-            routines = routines || this.routines;
+            allRoutines = allRoutines || this.routines;
+            routines = routines || allRoutines;
             routines.forEach(routine => {
-                routine.parents = this.routines.filter(x => routine.parentIDs.includes(x.id));
-                routine.children = this.routines.filter(x => routine.childIDs.includes(x.id));
-                routine.metrics = metricStore.getItems().filter(x => routine.metricIDs.includes(x.id));
-                routine.todos = todoStore.getItems().filter(x => routine.todoIDs.includes(x.id));
-                routine.goals = goalStore.getItems().filter(x => routine.goalIDs.includes(x.id));
+                routine.parents  = markRaw(allRoutines.filter(x => routine.parentIDs.includes(x.id)));
+                routine.children = markRaw(allRoutines.filter(x => routine.childIDs.includes(x.id)));
+                routine.metrics  = markRaw(metricStore.getItems().filter(x => routine.metricIDs.includes(x.id)));
+                routine.todos    = markRaw(todoStore.getItems().filter(x => routine.todoIDs.includes(x.id)));
+                routine.goals    = markRaw(goalStore.getItems().filter(x => routine.goalIDs.includes(x.id)));
             })
         },
         getItems(ids) {
@@ -91,20 +93,19 @@ export const useRoutineStore = defineStore('routine', {
             .then(response => response.result);
         },
         runUpdates(updates) {
-            let _this = this;
-            if (updates.routines && updates.routines.length > 0) {
-                updates.routines.forEach(routine => {
-                    replaceOrAddItem(routine, _this.routines);
-                })
-                this.initializeItems(updates.routines);
-                sortAsc(_this.routines);
+            const hasRoutines = updates.routines?.length > 0;
+            const hasRemovals = updates.routineIDsRemoved?.length > 0;
+            if (!hasRoutines && !hasRemovals) return;
+
+            let routines = [...this.routines];
+            if (hasRoutines) {
+                updates.routines.forEach(routine => replaceOrAddItem(routine, routines));
+                this.initializeItems(updates.routines, routines);
             }
-            if (updates.routineIDsRemoved && updates.routineIDsRemoved.length > 0) {
-                updates.routineIDsRemoved.forEach(routineID => {
-                    removeItemByID(routineID, _this.routines);
-                })
-                sortAsc(_this.routines);
+            if (hasRemovals) {
+                updates.routineIDsRemoved.forEach(id => removeItemByID(id, routines));
             }
+            deferUpdate(() => { this.routines = sortAsc(routines); });
         },
         connectSocket() {
             if (!initialized) {

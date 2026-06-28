@@ -40,3 +40,19 @@ export function isHubConnected(hubName) {
     let connection = getSocketConnection(hubName);
     return (connection.state == HubConnectionState.Connected);
 }
+
+let _deferred = [];
+let _scheduled = false;
+
+export function deferUpdate(fn) {
+    _deferred.push(fn);
+    if (!_scheduled) {
+        _scheduled = true;
+        setTimeout(() => {
+            const fns = _deferred;
+            _deferred = [];
+            _scheduled = false;
+            fns.forEach(f => f());
+        }, 0);
+    }
+}

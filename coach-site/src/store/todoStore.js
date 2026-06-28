@@ -1,7 +1,8 @@
 import { defineStore } from 'pinia'
+import { markRaw } from 'vue'
 import { getTodos } from '../api/todoAPI';
 import { replaceOrAddItem, removeItemByID, sortAsc, capitalize } from '../../utility';
-import { getSocketConnection } from './socket'
+import { getSocketConnection, deferUpdate } from './socket'
 import { useMetricStore } from '@/store/metricStore'
 import { useGoalStore } from '@/store/goalStore'
 import { useRoutineStore } from '@/store/routineStore'
@@ -28,18 +29,19 @@ export const useTodoStore = defineStore('todo', {
             return getTodos()
                 .then(res => this.todos = res);
         },
-        initializeItems(todos) {
+        initializeItems(todos, allTodos) {
             let metricStore = useMetricStore();
             let goalStore = useGoalStore();
             let routineStore = useRoutineStore();
 
-            todos = todos || this.todos;
+            allTodos = allTodos || this.todos;
+            todos = todos || allTodos;
             todos.forEach(todo => {
-                todo.parents = this.todos.filter(x => todo.parentIDs.includes(x.id));
-                todo.children = this.todos.filter(x => todo.childIDs.includes(x.id));
-                todo.metrics = metricStore.getItems().filter(x => todo.metricIDs.includes(x.id));
-                todo.goals = goalStore.getItems().filter(x => todo.goalIDs.includes(x.id));
-                todo.routines = routineStore.getItems().filter(x => todo.routineIDs.includes(x.id));
+                todo.parents  = markRaw(allTodos.filter(x => todo.parentIDs.includes(x.id)));
+                todo.children = markRaw(allTodos.filter(x => todo.childIDs.includes(x.id)));
+                todo.metrics  = markRaw(metricStore.getItems().filter(x => todo.metricIDs.includes(x.id)));
+                todo.goals    = markRaw(goalStore.getItems().filter(x => todo.goalIDs.includes(x.id)));
+                todo.routines = markRaw(routineStore.getItems().filter(x => todo.routineIDs.includes(x.id)));
             })
         },
         getItems() {
@@ -203,20 +205,19 @@ export const useTodoStore = defineStore('todo', {
             .then(response => response.result);
         },
         runUpdates(updates) {
-            let _this = this;
-            if (updates.todos && updates.todos.length > 0) {
-                updates.todos.forEach(todo => {
-                    replaceOrAddItem(todo, _this.todos);
-                });
-                this.initializeItems(updates.todos);
-                sortAsc(_this.todos);
+            const hasTodos = updates.todos?.length > 0;
+            const hasRemovals = updates.todoIDsRemoved?.length > 0;
+            if (!hasTodos && !hasRemovals) return;
+
+            let todos = [...this.todos];
+            if (hasTodos) {
+                updates.todos.forEach(todo => replaceOrAddItem(todo, todos));
+                this.initializeItems(updates.todos, todos);
             }
-            if (updates.todoIDsRemoved && updates.todoIDsRemoved.length > 0) {
-                updates.todoIDsRemoved.forEach(todoID => {
-                    removeItemByID(todoID, _this.todos);
-                })
-                sortAsc(_this.todos);
+            if (hasRemovals) {
+                updates.todoIDsRemoved.forEach(id => removeItemByID(id, todos));
             }
+            deferUpdate(() => { this.todos = sortAsc(todos); });
         },
         connectSocket() {
             if (!initialized) {

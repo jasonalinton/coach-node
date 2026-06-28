@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { postEndpoint } from '../api/api'
 import { getEvent, getEvents } from '../api/eventAPI'
 import { removeItemByID, replaceOrAddItem, sortAsc } from '../../utility'
-import { getSocketConnection } from './socket'
+import { getSocketConnection, deferUpdate } from './socket'
 
 let initialized = false;
 
@@ -57,44 +57,42 @@ export const useEventStore = defineStore('event', {
         },
         runUpdates(updates) {
             let _this = this;
-            // Events updated
-            if (updates.events && updates.events.length > 0) {
-                updates.events.forEach(event => {
-                    replaceOrAddItem(event, _this.events);
-                })
-                sortAsc(_this.events);
+            const deferred = [];
+
+            const hasEvents = updates.events?.length > 0;
+            const hasEventsRemoved = updates.eventIDRemoved?.length > 0;
+            if (hasEvents || hasEventsRemoved) {
+                let events = [..._this.events];
+                if (hasEvents) updates.events.forEach(event => replaceOrAddItem(event, events));
+                if (hasEventsRemoved) updates.eventIDRemoved.forEach(id => removeItemByID(id, events));
+                deferred.push(() => { _this.events = sortAsc(events); });
             }
-            // Event IDs removed
-            if (updates.eventIDRemoved && updates.eventIDRemoved.length > 0) {
-                updates.eventIDRemoved.forEach(eventID => {
-                    removeItemByID(eventID, _this.events);
-                })
-                sortAsc(_this.events);
-            }
-            // Iterations updated
-            if (updates.iterations && updates.iterations.length > 0) {
+            // Iterations updated inside events
+            if (updates.iterations?.length > 0) {
                 updates.iterations.forEach(iteration => {
                     _this.events.forEach(_event => {
-                        var containsIteration = _event.iterations.some(_iteration => _iteration.id == iteration.id);
-                        if (containsIteration) {
-                            replaceOrAddItem(iteration, _event.iterations);
-                            sortAsc(_event.iterations);
-                        }
-                    });                       
-                });
-            }
-            // Iteration IDs removed
-            if (updates.iterationIDsRemoved && updates.iterationIDsRemoved.length > 0) {
-                updates.iterationIDsRemoved.forEach(iterationID => {
-                    _this.events.forEach(_event => {
-                        var containsIteration = _event.iterations.some(_iteration => _iteration.id == iterationID);
-                        if (containsIteration) {
-                            removeItemByID(iterationID, _event.iterations);
-                            sortAsc(_event.iterations);
+                        if (_event.iterations.some(i => i.id == iteration.id)) {
+                            let iters = [..._event.iterations];
+                            replaceOrAddItem(iteration, iters);
+                            deferred.push(() => { _event.iterations = sortAsc(iters); });
                         }
                     });
-                })
+                });
             }
+            // Iteration IDs removed from events
+            if (updates.iterationIDsRemoved?.length > 0) {
+                updates.iterationIDsRemoved.forEach(iterationID => {
+                    _this.events.forEach(_event => {
+                        if (_event.iterations.some(i => i.id == iterationID)) {
+                            let iters = [..._event.iterations];
+                            removeItemByID(iterationID, iters);
+                            deferred.push(() => { _event.iterations = sortAsc(iters); });
+                        }
+                    });
+                });
+            }
+
+            deferred.forEach(fn => deferUpdate(fn));
         },
         connectSocket() {
             if (!initialized) {

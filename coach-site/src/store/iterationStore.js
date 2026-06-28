@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { getSocketConnection } from './socket'
+import { getSocketConnection, deferUpdate } from './socket'
 import { getRepetitiveTodoIterations } from '../api/todoAPI';
 import { getAllIterationsInRange, getUnplannedIterations } from '../api/plannerAPI'
 import { removeItemByID, replaceOrAddItem, sortAsc } from '../../utility'
@@ -37,10 +37,9 @@ export const useIterationStore = defineStore('iteration', {
             if (shouldRequestServer) {
                 getAllIterationsInRange(startAt, endAt)
                 .then(_iterations => {
-                    _iterations.forEach(iteration => {
-                        replaceOrAddItem(iteration, _this.iterations);
-                    })
-                    sortAsc(_this.iterations, 'startAt');
+                    let iterations = [..._this.iterations];
+                    _iterations.forEach(iteration => replaceOrAddItem(iteration, iterations));
+                    _this.iterations = sortAsc(iterations, 'startAt');
                 });
             }
             return this.iterations.filter(iteration => {
@@ -58,10 +57,9 @@ export const useIterationStore = defineStore('iteration', {
             let _this = this;
             getRepetitiveTodoIterations(startAt, endAt)
             .then(_iterations => {
-                _iterations.forEach(iteration => {
-                    replaceOrAddItem(iteration, _this.iterations);
-                })
-                sortAsc(_this.iterations, 'startAt');
+                let iterations = [..._this.iterations];
+                _iterations.forEach(iteration => replaceOrAddItem(iteration, iterations));
+                _this.iterations = sortAsc(iterations, 'startAt');
             });
             return this.iterations.filter(iteration => {
                 return (new Date(iteration.startAt)).getTime() >= startAt && (new Date(iteration.startAt)).getTime() <= endAt &&
@@ -73,10 +71,9 @@ export const useIterationStore = defineStore('iteration', {
             if (shouldRequestServer) {
                 getUnplannedIterations()
                 .then(_iterations => {
-                    _iterations.forEach(iteration => {
-                        replaceOrAddItem(iteration, _this.iterations);
-                    })
-                    sortAsc(_this.iterations, 'startAt');
+                    let iterations = [..._this.iterations];
+                    _iterations.forEach(iteration => replaceOrAddItem(iteration, iterations));
+                    _this.iterations = sortAsc(iterations, 'startAt');
                 });
             }
             return this.iterations.filter(iteration => {
@@ -92,8 +89,9 @@ export const useIterationStore = defineStore('iteration', {
             let data = { idType, startAt, endAt };
             return postEndpoint("Planner", "GetIterationsOfTodoType", data)
             .then(response => {
-                response.result.forEach(iteration => replaceOrAddItem(iteration, this.iterations));
-                sortAsc(this.iterations, 'startAt');
+                let iterations = [...this.iterations];
+                response.result.forEach(iteration => replaceOrAddItem(iteration, iterations));
+                this.iterations = sortAsc(iterations, 'startAt');
                 return response.result;
             })
             .then(response => response.result);
@@ -144,19 +142,18 @@ export const useIterationStore = defineStore('iteration', {
             .then(response => response.result);
         },
         runUpdates(updates) {
-            let _this = this;
-            if (updates.iterations && updates.iterations.length > 0) {
-                updates.iterations.forEach(iteration => {
-                    replaceOrAddItem(iteration, _this.iterations);
-                })
-                sortAsc(_this.iterations);
+            const hasIterations = updates.iterations?.length > 0;
+            const hasRemovals = updates.iterationIDsRemoved?.length > 0;
+            if (!hasIterations && !hasRemovals) return;
+
+            let iterations = [...this.iterations];
+            if (hasIterations) {
+                updates.iterations.forEach(iteration => replaceOrAddItem(iteration, iterations));
             }
-            if (updates.iterationIDsRemoved && updates.iterationIDsRemoved.length > 0) {
-                updates.iterationIDsRemoved.forEach(iterationID => {
-                    removeItemByID(iterationID, _this.iterations);
-                })
-                sortAsc(_this.iterations);
+            if (hasRemovals) {
+                updates.iterationIDsRemoved.forEach(id => removeItemByID(id, iterations));
             }
+            deferUpdate(() => { this.iterations = sortAsc(iterations); });
         },
         connectSocket() {
             if (!initialized) {

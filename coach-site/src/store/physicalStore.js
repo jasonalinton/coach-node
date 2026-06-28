@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { getSocketConnection } from './socket';
+import { getSocketConnection, deferUpdate } from './socket';
 import { getNutritionHistory, getMealsInRange, getWaterLogs } from '../api/physicalAPI';
 import { sortAsc, replaceOrAddItem, removeItemByID, addDay } from '../../utility';
 import { postEndpoint } from '../api/api';
@@ -44,10 +44,9 @@ export const usePhysicalStore = defineStore('physical', {
             if (shouldRequestServer) {
                 getMealsInRange(startAt, endAt)
                 .then(_meals => {
-                    _meals.forEach(meal => {
-                        replaceOrAddItem(meal, _this.meals);
-                    })
-                    sortAsc(_this.meals);
+                    let meals = [..._this.meals];
+                    _meals.forEach(meal => replaceOrAddItem(meal, meals));
+                    _this.meals = sortAsc(meals);
                     // sortAsc(_this.meals, 'dateTime');
                 });
             }
@@ -109,55 +108,37 @@ export const usePhysicalStore = defineStore('physical', {
         },
         runUpdates(updates) {
             let _this = this;
+            const deferred = [];
             /* Meal */
-            if (updates.meals && updates.meals.length > 0) {
-                updates.meals.forEach(meal => {
-                    replaceOrAddItem(meal, _this.meals);
-                    let mealHistory = {
-                        id: meal.id,
-                        name: meal.name,
-                        dateTime: meal.dateTime,
-                        calories: meal.calories,
-                        carbs: meal.carbohydrates,
-                        protein: meal.protein,
-                        fat: meal.fat
-                    }
-                    replaceOrAddItem(mealHistory, _this.mealHistories);
-                })
-                sortAsc(_this.meals);
-            }
-            if (updates.mealIDsRemoved && updates.mealIDsRemoved.length > 0) {
-                updates.mealIDsRemoved.forEach(mealID => {
-                    removeItemByID(mealID, _this.meals);
-                    removeItemByID(mealID, _this.mealHistories);
-                })
-                sortAsc(_this.meals);
+            if (updates.meals?.length > 0 || updates.mealIDsRemoved?.length > 0) {
+                let meals = [..._this.meals];
+                let mealHistories = [..._this.mealHistories];
+                if (updates.meals?.length > 0) {
+                    updates.meals.forEach(meal => {
+                        replaceOrAddItem(meal, meals);
+                        replaceOrAddItem({ id: meal.id, name: meal.name, dateTime: meal.dateTime, calories: meal.calories, carbs: meal.carbohydrates, protein: meal.protein, fat: meal.fat }, mealHistories);
+                    });
+                }
+                if (updates.mealIDsRemoved?.length > 0) {
+                    updates.mealIDsRemoved.forEach(id => { removeItemByID(id, meals); removeItemByID(id, mealHistories); });
+                }
+                deferred.push(() => { _this.meals = sortAsc(meals); _this.mealHistories = mealHistories; });
             }
             /* Food Item */
-            if (updates.foodItems && updates.foodItems.length > 0) {
-                updates.foodItems.forEach(foodItem => {
-                    replaceOrAddItem(foodItem, this.foodItems);
-                });
-            }
-            if (updates.foodItemIDsRemoved && updates.foodItemIDsRemoved.length > 0) {
-                updates.foodItemIDsRemoved.forEach(foodItemID => {
-                    removeItemByID(foodItemID, _this.foodItems);
-                })
-                sortAsc(_this.foodItems);
+            if (updates.foodItems?.length > 0 || updates.foodItemIDsRemoved?.length > 0) {
+                let foodItems = [..._this.foodItems];
+                if (updates.foodItems?.length > 0) updates.foodItems.forEach(item => replaceOrAddItem(item, foodItems));
+                if (updates.foodItemIDsRemoved?.length > 0) updates.foodItemIDsRemoved.forEach(id => removeItemByID(id, foodItems));
+                deferred.push(() => { _this.foodItems = sortAsc(foodItems); });
             }
             /* Water Log */
-            if (updates.waterLogs && updates.waterLogs.length > 0) {
-                updates.waterLogs.forEach(waterLog => {
-                    replaceOrAddItem(waterLog, _this.waterLogs);
-                })
-                sortAsc(_this.waterLogs);
+            if (updates.waterLogs?.length > 0 || updates.waterLogIDsRemoved?.length > 0) {
+                let waterLogs = [..._this.waterLogs];
+                if (updates.waterLogs?.length > 0) updates.waterLogs.forEach(log => replaceOrAddItem(log, waterLogs));
+                if (updates.waterLogIDsRemoved?.length > 0) updates.waterLogIDsRemoved.forEach(id => removeItemByID(id, waterLogs));
+                deferred.push(() => { _this.waterLogs = sortAsc(waterLogs); });
             }
-            if (updates.waterLogIDsRemoved && updates.waterLogIDsRemoved.length > 0) {
-                updates.waterLogIDsRemoved.forEach(waterLogID => {
-                    removeItemByID(waterLogID, _this.waterLogs);
-                })
-                sortAsc(_this.waterLogs);
-            }
+            deferred.forEach(fn => deferUpdate(fn));
         },
         connectSocket() {
             if (!initialized) {
