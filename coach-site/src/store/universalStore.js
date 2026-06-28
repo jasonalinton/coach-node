@@ -52,10 +52,10 @@ export const useUniversalStore = defineStore('universal', {
                 response.result.forEach(blurb => {
                     replaceOrAddItem(blurb, _this.blurbs);
                 });
-                sortAsc(_this.blurbs);
+                _this.blurbs = sortAsc([..._this.blurbs]);
                 return response.result;
             });
-            
+
             let blurbs = this.blurbs.filter(blurb => blurb.idMetric == idMetric);
             return blurbs;
         },
@@ -66,10 +66,10 @@ export const useUniversalStore = defineStore('universal', {
                 response.result.forEach(blurb => {
                     replaceOrAddItem(blurb, _this.blurbs);
                 });
-                sortAsc(_this.blurbs);
+                _this.blurbs = sortAsc([..._this.blurbs]);
                 return response.result;
             });
-            
+
             let blurbs = this.blurbs.filter(blurb => blurb.idType == BLURBTYPE.BRIEFING || blurb.idType == BLURBTYPE.DEBRIEFING);
             return blurbs;
         },
@@ -89,13 +89,13 @@ export const useUniversalStore = defineStore('universal', {
                 updates.blurbs.forEach(blurb => {
                     replaceOrAddItem(blurb, _this.blurbs);
                 })
-                sortAsc(_this.blurbs);
+                _this.blurbs = sortAsc([..._this.blurbs]);
             }
             if (updates.blurbIDsRemoved && updates.blurbIDsRemoved.length > 0) {
                 updates.blurbIDsRemoved.forEach(blurbID => {
                     removeItemByID(blurbID, _this.blurbs);
                 })
-                sortAsc(_this.blurbs);
+                _this.blurbs = sortAsc([..._this.blurbs]);
             }
         },
         addMetricBlurb(idMetric, datetime, text, title) {

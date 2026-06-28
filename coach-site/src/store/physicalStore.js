@@ -47,7 +47,7 @@ export const usePhysicalStore = defineStore('physical', {
                     _meals.forEach(meal => {
                         replaceOrAddItem(meal, _this.meals);
                     })
-                    sortAsc(_this.meals);
+                    _this.meals = sortAsc([..._this.meals]);
                     // sortAsc(_this.meals, 'dateTime');
                 });
             }
@@ -124,14 +124,14 @@ export const usePhysicalStore = defineStore('physical', {
                     }
                     replaceOrAddItem(mealHistory, _this.mealHistories);
                 })
-                sortAsc(_this.meals);
+                _this.meals = sortAsc([..._this.meals]);
             }
             if (updates.mealIDsRemoved && updates.mealIDsRemoved.length > 0) {
                 updates.mealIDsRemoved.forEach(mealID => {
                     removeItemByID(mealID, _this.meals);
                     removeItemByID(mealID, _this.mealHistories);
                 })
-                sortAsc(_this.meals);
+                _this.meals = sortAsc([..._this.meals]);
             }
             /* Food Item */
             if (updates.foodItems && updates.foodItems.length > 0) {
@@ -143,20 +143,20 @@ export const usePhysicalStore = defineStore('physical', {
                 updates.foodItemIDsRemoved.forEach(foodItemID => {
                     removeItemByID(foodItemID, _this.foodItems);
                 })
-                sortAsc(_this.foodItems);
+                _this.foodItems = sortAsc([..._this.foodItems]);
             }
             /* Water Log */
             if (updates.waterLogs && updates.waterLogs.length > 0) {
                 updates.waterLogs.forEach(waterLog => {
                     replaceOrAddItem(waterLog, _this.waterLogs);
                 })
-                sortAsc(_this.waterLogs);
+                _this.waterLogs = sortAsc([..._this.waterLogs]);
             }
             if (updates.waterLogIDsRemoved && updates.waterLogIDsRemoved.length > 0) {
                 updates.waterLogIDsRemoved.forEach(waterLogID => {
                     removeItemByID(waterLogID, _this.waterLogs);
                 })
-                sortAsc(_this.waterLogs);
+                _this.waterLogs = sortAsc([..._this.waterLogs]);
             }
         },
         connectSocket() {

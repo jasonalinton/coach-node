@@ -97,13 +97,13 @@ export const useRoutineStore = defineStore('routine', {
                     replaceOrAddItem(routine, _this.routines);
                 })
                 this.initializeItems(updates.routines);
-                sortAsc(_this.routines);
+                _this.routines = sortAsc([..._this.routines]);
             }
             if (updates.routineIDsRemoved && updates.routineIDsRemoved.length > 0) {
                 updates.routineIDsRemoved.forEach(routineID => {
                     removeItemByID(routineID, _this.routines);
                 })
-                sortAsc(_this.routines);
+                _this.routines = sortAsc([..._this.routines]);
             }
         },
         connectSocket() {

@@ -40,7 +40,7 @@ export const useIterationStore = defineStore('iteration', {
                     _iterations.forEach(iteration => {
                         replaceOrAddItem(iteration, _this.iterations);
                     })
-                    sortAsc(_this.iterations, 'startAt');
+                    _this.iterations = sortAsc([..._this.iterations], 'startAt');
                 });
             }
             return this.iterations.filter(iteration => {
@@ -61,7 +61,7 @@ export const useIterationStore = defineStore('iteration', {
                 _iterations.forEach(iteration => {
                     replaceOrAddItem(iteration, _this.iterations);
                 })
-                sortAsc(_this.iterations, 'startAt');
+                _this.iterations = sortAsc([..._this.iterations], 'startAt');
             });
             return this.iterations.filter(iteration => {
                 return (new Date(iteration.startAt)).getTime() >= startAt && (new Date(iteration.startAt)).getTime() <= endAt &&
@@ -76,7 +76,7 @@ export const useIterationStore = defineStore('iteration', {
                     _iterations.forEach(iteration => {
                         replaceOrAddItem(iteration, _this.iterations);
                     })
-                    sortAsc(_this.iterations, 'startAt');
+                    _this.iterations = sortAsc([..._this.iterations], 'startAt');
                 });
             }
             return this.iterations.filter(iteration => {
@@ -93,7 +93,7 @@ export const useIterationStore = defineStore('iteration', {
             return postEndpoint("Planner", "GetIterationsOfTodoType", data)
             .then(response => {
                 response.result.forEach(iteration => replaceOrAddItem(iteration, this.iterations));
-                sortAsc(this.iterations, 'startAt');
+                this.iterations = sortAsc([...this.iterations], 'startAt');
                 return response.result;
             })
             .then(response => response.result);
@@ -149,13 +149,13 @@ export const useIterationStore = defineStore('iteration', {
                 updates.iterations.forEach(iteration => {
                     replaceOrAddItem(iteration, _this.iterations);
                 })
-                sortAsc(_this.iterations);
+                _this.iterations = sortAsc([..._this.iterations]);
             }
             if (updates.iterationIDsRemoved && updates.iterationIDsRemoved.length > 0) {
                 updates.iterationIDsRemoved.forEach(iterationID => {
                     removeItemByID(iterationID, _this.iterations);
                 })
-                sortAsc(_this.iterations);
+                _this.iterations = sortAsc([..._this.iterations]);
             }
         },
         connectSocket() {

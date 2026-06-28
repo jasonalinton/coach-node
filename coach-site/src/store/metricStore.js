@@ -93,7 +93,7 @@ export const useMetricStore = defineStore('metric', {
                     replaceOrAddItem(metric, _this.metrics);
                 })
                 this.initializeItems(updates.metrics);
-                sortAsc(this.metrics);
+                this.metrics = sortAsc([...this.metrics]);
             }
         },
         connectSocket() {

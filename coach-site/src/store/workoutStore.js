@@ -378,7 +378,7 @@ export const useWorkoutStore = defineStore('workout', {
                 updates.workoutIDsRemoved.forEach(workoutID => {
                     removeItemByID(workoutID, _this.workouts);
                 })
-                sortAsc(_this.workouts);
+                _this.workouts = sortAsc([..._this.workouts]);
             }
             if (updates.exercises && updates.exercises.length > 0) {
                 updates.exercises.forEach(exercise => {

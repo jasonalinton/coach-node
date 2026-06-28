@@ -64,7 +64,7 @@ export const useGoalStore = defineStore('goal', {
                         replaceOrAddItem(goal, _this.goals);
                     })
                     this.initializeItems(goals);
-                    sortAsc(_this.goals);
+                    _this.goals = sortAsc([..._this.goals]);
                     return goals;
                 });
         },
@@ -243,13 +243,13 @@ export const useGoalStore = defineStore('goal', {
                     replaceOrAddItem(goal, _this.goals);
                 })
                 this.initializeItems(updates.goals);
-                sortAsc(_this.goals);
+                _this.goals = sortAsc([..._this.goals]);
             }
             if (updates.goalIDsRemoved && updates.goalIDsRemoved.length > 0) {
                 updates.goalIDsRemoved.forEach(goalID => {
                     removeItemByID(goalID, _this.goals);
                 })
-                sortAsc(_this.goals);
+                _this.goals = sortAsc([..._this.goals]);
             }
         },
         connectSocket() {

@@ -62,14 +62,14 @@ export const useEventStore = defineStore('event', {
                 updates.events.forEach(event => {
                     replaceOrAddItem(event, _this.events);
                 })
-                sortAsc(_this.events);
+                _this.events = sortAsc([..._this.events]);
             }
             // Event IDs removed
             if (updates.eventIDRemoved && updates.eventIDRemoved.length > 0) {
                 updates.eventIDRemoved.forEach(eventID => {
                     removeItemByID(eventID, _this.events);
                 })
-                sortAsc(_this.events);
+                _this.events = sortAsc([..._this.events]);
             }
             // Iterations updated
             if (updates.iterations && updates.iterations.length > 0) {
@@ -78,9 +78,9 @@ export const useEventStore = defineStore('event', {
                         var containsIteration = _event.iterations.some(_iteration => _iteration.id == iteration.id);
                         if (containsIteration) {
                             replaceOrAddItem(iteration, _event.iterations);
-                            sortAsc(_event.iterations);
+                            _event.iterations = sortAsc([..._event.iterations]);
                         }
-                    });                       
+                    });
                 });
             }
             // Iteration IDs removed
@@ -90,7 +90,7 @@ export const useEventStore = defineStore('event', {
                         var containsIteration = _event.iterations.some(_iteration => _iteration.id == iterationID);
                         if (containsIteration) {
                             removeItemByID(iterationID, _event.iterations);
-                            sortAsc(_event.iterations);
+                            _event.iterations = sortAsc([..._event.iterations]);
                         }
                     });
                 })

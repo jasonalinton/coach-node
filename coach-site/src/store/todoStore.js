@@ -209,13 +209,13 @@ export const useTodoStore = defineStore('todo', {
                     replaceOrAddItem(todo, _this.todos);
                 });
                 this.initializeItems(updates.todos);
-                sortAsc(_this.todos);
+                _this.todos = sortAsc([..._this.todos]);
             }
             if (updates.todoIDsRemoved && updates.todoIDsRemoved.length > 0) {
                 updates.todoIDsRemoved.forEach(todoID => {
                     removeItemByID(todoID, _this.todos);
                 })
-                sortAsc(_this.todos);
+                _this.todos = sortAsc([..._this.todos]);
             }
         },
         connectSocket() {
