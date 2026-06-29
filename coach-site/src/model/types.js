@@ -358,6 +358,36 @@ export let workoutSectionTypes = [
     },
 ]
 
+export let exerciseTempos = [
+    {
+        id: 193,
+        text: "Eccentric"
+    },
+    {
+        id: 194,
+        text: "Top Isometric"
+    },
+    {
+        id: 195,
+        text: "Concentric"
+    },
+    {
+        id: 196,
+        text: "Bottom Isometric"
+    },
+]
+
+export let exerciseLaterality = [
+    {
+        id: 198,
+        text: "Unilateral"
+    },
+    {
+        id: 199,
+        text: "Bilateral"
+    },
+]
+
 export let todoMappingTypes = [
     {
         id: 186,

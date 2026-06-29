@@ -33,9 +33,9 @@
                 <img src="/icon/briefing.png" width="22" height="22" />
                 <span class="toolbar-label">Notes</span>
             </div>
-            <div class="toolbar-item d-flex flex-column align-items-center gap-1">
+            <div class="toolbar-item d-flex flex-column align-items-center gap-1" @click.prevent="editExercise">
                 <img src="/icon/slider-icon.png" width="22" height="22" />
-                <span class="toolbar-label">Units</span>
+                <span class="toolbar-label">Edit</span>
             </div>
             <div class="toolbar-item d-flex flex-column align-items-center gap-1" @click.prevent="showSettings = !showSettings">
                 <img src="/icon/dots-vertical.png" width="22" height="22" />
@@ -306,6 +306,11 @@ export default {
     methods: {
         back() {
             this.appStore.onBackWorkoutPanel();
+        },
+        editExercise() {
+            if (this.workoutExercise) {
+                this.appStore.selectExerciseForm(this.workoutExercise.idExercise);
+            }
         },
         showHistory() {
             if (this.exercise) {

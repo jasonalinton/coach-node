@@ -460,7 +460,7 @@ function completeWorkout() {
         this.workoutStore.completeWorkout(this.workout.id, this.startAt.value, this.endAt.value, this.completion.createEvent)
         .then(() => {
             this.completion.isActive = false;
-            this.$emit('back');
+            this.back();
         });
     }
 }
@@ -500,7 +500,7 @@ function deleteWorkout() {
      };
 
      this.workoutStore.saveWorkout(model)
-        .then(() => this.$emit('back'));
+        .then(() => this.back());
 }
 
 function repositionExercise(exerciseID, position) {

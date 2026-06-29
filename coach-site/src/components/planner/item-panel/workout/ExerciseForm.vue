@@ -8,11 +8,23 @@
             <input id="name" class="textbox mb-2" type="text" ref="name"  placeholder="Exercise Name"
                    v-model.lazy.trim="name.value" 
                    spellcheck="true"/>
-            <textarea id="description" class="textarea" 
+            <textarea id="description" class="textarea"
                     type="text"
                     placeholder="Exercise Description"
                     v-model="description.value"
                     spellcheck="true"></textarea>
+            <!-- Laterality -->
+            <div class="label mt-2">Laterality</div>
+            <select v-model="idLaterality.value" class="form-select form-select-sm mb-2">
+                <option :value="null">— None —</option>
+                <option v-for="t in exerciseLaterality" :key="t.id" :value="t.id">{{ t.text }}</option>
+            </select>
+            <!-- Tempo Start -->
+            <div class="label">Tempo Start</div>
+            <select v-model="idTempoStart.value" class="form-select form-select-sm mb-2">
+                <option :value="null">— None —</option>
+                <option v-for="t in exerciseTempos" :key="t.id" :value="t.id">{{ t.text }}</option>
+            </select>
             <button type="button" class="btn btn-primary mt-2" @click="save()">Save</button>
             <!-- Muscle Groups -->
             <div class="d-flex flex-column">
@@ -86,6 +98,7 @@
 <script>
 import { useWorkoutStore } from '../../../../store/workoutStore';
 import { clone, replaceOrAddItem, sortAsc, sortAlphaAsc } from '../../../../../utility';
+import { exerciseLaterality, exerciseTempos } from '../../../../model/types';
 import MuscleSelector from './MuscleSelector.vue';
 import VariationList from './VariationList.vue';
 import ExerciseVariationForm from './ExerciseVariationForm.vue';
@@ -113,6 +126,18 @@ export default {
                 oldValue: undefined,
                 isUpdated: false
             },
+            idLaterality:  {
+                value: undefined,
+                oldValue: undefined,
+                isUpdated: false
+            },
+            idTempoStart:  {
+                value: undefined,
+                oldValue: undefined,
+                isUpdated: false
+            },
+            exerciseLaterality: clone(exerciseLaterality),
+            exerciseTempos: clone(exerciseTempos),
             muscleGroups: {
                 value: [],
                 oldValue: [],
@@ -200,6 +225,14 @@ function setProps() {
             this.description.oldValue = this.exercise.description;
             this.description.isUpdated = false;
             
+            this.idLaterality.value = this.exercise.idLaterality ?? null;
+            this.idLaterality.oldValue = this.exercise.idLaterality ?? null;
+            this.idLaterality.isUpdated = false;
+
+            this.idTempoStart.value = this.exercise.idTempoStart ?? null;
+            this.idTempoStart.oldValue = this.exercise.idTempoStart ?? null;
+            this.idTempoStart.isUpdated = false;
+
             this.muscleGroups.value = clone(this.exercise.muscleGroups);
             this.muscleGroups.oldValue = clone(this.exercise.muscleGroups);
 
@@ -218,7 +251,15 @@ function setProps() {
                 v_new.name.value = v.name;
                 v_new.name.oldValue = v.name;
                 v_new.name.isUpdated = false;
-                
+
+                // v_new.idLaterality.value = v.idLaterality;
+                // v_new.idLaterality.oldValue = v.idLaterality;
+                // v_new.idLaterality.isUpdated = false;
+
+                // v_new.idTempoStart.value = v.idTempoStart;
+                // v_new.idTempoStart.oldValue = v.idTempoStart;
+                // v_new.idTempoStart.isUpdated = false;
+
                 v_new.description.value = v.description || "";
                 v_new.description.oldValue = v.description || "";
                 v_new.description.isUpdated = false;
@@ -238,6 +279,14 @@ function setProps() {
     } else {
         this.exercise = {
             id: this.id,
+            idLaterality:  {
+                value: undefined,
+                oldValue: undefined,
+            },
+            idTempoStart:  {
+                value: undefined,
+                oldValue: undefined,
+            },
             name: {
                 value: undefined,
                 oldValue: undefined
@@ -365,11 +414,20 @@ function saveExerciseVariation(variation) {
 async function save() {
     let _this = this;
     let errors = [];
-    let model = { 
+    let model = {
         id: this.id,
         isNew: (this.id < 1) ? true : false,
-        isUpdated: false
+        isUpdated: false,
      };
+
+     if (this.idLaterality.value != this.idLaterality.oldValue) {
+        model.idLaterality = this.idLaterality.value;
+        model.isUpdated = true;
+     }
+     if (this.idTempoStart.value != this.idTempoStart.oldValue) {
+        model.idTempoStart = this.idTempoStart.value;
+        model.isUpdated = true;
+     }
 
     /* Set name */
     if (this.name.value.trim() != "") {

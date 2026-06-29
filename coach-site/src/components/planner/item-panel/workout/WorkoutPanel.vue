@@ -8,21 +8,17 @@
             </ItemPanelHeader>
             <WorkoutDashboard v-if="selectedView == 'dashboard' && designVariants.workoutDashboard == 'WorkoutDashboard'"/>
             <WorkoutDashboardLite v-if="selectedView == 'dashboard' && designVariants.workoutDashboard == 'WorkoutDashboardLite'"/>
-            <WorkoutPanelDashboard v-if="selectedView == 'dashboard' && designVariants.workoutDashboard == 'WorkoutPanelDashboard'"
-                                   @selectView="selectView"/>
+            <WorkoutPanelDashboard v-if="selectedView == 'dashboard' && designVariants.workoutDashboard == 'WorkoutPanelDashboard'"/>
             <WorkoutList v-if="selectedView == 'workoutList'"
-                         @setPanelHeader="setPanelHeader"
-                         @selectWorkout="selectWorkout"
-                         @back="back"/>
-            <WorkoutForm v-if="selectedView == 'workoutForm'"
-                         @selectView="selectView"
-                         @back="back"/>
+                         @setPanelHeader="setPanelHeader"/>
+            <WorkoutForm v-if="selectedView == 'workoutForm'"/>
             <ActiveWorkout v-if="selectedView == 'workoutActive' && designVariants.workoutActive == 'ActiveWorkout'"/>
             <WorkoutActive v-if="selectedView == 'workoutActive' && designVariants.workoutActive == 'WorkoutActive'"/>
             <WorkoutExercise v-if="selectedView == 'workoutExercise' && designVariants.workoutExercise == 'WorkoutExercise'" />
             <WorkoutExercise2 v-if="selectedView == 'workoutExercise' && designVariants.workoutExercise == 'WorkoutExercise2'" />
             <WorkoutExercise3 v-if="selectedView == 'workoutExercise' && designVariants.workoutExercise == 'WorkoutExercise3'" />
             <ExerciseList v-if="selectedView == 'exerciseList'" />
+            <ExerciseForm v-if="selectedView == 'exerciseForm'" :id="appStore.itemPanel.workout.exerciseFormID" @back="back" />
             <ExerciseHistory v-if="selectedView == 'exerciseHistory'" />
             <FitnessGoals v-if="selectedView == 'fitnessGoals'" />
         </div>
@@ -41,6 +37,7 @@ import WorkoutForm from './WorkoutForm.vue';
 import WorkoutActive from './WorkoutActive.vue';
 import ActiveWorkout from './ActiveWorkout.vue';
 import ExerciseList from './ExerciseList.vue';
+import ExerciseForm from './ExerciseForm.vue';
 import WorkoutExercise from './WorkoutExercise.vue';
 import WorkoutExercise2 from './WorkoutExercise2.vue';
 import WorkoutExercise3 from './WorkoutExercise3.vue';
@@ -55,7 +52,7 @@ var sortItems = [
 export default {
     name: 'WorkoutPanel',
     components: { ItemPanelHeader, WorkoutList, WorkoutForm, WorkoutActive, ActiveWorkout,
-        WorkoutDashboard, WorkoutPanelDashboard, WorkoutDashboardLite, ExerciseList, WorkoutExercise, WorkoutExercise2, WorkoutExercise3, ExerciseHistory, FitnessGoals },
+        WorkoutDashboard, WorkoutPanelDashboard, WorkoutDashboardLite, ExerciseList, ExerciseForm, WorkoutExercise, WorkoutExercise2, WorkoutExercise3, ExerciseHistory, FitnessGoals },
     props: {
         selectedDate: Date,
         showHead: {
@@ -74,7 +71,6 @@ export default {
                 workoutExercise: 'WorkoutExercise2',
             },
             title: "Workout Dashboard",
-            activePanel: "dashboard",
             lastPanel: "",
             panelQueue: [ ],
             workoutView: {
@@ -141,7 +137,6 @@ export default {
     },
     methods: {
         onSortChange,
-        selectView,
         setPanelHeader,
         selectWorkout,
         back
@@ -162,26 +157,6 @@ function onSortChange(sortBy) {
     localStorage.setItem('workout-panel-design-variants', JSON.stringify(this.designVariants));
 }
 
-function selectView(value) {
-    if (this.activePanel != value.panel) {
-        this.panelQueue.push(this.activePanel);
-    }
-    this.activePanel = value.panel;
-
-    if (value && value.panel && value.panel == 'dashboard') {
-        this.activePanel = "Workout Dashboard";
-    } else if (value && value.panel && value.panel == 'workoutList') {
-        this.title = "Workout List";
-    } else if (value && value.panel && value.panel == 'workoutForm') {
-        this.workoutView.workout = value.workout;
-        this.title = "Workout";
-    } else if (value && value.panel && value.panel == 'exerciseList') {
-        this.title = (value.panelTitle) ? value.panelTitle : "Exercises";
-    } else if (value && value.panel && value.panel == 'exerciseForm') {
-        this.title = "Exercise Form";
-    }
-}
-
 function setPanelHeader(props) {
     this.title = props.text;
 }
@@ -192,7 +167,7 @@ function selectWorkout(workoutID) {
 }
 
 function back() {
-    this.activePanel = this.panelQueue.pop();
+    this.appStore.onBackWorkoutPanel();
 }
 </script>
 

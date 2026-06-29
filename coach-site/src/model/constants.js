@@ -161,6 +161,18 @@ export let WORKOUT_SECTIONS = {
     MOBILITY: 180
 }
 
+export let EXERCISE_TEMPOS = {
+    ECCENTRIC: 193,
+    TOP_ISOMETRIC: 194,
+    CONCENTRIC: 195,
+    BOTTOM_ISOMETRIC: 196
+}
+
+export let EXERCISE_LATERALITY = {
+    UNILATERAL: 198,
+    BILATERAL: 199,
+}
+
 export let WORKOUT_VIEWS = {
     DASHBOARD: "dashboard",
     WORKOUT_LIST: "workoutList",

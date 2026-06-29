@@ -105,6 +105,7 @@ export const useAppStore = defineStore('app', {
                 selectedWorkoutID: undefined,
                 selectedExerciseID: undefined,
                 activeExerciseID: undefined,
+                exerciseFormID: undefined,
                 exerciseList: {
                     selectedSectionID: undefined,
                     nextExercisePosition: undefined,
@@ -262,6 +263,10 @@ export const useAppStore = defineStore('app', {
         },
         setActiveExercise(id) {
             this.itemPanel.workout.activeExerciseID = id;
+        },
+        selectExerciseForm(idExercise) {
+            this.itemPanel.workout.exerciseFormID = idExercise;
+            this.selectWorkoutView("exerciseForm");
         },
         selectExerciseHistory(idExercise, variationIDs) {
             this.itemPanel.workout.exerciseHistory.idExercise = idExercise;
