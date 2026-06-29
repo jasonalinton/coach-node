@@ -423,10 +423,12 @@ async function save() {
      if (this.idLaterality.value != this.idLaterality.oldValue) {
         model.idLaterality = this.idLaterality.value;
         model.isUpdated = true;
+        model.isIdLateralityUpdated = true;
      }
      if (this.idTempoStart.value != this.idTempoStart.oldValue) {
         model.idTempoStart = this.idTempoStart.value;
         model.isUpdated = true;
+        model.isIdTempoStartUpdated = true;
      }
 
     /* Set name */
