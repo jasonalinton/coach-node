@@ -101,8 +101,11 @@
             </div>
             <span v-else class="tempo-display fw-bold fs-5">{{ tempoDisplay }}</span>
             <div v-if="tempoPhases.length" class="d-flex flex-column align-items-center gap-1">
-                <span v-if="isTempoPlaying && loopsTotal > 1" class="loop-counter">
-                    {{ loopsTotal - loopsRemaining + 1 }} / {{ loopsTotal }}
+                <span v-if="(isTempoPlaying || tempoPaused) && loopsTotal > rotationsPerRep" class="loop-counter">
+                    {{ Math.floor((loopsTotal - loopsRemaining) / rotationsPerRep) + 1 }} / {{ loopsTotal / rotationsPerRep }}
+                </span>
+                <span v-if="(isTempoPlaying || tempoPaused) && rotationsPerRep > 1" class="loop-counter">
+                    Rotation {{ currentRotation }} / {{ rotationsPerRep }}
                 </span>
                 <button class="btn-tempo" @click="toggleTempo">
                     {{ isTempoPlaying ? '■' : '▶' }}
@@ -188,6 +191,7 @@ export default {
             localTempoCR: { contract: 1, relax: 1 },
             localTempoBPM: 120,
             isTempoPlaying: false,
+            tempoPaused: false,
             tempoPhase: 0,
             tempoPhaseRemaining: 0,
             tempoIntervalID: undefined,
@@ -257,6 +261,19 @@ export default {
                 return [Number(this.localTempoCR.contract) || 0, Number(this.localTempoCR.relax) || 0];
             }
             return [];
+        },
+        tempoStartIndex() {
+            const id = this.exercise?.idTempoStart;
+            if (id === 196) return 1; // bottomIso
+            if (id === 195) return 2; // concentric
+            if (id === 194) return 3; // topIso
+            return 0;                 // eccentric (default)
+        },
+        rotationsPerRep() {
+            return this.exercise?.idLaterality === 198 ? 2 : 1; // 198 = UNILATERAL
+        },
+        currentRotation() {
+            return ((this.loopsTotal - this.loopsRemaining) % this.rotationsPerRep) + 1;
         },
         tempoDisplay() {
             if (!this.tempoType) return null;
@@ -348,41 +365,54 @@ export default {
         },
         startTempo() {
             if (!this.tempoPhases.length) return;
-            const activeSet = this.sets.find(s => s.id === this.activeSetID);
-            const reps = (activeSet?.reps && Number(activeSet.reps) > 0) ? Number(activeSet.reps) : 1;
-            this.loopsTotal = reps;
-            this.loopsRemaining = reps;
-            this.tempoPhase = 0;
-            this.tempoPhaseRemaining = this.tempoPhases[0];
+            if (!this.tempoPaused) {
+                const activeSet = this.sets.find(s => s.id === this.activeSetID);
+                const reps = (activeSet?.reps && Number(activeSet.reps) > 0) ? Number(activeSet.reps) : 1;
+                this.loopsTotal = reps * this.rotationsPerRep;
+                this.loopsRemaining = reps * this.rotationsPerRep;
+            }
+            this.tempoPaused = false;
+            const startIdx = (this.tempoType === this.TEMPTYPES.FOURDIGIT) ? this.tempoStartIndex : 0;
+            this.tempoPhase = startIdx;
+            this.tempoPhaseRemaining = this.tempoPhases[startIdx];
             this.isTempoPlaying = true;
             const _this = this;
             this.tempoIntervalID = setInterval(() => {
                 _this.tempoPhaseRemaining--;
-                if (_this.tempoPhaseRemaining === 0) {
-                    setTimeout(() => {
-                        if (!_this.isTempoPlaying) return;
-                        const nextPhase = _this.tempoPhase + 1;
-                        if (nextPhase >= _this.tempoPhases.length) {
-                            _this.loopsRemaining--;
-                            if (_this.loopsRemaining <= 0) {
-                                _this.stopTempo();
-                                _this.logSet();
-                            } else {
-                                _this.tempoPhase = 0;
-                                _this.tempoPhaseRemaining = _this.tempoPhases[0];
-                            }
+                if (_this.tempoPhaseRemaining < 0) {
+                    if (!_this.isTempoPlaying) return;
+                    const nextPhase = _this.tempoPhase + 1;
+                    if (nextPhase >= _this.tempoPhases.length) {
+                        _this.loopsRemaining--;
+                        if (_this.loopsRemaining <= 0) {
+                            _this.stopTempo();
+                            _this.logSet();
+                        } else if (_this.rotationsPerRep > 1 && _this.loopsRemaining % (_this.loopsTotal / _this.rotationsPerRep) === 0) {
+                            _this.pauseTempo();
                         } else {
-                            _this.tempoPhase = nextPhase;
-                            _this.tempoPhaseRemaining = _this.tempoPhases[nextPhase];
+                            _this.tempoPhase = 0;
+                            _this.tempoPhaseRemaining = _this.tempoPhases[0];
                         }
-                    }, 0);
+                    } else {
+                        _this.tempoPhase = nextPhase;
+                        _this.tempoPhaseRemaining = _this.tempoPhases[nextPhase];
+                    }
                 }
             }, 1000);
+        },
+        pauseTempo() {
+            clearInterval(this.tempoIntervalID);
+            this.tempoIntervalID = undefined;
+            this.isTempoPlaying = false;
+            this.tempoPaused = true;
+            this.tempoPhase = 0;
+            this.tempoPhaseRemaining = 0;
         },
         stopTempo() {
             clearInterval(this.tempoIntervalID);
             this.tempoIntervalID = undefined;
             this.isTempoPlaying = false;
+            this.tempoPaused = false;
             this.tempoPhase = 0;
             this.tempoPhaseRemaining = 0;
             this.loopsTotal = 1;
