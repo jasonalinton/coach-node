@@ -201,6 +201,7 @@ export default {
             localPosition: undefined,
             localTempo: { eccentric: 1, bottomIso: 1, concentric: 1, topIso: 1 },
             localRest: undefined,
+            audioContext: null,
         };
     },
     created() {
@@ -210,6 +211,10 @@ export default {
     beforeUnmount() {
         this.stopTempo();
         this.resetRest();
+        if (this.audioContext) {
+            this.audioContext.close();
+            this.audioContext = null;
+        }
     },
     mounted() {
         if (this.workoutExercise) {
@@ -379,26 +384,73 @@ export default {
             const _this = this;
             this.tempoIntervalID = setInterval(() => {
                 _this.tempoPhaseRemaining--;
-                if (_this.tempoPhaseRemaining < 0) {
+                if (_this.tempoPhaseRemaining === 0) {
+                    _this.playPhaseEnd();
+                } else if (_this.tempoPhaseRemaining > 0) {
+                    _this.playTick();
+                } else {
                     if (!_this.isTempoPlaying) return;
                     const nextPhase = _this.tempoPhase + 1;
                     if (nextPhase >= _this.tempoPhases.length) {
                         _this.loopsRemaining--;
                         if (_this.loopsRemaining <= 0) {
+                            _this.playComplete();
                             _this.stopTempo();
                             _this.logSet();
                         } else if (_this.rotationsPerRep > 1 && _this.loopsRemaining % (_this.loopsTotal / _this.rotationsPerRep) === 0) {
+                            _this.playRotationPause();
                             _this.pauseTempo();
                         } else {
+                            _this.playPhaseTransition();
                             _this.tempoPhase = 0;
                             _this.tempoPhaseRemaining = _this.tempoPhases[0];
                         }
                     } else {
+                        _this.playPhaseTransition();
                         _this.tempoPhase = nextPhase;
                         _this.tempoPhaseRemaining = _this.tempoPhases[nextPhase];
                     }
                 }
             }, 1000);
+        },
+        getAudioContext() {
+            if (!this.audioContext) {
+                this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            return this.audioContext;
+        },
+        playBeep(frequency, duration, volume = 0.25, type = 'sine') {
+            try {
+                const ctx = this.getAudioContext();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.type = type;
+                osc.frequency.value = frequency;
+                gain.gain.setValueAtTime(volume, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+                osc.start(ctx.currentTime);
+                osc.stop(ctx.currentTime + duration);
+            } catch (e) {}
+        },
+        playTick() {
+            this.playBeep(880, 0.06, 0.2);
+        },
+        playPhaseEnd() {
+            this.playBeep(660, 0.12, 0.3);
+        },
+        playPhaseTransition() {
+            this.playBeep(1046, 0.1, 0.35);
+        },
+        playRotationPause() {
+            this.playBeep(880, 0.08, 0.3);
+            setTimeout(() => this.playBeep(660, 0.12, 0.3), 120);
+        },
+        playComplete() {
+            this.playBeep(523, 0.12, 0.3);
+            setTimeout(() => this.playBeep(659, 0.12, 0.3), 150);
+            setTimeout(() => this.playBeep(784, 0.2, 0.35), 300);
         },
         pauseTempo() {
             clearInterval(this.tempoIntervalID);
