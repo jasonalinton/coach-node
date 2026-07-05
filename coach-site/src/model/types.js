@@ -406,3 +406,126 @@ export let todoMappingTypes = [
         text: "Class"
     },
 ]
+
+export let blurbMappingTypes = [
+    {
+        id: 201,
+        text: "Metric"
+    },
+    {
+        id: 202,
+        text: "Goal"
+    },
+    {
+        id: 203,
+        text: "Todo"
+    },
+    {
+        id: 204,
+        text: "Iteration"
+    },
+    {
+        id: 205,
+        text: "Routine"
+    },
+    {
+        id: 206,
+        text: "Briefing"
+    },
+    {
+        id: 207,
+        text: "Fitness Goal"
+    },
+    {
+        id: 208,
+        text: "Goal Time Pair"
+    },
+    {
+        id: 209,
+        text: "Goal Time Pair Todo"
+    },
+    {
+        id: 210,
+        text: "Todo Repeat"
+    },
+    {
+        id: 211,
+        text: "Todo Time Pair"
+    },
+    {
+        id: 212,
+        text: "Food Item"
+    },
+    {
+        id: 213,
+        text: "Meal"
+    },
+    {
+        id: 214,
+        text: "Workout"
+    },
+    {
+        id: 215,
+        text: "Exercise"
+    },
+    {
+        id: 216,
+        text: "Log Entry"
+    },
+]
+
+export let blurbTypes = [
+    {
+        id: 162,
+        text: "Advice"
+    },
+    {
+        id: 163,
+        text: "Reason"
+    },
+    {
+        id: 164,
+        text: "Measure Of Success"
+    },
+    {
+        id: 165,
+        text: "Note"
+    },
+    {
+        id: 166,
+        text: "Blurb"
+    },
+    {
+        id: 167,
+        text: "Question"
+    },
+    {
+        id: 168,
+        text: "Answer"
+    },
+    {
+        id: 169,
+        text: "Insecurity"
+    },
+    {
+        id: 170,
+        text: "Reminder"
+    },
+    {
+        id: 172,
+        text: "Briefing"
+    },
+    {
+        id: 173,
+        text: "De-Briefing"
+    },
+    {
+        id: 184,
+        text: "Issue"
+    },
+    {
+        id: 185,
+        text: "Solution"
+    },
+]
+

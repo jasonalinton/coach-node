@@ -37,7 +37,7 @@ import { useUniversalStore } from '@/store/universalStore'
 import { TIMEFRAME } from '../../model/constants'
 import { toLongDateString, toShortTimeString, formatInputDateTime, getTimeframeEndpoints, today } from '../../../utility/timeUtility'
 import { sortDateDesc } from '../../../utility'
-import BlurbCard from './BlurbCard.vue'
+import BlurbCard from './BlurbTimelineCard.vue'
 
 export default {
     name: 'BlogTimeline',
@@ -152,6 +152,10 @@ function cancelBlurb() {
 </script>
 
 <style scoped>
+.blog-timeline {
+    background-color: #F5F5F5;
+}
+
 .new-post button {
     height: 25px;
     background-color: #BAD8F1;
