@@ -55,6 +55,7 @@ export default {
     },
     data: function () {
         return {
+            plannerStore: undefined,
             todoStore: undefined,
             iterationStore: undefined,
             showChildren: false,
@@ -62,6 +63,9 @@ export default {
         }
     },
     created: async function() {
+        let plannerStore = await import(`@/store/plannerStore`);
+        this.plannerStore = plannerStore.usePlannerStore();
+
         let todoStore = await import(`@/store/todoStore`);
         this.todoStore = todoStore.useTodoStore();
 
@@ -69,6 +73,9 @@ export default {
         this.iterationStore = iterationStore.useIterationStore();
     },
     computed: {
+        selectedDate() {
+            return (this.plannerStore) ? this.plannerStore.selectedDate : today();
+        },
         todo() {
             if (this.todoStore) {
                 let todo = this.todoStore.getItem(this.idTodo);
@@ -86,10 +93,10 @@ export default {
         repeat() {
             if (this.todo) {
                 if (this.level == 1) {
-                    let repeat = this.todo.repeats.find(x => x.id == idRoutineRepeat);
+                    let repeat = this.todo.repeats.find(x => x.routineRepeatID == this.idRoutineRepeat);
                     return repeat;
                 } else {
-                    let repeat = this.todo.repeats.find(x => x.idRoutineRepeat == idRoutineRepeat);
+                    let repeat = this.todo.repeats.find(x => x.parentID == this.idParentRepeat);
                     return repeat;
                 }
             }
@@ -119,7 +126,7 @@ export default {
             return "";
         },
         idRepeat() {
-            return undefined;
+            return this.repeat ? this.repeat.id : this.idParentRepeat;
         }
     },
     methods: {
@@ -132,22 +139,8 @@ export default {
 }
 
 function markComplete() {
-    if (this.level == 1) {
-
-    } else {
-        if (this.idTodoMappingType == TODO_MAPPING_TYPE.GROUP) {
-            /* Just log iteration */
-
-        } else if (this.idTodoMappingType == TODO_MAPPING_TYPE.CLASS) {
-            /* Log iteration, Log root iteration, Set root iteration points to 0 */
-            
-        }
-    }
-    // let now = new Date().toJSON();
-    // this.iteration.attemptedAt = now;
-    // this.iteration.completedAt = now;
-
-    // this.iterationStore.toggleCompletion(this.iteration.id, this.iteration.attemptedAt, this.iteration.completedAt);
+    let now = new Date().toJSON();
+    this.iterationStore.completeRepeatIteration(this.todo.id, this.idRepeat, null, null, now, this.selectedDate, this.selectedDate);
 }
 
 function markIncomplete() {

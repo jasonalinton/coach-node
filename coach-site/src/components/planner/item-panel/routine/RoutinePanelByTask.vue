@@ -43,7 +43,7 @@ export default {
                 routines = routines.filter(routine => {
                     let inTimeframe = false;
                     routine.repeats.forEach(repeat => {
-                        /* Check is repeat is active */
+                        /* Check if repeat is active */
                         let isActive = false;
                         routine.repeats.forEach(repeat => {
                             if (+repeat.startDate.toDate() <= +this.selectedDate) {
