@@ -19,7 +19,13 @@ export const useGoalStore = defineStore('goal', {
         goals: []
     }),
     getters: {
-        
+        fitnessGoals: (state) => {
+            let fitnessGoals = state.goals.filter(goal => {
+                let isFitness = goal.types.some(type => type.id == GOAL_TYPE.FITNESS);
+                return isFitness;
+            });
+            return fitnessGoals;
+        }
     },
     actions: {
         async initialize() {

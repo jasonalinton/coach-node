@@ -139,12 +139,12 @@ export default {
 <style scoped>
 .blurb-timeline-card {
     background-color: white;
-    border-radius: 20px;
+    border-radius: 12px;
     box-shadow: 0px 8px 12px rgba(0, 0, 0, 0.03);
-    padding: 24px;
+    padding: 16px;
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 18px;
     width: 100%;
     max-width: 720px;
     text-align: start;
@@ -155,7 +155,7 @@ export default {
 .universal-content {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 8px;
     width: 100%;
 }
 
@@ -193,7 +193,7 @@ export default {
 }
 
 .title {
-    font-size: 24px;
+    font-size: 22px;
     font-weight: bold;
     line-height: 1.2;
     color: #1a1c1e;

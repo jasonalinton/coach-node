@@ -95,6 +95,20 @@ export const useUniversalStore = defineStore('universal', {
             return postEndpoint("Universal", "AddMetricBlurb", { idMetric, datetime, text, title })
                 .then(response => response.result);
         },
+        addBlurb(idMappingType, typeIDs, text, title, datetime, mappings) {
+            let data = { idMappingType, typeIDs, text, title, datetime, mappings };
+            return postEndpoint("Universal", "AddBlurb", data)
+                .then(this.onResponse);
+        },
+        updateBlurb(idBlurb, idMappingType, typeIDs_Added, typeIDs_Removed, text, title, datetime, mappings_Added, mappings_Removed) {
+            let data = {
+                idBlurb, idMappingType, text, title, datetime,
+                typeIDs_Added, typeIDs_Removed,
+                mappings_Added, mappings_Removed
+            };
+            return postEndpoint("Universal", "UpdateBlurb", data)
+                .then(this.onResponse);
+        },
         connectSocket() {
             if (!initialized) {
                 let coachConnection = getSocketConnection("coachHub");
