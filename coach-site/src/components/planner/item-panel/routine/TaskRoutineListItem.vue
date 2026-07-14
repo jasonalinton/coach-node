@@ -120,7 +120,7 @@ export default {
             return false
         },
         points() {
-            return 2;
+            return this.todo.points ?? undefined;
         },
         text() {
             return "";
@@ -140,7 +140,7 @@ export default {
 
 function markComplete() {
     let now = new Date().toJSON();
-    this.iterationStore.completeRepeatIteration(this.todo.id, this.idRepeat, null, null, now, this.selectedDate, this.selectedDate);
+    this.iterationStore.completeRepeatIteration(this.todo.id, this.idRepeat, null, this.points, now, this.selectedDate, this.selectedDate);
 }
 
 function markIncomplete() {
