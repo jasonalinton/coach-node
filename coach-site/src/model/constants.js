@@ -206,6 +206,14 @@ export let GOAL_TYPE = {
     FITNESS: 183,
 }
 
+export let KANBAN_COLUMN = {
+    KANBAN_COLUMN: 217,
+    COMPLETE: 218,
+    ACTIVE: 219,
+    ON_HOLD: 220,
+    ON_DECK: 221
+};
+
 export let LOG_ITEMS = {
     EMOTIONAL_MOOD: 1,
     MENTAL_ENERGY: 6,

@@ -67,6 +67,25 @@ export let routineTypes = [
     },
 ]
 
+export let priority = [
+    {
+        id: 18,
+        text: "Spotlight"
+    },
+    {
+        id: 19,
+        text: "Primary"
+    },
+    {
+        id: 20,
+        text: "Secondary"
+    },
+    {
+        id: 21,
+        text: "Tertiary"
+    },
+]
+
 export let mediums = [
     {
         id: 28,
@@ -319,6 +338,61 @@ export let todoActivityTypes = [
     },
 ]
 
+export let blurbTypes = [
+    {
+        id: 162,
+        text: "Advice"
+    },
+    {
+        id: 163,
+        text: "Reason"
+    },
+    {
+        id: 164,
+        text: "Measure Of Success"
+    },
+    {
+        id: 165,
+        text: "Note"
+    },
+    {
+        id: 166,
+        text: "Blurb"
+    },
+    {
+        id: 167,
+        text: "Question"
+    },
+    {
+        id: 168,
+        text: "Answer"
+    },
+    {
+        id: 169,
+        text: "Insecurity"
+    },
+    {
+        id: 170,
+        text: "Reminder"
+    },
+    {
+        id: 172,
+        text: "Briefing"
+    },
+    {
+        id: 173,
+        text: "De-Briefing"
+    },
+    {
+        id: 184,
+        text: "Issue"
+    },
+    {
+        id: 185,
+        text: "Solution"
+    },
+]
+
 export let workoutSectionTypes = [
     {
         id: 150,
@@ -474,58 +548,25 @@ export let blurbMappingTypes = [
     },
 ]
 
-export let blurbTypes = [
+export let KanbanColumn = [
     {
-        id: 162,
-        text: "Advice"
+        id: 217,
+        text: "Kanban Column"
     },
     {
-        id: 163,
-        text: "Reason"
+        id: 218,
+        text: "Complete"
     },
     {
-        id: 164,
-        text: "Measure Of Success"
+        id: 219,
+        text: "Active"
     },
     {
-        id: 165,
-        text: "Note"
+        id: 220,
+        text: "On Hold"
     },
     {
-        id: 166,
-        text: "Blurb"
-    },
-    {
-        id: 167,
-        text: "Question"
-    },
-    {
-        id: 168,
-        text: "Answer"
-    },
-    {
-        id: 169,
-        text: "Insecurity"
-    },
-    {
-        id: 170,
-        text: "Reminder"
-    },
-    {
-        id: 172,
-        text: "Briefing"
-    },
-    {
-        id: 173,
-        text: "De-Briefing"
-    },
-    {
-        id: 184,
-        text: "Issue"
-    },
-    {
-        id: 185,
-        text: "Solution"
+        id: 221,
+        text: "On Deck"
     },
 ]
-

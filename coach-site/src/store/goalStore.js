@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { markRaw } from 'vue'
-import { getGoals, getGoalsWithTimeframe } from '../api/goalAPI'
+import { getGoals, getGoalsWithTimeframe, getGoalKanban as fetchGoalKanban } from '../api/goalAPI'
 import { capitalize, replaceOrAddItem, sortAsc, sum } from '../../utility';
 import { getSocketConnection, deferUpdate } from './socket'
 import { useMetricStore } from '@/store/metricStore'
@@ -16,7 +16,8 @@ let initialized = false;
 
 export const useGoalStore = defineStore('goal', {
     state: () => ({
-        goals: []
+        goals: [],
+        draggedKanbanTask: null
     }),
     getters: {
         fitnessGoals: (state) => {
@@ -25,6 +26,9 @@ export const useGoalStore = defineStore('goal', {
                 return isFitness;
             });
             return fitnessGoals;
+        },
+        getDraggedKanbanTask: (state) => {
+            return state.draggedKanbanTask;
         }
     },
     actions: {
@@ -233,12 +237,30 @@ export const useGoalStore = defineStore('goal', {
             .then(response => response.result);
         },
         updateBlurb(blurb) {
-            let data = { 
-                idBlurb: blurb.id, 
+            let data = {
+                idBlurb: blurb.id,
                 idBlurbType: blurb.idType,
                 ...blurb
             }
             return postEndpoint("Goal", "UpdateBlurbInGoal", data)
+            .then(response => response.result);
+        },
+        setDraggedKanbanTask(item) {
+            this.draggedKanbanTask = item;
+        },
+        clearDraggedKanbanTask() {
+            this.draggedKanbanTask = null;
+        },
+        getGoalKanban(idGoal) {
+            return fetchGoalKanban(idGoal);
+        },
+        setKanbanTask(idParent, idDescendant, idColumn, idTimeframe, positionDescendant, date, dateAdded, dateRemoved) {
+            let data = { idParent, idDescendant, idColumn, idTimeframe, positionDescendant, date, dateAdded, dateRemoved };
+            return postEndpoint("Goal", "SetKanbanTask", data)
+            .then(response => response.result);
+        },
+        removeKanbanTask(id, dateRemoved) {
+            return postEndpoint("Goal", "RemoveKanbanTask", { id, dateRemoved })
             .then(response => response.result);
         },
         runUpdates(updates) {
