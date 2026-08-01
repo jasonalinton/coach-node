@@ -26,13 +26,29 @@ export function floatString(number, decimalPlaces = 2) {
 export function sortAsc(array, prop) {
     prop = prop || 'id';
 
-    return array.sort((a, b) => a[prop] - b[prop]);
+    // Null values are sorted to the bottom of the list
+    return array.sort((a, b) => {
+        const av = a[prop];
+        const bv = b[prop];
+        if (av == null && bv == null) return 0;
+        if (av == null) return 1;
+        if (bv == null) return -1;
+        return av - bv;
+    });
 }
 
 export function sortDesc(array, prop) {
     prop = prop || 'id';
 
-    return array.sort((a, b) => b[prop] - a[prop]);
+    // Null values are sorted to the bottom of the list
+    return array.sort((a, b) => {
+        const av = a[prop];
+        const bv = b[prop];
+        if (av == null && bv == null) return 0;
+        if (av == null) return 1;
+        if (bv == null) return -1;
+        return bv - av;
+    });
 }
 
 export function sortNumAsc(array) {
