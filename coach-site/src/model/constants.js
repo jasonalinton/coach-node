@@ -100,7 +100,7 @@ export let EVENTTYPE = {
     TODO: 125,
     TASK: 126,
     ROUTINE: 127,
-    ROUTINE2: 128,
+    BLOCKROUTINE: 128,
     TASKROUTINE: 129,
     SUBTYPE: 130,
     SLEEP: 131,

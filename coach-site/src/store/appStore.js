@@ -217,6 +217,10 @@ export const useAppStore = defineStore('app', {
                 this.itemPanel.selected = "event";
                 this.itemPanel.event.type = EVENTTYPE.ROUTINE;
                 this.itemPanel.event.event = eevent;
+            } else if (eevent.type.id == EVENTTYPE.BLOCKROUTINE) {
+                this.itemPanel.selected = "event";
+                this.itemPanel.event.type = EVENTTYPE.BLOCKROUTINE;
+                this.itemPanel.event.event = eevent;
             }
         },
         setSelectedTask(task) {

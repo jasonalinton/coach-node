@@ -1,5 +1,6 @@
 import moment from "moment";
 import date from 'date-and-time';
+import { REPETITION, TIMEFRAME } from './src/model/constants.js';
 
 export function sum(array, prop) {
     return array.reduce((accumulator, currentValue) => accumulator + currentValue[prop], 0,);
@@ -255,6 +256,22 @@ export function getNextNewID(list, prop) {
 
 export function clone(item) {
   return JSON.parse(JSON.stringify(item));
+}
+
+export function idRepeatToIdTimeframe(idRepeat) {
+    if (idRepeat == REPETITION.DAILY) {
+        return TIMEFRAME.DAY;
+    } else if (idRepeat == REPETITION.WEEKDAYLY) {
+        return TIMEFRAME.WEEKDAY;
+    } else if (idRepeat == REPETITION.WEEKENDLY) {
+        return TIMEFRAME.WEEKEND;
+    } else if (idRepeat == REPETITION.WEEKLY) {
+        return TIMEFRAME.WEEK;
+    } else if (idRepeat == REPETITION.MONTHLY) {
+        return TIMEFRAME.MONTH;
+    } else if (idRepeat == REPETITION.ANUALLY) {
+        return TIMEFRAME.YEAR;
+    }
 }
 
 // camelCase

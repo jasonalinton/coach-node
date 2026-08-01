@@ -14,6 +14,9 @@
                 <EventRoutinePanel v-if="type == EVENTTYPE.ROUTINE"
                                    :_event="eventt" 
                                    @editIteration="iteration => iteration_Form = iteration"/>
+                <EventBlockPanel v-if="type == EVENTTYPE.BLOCKROUTINE"
+                                  :_event="eventt" 
+                                  @editIteration="iteration => iteration_Form = iteration"/>
             </template>
             <IterationForm v-if="iteration_Form" 
                            :iteration="iteration_Form"
@@ -30,6 +33,7 @@ import ItemPanelHeader from '../component/ItemPanelHeader.vue';
 // import EventPanelByDate from './EventPanelByDate.vue';
 import EventTodoPanel from './EventTodoPanel.vue';
 import EventRoutinePanel from './EventRoutinePanel.vue';
+import EventBlockPanel from './EventBlockPanel.vue';
 import IterationForm from '../component/form/IterationForm.vue';
 
 var sortItems = [
@@ -51,6 +55,7 @@ export default {
         ItemPanelHeader, 
         EventTodoPanel, 
         EventRoutinePanel, 
+        EventBlockPanel,
         IterationForm },
     props: {
         props: Object,
