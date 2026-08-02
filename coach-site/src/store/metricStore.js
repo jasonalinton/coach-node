@@ -59,6 +59,47 @@ export const useMetricStore = defineStore('metric', {
 
             return postEndpoint(parentType, `Reposition${itemType}In${parentType}`, data);
         },
+        createAndMapItem(metricID, itemType, itemText) {
+            let data = { metricID, itemType, itemText };
+            return postEndpoint("Metric", "CreateAndMapItemToMetric", data)
+            .then(response => response.result);
+        },
+        mapItems(metricID, itemType, addedIDs, removedIDs) {
+            let data = { metricID, itemType, addedIDs, removedIDs };
+            return postEndpoint("Metric", "MapItemsToMetric", data)
+            .then(response => response.result);
+        },
+        saveMetric(model) {
+            return postEndpoint("Metric", "SaveMetric", model)
+            .then(response => response.result);
+        },
+        saveDescription(metricID, description) {
+            let model = {
+                id: metricID,
+                description: {
+                    value: description
+                }
+            };
+            this.saveMetric(model);
+        },
+        addBlurb(idMetric, blurb) {
+            let data = {
+                ...blurb,
+                idMetric,
+                idBlurbType: blurb.idType,
+            }
+            return postEndpoint("Metric", "AddBlurbToMetric", data)
+            .then(response => response.result);
+        },
+        updateBlurb(blurb) {
+            let data = {
+                idBlurb: blurb.id,
+                idBlurbType: blurb.idType,
+                ...blurb
+            }
+            return postEndpoint("Metric", "UpdateBlurbInMetric", data)
+            .then(response => response.result);
+        },
         initializeLogItems() {
             let _this = this;
             getLogItems()

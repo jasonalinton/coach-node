@@ -31,9 +31,13 @@
                 </div>
                 <div v-if="itemType == 'todo'">
                     <TodoFormItem v-for="id in itemIDs" :key="id"
-                                  :id="id" :parentID="parentID" :parentType="parentType" 
+                                  :id="id" :parentID="parentID" :parentType="parentType"
                                   :routineRepeatIDs="parentType == 'routine' ? repeatIDs : []"
                                   :parentRepeatIDs="parentType == 'todo' ? repeatIDs : []"/>
+                </div>
+                <div v-if="itemType == 'routine'">
+                    <RoutineFormItem v-for="id in itemIDs" :key="id"
+                                     :id="id" :parentID="parentID" :parentType="parentType"/>
                 </div>
             </div>
         </div>
@@ -44,10 +48,11 @@
 import { capitalize } from '../../../../../utility';
 import GoalFormItem from '../goal/GoalFormItem.vue';
 import TodoFormItem from '../todo/TodoFormItem.vue';
+import RoutineFormItem from '../routine/RoutineFormItem.vue';
 
 export default {
     name: "FormItemList",
-    components: { GoalFormItem, TodoFormItem },
+    components: { GoalFormItem, TodoFormItem, RoutineFormItem },
     props: {
         itemType: String,
         itemIDs: Array,

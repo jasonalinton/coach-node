@@ -19,6 +19,8 @@
                               @closeItemModal="closeItemModal" />
             <TodoFormModal v-if="form.itemType == 'todo'" :id="form.id"
                               @closeItemModal="closeItemModal" />
+            <MetricFormModal v-if="form.itemType == 'metric'" :id="form.id"
+                              @closeItemModal="closeItemModal" />
         </div>
     </div>
 </template>
@@ -29,11 +31,12 @@ import ItemTable from './ItemTable.vue';
 import GoalFormModal from '../form/goal/GoalFormModal.vue'
 import RoutineFormModal from '../form/routine/RoutineFormModal.vue'
 import TodoFormModal from '../form/todo/TodoFormModal.vue';
+import MetricFormModal from '../form/metric/MetricFormModal.vue';
 import { Modal } from 'bootstrap';
 
 export default {
     name: 'ItemTableAndToolbar',
-    components: { ItemTableToolbar, ItemTable, GoalFormModal, RoutineFormModal, TodoFormModal },
+    components: { ItemTableToolbar, ItemTable, GoalFormModal, RoutineFormModal, TodoFormModal, MetricFormModal },
     props: {
       itemType: String
     },
@@ -66,7 +69,7 @@ export default {
             this.form.itemType = data.itemType;
             await this.$nextTick();
             this.modal = new Modal(this.$refs[`${data.itemType}-${data.id}-Modal`]);
-            if (data.itemType == "goal" || data.itemType == "todo" || data.itemType == "routine") {
+            if (data.itemType == "goal" || data.itemType == "todo" || data.itemType == "routine" || data.itemType == "metric") {
                 this.modal.show();
             } 
 
@@ -80,7 +83,7 @@ export default {
             this.form.itemType = itemType;
             await this.$nextTick();
             this.modal = new Modal(this.$refs[`${itemType}-${this.form.id}-Modal`]);
-            if (itemType == "goal" || itemType == "todo" || itemType == "routine") {
+            if (itemType == "goal" || itemType == "todo" || itemType == "routine" || itemType == "metric") {
                 this.modal.show();
             } 
         },
