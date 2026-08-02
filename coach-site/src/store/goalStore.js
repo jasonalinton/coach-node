@@ -128,25 +128,30 @@ export const useGoalStore = defineStore('goal', {
         },
         getIterationIDs(goalID) {
             let idsChecked = { goals: [], todos: [], iterations: [] };
-            this.getAncensorIterationsFromGoal(goalID, idsChecked);
+            this.getDescendantIterationsFromGoal(goalID, idsChecked);
             return idsChecked.iterations;
         },
-        getAncensorIterationsFromGoal(goalID, idsChecked) {
+        getDescendantTodoIDs(goalID) {
+            let idsChecked = { goals: [], todos: [], iterations: [] };
+            this.getDescendantIterationsFromGoal(goalID, idsChecked);
+            return idsChecked.todos;
+        },
+        getDescendantIterationsFromGoal(goalID, idsChecked) {
             if (!idsChecked.goals.includes(goalID)) {
                 idsChecked.goals.push(goalID);
                 let goal = this.goals.find(goal => goal.id == goalID);
                 
                 /* Loop through todos */
                 goal.todoIDs.forEach(todoID => {
-                    this.getAncestorIterationsFromTodo(todoID, idsChecked);
+                    this.getDescendantIterationsFromTodo(todoID, idsChecked);
                 })
                 /* Loop through goals */
                 goal.childIDs.forEach(goalID => {
-                    this.getAncensorIterationsFromGoal(goalID, idsChecked);
+                    this.getDescendantIterationsFromGoal(goalID, idsChecked);
                 })
             }
         },
-        getAncestorIterationsFromTodo(todoID, idsChecked) {
+        getDescendantIterationsFromTodo(todoID, idsChecked) {
             if (!idsChecked.todos.includes(todoID)) {
                 idsChecked.todos.push(todoID);
                 
@@ -154,7 +159,7 @@ export const useGoalStore = defineStore('goal', {
                 let todoStore = useTodoStore();
                 let todo = todoStore.getItem(todoID);
                 todo.childIDs.forEach(childID => {
-                    this.getAncestorIterationsFromTodo(childID, idsChecked);
+                    this.getDescendantIterationsFromTodo(childID, idsChecked);
                 })
                 
                 /* Record iteration ids */
@@ -254,8 +259,8 @@ export const useGoalStore = defineStore('goal', {
         getGoalKanban(idGoal) {
             return fetchGoalKanban(idGoal);
         },
-        setKanbanTask(idParent, idDescendant, idColumn, idTimeframe, positionDescendant, date, dateAdded, dateRemoved) {
-            let data = { idParent, idDescendant, idColumn, idTimeframe, positionDescendant, date, dateAdded, dateRemoved };
+        setKanbanTask(idParent, idDescendant, idTodo, idIteration, idColumn, idTimeframe, positionDescendant, date, dateAdded, dateRemoved) {
+            let data = { idParent, idDescendant, idTodo, idIteration, idColumn, idTimeframe, positionDescendant, date, dateAdded, dateRemoved };
             return postEndpoint("Goal", "SetKanbanTask", data)
             .then(response => response.result);
         },

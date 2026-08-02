@@ -13,7 +13,7 @@
         <div class="cards d-flex flex-column"
              @dragover.prevent="onContainerDragOver"
              @drop="onContainerDrop">
-            <div v-for="item in laneItems" :key="item.idDescendant"
+            <div v-for="item in laneItems" :key="item.idItem"
                  class="kanban-item"
                  :class="dragPositionFor(item)"
                  draggable="true"
@@ -22,7 +22,8 @@
                  @dragleave="onDragLeave(item)"
                  @drop.stop="onDrop($event, item)"
                  @dragend="onDragEnd($event)">
-                <GoalKanbanCard :id="item.idDescendant" />
+                <GoalKanbanCard v-if="idItemType === ITEMTYPES.GOAL" :id="item.idItem" />
+                <TodoKanbanCard v-if="idItemType === ITEMTYPES.TODO" :id="item.idItem" />
             </div>
         </div>
     </div>
@@ -30,7 +31,8 @@
 
 <script>
 import GoalKanbanCard from './GoalKanbanCard.vue';
-import { KANBAN_COLUMN } from '../../../../model/constants';
+import TodoKanbanCard from './TodoKanbanCard.vue';
+import { KANBAN_COLUMN, ITEMTYPES } from '../../../../model/constants';
 
 const COLUMN_META = {
     [KANBAN_COLUMN.COMPLETE]: { label: "Complete", color: "#059669" },
@@ -41,15 +43,17 @@ const COLUMN_META = {
 
 export default {
     name: "GoalColumn",
-    components: { GoalKanbanCard },
+    components: { GoalKanbanCard, TodoKanbanCard },
     props: {
         idGoal: { type: Number, required: true },
+        idItemType: { type: Number, default: ITEMTYPES.GOAL },
         idTimeframe: { type: Number, default: null },
         idColumn: { type: Number, required: true },
         items: { type: Array, default: () => [] }
     },
     data: function() {
         return {
+            ITEMTYPES,
             goalStore: null,
             localItems: [],
             dragOverDescendantID: null,
@@ -70,9 +74,9 @@ export default {
         currentByDescendant() {
             let map = {};
             this.localItems.forEach(item => {
-                let existing = map[item.idDescendant];
+                let existing = map[item.idItem];
                 if (!existing || new Date(item.dateAdded) > new Date(existing.dateAdded)) {
-                    map[item.idDescendant] = item;
+                    map[item.idItem] = item;
                 }
             });
             return Object.values(map);
@@ -90,7 +94,7 @@ export default {
     },
     methods: {
         dragPositionFor(item) {
-            return (this.dragOverDescendantID == item.idDescendant) ? this.dragPosition : "";
+            return (this.dragOverDescendantID == item.idItem) ? this.dragPosition : "";
         },
         onDragStart(ev, item) {
             ev.target.classList.add("drag");
@@ -102,18 +106,18 @@ export default {
             ev.preventDefault();
 
             let dragged = this.goalStore.getDraggedKanbanTask;
-            if (!dragged || dragged.idDescendant == item.idDescendant) {
+            if (!dragged || dragged.idItem == item.idItem) {
                 this.dragOverDescendantID = null;
                 return;
             }
 
-            this.dragOverDescendantID = item.idDescendant;
+            this.dragOverDescendantID = item.idItem;
             let rect = ev.currentTarget.getBoundingClientRect();
             let percent = (ev.clientY - rect.y) / rect.height;
             this.dragPosition = (percent < .50) ? "before" : "after";
         },
         onDragLeave(item) {
-            if (this.dragOverDescendantID == item.idDescendant) {
+            if (this.dragOverDescendantID == item.idItem) {
                 this.dragOverDescendantID = null;
                 this.dragPosition = "";
             }
@@ -122,8 +126,8 @@ export default {
             ev.preventDefault();
 
             let dragged = this.goalStore.getDraggedKanbanTask;
-            if (dragged && dragged.idDescendant != item.idDescendant) {
-                this.moveItem(dragged, item.idDescendant, this.dragPosition);
+            if (dragged && dragged.idItem != item.idItem) {
+                this.moveItem(dragged, item.idItem, this.dragPosition);
             }
 
             this.dragOverDescendantID = null;
@@ -152,27 +156,27 @@ export default {
         // explicitly closed out (RemoveKanbanTask) rather than left dangling.
         moveItem(draggedItem, referenceDescendantID, position) {
             let orderedIDs = this.laneItems
-                .map(item => item.idDescendant)
-                .filter(idDescendant => idDescendant != draggedItem.idDescendant);
+                .map(item => item.idItem)
+                .filter(idItem => idItem != draggedItem.idItem);
 
             let insertionIndex = orderedIDs.length;
             if (referenceDescendantID != null) {
                 let targetIndex = orderedIDs.indexOf(referenceDescendantID);
                 insertionIndex = (position == "before") ? targetIndex : targetIndex + 1;
             }
-            orderedIDs.splice(insertionIndex, 0, draggedItem.idDescendant);
+            orderedIDs.splice(insertionIndex, 0, draggedItem.idItem);
 
             let now = new Date();
             let newRows = [];
             let removedRowIDs = [];
 
-            orderedIDs.forEach((idDescendant, index) => {
+            orderedIDs.forEach((idItem, index) => {
                 let newPosition = index + 1;
-                let sourceItem = (idDescendant == draggedItem.idDescendant)
+                let sourceItem = (idItem == draggedItem.idItem)
                     ? draggedItem
-                    : this.laneItems.find(item => item.idDescendant == idDescendant);
+                    : this.laneItems.find(item => item.idItem == idItem);
 
-                let hasMoved = (idDescendant == draggedItem.idDescendant) || (sourceItem.positionDescendant != newPosition);
+                let hasMoved = (idItem == draggedItem.idItem) || (sourceItem.positionDescendant != newPosition);
                 if (hasMoved) {
                     newRows.push({
                         ...sourceItem,
@@ -191,8 +195,16 @@ export default {
             this.$emit('update:items', this.items.map(closeOutRemovedRows).concat(newRows));
 
             newRows.forEach(row => {
-                this.goalStore.setKanbanTask(this.idGoal, row.idDescendant, row.idColumn, row.idTimeframe,
-                    row.positionDescendant, row.date, row.dateAdded, row.dateRemoved);
+                if (this.idItemType == ITEMTYPES.GOAL) {
+                    this.goalStore.setKanbanTask(row.idParent, row.idItem, null, null, row.idColumn, row.idTimeframe,
+                        row.positionDescendant, row.date, row.dateAdded, row.dateRemoved);
+                } else if (this.idItemType == ITEMTYPES.TODO) {
+                    this.goalStore.setKanbanTask(row.idParent, null, row.idItem, null, row.idColumn, row.idTimeframe,
+                        row.positionDescendant, row.date, row.dateAdded, row.dateRemoved);
+                }else if (this.idItemType == ITEMTYPES.TASK) {
+                    this.goalStore.setKanbanTask(row.idParent, null, null, row.idItem, row.idColumn, row.idTimeframe,
+                        row.positionDescendant, row.date, row.dateAdded, row.dateRemoved);
+                }
             });
             removedRowIDs.filter(id => id != undefined).forEach(id => {
                 this.goalStore.removeKanbanTask(id, now);

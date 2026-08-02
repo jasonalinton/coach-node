@@ -1,17 +1,17 @@
 <template>
-    <div v-if="goal" class="goal-kanban-card d-flex flex-column">
+    <div v-if="todo" class="todo-kanban-card d-flex flex-column">
         <!-- Head -->
         <div class="d-flex flex-row justify-content-between align-items-center">
-            <!-- <span class="flag-pill d-flex flex-row align-items-center" :style="flagStyle">
+            <span class="flag-pill d-flex flex-row align-items-center" :style="flagStyle">
                 <span class="flag-dot"></span>
                 {{ flag }}
-            </span> -->
+            </span>
             <i class="fa-solid fa-ellipsis more-icon" @click.stop="togglePriority"></i>
         </div>
         <!-- Text -->
          <div class="d-flex gap-1">
-             <div class="text">{{ goal.id }}</div>
-             <div class="text">{{ goal.text }}</div>
+             <div class="text">{{ todo.id }}</div>
+             <div class="text">{{ todo.text }}</div>
          </div>
         <!-- Blurb -->
         <div v-if="blurb" class="blurb">{{ blurb.text }}</div>
@@ -20,7 +20,7 @@
             <div class="d-flex flex-row align-items-center gap-3">
                 <span class="d-flex flex-row align-items-center gap-1">
                     <i class="fa-solid fa-list-check"></i>
-                    {{ todoCount }}
+                    {{ taskCount }}
                 </span>
                 <span class="d-flex flex-row align-items-center gap-1">
                     <i class="fa-solid fa-star"></i>
@@ -59,13 +59,12 @@ const FLAG_COLORS = {
 const PRIORITY_SHOWN_DURATION = 2000;
 
 export default {
-    name: "GoalKanbanCard",
+    name: "TodoKanbanCard",
     props: {
         id: Number
     },
     data: function() {
         return {
-            goalStore: null,
             todoStore: null,
             isPriorityShown: true,
             /* Hardcoded until priority has a real data source */
@@ -73,9 +72,6 @@ export default {
         }
     },
     created: async function() {
-        let goalStore = await import(`@/store/goalStore`);
-        this.goalStore = goalStore.useGoalStore();
-
         let todoStore = await import(`@/store/todoStore`);
         this.todoStore = todoStore.useTodoStore();
     },
@@ -83,39 +79,36 @@ export default {
         setTimeout(() => this.isPriorityShown = false, PRIORITY_SHOWN_DURATION);
     },
     computed: {
-        goal() {
-            if (this.goalStore) {
-                return this.goalStore.getItem(this.id);
+        todo() {
+            if (this.todoStore) {
+                return this.todoStore.getItem(this.id);
             }
             return null;
         },
         blurb() {
-            let blurbs = this.goal.blurbs.filter(x => x.idType == BLURBTYPE.REASON || x.idType == BLURBTYPE.REMINDER);
-            if (blurbs.length > 0) {
-                let index = Math.floor(Math.random() * blurbs.length);
-                return blurbs[index];
-            }
+            // let blurbs = this.todo.blurbs.filter(x => x.idType == BLURBTYPE.REASON || x.idType == BLURBTYPE.REMINDER);
+            // if (blurbs.length > 0) {
+            //     let index = Math.floor(Math.random() * blurbs.length);
+            //     return blurbs[index];
+            // }
             return null;
         },
         points() {
-            if (this.goalStore) {
-                return this.goalStore.getPoints(this.id);
-            }
-            return 0;
+            // if (this.todoStore) {
+            //     return this.todoStore.getPoints(this.id);
+            // }
+            return this.todo?.points || 0;
         },
-        todoCount() {
+        taskCount() {
             if (this.todoStore) {
-                let count = this.goal.todos.length;
-                this.goal.todos.forEach(todo => {
-                    count += this.todoStore.getDescendantIDs(todo.id).length;
-                });
+                let count = this.todo.iterationIDs.length;
                 return count;
             }
             return 0;
         },
         /* Determined by computed property (placeholder rule until real business logic exists) */
         flag() {
-            if (this.goal.todos.length === 0) {
+            if (this.todo.iterationIDs.length === 0) {
                 return FLAG.COMPLETE;
             } else if (this.points === 0) {
                 return FLAG.NO_STARTED;
@@ -139,7 +132,7 @@ export default {
 </script>
 
 <style scoped>
-.goal-kanban-card {
+.todo-kanban-card {
     padding: 16px;
     gap: 8px;
     background-color: var(--background-color);

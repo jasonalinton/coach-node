@@ -5,13 +5,25 @@
         <!-- Toolbar -->
         <div class="toolbar d-flex flex-column">
             <div class="d-flex flex-row justify-content-between align-items-center">
-                <div class="timeframe-picker d-flex flex-row">
-                    <span v-for="timeframe in TIMEFRAMES" :key="timeframe.id"
-                          class="timeframe-tab"
-                          :class="{ active: idTimeframe == timeframe.id }"
-                          @click="selectTimeframe(timeframe.id)">
-                        {{ timeframe.label }}
-                    </span>
+                <div class="d-flex gap-4">
+                    <!-- Item Type Picker -->
+                    <div class="item-picker d-flex flex-row gap-1">
+                        <span v-for="type in ITEMTYPE" :key="type.id"
+                              class="tab"
+                              :class="{ active: idItemType == type.id }"
+                              @click="selectItemType(type.id)">
+                            {{ type.label }}
+                        </span>
+                    </div>
+                    <!-- Timeframe Picker -->
+                    <div class="timeframe-picker d-flex flex-row gap-1">
+                        <span v-for="timeframe in TIMEFRAMES" :key="timeframe.id"
+                              class="tab"
+                              :class="{ active: idTimeframe == timeframe.id }"
+                              @click="selectTimeframe(timeframe.id)">
+                            {{ timeframe.label }}
+                        </span>
+                    </div>
                 </div>
                 <i class="fa-solid fa-ellipsis more-icon"></i>
             </div>
@@ -23,13 +35,13 @@
                         :idGoal="idGoal" :idColumn="column.id"
                         :idTimeframe="(column.id == KANBAN_COLUMN.ON_DECK) ? null : idTimeframe"
                         :items="resolvedItems" @update:items="kanbanItems = $event" /> -->
-            <GoalColumn :idGoal="idGoal" :idColumn="KANBAN_COLUMN.ON_DECK"
+            <GoalColumn :idGoal="idGoal" :idItemType="idItemType" :idColumn="KANBAN_COLUMN.ON_DECK"
                         :idTimeframe="idTimeframe" :items="onDeckItems" @update:items="kanbanItems = $event" />
-            <GoalColumn :idGoal="idGoal" :idColumn="KANBAN_COLUMN.ON_HOLD"
+            <GoalColumn :idGoal="idGoal" :idItemType="idItemType" :idColumn="KANBAN_COLUMN.ON_HOLD"
                         :idTimeframe="idTimeframe" :items="onHoldItems" @update:items="kanbanItems = $event" />
-            <GoalColumn :idGoal="idGoal" :idColumn="KANBAN_COLUMN.ACTIVE"
+            <GoalColumn :idGoal="idGoal" :idItemType="idItemType" :idColumn="KANBAN_COLUMN.ACTIVE"
                         :idTimeframe="idTimeframe" :items="activeItems" @update:items="kanbanItems = $event" />
-            <GoalColumn :idGoal="idGoal" :idColumn="KANBAN_COLUMN.COMPLETE"
+            <GoalColumn :idGoal="idGoal" :idItemType="idItemType" :idColumn="KANBAN_COLUMN.COMPLETE"
                         :idTimeframe="idTimeframe" :items="completeItems" @update:items="kanbanItems = $event" />
         </div>
     </div>
@@ -37,13 +49,19 @@
 
 <script>
 import GoalColumn from './GoalColumn.vue';
-import { KANBAN_COLUMN, TIMEFRAME } from '../../../../model/constants';
+import { KANBAN_COLUMN, ITEMTYPES, TIMEFRAME } from '../../../../model/constants';
+
+const ITEMTYPE = [
+    { id: ITEMTYPES.GOAL, label: "Descendants" },
+    { id: ITEMTYPES.TODO, label: "Todos" },
+    { id: ITEMTYPES.TASK, label: "Iterations" }
+];
 
 const TIMEFRAMES = [
-    { id: TIMEFRAME.WEEK, label: "Week" },
-    { id: TIMEFRAME.MONTH, label: "Month" },
+    { id: TIMEFRAME.MILESTONE, label: "Milestone" },
     { id: TIMEFRAME.YEAR, label: "Year" },
-    { id: TIMEFRAME.MILESTONE, label: "Milestone" }
+    { id: TIMEFRAME.MONTH, label: "Month" },
+    { id: TIMEFRAME.WEEK, label: "Week" }
 ];
 
 const COLUMNS = [
@@ -66,7 +84,9 @@ export default {
             goalStore: null,
             // kanbanItems: [],
             idTimeframe: null,
+            idItemType: ITEMTYPES.GOAL,
             TIMEFRAMES,
+            ITEMTYPE,
             COLUMNS,
             KANBAN_COLUMN
         }
@@ -84,7 +104,8 @@ export default {
         },
         kanbanItems() {
             if (this.goal) {
-                let items = this.goal.kanbanCards;
+                let items = this.goal.kanbanCards
+                    .filter(item => item.idType == this.idItemType);
                 return items;
             }
             return [];
@@ -94,14 +115,14 @@ export default {
                 .filter(item => item.idColumn == KANBAN_COLUMN.ON_DECK && !item.dateRemoved);
             let items_Other = this.kanbanItems
                 .filter(item => !item.dateRemoved);
-            let otherIDs = items_Other.map(item => item.idDescendant);
+            let otherIDs = items_Other.map(item => item.idItem);
 
             let positionDescendant = (items_OnDeck.length > 0) ? Math.max(...items_OnDeck.map(item => item.positionDescendant)) + 1 : 1;
-            let placeholders = this.descendantGoalIDs
-                .filter(idDescendant => !otherIDs.includes(idDescendant))
-                .map(idDescendant => ({
+            let placeholders = this.descendantTypeIDs
+                .filter(idItem => !otherIDs.includes(idItem))
+                .map(idItem => ({
                     idParent: this.idGoal,
-                    idDescendant,
+                    idItem,
                     idColumn: KANBAN_COLUMN.ON_DECK,
                     idTimeframe: null,
                     positionDescendant: positionDescendant++,
@@ -143,12 +164,24 @@ export default {
             }
             return ids;
         },
+        // A descendant is a child item (recursively) of the root goal being viewed.
+        descendantTypeIDs() {
+            let ids = [];
+            if (this.idItemType == ITEMTYPES.GOAL) {
+                ids = this.descendantGoalIDs;
+            } else if (this.idItemType == ITEMTYPES.TODO) {
+                ids = this.goalStore.getDescendantTodoIDs(this.idGoal);
+            } else if (this.idItemType == ITEMTYPES.TASK) {
+                ids = this.goalStore.getDescendantIterationIDs(this.idGoal);
+            }
+            return ids;
+        },
         currentByDescendant() {
             let map = {};
             this.kanbanItems.forEach(item => {
-                let existing = map[item.idDescendant];
+                let existing = map[item.idItem];
                 if (!existing || new Date(item.dateAdded) > new Date(existing.dateAdded)) {
-                    map[item.idDescendant] = item;
+                    map[item.idItem] = item;
                 }
             });
             return map;
@@ -163,13 +196,13 @@ export default {
             let nextPosition = (onDeckPositions.length > 0) ? Math.max(...onDeckPositions) + 1 : 1;
 
             let placeholders = this.descendantGoalIDs
-                .filter(idDescendant => {
-                    let existing = map[idDescendant];
+                .filter(idItem => {
+                    let existing = map[idItem];
                     return !existing || existing.dateRemoved || !TRACKED_COLUMNS.includes(existing.idColumn);
                 })
-                .map(idDescendant => ({
+                .map(idItem => ({
                     idParent: this.idGoal,
-                    idDescendant,
+                    idItem,
                     idColumn: KANBAN_COLUMN.ON_DECK,
                     idTimeframe: null,
                     positionDescendant: nextPosition++,
@@ -184,6 +217,11 @@ export default {
     methods: {
         selectTimeframe(id) {
             this.idTimeframe = (this.idTimeframe == id) ? null : id;
+        },
+        selectItemType(id) {
+            if (id != this.idItemType) {
+                this.idItemType = id;
+            }
         }
     }
 }
@@ -210,7 +248,7 @@ export default {
     gap: 4px;
 }
 
-.timeframe-tab {
+.tab {
     padding: 4px 8px;
     border-radius: 6px;
     font-size: 13px;
@@ -219,7 +257,7 @@ export default {
     cursor: pointer;
 }
 
-.timeframe-tab.active {
+.tab.active {
     background-color: #EEEEF9;
     color: #6366F1;
     font-weight: 600;
@@ -240,6 +278,7 @@ export default {
 .goal-kanban-columns {
     gap: 20px;
     overflow-x: scroll;
+    /* overflow-y: hidden; */
     align-items: stretch;
     height: 100%;
 }

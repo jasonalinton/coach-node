@@ -6,6 +6,15 @@ export let METRIC = {
     FINANCIAL: 5
 };
 
+export let ITEMTYPES = {
+    ITEMTYPE: 2,
+    METRIC: 3,
+    GOAL: 4,
+    ROUTINE: 5,
+    TODO: 6,
+    TASK: 7
+};
+
 export let TODOTYPE = {
     REMINDER: 9,
     TALLY: 10,

@@ -21,6 +21,33 @@ export let metrics = [
     },
 ]
 
+export let itemTypes = [
+    {
+        id: 2,
+        text: "Item Type"
+    },
+    {
+        id: 3,
+        text: "Metric"
+    },
+    {
+        id: 4,
+        text: "Goal"
+    },
+    {
+        id: 5,
+        text: "Routine"
+    },
+    {
+        id: 6,
+        text: "Todo"
+    },
+    {
+        id: 7,
+        text: "Task"
+    },
+]
+
 export let todoTypes = [
     {
         id: 9,
