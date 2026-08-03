@@ -133,7 +133,7 @@
                 </div>
             </div>
             <div v-if="isKanbanShown" class="container-fluid">
-                <GoalKanban :idGoal="id" />
+                <ItemKanban :idParent="id" :idKanbanType="ITEMTYPES.GOAL" />
             </div>
         </div>
         <div v-if="!mapper.isShown && !isKanbanShown" class="modal-footer">
@@ -155,14 +155,14 @@ import GoalTimePairControl from '../component/GoalTimePairControl.vue';
 import FormItemList from '../component/FormItemList.vue';
 import ItemMapper from '../component/ItemMapper.vue';
 import BlurbFormControl from '../component/BlurbFormControl.vue';
-import GoalKanban from './GoalKanban.vue';
+import ItemKanban from '../component/ItemKanban.vue';
 import { clone, replaceItem, addOrReplaceItem, sortItems, sortAsc } from '../../../../../utility';
 import { getShortDateString } from '../../../../../utility/timeUtility';
-import { INHERITANCE, BLURBTYPE } from '../../../../model/constants'
+import { INHERITANCE, BLURBTYPE, ITEMTYPES } from '../../../../model/constants'
 
 export default {
     name: "GoalFormModal",
-    components: { RepeatControl, GoalTimePairControl, ItemMapper, FormItemList, BlurbFormControl, GoalKanban },
+    components: { RepeatControl, GoalTimePairControl, ItemMapper, FormItemList, BlurbFormControl, ItemKanban },
     props: {
       id: Number
     },
@@ -171,6 +171,7 @@ export default {
             store: null,
             plannerStore: null,
             BLURBTYPE: BLURBTYPE,
+            ITEMTYPES: ITEMTYPES,
             text: {
                 value: undefined,
                 oldValue: undefined,

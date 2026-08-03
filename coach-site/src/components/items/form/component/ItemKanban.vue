@@ -1,14 +1,14 @@
 <template>
-    <div v-if="goal" class="goal-kanban d-flex flex-column">
+    <div v-if="item" class="item-kanban d-flex flex-column">
         <!-- Title -->
-        <div class="title">{{ goal.text }}</div>
+        <div class="title">{{ item.text }}</div>
         <!-- Toolbar -->
         <div class="toolbar d-flex flex-column">
             <div class="d-flex flex-row justify-content-between align-items-center">
                 <div class="d-flex gap-4">
                     <!-- Item Type Picker -->
                     <div class="item-picker d-flex flex-row gap-1">
-                        <span v-for="type in ITEMTYPE" :key="type.id"
+                        <span v-for="type in itemTypeTabs" :key="type.id"
                               class="tab"
                               :class="{ active: idItemType == type.id }"
                               @click="selectItemType(type.id)">
@@ -30,32 +30,22 @@
             <div class="divider"></div>
         </div>
         <!-- Columns -->
-        <div class="goal-kanban-columns d-flex flex-row">
-            <!-- <GoalColumn v-for="column in COLUMNS" :key="column.id"
-                        :idGoal="idGoal" :idColumn="column.id"
-                        :idTimeframe="(column.id == KANBAN_COLUMN.ON_DECK) ? null : idTimeframe"
-                        :items="resolvedItems" @update:items="kanbanItems = $event" /> -->
-            <GoalColumn :idGoal="idGoal" :idItemType="idItemType" :idColumn="KANBAN_COLUMN.ON_DECK"
+        <div class="item-kanban-columns d-flex flex-row">
+            <KanbanColumn :idParent="idParent" :idKanbanType="idKanbanType" :idItemType="idItemType" :idColumn="KANBAN_COLUMN.ON_DECK"
                         :idTimeframe="idTimeframe" :items="onDeckItems" @update:items="kanbanItems = $event" />
-            <GoalColumn :idGoal="idGoal" :idItemType="idItemType" :idColumn="KANBAN_COLUMN.ON_HOLD"
+            <KanbanColumn :idParent="idParent" :idKanbanType="idKanbanType" :idItemType="idItemType" :idColumn="KANBAN_COLUMN.ON_HOLD"
                         :idTimeframe="idTimeframe" :items="onHoldItems" @update:items="kanbanItems = $event" />
-            <GoalColumn :idGoal="idGoal" :idItemType="idItemType" :idColumn="KANBAN_COLUMN.ACTIVE"
+            <KanbanColumn :idParent="idParent" :idKanbanType="idKanbanType" :idItemType="idItemType" :idColumn="KANBAN_COLUMN.ACTIVE"
                         :idTimeframe="idTimeframe" :items="activeItems" @update:items="kanbanItems = $event" />
-            <GoalColumn :idGoal="idGoal" :idItemType="idItemType" :idColumn="KANBAN_COLUMN.COMPLETE"
+            <KanbanColumn :idParent="idParent" :idKanbanType="idKanbanType" :idItemType="idItemType" :idColumn="KANBAN_COLUMN.COMPLETE"
                         :idTimeframe="idTimeframe" :items="completeItems" @update:items="kanbanItems = $event" />
         </div>
     </div>
 </template>
 
 <script>
-import GoalColumn from './GoalColumn.vue';
+import KanbanColumn from './KanbanColumn.vue';
 import { KANBAN_COLUMN, ITEMTYPES, TIMEFRAME } from '../../../../model/constants';
-
-const ITEMTYPE = [
-    { id: ITEMTYPES.GOAL, label: "Descendants" },
-    { id: ITEMTYPES.TODO, label: "Todos" },
-    { id: ITEMTYPES.TASK, label: "Iterations" }
-];
 
 const TIMEFRAMES = [
     { id: TIMEFRAME.MILESTONE, label: "Milestone" },
@@ -64,47 +54,70 @@ const TIMEFRAMES = [
     { id: TIMEFRAME.WEEK, label: "Week" }
 ];
 
-const COLUMNS = [
-    { id: KANBAN_COLUMN.ON_DECK },
-    { id: KANBAN_COLUMN.ON_HOLD },
-    { id: KANBAN_COLUMN.ACTIVE },
-    { id: KANBAN_COLUMN.COMPLETE }
-];
-
-const TRACKED_COLUMNS = COLUMNS.map(column => column.id);
+async function loadOwnerStore(idKanbanType) {
+    if (idKanbanType == ITEMTYPES.METRIC) {
+        let metricStore = await import(`@/store/metricStore`);
+        return metricStore.useMetricStore();
+    } else if (idKanbanType == ITEMTYPES.TODO) {
+        let todoStore = await import(`@/store/todoStore`);
+        return todoStore.useTodoStore();
+    } else {
+        let goalStore = await import(`@/store/goalStore`);
+        return goalStore.useGoalStore();
+    }
+}
 
 export default {
-    name: "GoalKanban",
-    components: { GoalColumn },
+    name: "ItemKanban",
+    components: { KanbanColumn },
     props: {
-        idGoal: { type: Number, required: true }
+        idParent: { type: Number, required: true },
+        idKanbanType: { type: Number, required: true }
     },
     data: function() {
         return {
-            goalStore: null,
-            // kanbanItems: [],
+            ownerStore: null,
             idTimeframe: null,
-            idItemType: ITEMTYPES.GOAL,
+            idItemType: (this.idKanbanType == ITEMTYPES.TODO) ? ITEMTYPES.TODO : ITEMTYPES.GOAL,
             TIMEFRAMES,
-            ITEMTYPE,
-            COLUMNS,
             KANBAN_COLUMN
         }
     },
     created: async function() {
-        let goalStore = await import(`@/store/goalStore`);
-        this.goalStore = goalStore.useGoalStore();
+        this.ownerStore = await loadOwnerStore(this.idKanbanType);
     },
     computed: {
-        goal() {
-            if (this.goalStore) {
-                return this.goalStore.getItem(this.idGoal);
+        item() {
+            if (this.ownerStore) {
+                return this.ownerStore.getItem(this.idParent);
             }
             return null;
         },
+        // Metrics don't have a "Descendants" tab (they map directly to Goals instead of
+        // recursing through a goal-like tree), and Todos only distinguish Descendants/
+        // Iterations since a todo's descendants are other todos, not a separate item type.
+        itemTypeTabs() {
+            if (this.idKanbanType == ITEMTYPES.METRIC) {
+                return [
+                    { id: ITEMTYPES.GOAL, label: "Goals" },
+                    { id: ITEMTYPES.TODO, label: "Todos" },
+                    { id: ITEMTYPES.TASK, label: "Iterations" }
+                ];
+            } else if (this.idKanbanType == ITEMTYPES.TODO) {
+                return [
+                    { id: ITEMTYPES.TODO, label: "Descendants" },
+                    { id: ITEMTYPES.TASK, label: "Iterations" }
+                ];
+            }
+            return [
+                { id: ITEMTYPES.GOAL, label: "Descendants" },
+                { id: ITEMTYPES.TODO, label: "Todos" },
+                { id: ITEMTYPES.TASK, label: "Iterations" }
+            ];
+        },
         kanbanItems() {
-            if (this.goal) {
-                let items = this.goal.kanbanCards
+            if (this.item) {
+                let items = this.item.kanbanCards
                     .filter(item => item.idType == this.idItemType);
                 return items;
             }
@@ -121,7 +134,7 @@ export default {
             let placeholders = this.descendantTypeIDs
                 .filter(idItem => !otherIDs.includes(idItem))
                 .map(idItem => ({
-                    idParent: this.idGoal,
+                    idParent: this.idParent,
                     idItem,
                     idColumn: KANBAN_COLUMN.ON_DECK,
                     idTimeframe: null,
@@ -149,6 +162,8 @@ export default {
             return items;
         },
         // A descendant is a child goal (recursively) of the root goal being viewed.
+        // Only meaningful when idKanbanType is GOAL - Metric's "Goals" tab uses its
+        // direct goalIDs instead, since metrics don't have descendant semantics.
         descendantGoalIDs() {
             let ids = [];
             let collect = (goal) => {
@@ -159,22 +174,36 @@ export default {
                     }
                 });
             };
-            if (this.goal) {
-                collect(this.goal);
+            if (this.item) {
+                collect(this.item);
             }
             return ids;
         },
-        // A descendant is a child item (recursively) of the root goal being viewed.
         descendantTypeIDs() {
-            let ids = [];
-            if (this.idItemType == ITEMTYPES.GOAL) {
-                ids = this.descendantGoalIDs;
-            } else if (this.idItemType == ITEMTYPES.TODO) {
-                ids = this.goalStore.getDescendantTodoIDs(this.idGoal);
-            } else if (this.idItemType == ITEMTYPES.TASK) {
-                ids = this.goalStore.getDescendantIterationIDs(this.idGoal);
+            if (this.idKanbanType == ITEMTYPES.METRIC) {
+                if (this.idItemType == ITEMTYPES.GOAL) {
+                    return this.item?.goalIDs || [];
+                } else if (this.idItemType == ITEMTYPES.TODO) {
+                    return this.item?.todoIDs || [];
+                } else if (this.idItemType == ITEMTYPES.TASK) {
+                    return this.ownerStore.getDescendantIterationIDs(this.idParent);
+                }
+            } else if (this.idKanbanType == ITEMTYPES.TODO) {
+                if (this.idItemType == ITEMTYPES.TODO) {
+                    return this.ownerStore.getDescendantIDs(this.idParent);
+                } else if (this.idItemType == ITEMTYPES.TASK) {
+                    return this.ownerStore.getDescendantIterationIDs(this.idParent);
+                }
+            } else {
+                if (this.idItemType == ITEMTYPES.GOAL) {
+                    return this.descendantGoalIDs;
+                } else if (this.idItemType == ITEMTYPES.TODO) {
+                    return this.ownerStore.getDescendantTodoIDs(this.idParent);
+                } else if (this.idItemType == ITEMTYPES.TASK) {
+                    return this.ownerStore.getDescendantIterationIDs(this.idParent);
+                }
             }
-            return ids;
+            return [];
         },
         currentByDescendant() {
             let map = {};
@@ -185,33 +214,6 @@ export default {
                 }
             });
             return map;
-        },
-        // On Deck is a special case: any descendant that isn't currently placed in one of the
-        // other three columns is shown there without being queried/persisted, until it's first moved.
-        resolvedItems() {
-            let map = this.currentByDescendant;
-            let onDeckPositions = Object.values(map)
-                .filter(item => item.idColumn == KANBAN_COLUMN.ON_DECK && !item.dateRemoved)
-                .map(item => item.positionDescendant);
-            let nextPosition = (onDeckPositions.length > 0) ? Math.max(...onDeckPositions) + 1 : 1;
-
-            let placeholders = this.descendantGoalIDs
-                .filter(idItem => {
-                    let existing = map[idItem];
-                    return !existing || existing.dateRemoved || !TRACKED_COLUMNS.includes(existing.idColumn);
-                })
-                .map(idItem => ({
-                    idParent: this.idGoal,
-                    idItem,
-                    idColumn: KANBAN_COLUMN.ON_DECK,
-                    idTimeframe: null,
-                    positionDescendant: nextPosition++,
-                    date: null,
-                    dateAdded: new Date(),
-                    dateRemoved: null
-                }));
-
-            return [...this.kanbanItems, ...placeholders];
         }
     },
     methods: {
@@ -228,7 +230,7 @@ export default {
 </script>
 
 <style scoped>
-.goal-kanban {
+.item-kanban {
     text-align: start;
     gap: 24px;
     padding: 16px;
@@ -275,7 +277,7 @@ export default {
     margin-top: 16px;
 }
 
-.goal-kanban-columns {
+.item-kanban-columns {
     gap: 20px;
     overflow-x: scroll;
     /* overflow-y: hidden; */

@@ -13,10 +13,11 @@ let initialized = false;
 export const useMetricStore = defineStore('metric', {
     state: () => ({
         metrics: [],
-        logItems: []
+        logItems: [],
+        draggedKanbanTask: null
     }),
     getters: {
-        
+        getDraggedKanbanTask: (state) => state.draggedKanbanTask
     },
     actions: {
         async initialize() {
@@ -98,6 +99,21 @@ export const useMetricStore = defineStore('metric', {
                 ...blurb
             }
             return postEndpoint("Metric", "UpdateBlurbInMetric", data)
+            .then(response => response.result);
+        },
+        setDraggedKanbanTask(item) {
+            this.draggedKanbanTask = item;
+        },
+        clearDraggedKanbanTask() {
+            this.draggedKanbanTask = null;
+        },
+        setKanbanTask(idParent, idDescendant, idTodo, idIteration, idColumn, idTimeframe, positionDescendant, date, dateAdded, dateRemoved) {
+            let data = { idParent, idDescendant, idTodo, idIteration, idColumn, idTimeframe, positionDescendant, date, dateAdded, dateRemoved };
+            return postEndpoint("Metric", "SetKanbanTask", data)
+            .then(response => response.result);
+        },
+        removeKanbanTask(id, dateRemoved) {
+            return postEndpoint("Metric", "RemoveKanbanTask", { id, dateRemoved })
             .then(response => response.result);
         },
         initializeLogItems() {

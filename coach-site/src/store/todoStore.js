@@ -13,10 +13,11 @@ let initialized = false;
 
 export const useTodoStore = defineStore('todo', {
     state: () => ({
-        todos: []
+        todos: [],
+        draggedKanbanTask: null
     }),
     getters: {
-        
+        getDraggedKanbanTask: (state) => state.draggedKanbanTask
     },
     actions: {
         async initialize() {
@@ -202,6 +203,21 @@ export const useTodoStore = defineStore('todo', {
         },
         saveRepeat(repeat) {
             return postEndpoint("Todo", "SaveTodoRepeat", { repeat })
+            .then(response => response.result);
+        },
+        setDraggedKanbanTask(item) {
+            this.draggedKanbanTask = item;
+        },
+        clearDraggedKanbanTask() {
+            this.draggedKanbanTask = null;
+        },
+        setKanbanTask(idParent, idDescendant, idTodo, idIteration, idColumn, idTimeframe, positionDescendant, date, dateAdded, dateRemoved) {
+            let data = { idParent, idDescendant, idTodo, idIteration, idColumn, idTimeframe, positionDescendant, date, dateAdded, dateRemoved };
+            return postEndpoint("Todo", "SetKanbanTask", data)
+            .then(response => response.result);
+        },
+        removeKanbanTask(id, dateRemoved) {
+            return postEndpoint("Todo", "RemoveKanbanTask", { id, dateRemoved })
             .then(response => response.result);
         },
         runUpdates(updates) {

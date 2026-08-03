@@ -1,5 +1,5 @@
 <template>
-    <div class="goal-column d-flex flex-column flex-grow-1 flex-shrink-1">
+    <div class="kanban-column d-flex flex-column flex-grow-1 flex-shrink-1">
         <!-- Column Header -->
         <div class="d-flex flex-row justify-content-between align-items-center header">
             <div class="d-flex flex-row align-items-center gap-2">
@@ -41,11 +41,38 @@ const COLUMN_META = {
     [KANBAN_COLUMN.ON_DECK]: { label: "On Deck", color: "#FBBF24" }
 };
 
+async function loadOwnerStore(idKanbanType) {
+    if (idKanbanType == ITEMTYPES.METRIC) {
+        let metricStore = await import(`@/store/metricStore`);
+        return metricStore.useMetricStore();
+    } else if (idKanbanType == ITEMTYPES.TODO) {
+        let todoStore = await import(`@/store/todoStore`);
+        return todoStore.useTodoStore();
+    } else {
+        let goalStore = await import(`@/store/goalStore`);
+        return goalStore.useGoalStore();
+    }
+}
+
+// The store that owns the *displayed* items (idItemType: Goal/Todo) - separate from
+// ownerStore, which owns the kanban rows themselves (idKanbanType) and can differ,
+// e.g. a Metric-owned kanban's "Goals" tab is owned by metricStore but displays goals.
+async function loadItemTypeStore(idItemType) {
+    if (idItemType == ITEMTYPES.TODO) {
+        let todoStore = await import(`@/store/todoStore`);
+        return todoStore.useTodoStore();
+    } else {
+        let goalStore = await import(`@/store/goalStore`);
+        return goalStore.useGoalStore();
+    }
+}
+
 export default {
-    name: "GoalColumn",
+    name: "KanbanColumn",
     components: { GoalKanbanCard, TodoKanbanCard },
     props: {
-        idGoal: { type: Number, required: true },
+        idParent: { type: Number, required: true },
+        idKanbanType: { type: Number, required: true },
         idItemType: { type: Number, default: ITEMTYPES.GOAL },
         idTimeframe: { type: Number, default: null },
         idColumn: { type: Number, required: true },
@@ -54,15 +81,14 @@ export default {
     data: function() {
         return {
             ITEMTYPES,
-            goalStore: null,
+            ownerStore: null,
             localItems: [],
             dragOverDescendantID: null,
             dragPosition: ""
         }
     },
     created: async function() {
-        let goalStore = await import(`@/store/goalStore`);
-        this.goalStore = goalStore.useGoalStore();
+        this.ownerStore = await loadOwnerStore(this.idKanbanType);
         this.localItems = [...this.items];
     },
     watch: {
@@ -100,12 +126,12 @@ export default {
             ev.target.classList.add("drag");
             ev.dataTransfer.dropEffect = 'move';
             ev.dataTransfer.effectAllowed = 'move';
-            this.goalStore.setDraggedKanbanTask(item);
+            this.ownerStore.setDraggedKanbanTask(item);
         },
         onDragOver(ev, item) {
             ev.preventDefault();
 
-            let dragged = this.goalStore.getDraggedKanbanTask;
+            let dragged = this.ownerStore.getDraggedKanbanTask;
             if (!dragged || dragged.idItem == item.idItem) {
                 this.dragOverDescendantID = null;
                 return;
@@ -125,7 +151,7 @@ export default {
         onDrop(ev, item) {
             ev.preventDefault();
 
-            let dragged = this.goalStore.getDraggedKanbanTask;
+            let dragged = this.ownerStore.getDraggedKanbanTask;
             if (dragged && dragged.idItem != item.idItem) {
                 this.moveItem(dragged, item.idItem, this.dragPosition);
             }
@@ -137,14 +163,14 @@ export default {
             // Allows dropping into empty space below the last card / into an empty lane
         },
         onContainerDrop() {
-            let dragged = this.goalStore.getDraggedKanbanTask;
+            let dragged = this.ownerStore.getDraggedKanbanTask;
             if (dragged) {
                 this.moveItem(dragged, null, "end");
             }
         },
         onDragEnd(ev) {
             ev.target.classList.remove("drag");
-            this.goalStore.clearDraggedKanbanTask();
+            this.ownerStore.clearDraggedKanbanTask();
             this.dragOverDescendantID = null;
             this.dragPosition = "";
         },
@@ -196,18 +222,18 @@ export default {
 
             newRows.forEach(row => {
                 if (this.idItemType == ITEMTYPES.GOAL) {
-                    this.goalStore.setKanbanTask(row.idParent, row.idItem, null, null, row.idColumn, row.idTimeframe,
+                    this.ownerStore.setKanbanTask(row.idParent, row.idItem, null, null, row.idColumn, row.idTimeframe,
                         row.positionDescendant, row.date, row.dateAdded, row.dateRemoved);
                 } else if (this.idItemType == ITEMTYPES.TODO) {
-                    this.goalStore.setKanbanTask(row.idParent, null, row.idItem, null, row.idColumn, row.idTimeframe,
+                    this.ownerStore.setKanbanTask(row.idParent, null, row.idItem, null, row.idColumn, row.idTimeframe,
                         row.positionDescendant, row.date, row.dateAdded, row.dateRemoved);
                 }else if (this.idItemType == ITEMTYPES.TASK) {
-                    this.goalStore.setKanbanTask(row.idParent, null, null, row.idItem, row.idColumn, row.idTimeframe,
+                    this.ownerStore.setKanbanTask(row.idParent, null, null, row.idItem, row.idColumn, row.idTimeframe,
                         row.positionDescendant, row.date, row.dateAdded, row.dateRemoved);
                 }
             });
             removedRowIDs.filter(id => id != undefined).forEach(id => {
-                this.goalStore.removeKanbanTask(id, now);
+                this.ownerStore.removeKanbanTask(id, now);
             });
         }
     }
@@ -215,7 +241,7 @@ export default {
 </script>
 
 <style scoped>
-.goal-column {
+.kanban-column {
     min-width: 250px;
     min-height: 100%;
     flex-basis: 0;
