@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { markRaw } from 'vue'
-import { getMetrics, getLogItems, deleteLogEntry } from '../api/metricAPI'
+import { getMetrics, getLogItems, deleteLogEntry, getMetricKanban as fetchMetricKanban } from '../api/metricAPI'
 import { replaceOrAddItem, sortAsc, clone, capitalize } from '../../utility';
 import { getSocketConnection, deferUpdate } from './socket'
 import { useGoalStore } from '@/store/goalStore'
@@ -107,13 +107,19 @@ export const useMetricStore = defineStore('metric', {
         clearDraggedKanbanTask() {
             this.draggedKanbanTask = null;
         },
+        getMetricKanban(idMetric) {
+            return fetchMetricKanban(idMetric);
+        },
+        // MetricController's SetMetricKanbanTaskProps names the goal slot "idGoal" (not
+        // "idDescendant" like the Goal-owned kanban) - idDescendant here is just the
+        // shared cross-store parameter name KanbanColumn calls positionally.
         setKanbanTask(idParent, idDescendant, idTodo, idIteration, idColumn, idTimeframe, positionDescendant, date, dateAdded, dateRemoved) {
-            let data = { idParent, idDescendant, idTodo, idIteration, idColumn, idTimeframe, positionDescendant, date, dateAdded, dateRemoved };
-            return postEndpoint("Metric", "SetKanbanTask", data)
+            let data = { idParent, idGoal: idDescendant, idTodo, idIteration, idColumn, idTimeframe, positionDescendant, date, dateAdded, dateRemoved };
+            return postEndpoint("Metric", "SetMetricKanbanTask", data)
             .then(response => response.result);
         },
         removeKanbanTask(id, dateRemoved) {
-            return postEndpoint("Metric", "RemoveKanbanTask", { id, dateRemoved })
+            return postEndpoint("Metric", "RemoveMetricKanbanTask", { id, dateRemoved })
             .then(response => response.result);
         },
         initializeLogItems() {

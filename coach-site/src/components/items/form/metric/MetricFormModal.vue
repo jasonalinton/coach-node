@@ -6,7 +6,7 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-            <div v-if="!mapper.isShown" class="container-fluid">
+            <div v-if="!mapper.isShown && !isKanbanShown" class="container-fluid">
                 <div class="label row gx-0">
                     <div class="col">
                         <input id="text" class="textbox" type="text" placeholder="Title"
@@ -69,10 +69,17 @@
                     </div>
                 </div>
             </div>
+            <div v-if="isKanbanShown" class="container-fluid">
+                <ItemKanban :idParent="id" :idKanbanType="ITEMTYPES.METRIC" />
+            </div>
         </div>
-        <div v-if="!mapper.isShown" class="modal-footer">
+        <div v-if="!mapper.isShown && !isKanbanShown" class="modal-footer">
+            <button type="button" class="btn btn-info" @click="showKanban">Kanban</button>
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             <!-- <button type="button" class="btn btn-primary" @click="save()">Save changes</button> -->
+        </div>
+        <div v-if="isKanbanShown" class="modal-footer">
+            <button type="button" class="btn btn-secondary" @click="isKanbanShown = false">Back</button>
         </div>
         </div>
     </div>
@@ -82,12 +89,13 @@
 import FormItemList from '../component/FormItemList.vue';
 import ItemMapper from '../component/ItemMapper.vue';
 import BlurbFormControl from '../component/BlurbFormControl.vue';
+import ItemKanban from '../component/ItemKanban.vue';
 import { sortItems } from '../../../../../utility';
-import { BLURBTYPE } from '../../../../model/constants'
+import { BLURBTYPE, ITEMTYPES } from '../../../../model/constants'
 
 export default {
     name: "MetricFormModal",
-    components: { ItemMapper, FormItemList, BlurbFormControl },
+    components: { ItemMapper, FormItemList, BlurbFormControl, ItemKanban },
     props: {
       id: Number
     },
@@ -95,6 +103,7 @@ export default {
         return {
             store: null,
             BLURBTYPE: BLURBTYPE,
+            ITEMTYPES: ITEMTYPES,
             text: {
                 value: undefined,
                 oldValue: undefined,
@@ -110,7 +119,8 @@ export default {
             mapper: {
                 isShown: false,
                 type: undefined
-            }
+            },
+            isKanbanShown: false
         }
     },
     created: async function() {
@@ -223,6 +233,9 @@ export default {
         cancelMapping() {
             this.mapper.isShown = false;
             this.mapper.type = undefined;
+        },
+        showKanban() {
+            this.isKanbanShown = true;
         }
     },
     watch: {

@@ -9,6 +9,8 @@
             </div>
             <i class="fa-solid fa-ellipsis more-icon"></i>
         </div>
+        <input type="text" class="search-box" placeholder="Search"
+               v-model="searchText" />
         <!-- Kanban Cards -->
         <div class="cards d-flex flex-column"
              @dragover.prevent="onContainerDragOver"
@@ -82,18 +84,26 @@ export default {
         return {
             ITEMTYPES,
             ownerStore: null,
+            itemStore: null,
             localItems: [],
+            searchText: "",
             dragOverDescendantID: null,
             dragPosition: ""
         }
     },
     created: async function() {
         this.ownerStore = await loadOwnerStore(this.idKanbanType);
+        this.itemStore = await loadItemTypeStore(this.idItemType);
         this.localItems = [...this.items];
     },
     watch: {
         items(newItems) {
             this.localItems = [...newItems];
+        },
+        // idItemType changes when the parent's tab switches (Descendants/Todos/Iterations) -
+        // this instance isn't recreated, so the resolved item-lookup store has to follow it.
+        async idItemType(newType) {
+            this.itemStore = await loadItemTypeStore(newType);
         }
     },
     computed: {
@@ -112,6 +122,7 @@ export default {
                 .filter(item => item.idColumn == this.idColumn &&
                     !item.dateRemoved &&
                     (this.idTimeframe == null || item.idTimeframe == this.idTimeframe))
+                .filter(item => this.matchesSearch(item))
                 .sort((a, b) => a.positionDescendant - b.positionDescendant);
         },
         laneMeta() {
@@ -119,6 +130,12 @@ export default {
         }
     },
     methods: {
+        matchesSearch(item) {
+            if (!this.searchText) return true;
+            let resolvedItem = this.itemStore?.getItem(item.idItem);
+            if (!resolvedItem?.text) return true;
+            return resolvedItem.text.toLowerCase().includes(this.searchText.toLowerCase());
+        },
         dragPositionFor(item) {
             return (this.dragOverDescendantID == item.idItem) ? this.dragPosition : "";
         },
@@ -282,6 +299,20 @@ export default {
     color: var(--gray-text);
     cursor: pointer;
     padding: 4px;
+}
+
+.search-box {
+    width: 100%;
+    padding: 4px 8px;
+    border: 1px solid #E0E0E0;
+    border-radius: 6px;
+    font-size: 13px;
+    color: var(--dark-gray-text);
+}
+
+.search-box:focus {
+    outline: none;
+    border-color: #6366F1;
 }
 
 .cards {

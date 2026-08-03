@@ -32,13 +32,13 @@
         <!-- Columns -->
         <div class="item-kanban-columns d-flex flex-row">
             <KanbanColumn :idParent="idParent" :idKanbanType="idKanbanType" :idItemType="idItemType" :idColumn="KANBAN_COLUMN.ON_DECK"
-                        :idTimeframe="idTimeframe" :items="onDeckItems" @update:items="kanbanItems = $event" />
+                        :idTimeframe="idTimeframe" :items="onDeckItems" @update:items="loadKanbanCards" />
             <KanbanColumn :idParent="idParent" :idKanbanType="idKanbanType" :idItemType="idItemType" :idColumn="KANBAN_COLUMN.ON_HOLD"
-                        :idTimeframe="idTimeframe" :items="onHoldItems" @update:items="kanbanItems = $event" />
+                        :idTimeframe="idTimeframe" :items="onHoldItems" @update:items="loadKanbanCards" />
             <KanbanColumn :idParent="idParent" :idKanbanType="idKanbanType" :idItemType="idItemType" :idColumn="KANBAN_COLUMN.ACTIVE"
-                        :idTimeframe="idTimeframe" :items="activeItems" @update:items="kanbanItems = $event" />
+                        :idTimeframe="idTimeframe" :items="activeItems" @update:items="loadKanbanCards" />
             <KanbanColumn :idParent="idParent" :idKanbanType="idKanbanType" :idItemType="idItemType" :idColumn="KANBAN_COLUMN.COMPLETE"
-                        :idTimeframe="idTimeframe" :items="completeItems" @update:items="kanbanItems = $event" />
+                        :idTimeframe="idTimeframe" :items="completeItems" @update:items="loadKanbanCards" />
         </div>
     </div>
 </template>
@@ -77,6 +77,7 @@ export default {
     data: function() {
         return {
             ownerStore: null,
+            kanbanCards: [],
             idTimeframe: null,
             idItemType: (this.idKanbanType == ITEMTYPES.TODO) ? ITEMTYPES.TODO : ITEMTYPES.GOAL,
             TIMEFRAMES,
@@ -85,6 +86,7 @@ export default {
     },
     created: async function() {
         this.ownerStore = await loadOwnerStore(this.idKanbanType);
+        await this.loadKanbanCards();
     },
     computed: {
         item() {
@@ -116,12 +118,7 @@ export default {
             ];
         },
         kanbanItems() {
-            if (this.item) {
-                let items = this.item.kanbanCards
-                    .filter(item => item.idType == this.idItemType);
-                return items;
-            }
-            return [];
+            return this.kanbanCards.filter(item => item.idType == this.idItemType);
         },
         onDeckItems() {
             let items_OnDeck = this.kanbanItems
@@ -223,6 +220,19 @@ export default {
         selectItemType(id) {
             if (id != this.idItemType) {
                 this.idItemType = id;
+            }
+        },
+        // Re-fetches the full set of kanban rows from the backend rather than merging the
+        // partial per-column payload KanbanColumn emits, since that payload only reflects the
+        // one lane/column a drag landed in - the backend is the simplest source of truth here.
+        async loadKanbanCards() {
+            if (this.idKanbanType == ITEMTYPES.METRIC) {
+                this.kanbanCards = (await this.ownerStore.getMetricKanban(this.idParent)) || [];
+            } else if (this.idKanbanType == ITEMTYPES.TODO) {
+                // No backend kanban endpoint exists yet for Todo-owned kanbans.
+                this.kanbanCards = [];
+            } else {
+                this.kanbanCards = (await this.ownerStore.getGoalKanban(this.idParent)) || [];
             }
         }
     }

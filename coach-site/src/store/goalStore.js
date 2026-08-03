@@ -261,11 +261,11 @@ export const useGoalStore = defineStore('goal', {
         },
         setKanbanTask(idParent, idDescendant, idTodo, idIteration, idColumn, idTimeframe, positionDescendant, date, dateAdded, dateRemoved) {
             let data = { idParent, idDescendant, idTodo, idIteration, idColumn, idTimeframe, positionDescendant, date, dateAdded, dateRemoved };
-            return postEndpoint("Goal", "SetKanbanTask", data)
+            return postEndpoint("Goal", "SetGoalKanbanTask", data)
             .then(response => response.result);
         },
         removeKanbanTask(id, dateRemoved) {
-            return postEndpoint("Goal", "RemoveKanbanTask", { id, dateRemoved })
+            return postEndpoint("Goal", "RemoveGoalKanbanTask", { id, dateRemoved })
             .then(response => response.result);
         },
         runUpdates(updates) {
