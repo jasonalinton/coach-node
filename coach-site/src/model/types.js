@@ -363,6 +363,11 @@ export let todoActivityTypes = [
         text: "Water",
         color: undefined
     },
+    {
+        id: 222,
+        text: "Physical Activity",
+        color: "#3B99FC"
+    },
 ]
 
 export let blurbTypes = [

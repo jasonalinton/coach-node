@@ -123,6 +123,7 @@ export let EVENTTYPE = {
 };
 
 export let TODO_ACTIVITY_TYPE = {
+    TODO_ACTIVITY_TYPE: 160,
     LOG: 157,
     SLEEP: 153,
     BRIEFING: 154,
@@ -130,6 +131,7 @@ export let TODO_ACTIVITY_TYPE = {
     WORKOUT: 156,
     EXERCISE: 158,
     WATER: 159,
+    PHYSICAL_ACTIVITY: 222
 };
 
 export let TODO_MAPPING_TYPE = {

@@ -75,6 +75,10 @@ export const usePhysicalStore = defineStore('physical', {
         getBodyMeasurements() {
             return this.bodyMeasurements;
         },
+        async getPhysicalTypePoints() {
+            return postEndpoint("Physical", "GetPhysicalTypePoints")
+            .then(response => response.result);
+        },
         async foodSearchAutoComplete(searchTerm) {
             return postEndpoint("Physical", "FoodSearchAutoComplete", { query: searchTerm })
             .then(response => response.result);

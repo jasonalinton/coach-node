@@ -2,11 +2,15 @@
     <div class="physical-view">
         <div class="d-flex flex-column flex-grow-1">
             <div class="hero m-auto">
-                <!-- <img class="img-fluid" src="/metric/physical/Badass Workout Photo.jpg" /> -->
-                <WeightChart />
+                <img v-if="hero === 'image'" class="img-fluid" src="/metric/physical/Badass Workout Photo.jpg" />
+                <WeightChart v-if="hero === 'weightChart'" />
+            <div v-if="hero === 'battery'" class="activity-chart d-flex flex-row justify-content-center">
+                <PhysicalActivityChart />
+            </div>
             </div>
             <div class="cards d-flex flex-row justify-content-center overflow-scroll">
-                <div class="card">
+                <div class="card"
+                     @click="hero = 'weightChart'">
                     <div class="height d-flex flex-row">
                         <span class="feet">6</span>
                         <span class="ft">ft</span>
@@ -17,7 +21,10 @@
                         <span>145lbs</span>
                     </div>
                 </div>
-                <div class="card"></div>
+                <div class="card"
+                     @click="hero = 'battery'">
+                    Battery
+                </div>
                 <div class="card"></div>
                 <div class="card"></div>
                 <div class="card"></div>
@@ -45,10 +52,11 @@ import { usePlannerStore } from '@/store/plannerStore'
 import { METRIC } from '../../../model/constants'
 import MetricTimeline from '../component/blog/MetricTimeline.vue'
 import WeightChart from './WeightChart.vue';
+import PhysicalActivityChart from './PhysicalActivityChart.vue';
 
 export default {
     name: 'PhysicalView',
-    components: { MetricTimeline, WeightChart },
+    components: { MetricTimeline, WeightChart, PhysicalActivityChart },
     props: {
         
     },
@@ -58,6 +66,7 @@ export default {
             universalStore: undefined,
             idMetric: METRIC.PHYSICAL,
             blurbs: [],
+            hero: "weightChart"
         }
     },
     created: async function() {
@@ -100,5 +109,9 @@ export default {
 
 .posts {
     padding: 0 12px;
+}
+
+.activity-chart {
+    padding: 20px 12px 0 12px;
 }
 </style>
