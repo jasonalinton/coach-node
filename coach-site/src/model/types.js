@@ -370,6 +370,22 @@ export let todoActivityTypes = [
     },
 ]
 
+// Server-driven activity-type lists (e.g. physicalActivityTypeIDs from
+// GetPhysicalBatteryData) can include child types under "Physical Activity"
+// that aren't in todoActivityTypes above — fall back to a deterministic
+// palette pick, keyed by the id's position in the full list, so colors stay
+// consistent across renders/components rather than being random per-call.
+let activityTypeFallbackColors = ['#3B99FC', '#F4511E', '#14b8a6', '#8B5CF6', '#EC4899', '#F59E0B'];
+
+export function getActivityTypeColor(typeId, allTypeIds) {
+    let known = todoActivityTypes.find(t => t.id === typeId);
+    if (known && known.color) {
+        return known.color;
+    }
+    let index = Math.max(0, (allTypeIds || []).indexOf(typeId));
+    return activityTypeFallbackColors[index % activityTypeFallbackColors.length];
+}
+
 export let blurbTypes = [
     {
         id: 162,

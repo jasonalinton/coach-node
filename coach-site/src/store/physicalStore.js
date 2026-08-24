@@ -79,6 +79,10 @@ export const usePhysicalStore = defineStore('physical', {
             return postEndpoint("Physical", "GetPhysicalTypePoints")
             .then(response => response.result);
         },
+        async getPhysicalBatteryData() {
+            return postEndpoint("Physical", "GetPhysicalBatteryData")
+            .then(response => response.result);
+        },
         async foodSearchAutoComplete(searchTerm) {
             return postEndpoint("Physical", "FoodSearchAutoComplete", { query: searchTerm })
             .then(response => response.result);

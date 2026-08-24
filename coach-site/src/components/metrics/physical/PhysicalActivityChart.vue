@@ -1,53 +1,73 @@
 <template>
-    <div class="physical-activity-chart d-flex flex-column overflow-scroll">
+    <div class="physical-activity-chart d-flex flex-column">
         <div class="header d-flex flex-column">
             <span class="title">Activity Trends</span>
-            <span class="subtitle">Weekly points from exercise &amp; physical activity</span>
-        </div>
-        <div class="bar-chart d-flex flex-row" :style="{ maxWidth: (width - 100) + 'px' }">
-            <div v-for="(week, index) in weeklyBuckets" :key="+week.weekStart"
-                 class="bar-column d-flex flex-column align-items-center">
-                <div class="stack d-flex flex-column-reverse">
-                    <div class="segment physicalActivity" :data-points="week.physicalActivity"
-                         :style="{ height: segmentHeight(week.physicalActivity) }"></div>
-                    <div class="segment exercise" :data-points="week.exercise"
-                         :style="{ height: segmentHeight(week.exercise) }"></div>
-                </div>
-                <span class="week-label" :class="{ 'is-current': index === weeklyBuckets.length - 1 }">
-                    {{ week.label }}
-                </span>
+            <span class="subtitle">Points from exercise &amp; physical activity</span>
+            <div class="timeframe-toggle d-flex flex-row">
+                <button v-for="option in timeframeOptions" :key="option.id"
+                        type="button"
+                        class="toggle-option"
+                        :class="{ selected: timeframe === option.id }"
+                        @click="timeframe = option.id">
+                    {{ option.text }}
+                </button>
             </div>
+        </div>
+        <div class="chart-row d-flex flex-row align-items-center">
+            <button type="button" class="nav-btn" :disabled="isAtOldest" @click="pageBack">&lsaquo;</button>
+            <div class="bar-chart d-flex flex-row flex-grow-1 overflow-scroll" ref="bar-chart" :style="{ maxWidth: (width - 100) + 'px' }">
+                <div v-for="bucket in visibleBuckets" :key="+bucket.bucketStart"
+                     class="bar-column d-flex flex-column align-items-center">
+                    <div class="stack d-flex flex-column-reverse">
+                        <div v-for="typeId in segmentOrder" v-show="!isHidden(typeId)" :key="typeId"
+                             class="segment has-tooltip"
+                             :data-tooltip="`${bucketValue(bucket, typeId)} pts`"
+                             :style="{ height: segmentHeight(bucket, typeId), backgroundColor: typeInfo(typeId).color }"></div>
+                    </div>
+                    <span class="bucket-label has-tooltip"
+                          :class="{ 'is-current': +bucket.bucketStart === currentPeriodKey }"
+                          :data-tooltip="`${visibleBucketTotal(bucket)} pts`"
+                          @click="selectDate(bucket.bucketStart)">
+                        {{ bucket.label }}
+                    </span>
+                </div>
+            </div>
+            <button type="button" class="nav-btn" :disabled="isAtNewest" @click="pageForward">&rsaquo;</button>
         </div>
         <div class="legend d-flex flex-row justify-content-center">
-            <div class="legend-item d-flex flex-row align-items-center">
-                <span class="swatch exercise"></span>
-                <span>{{ exerciseType.text }}</span>
-            </div>
-            <div class="legend-item d-flex flex-row align-items-center">
-                <span class="swatch physicalActivity"></span>
-                <span>{{ physicalActivityType.text }}</span>
+            <div v-for="typeId in segmentOrder" :key="typeId"
+                 class="legend-item d-flex flex-row align-items-center"
+                 :class="{ 'is-hidden': isHidden(typeId), 'is-dragging': draggedTypeId === typeId }"
+                 draggable="true"
+                 @click="toggleVisibility(typeId)"
+                 @dragstart="onLegendDragStart($event, typeId)"
+                 @dragover.prevent
+                 @drop="onLegendDrop($event, typeId)"
+                 @dragend="onLegendDragEnd">
+                <span class="swatch" :style="{ backgroundColor: typeInfo(typeId).color }"></span>
+                <span>{{ typeInfo(typeId).text }}</span>
             </div>
         </div>
         <hr />
         <div class="stat-grid d-flex flex-row flex-wrap">
             <div class="stat">
                 <span class="stat-label">Current Velocity</span>
-                <span class="stat-value current">{{ weeklyTotals.current }} pts</span>
+                <span class="stat-value current">{{ periodTotals.current }} pts</span>
                 <span class="stat-desc">Est. output in current cycle</span>
             </div>
             <div class="stat">
                 <span class="stat-label">Peak Capacity</span>
-                <span class="stat-value peak">{{ weeklyTotals.peak }} pts</span>
-                <span class="stat-desc">Max observed weekly load</span>
+                <span class="stat-value peak">{{ periodTotals.peak }} pts</span>
+                <span class="stat-desc">Max observed load</span>
             </div>
             <div class="stat">
                 <span class="stat-label">Growth Split</span>
-                <span class="stat-value growth">&gt; {{ weeklyTotals.growthSplit }} pts</span>
+                <span class="stat-value growth">&gt; {{ periodTotals.growthSplit }} pts</span>
                 <span class="stat-desc">Min load required to progress</span>
             </div>
             <div class="stat">
                 <span class="stat-label">Maintenance</span>
-                <span class="stat-value maintenance">{{ weeklyTotals.maintenance }} pts</span>
+                <span class="stat-value maintenance">{{ periodTotals.maintenance }} pts</span>
                 <span class="stat-desc">Min load to hold current level</span>
             </div>
         </div>
@@ -55,12 +75,18 @@
 </template>
 
 <script>
-import moment from 'moment';
 import { useAppStore } from '@/store/appStore'
 import { usePhysicalStore } from '@/store/physicalStore'
-import { TODO_ACTIVITY_TYPE } from '../../../model/constants'
-import { todoActivityTypes } from '../../../model/types'
-import { firstDayOfWeek, getMonthDate, addWeek } from '../../../../utility/timeUtility';
+import { usePlannerStore } from '@/store/plannerStore'
+import { TIMEFRAME } from '../../../model/constants'
+import { todoActivityTypes, timeframes, getActivityTypeColor } from '../../../model/types'
+import { startOfDay, firstDayOfWeek, firstDayOfMonth, addDay, addWeek, addMonth, getMonthDate } from '../../../../utility/timeUtility';
+
+const TIMEFRAME_CONFIG = {
+    [TIMEFRAME.DAY]: { start: startOfDay, step: addDay },
+    [TIMEFRAME.WEEK]: { start: firstDayOfWeek, step: addWeek },
+    [TIMEFRAME.MONTH]: { start: firstDayOfMonth, step: addMonth },
+};
 
 export default {
     name: 'PhysicalActivityChart',
@@ -70,86 +96,121 @@ export default {
     },
     data: function () {
         return {
+            appStore: undefined,
             physicalStore: undefined,
+            plannerStore: undefined,
             points: [],
-            weekCount: 52
+            periodCount: 30,
+            timeframe: TIMEFRAME.WEEK,
+            revealedCount: 0,
+            shiftCount: 10,
+            // Bottom-to-top stacking order (bottom = first, matching the .stack's
+            // flex-column-reverse DOM order) — reorderable by dragging legend items.
+            // Populated from the API's physicalActivityTypeIDs, not hardcoded, since the
+            // set of activity types battery data covers is server-determined.
+            segmentOrder: [],
+            hiddenTypes: [],
+            draggedTypeId: null
         }
     },
     created: async function() {
         this.appStore = useAppStore();
         this.physicalStore = usePhysicalStore();
-        this.points = await this.physicalStore.getPhysicalTypePoints() || [];
+        this.plannerStore = usePlannerStore();
+        let batteryData = await this.physicalStore.getPhysicalBatteryData();
+        this.points = batteryData?.todoTypePoints || [];
+        this.segmentOrder = batteryData?.physicalActivityTypeIDs || [];
+    },
+    mounted: function() {
+        this.scrollToLatest();
     },
     computed: {
         width() {
             return (this.appStore && this.appStore.bodyOuterWidth) ? this.appStore.bodyOuterWidth : 0
         },
-        exerciseType() {
-            return todoActivityTypes.find(t => t.id === TODO_ACTIVITY_TYPE.EXERCISE);
+        timeframeOptions() {
+            return timeframes.filter(t => [TIMEFRAME.DAY, TIMEFRAME.WEEK, TIMEFRAME.MONTH].includes(t.id));
         },
-        physicalActivityType() {
-            return todoActivityTypes.find(t => t.id === TODO_ACTIVITY_TYPE.PHYSICAL_ACTIVITY);
+        periodConfig() {
+            return TIMEFRAME_CONFIG[this.timeframe];
         },
-        allWeeklyTotals() {
-            let weekMap = {};
+        currentPeriodKey() {
+            return +this.periodConfig.start(new Date());
+        },
+        // Every actual data point grouped into buckets, keyed by bucket start — the single
+        // source of truth for both the bar chart and the (window-independent) stat grid.
+        // Each bucket's `values` is keyed by idType so it works for any series, not just two.
+        pointBucketMap() {
+            let { start } = this.periodConfig;
+            let map = {};
             this.points.forEach(point => {
-                let weekStart = firstDayOfWeek(new Date(point.date));
-                let key = +weekStart;
-                if (!weekMap[key]) {
-                    weekMap[key] = { weekStart, exercise: 0, physicalActivity: 0 };
+                let bucketStart = start(new Date(point.date));
+                let key = +bucketStart;
+                if (!map[key]) {
+                    map[key] = { bucketStart, values: {} };
                 }
-                if (point.idType === TODO_ACTIVITY_TYPE.EXERCISE) {
-                    weekMap[key].exercise += point.points;
-                } else if (point.idType === TODO_ACTIVITY_TYPE.PHYSICAL_ACTIVITY) {
-                    weekMap[key].physicalActivity += point.points;
-                }
+                map[key].values[point.idType] = (map[key].values[point.idType] || 0) + point.points;
             });
-            return Object.values(weekMap)
-                .map(week => week.exercise + week.physicalActivity)
-                .sort((a, b) => a - b);
+            return map;
         },
-        weeklyBuckets() {
-            let weekMap = {};
-            this.points.forEach(point => {
-                let weekStart = firstDayOfWeek(new Date(point.date));
-                let key = +weekStart;
-                if (!weekMap[key]) {
-                    weekMap[key] = { weekStart, exercise: 0, physicalActivity: 0 };
-                }
-                if (point.idType === TODO_ACTIVITY_TYPE.EXERCISE) {
-                    weekMap[key].exercise += point.points;
-                } else if (point.idType === TODO_ACTIVITY_TYPE.PHYSICAL_ACTIVITY) {
-                    weekMap[key].physicalActivity += point.points;
-                }
-            });
-
+        // How many periods back real data actually goes — the ceiling for "reveal more".
+        earliestDataBucketCount() {
+            let keys = Object.keys(this.pointBucketMap);
+            if (!keys.length) {
+                return this.periodCount;
+            }
+            let { start, step } = this.periodConfig;
+            let earliestKey = Math.min(...keys.map(Number));
+            let cursor = start(new Date());
+            let count = 1;
+            while (+cursor > earliestKey && count < 5000) {
+                cursor = step(cursor, -1);
+                count++;
+            }
+            return Math.max(this.periodCount, count);
+        },
+        // Nav buttons grow/shrink how much history is loaded into the chart. Floor is the
+        // `periodCount` default; ceiling is however far back real data actually goes.
+        effectiveRevealedCount() {
+            return Math.min(this.earliestDataBucketCount, Math.max(this.periodCount, this.revealedCount));
+        },
+        visibleBuckets() {
+            let { start, step } = this.periodConfig;
             let buckets = [];
-            let weekStart = firstDayOfWeek(new Date());
-            for (let i = 0; i < this.weekCount; i++) {
-                let key = +weekStart;
-                let bucket = weekMap[key] || { weekStart, exercise: 0, physicalActivity: 0 };
+            let bucketStart = start(new Date());
+            for (let i = 0; i < this.effectiveRevealedCount; i++) {
+                let key = +bucketStart;
+                let existing = this.pointBucketMap[key];
                 buckets.unshift({
-                    weekStart,
-                    exercise: bucket.exercise,
-                    physicalActivity: bucket.physicalActivity,
-                    // label: `W${moment(weekStart).week()}`
-                    label: `${getMonthDate(weekStart)}`
+                    bucketStart,
+                    values: existing ? existing.values : {},
+                    label: getMonthDate(bucketStart)
                 });
-                weekStart = addWeek(weekStart, -1);
+                bucketStart = step(bucketStart, -1);
             }
             return buckets;
         },
-        maxWeeklyTotal() {
-            let totals = this.weeklyBuckets.map(week => week.exercise + week.physicalActivity);
+        maxVisibleTotal() {
+            let totals = this.visibleBuckets.map(bucket => this.visibleBucketTotal(bucket));
             return Math.max(1, ...totals);
         },
-        weeklyTotals() {
+        isAtNewest() {
+            return this.effectiveRevealedCount <= this.periodCount;
+        },
+        isAtOldest() {
+            return this.effectiveRevealedCount >= this.earliestDataBucketCount;
+        },
+        allPeriodTotals() {
+            return Object.values(this.pointBucketMap)
+                .map(bucket => this.visibleBucketTotal(bucket))
+                .sort((a, b) => a - b);
+        },
+        periodTotals() {
             // Placeholder heuristics: there is no capacity/goal data source yet,
-            // so peak/growth/maintenance are derived from observed weekly totals.
-            let totals = this.allWeeklyTotals;
-            let current = this.weeklyBuckets.length
-                ? (this.weeklyBuckets[this.weeklyBuckets.length - 1].exercise + this.weeklyBuckets[this.weeklyBuckets.length - 1].physicalActivity)
-                : 0;
+            // so peak/growth/maintenance are derived from observed period totals.
+            let totals = this.allPeriodTotals;
+            let currentBucket = this.pointBucketMap[this.currentPeriodKey];
+            let current = currentBucket ? this.visibleBucketTotal(currentBucket) : 0;
             let peak = totals.length ? totals[totals.length - 1] : 0;
             let average = totals.length ? totals.reduce((sum, total) => sum + total, 0) / totals.length : 0;
             let roundTo10 = value => Math.round(value / 10) * 10;
@@ -163,10 +224,83 @@ export default {
         }
     },
     methods: {
-        segmentHeight(value) {
-            return `${(value / this.maxWeeklyTotal) * 100}%`;
+        selectDate(date) {
+            this.plannerStore.selectDate(date);
+        },
+        typeInfo(typeId) {
+            // physicalActivityTypeIDs can include child types under "Physical Activity" that
+            // aren't in the static todoActivityTypes list — fall back rather than break.
+            let known = todoActivityTypes.find(t => t.id === typeId);
+            return {
+                id: typeId,
+                text: known ? known.text : `Type ${typeId}`,
+                color: getActivityTypeColor(typeId, this.segmentOrder)
+            };
+        },
+        isHidden(typeId) {
+            return this.hiddenTypes.includes(typeId);
+        },
+        bucketValue(bucket, typeId) {
+            return bucket.values[typeId] || 0;
+        },
+        visibleBucketTotal(bucket) {
+            return this.segmentOrder.reduce((sum, typeId) => {
+                return sum + (this.isHidden(typeId) ? 0 : this.bucketValue(bucket, typeId));
+            }, 0);
+        },
+        segmentHeight(bucket, typeId) {
+            if (this.isHidden(typeId)) {
+                return '0%';
+            }
+            return `${(this.bucketValue(bucket, typeId) / this.maxVisibleTotal) * 100}%`;
+        },
+        toggleVisibility(typeId) {
+            this.hiddenTypes = this.isHidden(typeId)
+                ? this.hiddenTypes.filter(id => id !== typeId)
+                : [...this.hiddenTypes, typeId];
+        },
+        onLegendDragStart(event, typeId) {
+            this.draggedTypeId = typeId;
+            event.dataTransfer.effectAllowed = 'move';
+        },
+        onLegendDrop(event, targetTypeId) {
+            event.preventDefault();
+            if (this.draggedTypeId === null || this.draggedTypeId === targetTypeId) {
+                return;
+            }
+            // Removing the dragged item shifts every later index down by one, so when
+            // moving forward it must land *after* the target's post-removal position —
+            // otherwise it re-inserts right back where it started.
+            let movingForward = this.segmentOrder.indexOf(this.draggedTypeId) < this.segmentOrder.indexOf(targetTypeId);
+            let order = this.segmentOrder.filter(id => id !== this.draggedTypeId);
+            let insertionIndex = order.indexOf(targetTypeId) + (movingForward ? 1 : 0);
+            order.splice(insertionIndex, 0, this.draggedTypeId);
+            this.segmentOrder = order;
+        },
+        onLegendDragEnd() {
+            this.draggedTypeId = null;
+        },
+        pageBack() {
+            this.revealedCount = Math.min(this.earliestDataBucketCount, this.effectiveRevealedCount + this.shiftCount);
+        },
+        pageForward() {
+            this.revealedCount = Math.max(0, this.effectiveRevealedCount - this.shiftCount);
+        },
+        scrollToLatest() {
+            this.$nextTick(() => {
+                let barChart = this.$refs['bar-chart'];
+                if (barChart) {
+                    barChart.scrollLeft = barChart.scrollWidth;
+                }
+            });
         }
     },
+    watch: {
+        timeframe() {
+            this.revealedCount = 0;
+            this.scrollToLatest();
+        }
+    }
 }
 
 </script>
@@ -178,7 +312,7 @@ export default {
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
     padding: 24px;
     width: 100%;
-    /* max-width: 472px; */
+    text-align: start;
 }
 
 .header .title {
@@ -193,16 +327,62 @@ export default {
     margin-top: 2px;
 }
 
-.bar-chart {
+.timeframe-toggle {
+    margin-top: 16px;
+    background-color: #F5F5F5;
+    border-radius: 20px;
+    padding: 2px;
+    width: fit-content;
+}
+
+.toggle-option {
+    border: none;
+    background: transparent;
+    border-radius: 18px;
+    padding: 6px 14px;
+    font-size: 13px;
+    color: #767676;
+    cursor: pointer;
+}
+
+.toggle-option.selected {
+    background-color: #1a1a1a;
+    color: #fff;
+    font-weight: 600;
+}
+
+.chart-row {
     margin-top: 20px;
-    height: 130px;
+    gap: 8px;
+}
+
+.nav-btn {
+    flex: 0 0 auto;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 1px solid #e5e5e5;
+    background-color: #fff;
+    color: #1a1a1a;
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.nav-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.bar-chart {
+    /* Extra height (beyond the 130px bars need) reserves room, via flex-end alignment,
+       for tooltips to pop up without being clipped by this container's horizontal scroll. */
+    height: 174px;
     gap: 10px;
-    overflow-x: auto;
 }
 
 .bar-column {
-    flex: 1 1 0;
-    min-width: 20px;
+    flex: 0 0 46px;
     height: 100%;
     justify-content: flex-end;
 }
@@ -219,21 +399,53 @@ export default {
     border-radius: 2px;
 }
 
-.segment.exercise {
-    background-color: v-bind('exerciseType.color');
+.has-tooltip {
+    position: relative;
 }
 
-.segment.physicalActivity {
-    background-color: v-bind('physicalActivityType.color');
+.has-tooltip::after,
+.has-tooltip::before {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.1s ease;
+    position: absolute;
+    left: 50%;
+    z-index: 10;
 }
 
-.week-label {
+.has-tooltip::after {
+    content: attr(data-tooltip);
+    bottom: calc(100% + 8px);
+    transform: translateX(-50%);
+    background-color: #1a1a1a;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 6px 10px;
+    border-radius: 6px;
+    white-space: nowrap;
+}
+
+.has-tooltip::before {
+    content: '';
+    bottom: calc(100% + 2px);
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top-color: #1a1a1a;
+}
+
+.has-tooltip:hover::after,
+.has-tooltip:hover::before {
+    opacity: 1;
+}
+
+.bucket-label {
     font-size: 11px;
     color: #767676;
     margin-top: 8px;
 }
 
-.week-label.is-current {
+.bucket-label.is-current {
     color: #1a1a1a;
     font-weight: 700;
 }
@@ -247,20 +459,29 @@ export default {
     font-size: 12px;
     color: #767676;
     gap: 6px;
+    cursor: pointer;
+    user-select: none;
+    border-radius: 4px;
+    padding: 2px 4px;
+}
+
+.legend-item.is-hidden {
+    opacity: 0.4;
+}
+
+.legend-item.is-hidden .swatch {
+    background-color: transparent !important;
+    border: 1.5px solid #767676;
+}
+
+.legend-item.is-dragging {
+    opacity: 0.3;
 }
 
 .swatch {
     width: 8px;
     height: 8px;
     border-radius: 2px;
-}
-
-.swatch.exercise {
-    background-color: v-bind('exerciseType.color');
-}
-
-.swatch.physicalActivity {
-    background-color: v-bind('physicalActivityType.color');
 }
 
 hr {

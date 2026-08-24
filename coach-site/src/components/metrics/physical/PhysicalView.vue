@@ -4,8 +4,9 @@
             <div class="hero m-auto">
                 <img v-if="hero === 'image'" class="img-fluid" src="/metric/physical/Badass Workout Photo.jpg" />
                 <WeightChart v-if="hero === 'weightChart'" />
-            <div v-if="hero === 'battery'" class="activity-chart d-flex flex-row justify-content-center">
+            <div v-if="hero === 'battery'" class="activity-chart d-flex flex-column justify-content-center">
                 <PhysicalActivityChart />
+                <PhysicalActivitySchedule />
             </div>
             </div>
             <div class="cards d-flex flex-row justify-content-center overflow-scroll">
@@ -53,10 +54,11 @@ import { METRIC } from '../../../model/constants'
 import MetricTimeline from '../component/blog/MetricTimeline.vue'
 import WeightChart from './WeightChart.vue';
 import PhysicalActivityChart from './PhysicalActivityChart.vue';
+import PhysicalActivitySchedule from './PhysicalActivitySchedule.vue';
 
 export default {
     name: 'PhysicalView',
-    components: { MetricTimeline, WeightChart, PhysicalActivityChart },
+    components: { MetricTimeline, WeightChart, PhysicalActivityChart, PhysicalActivitySchedule },
     props: {
         
     },
