@@ -64,7 +64,7 @@ export default {
         this.plannerStore = usePlannerStore();
         this.physicalStore = usePhysicalStore();
         this.todoStore = useTodoStore();
-        let batteryData = await this.physicalStore.getPhysicalBatteryData();
+        let batteryData = await this.physicalStore.getPhysicalBatteryData(false);
         this.workouts = batteryData?.workouts || [];
         this.physicalActivityIterations = batteryData?.physicalActivityIterations || [];
         this.physicalActivityTypeIDs = batteryData?.physicalActivityTypeIDs || [];

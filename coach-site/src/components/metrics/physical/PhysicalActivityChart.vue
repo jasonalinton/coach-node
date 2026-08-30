@@ -117,7 +117,7 @@ export default {
         this.appStore = useAppStore();
         this.physicalStore = usePhysicalStore();
         this.plannerStore = usePlannerStore();
-        let batteryData = await this.physicalStore.getPhysicalBatteryData();
+        let batteryData = await this.physicalStore.getPhysicalBatteryData(true);
         this.points = batteryData?.todoTypePoints || [];
         this.segmentOrder = batteryData?.physicalActivityTypeIDs || [];
     },
