@@ -441,6 +441,29 @@ export let blurbTypes = [
     },
 ]
 
+export let workoutTypes = [
+    {
+        id: 224,
+        text: "Progressive Overload"
+    },
+    {
+        id: 225,
+        text: "Mobility"
+    },
+    {
+        id: 226,
+        text: "Physical Therapy"
+    },
+    {
+        id: 227,
+        text: "Skill"
+    },
+    {
+        id: 228,
+        text: "Ballet Conditioning"
+    },
+]
+
 export let workoutSectionTypes = [
     {
         id: 150,

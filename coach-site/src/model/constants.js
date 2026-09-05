@@ -180,6 +180,15 @@ export let CALENDAR_TYPES = {
     MONTH: "month"
 };
 
+export let WORKOUT_TYPES = {
+    WORKOUT_TYPE: 223,
+    PROGRESSIVE_OVERLOAD: 224,
+    MOBILITY: 225,
+    PHYSICAL_THERAPY: 226,
+    SKILL: 227,
+    BALEET_CONDITIONING: 228,
+}
+
 export let WORKOUT_SECTIONS = {
     MAIN: 150,
     WARMUP: 174,
