@@ -13,40 +13,6 @@ import PhysicalView from './components/metrics/physical/PhysicalView.vue'
 import TodoPanel from './components/planner/item-panel/todo/TodoPanel.vue'
 import GoalPanel from './components/planner/item-panel/goal/GoalPanel.vue'
 
-const routes = [
-  { 
-    path: '/:page', 
-    component: Planner,
-    props: true,
-   },
-  { 
-    component: Planner,
-    // path: '/planner', 
-    props: route => ({ page: route.query.page, showLeft: route.query.showLeft }), 
-    path: '/', 
-    // props: { page: }, 
-    name: 'planner',
-  },
-  { 
-    path: '/items/:type', 
-    component: ItemTabs, 
-    name: 'items'
-  },
-  { path: '/physical-view', component: PhysicalView },
-]
-
-const router = createRouter({
-  history: createWebHistory(),
-  routes,
-})
-
-const pinia = createPinia();
-
-app.use(router);
-app.use(pinia);
-
-app.mount("#app");
-
 // https://stackoverflow.com/questions/31096130/how-to-json-stringify-a-javascript-date-and-preserve-timezone
 // Send an unspecified date when serializing to JSON
 Date.prototype.toJSON = function(){ return moment(this).format().slice(0, -6); }
@@ -98,3 +64,37 @@ String.prototype.capitalize = function() {
 Number.prototype.round = function() { 
   return Math.round(this);
 }
+
+const routes = [
+  { 
+    path: '/:page', 
+    component: Planner,
+    props: true,
+   },
+  { 
+    component: Planner,
+    // path: '/planner', 
+    props: route => ({ page: route.query.page, showLeft: route.query.showLeft }), 
+    path: '/', 
+    // props: { page: }, 
+    name: 'planner',
+  },
+  { 
+    path: '/items/:type', 
+    component: ItemTabs, 
+    name: 'items'
+  },
+  { path: '/physical-view', component: PhysicalView },
+]
+
+const router = createRouter({
+  history: createWebHistory(),
+  routes,
+})
+
+const pinia = createPinia();
+
+app.use(router);
+app.use(pinia);
+
+app.mount("#app");

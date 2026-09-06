@@ -2,8 +2,16 @@ import moment from "moment";
 import date from 'date-and-time';
 import { REPETITION, TIMEFRAME } from './src/model/constants.js';
 
+// Resolves a property accessor that may be a dotted path (e.g. 'iteration.startAt').
+// Returns undefined if any segment along the way is null/undefined.
+export function getPath(obj, path) {
+    if (obj == null || path == null) return undefined;
+    if (typeof path !== 'string' || path.indexOf('.') === -1) return obj[path];
+    return path.split('.').reduce((o, key) => (o == null ? undefined : o[key]), obj);
+}
+
 export function sum(array, prop) {
-    return array.reduce((accumulator, currentValue) => accumulator + currentValue[prop], 0,);
+    return array.reduce((accumulator, currentValue) => accumulator + getPath(currentValue, prop), 0,);
 }
 
 export function currency(number) {
@@ -29,8 +37,8 @@ export function sortAsc(array, prop) {
 
     // Null values are sorted to the bottom of the list
     return array.sort((a, b) => {
-        const av = a[prop];
-        const bv = b[prop];
+        const av = getPath(a, prop);
+        const bv = getPath(b, prop);
         if (av == null && bv == null) return 0;
         if (av == null) return 1;
         if (bv == null) return -1;
@@ -43,8 +51,8 @@ export function sortDesc(array, prop) {
 
     // Null values are sorted to the bottom of the list
     return array.sort((a, b) => {
-        const av = a[prop];
-        const bv = b[prop];
+        const av = getPath(a, prop);
+        const bv = getPath(b, prop);
         if (av == null && bv == null) return 0;
         if (av == null) return 1;
         if (bv == null) return -1;
@@ -61,20 +69,22 @@ export function sortNumDesc(array) {
 }
 
 export function sortDateAsc(array, dateProp) {
-    return array.toSorted((a, b) => new Date(a[dateProp]) - new Date(b[dateProp]));
+    return array.toSorted((a, b) => new Date(getPath(a, dateProp)) - new Date(getPath(b, dateProp)));
 }
 
 export function sortDateDesc(array, dateProp) {
-    return array.toSorted((a, b) => new Date(b[dateProp]) - new Date(a[dateProp]));
+    return array.toSorted((a, b) => new Date(getPath(b, dateProp)) - new Date(getPath(a, dateProp)));
 }
 
 export function sortAlphaAsc(array, prop) {
     if (prop) {
         return array.sort((a, b) => {
-            if (a[prop].toLowerCase() < b[prop].toLowerCase()) {
+            const av = getPath(a, prop).toLowerCase();
+            const bv = getPath(b, prop).toLowerCase();
+            if (av < bv) {
                 return -1;
-            } 
-            if (a[prop].toLowerCase() > b[prop].toLowerCase()) {
+            }
+            if (av > bv) {
                 return 1;
             }
             return 0;
@@ -95,10 +105,12 @@ export function sortAlphaAsc(array, prop) {
 export function sortAlphaDesc(array, prop) {
     if (prop) {
         return array.sort((a, b) => {
-            if (b[prop].toLowerCase() < a[prop].toLowerCase()) {
+            const av = getPath(a, prop).toLowerCase();
+            const bv = getPath(b, prop).toLowerCase();
+            if (bv < av) {
                 return -1;
-            } 
-            if (b[prop].toLowerCase() > a[prop].toLowerCase()) {
+            }
+            if (bv > av) {
                 return 1;
             }
             return 0;
@@ -118,9 +130,11 @@ export function sortAlphaDesc(array, prop) {
 
 export function sortTrueOnTop(array, prop) {
     return array.sort((a,b) => {
-        if (!a[prop] && b[prop]) {
+        const av = getPath(a, prop);
+        const bv = getPath(b, prop);
+        if (!av && bv) {
             return 1;
-        } else if (a[prop] && !b[prop]) {
+        } else if (av && !bv) {
             return -1;
         } else {
             return 0;

@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { getWorkoutInfo, getWorkout, getWorkouts, getExercises, getWorkoutIDFromEvent, getExerciseHistory } from '../api/workoutAPI'
-import { replaceOrAddItem, removeItemByID, sortAsc, sortNumAsc } from '../../utility';
+import { replaceOrAddItem, removeItemByID, sortAsc, sortNumAsc, sortDateDesc } from '../../utility';
 import { getSocketConnection, deferUpdate } from './socket'
 import { postEndpoint } from '../api/api';
 
@@ -16,6 +16,10 @@ export const useWorkoutStore = defineStore('workout', {
         muscles: [],
         exerciseHistory: [],
         displaySettings: [],
+        loadedRange: {
+            startAt: undefined,
+            endAt: undefined
+        },
         dragged: {
             exerciseID: undefined,
         },
@@ -52,7 +56,18 @@ export const useWorkoutStore = defineStore('workout', {
                         s.exercises.flatMap(e => e.sets ?? [])
                     )
                 );
+
+                // TODO: If iteration is null and idIteration exists, get iteration from server
+                let workouts = this.workouts.filter(w => w.iteration && w.iteration.startAt);
+                workouts = sortDateDesc(workouts, 'iteration.startAt');
+                if (workouts.length > 0) {
+                    let startAt = (new Date(workouts.at(-1).iteration.startAt)).startOfDay();
+                    let endAt = (new Date(workouts.at(0).iteration.startAt)).endOfDay();
+                    this.loadedRange.startAt = startAt;
+                    this.loadedRange.endAt = endAt;
+                }
             });
+
             return promise;
         },
         // NOTE: This is not neccesary yet. 
@@ -133,6 +148,35 @@ export const useWorkoutStore = defineStore('workout', {
                 })
             }
             return this.workouts;
+        },
+        async getWorkoutsCount(startAt, count) {
+            let response = await postEndpoint("Physical", "GetWorkoutsCount", { startAt, count });
+
+            let workouts = response?.result ?? [];
+
+            if (response?.updates) {
+                // Socket disconnected: the envelope carries the rows; runUpdates()
+                // merges updates.workouts via replaceOrAddItem + deferUpdate reassign.
+                this.runUpdates(response.updates);
+            } else if (workouts.length > 0) {
+                // Socket connected: merge this page ourselves, matching the
+                // runUpdates() convention (copy -> replaceOrAddItem -> deferUpdate).
+                let merged = [...this.workouts];
+                workouts.forEach(workout => replaceOrAddItem(workout, merged));
+                deferUpdate(() => { this.workouts = sortAsc(merged); });
+            }
+
+            // Advance the "loaded back to" cursor to the oldest workout in this
+            // page, keyed by iteration.startAt (same key fill() uses).
+            if (workouts.length > 0) {
+                let oldest = sortDateDesc(workouts, 'iteration.startAt').at(-1);
+                let cursor = oldest?.iteration?.startAt;
+                if (cursor) {
+                    this.loadedRange.startAt = (new Date(cursor));
+                }
+            }
+
+            return workouts;
         },
         getActiveWorkouts() {
             let workouts = this.workouts.filter(workout => {

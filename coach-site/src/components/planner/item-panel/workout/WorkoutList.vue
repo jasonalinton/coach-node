@@ -1,5 +1,6 @@
 <template>
-    <div class="d-flex flex-column flex-grow-1 overflow-scroll">
+    <div class="d-flex flex-column flex-grow-1 overflow-scroll"
+         ref="scrollContainer" @scroll="onScroll">
         <div class="workout-list d-flex flex-column flex-grow-1" :class="{ hide: selectedPanel != 'list'}">
             <div class="label d-flex flex-row mb-2">
                 <img class="icon-button"
@@ -30,6 +31,9 @@
                              :workout="workout"
                              class="mb-2"
                              @selectWorkout="selectWorkout($event.id)"></WorkoutItem>
+                <div v-if="loadingMore" class="d-flex justify-content-center py-2">
+                    <SpinningLoader />
+                </div>
             </div>
         </div>
     </div>
@@ -40,23 +44,37 @@ import { useAppStore } from '@/store/appStore'
 import WorkoutItem from './WorkoutItem.vue';
 import WorkoutForm from './WorkoutForm.vue';
 import WorkoutActive from './WorkoutActive.vue';
+import SpinningLoader from '@/components/loader/SpinningLoader.vue';
 import { sortDesc, sortAsc } from '../../../../../utility.js';
 
 export default {
     name: 'WorkoutList',
-    components: { WorkoutItem, WorkoutForm, WorkoutActive },
+    components: { WorkoutItem, WorkoutForm, WorkoutActive, SpinningLoader },
     data: function () {
         return {
             appStore: undefined,
             workoutStore: undefined,
             selectedPanel: "list",
-            selectedWorkoutID: undefined
+            selectedWorkoutID: undefined,
+            loadingMore: false,
+            hasMoreRecents: true,
+            recentsBatchSize: 10,
+            scrollThreshold: 200
         };
     },
     created: async function () {
         this.appStore = useAppStore();
         let workoutStore = await import(`@/store/workoutStore`);
         this.workoutStore = workoutStore.useWorkoutStore();
+        this.$nextTick(() => this.maybeLoadMore());
+    },
+    mounted: function () {
+        this.$nextTick(() => this.maybeLoadMore());
+    },
+    watch: {
+        'recents.length'() {
+            this.$nextTick(() => this.maybeLoadMore());
+        }
     },
     computed: {
         workouts() {
@@ -73,8 +91,8 @@ export default {
             return sorted;
         },
         recents() {
-            let recents = this.workouts.filter(x => x.iteration && x.iteration.completedAt);
-            recents.sort((a, b) => new Date(b.iteration.completedAt) - new Date(a.iteration.completedAt)); // sort desc
+            let recents = this.workouts.filter(x => x.iteration && x.iteration.startAt);
+            recents.sort((a, b) => new Date(b.iteration.startAt) - new Date(a.iteration.startAt)); // sort desc
             return recents;
         },
         actives() {
@@ -92,6 +110,43 @@ export default {
         },
         back() {
             this.appStore.onBackWorkoutPanel();
+        },
+        onScroll() {
+            let el = this.$refs.scrollContainer;
+            if (!el) return;
+            if (el.scrollTop + el.clientHeight >= el.scrollHeight - this.scrollThreshold) {
+                this.loadMoreRecents();
+            }
+        },
+        async loadMoreRecents() {
+            if (this.loadingMore || !this.hasMoreRecents) return;
+            if (!this.workoutStore) return; // created() still awaiting the store import
+
+            let before = this.workoutStore.loadedRange.startAt;
+            if (!before) return; // fill() hasn't seeded loadedRange yet
+
+            this.loadingMore = true;
+            try {
+                let count = this.recentsBatchSize;
+                let batch = await this.workoutStore.getWorkoutsCount(before, count);
+                let after = this.workoutStore.loadedRange.startAt;
+                // Stop on a short/empty page, or if the cursor didn't move (loop guard).
+                if (!batch || batch.length < count || +after === +before) {
+                    this.hasMoreRecents = false;
+                }
+            } finally {
+                this.loadingMore = false;
+            }
+
+            this.$nextTick(() => this.maybeLoadMore());
+        },
+        maybeLoadMore() {
+            let el = this.$refs.scrollContainer;
+            if (!el || el.offsetParent === null) return; // unmounted or display:none
+            if (!this.hasMoreRecents || this.loadingMore) return;
+            if (el.scrollHeight <= el.clientHeight + this.scrollThreshold) {
+                this.loadMoreRecents();
+            }
         }
     }
 }
