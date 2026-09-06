@@ -1,12 +1,17 @@
 <template>
     <div class="physical-view">
         <div class="d-flex flex-column flex-grow-1">
-            <div class="hero m-auto">
-                <!-- <img class="img-fluid" src="/metric/physical/Badass Workout Photo.jpg" /> -->
-                <WeightChart />
+            <div class="hero m-auto" :style="{ maxWidth: width + 'px' }">
+                <img v-if="hero === 'image'" class="img-fluid" src="/metric/physical/Badass Workout Photo.jpg" />
+                <WeightChart v-if="hero === 'weightChart'" />
+            <div v-if="hero === 'battery'" class="activity-chart d-flex flex-column justify-content-center">
+                <PhysicalActivityChart />
+                <PhysicalActivitySchedule />
+            </div>
             </div>
             <div class="cards d-flex flex-row justify-content-center overflow-scroll">
-                <div class="card">
+                <div class="card"
+                     @click="hero = 'weightChart'">
                     <div class="height d-flex flex-row">
                         <span class="feet">6</span>
                         <span class="ft">ft</span>
@@ -17,7 +22,10 @@
                         <span>145lbs</span>
                     </div>
                 </div>
-                <div class="card"></div>
+                <div class="card"
+                     @click="hero = 'battery'">
+                    Battery
+                </div>
                 <div class="card"></div>
                 <div class="card"></div>
                 <div class="card"></div>
@@ -41,27 +49,38 @@
 </template>
 
 <script>
+import { useAppStore } from '@/store/appStore'
 import { usePlannerStore } from '@/store/plannerStore'
 import { METRIC } from '../../../model/constants'
 import MetricTimeline from '../component/blog/MetricTimeline.vue'
 import WeightChart from './WeightChart.vue';
+import PhysicalActivityChart from './PhysicalActivityChart.vue';
+import PhysicalActivitySchedule from './PhysicalActivitySchedule.vue';
 
 export default {
     name: 'PhysicalView',
-    components: { MetricTimeline, WeightChart },
+    components: { MetricTimeline, WeightChart, PhysicalActivityChart, PhysicalActivitySchedule },
     props: {
         
     },
     data: function () {
         return {
+            appStore: undefined,
             plannerStore: undefined,
             universalStore: undefined,
             idMetric: METRIC.PHYSICAL,
             blurbs: [],
+            hero: "weightChart"
         }
     },
     created: async function() {
+        this.appStore = useAppStore();
         this.plannerStore = usePlannerStore();
+    },
+    computed: {
+        width() {
+            return (this.appStore && this.appStore.bodyOuterWidth) ? this.appStore.bodyOuterWidth : 0
+        },
     },
     methods: {
 
@@ -100,5 +119,9 @@ export default {
 
 .posts {
     padding: 0 12px;
+}
+
+.activity-chart {
+    padding: 20px 12px 0 12px;
 }
 </style>

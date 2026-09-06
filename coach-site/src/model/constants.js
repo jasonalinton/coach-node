@@ -6,6 +6,15 @@ export let METRIC = {
     FINANCIAL: 5
 };
 
+export let ITEMTYPES = {
+    ITEMTYPE: 2,
+    METRIC: 3,
+    GOAL: 4,
+    ROUTINE: 5,
+    TODO: 6,
+    TASK: 7
+};
+
 export let TODOTYPE = {
     REMINDER: 9,
     TALLY: 10,
@@ -18,7 +27,8 @@ export let ROUTINETYPES = {
     TASKROUTINE: 13,
     LIFESTYLE: 14,
     MAINTAINANCE: 15,
-    HOUSEKEEPING: 16
+    HOUSEKEEPING: 16,
+    BLOCKROUTINE: 191
 };
 
 export let TIMEFRAME = {
@@ -99,7 +109,7 @@ export let EVENTTYPE = {
     TODO: 125,
     TASK: 126,
     ROUTINE: 127,
-    ROUTINE2: 128,
+    BLOCKROUTINE: 128,
     TASKROUTINE: 129,
     SUBTYPE: 130,
     SLEEP: 131,
@@ -113,6 +123,7 @@ export let EVENTTYPE = {
 };
 
 export let TODO_ACTIVITY_TYPE = {
+    TODO_ACTIVITY_TYPE: 160,
     LOG: 157,
     SLEEP: 153,
     BRIEFING: 154,
@@ -120,6 +131,9 @@ export let TODO_ACTIVITY_TYPE = {
     WORKOUT: 156,
     EXERCISE: 158,
     WATER: 159,
+    PHYSICAL_ACTIVITY: 222,
+    DANCE_CLASS: 229,
+    PHYSICAL_ACTIVITY: 230,
 };
 
 export let TODO_MAPPING_TYPE = {
@@ -127,6 +141,25 @@ export let TODO_MAPPING_TYPE = {
     PACKAGE: 187,
     SEQUENCE: 188,
     CLASS: 189,
+};
+
+export let BLURB_MAPPING_TYPE = {
+    METRIC: 201,
+    GOAL: 202,
+    TODO: 203,
+    ITERATION: 204,
+    ROUTINE: 205,
+    BRIEFING: 206,
+    FITNESSGOAL: 207,
+    GOALTIMEPAIR: 208,
+    GOALTIMEPAIRTODO: 209,
+    TODOREPEAT: 210,
+    TODOTIMEPAIR: 211,
+    FOODITEM: 212,
+    MEAL: 213,
+    WORKOUT: 214,
+    EXERCISE: 215,
+    LOGENTRY: 216,
 };
 
 export let BLURBTYPE = {
@@ -149,6 +182,15 @@ export let CALENDAR_TYPES = {
     MONTH: "month"
 };
 
+export let WORKOUT_TYPES = {
+    WORKOUT_TYPE: 223,
+    PROGRESSIVE_OVERLOAD: 224,
+    MOBILITY: 225,
+    PHYSICAL_THERAPY: 226,
+    SKILL: 227,
+    BALEET_CONDITIONING: 228,
+}
+
 export let WORKOUT_SECTIONS = {
     MAIN: 150,
     WARMUP: 174,
@@ -158,6 +200,18 @@ export let WORKOUT_SECTIONS = {
     STRENGTH: 178,
     COOL_DOWN: 179,
     MOBILITY: 180
+}
+
+export let EXERCISE_TEMPOS = {
+    ECCENTRIC: 193,
+    TOP_ISOMETRIC: 194,
+    CONCENTRIC: 195,
+    BOTTOM_ISOMETRIC: 196
+}
+
+export let EXERCISE_LATERALITY = {
+    UNILATERAL: 198,
+    BILATERAL: 199,
 }
 
 export let WORKOUT_VIEWS = {
@@ -173,6 +227,14 @@ export let GOAL_TYPE = {
     GOAL_TYPE: 182,
     FITNESS: 183,
 }
+
+export let KANBAN_COLUMN = {
+    KANBAN_COLUMN: 217,
+    COMPLETE: 218,
+    ACTIVE: 219,
+    ON_HOLD: 220,
+    ON_DECK: 221
+};
 
 export let LOG_ITEMS = {
     EMOTIONAL_MOOD: 1,

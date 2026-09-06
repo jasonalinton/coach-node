@@ -37,6 +37,27 @@ export async function getLogItems() {
     });
 }
 
+export async function getMetricKanban(idMetric) {
+    let data = { idMetric };
+
+    return fetch(`${URL}/api/Metric/GetMetricKanban`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    })
+    .then((response) => response.json())
+    .then((data) => {
+        if (!data.errorMessage) {
+            return data;
+        } else {
+            this.errorMessage = data.errorMessage;
+        }
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+    });
+}
+
 export async function migrateItemMappings() {
     return fetch(`${URL}/api/Metric/MigrateItemMappings`, {
         method: 'POST',

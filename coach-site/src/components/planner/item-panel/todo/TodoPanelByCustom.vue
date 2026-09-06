@@ -48,7 +48,7 @@
 import IconButton from '../../../controls/button/IconButton.vue'
 import AddTaskButton from '../component/AddTaskButton.vue'
 import ListItem from '../component/ListItem.vue'
-import { replaceItem, removeItem, today, sortAsc } from '../../../../../utility';
+import { replaceItem, removeItem, today, sortDateAsc } from '../../../../../utility';
 import TimeframeRadio from '../component/TimeframeRadio.vue';
 import { firstDayOfWeek, lastDayOfWeek, firstDayOfMonth, lastDayOfMonth, endOfDay } from '../../../../../utility/timeUtility';
 
@@ -106,11 +106,10 @@ export default {
                 iterations = iterations.filter(iteration => {
                     return +(new Date(iteration.startAt)) >= +this.start && 
                         //    +endOfDay((new Date(iteration.endAt))) <= +this.end &&
-                           +(new Date(iteration.endAt)) <= +this.end &&
-                           !iteration.isRepeat
+                           +(new Date(iteration.endAt)) <= +this.end
                 });
                 iterations = iterations.filter(iteration => iteration.idRoutine == null && iteration.idRoutineIteration == null);
-                iterations = sortAsc(iterations, 'startAt');
+                iterations = sortDateAsc(iterations, 'startAt');
 
                 return iterations;
             } else {

@@ -40,6 +40,7 @@ import { useAppStore } from '@/store/appStore'
 import WorkoutItem from './WorkoutItem.vue';
 import WorkoutForm from './WorkoutForm.vue';
 import WorkoutActive from './WorkoutActive.vue';
+import { sortDesc, sortAsc } from '../../../../../utility.js';
 
 export default {
     name: 'WorkoutList',
@@ -67,7 +68,9 @@ export default {
             }
         },
         templates() {
-            return this.workouts.filter(x => x.isTemplate);
+            let templates = this.workouts.filter(x => x.isTemplate);
+            let sorted = sortAsc(sortDesc(templates), 'position');
+            return sorted;
         },
         recents() {
             let recents = this.workouts.filter(x => x.iteration && x.iteration.completedAt);

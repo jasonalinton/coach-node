@@ -64,6 +64,12 @@ export function toShortTimeString(dateTimeJSON) {
     return date.format(datetime, 'h:mm A') // Ex. 7:50 AM
 }
 
+// Ex. Jun 28, 2025 · 9:15 AM
+export function toShortDateTimeString(dateTimeJSON) {
+    let datetime = new Date(dateTimeJSON);
+    return `${moment(datetime).format("MMM D, YYYY")} · ${date.format(datetime, 'h:mm A')}`;
+}
+
 export function toUTCTimestamp(dateTimeJSON) {
     let datetime = new Date(dateTimeJSON);
     return moment(datetime).unix();

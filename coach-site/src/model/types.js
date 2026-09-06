@@ -21,6 +21,33 @@ export let metrics = [
     },
 ]
 
+export let itemTypes = [
+    {
+        id: 2,
+        text: "Item Type"
+    },
+    {
+        id: 3,
+        text: "Metric"
+    },
+    {
+        id: 4,
+        text: "Goal"
+    },
+    {
+        id: 5,
+        text: "Routine"
+    },
+    {
+        id: 6,
+        text: "Todo"
+    },
+    {
+        id: 7,
+        text: "Task"
+    },
+]
+
 export let todoTypes = [
     {
         id: 9,
@@ -42,6 +69,24 @@ export let todoTypes = [
         id: 190,
         text: "Memorization"
     },
+    // NOTE: This doesn't belong here. remove after todo form refactor
+    {
+        id: 222,
+        text: "Physical Activity",
+        color: "#3B99FC"
+    },
+    // NOTE: This doesn't belong here. remove after todo form refactor
+    {
+        id: 229,
+        text: "Dance",
+        color: "#127ef1"
+    },
+    // NOTE: This doesn't belong here. remove after todo form refactor
+    {
+        id: 230,
+        text: "Dance Practice",
+        color: "#1067c5"
+    },
 ]
 
 export let routineTypes = [
@@ -60,6 +105,29 @@ export let routineTypes = [
     {
         id: 16,
         text: "Housekeeping"
+    },
+    {
+        id: 191,
+        text: "Block Routine"
+    },
+]
+
+export let priority = [
+    {
+        id: 18,
+        text: "Spotlight"
+    },
+    {
+        id: 19,
+        text: "Primary"
+    },
+    {
+        id: 20,
+        text: "Secondary"
+    },
+    {
+        id: 21,
+        text: "Tertiary"
     },
 ]
 
@@ -313,6 +381,143 @@ export let todoActivityTypes = [
         text: "Water",
         color: undefined
     },
+    {
+        id: 222,
+        text: "Physical Activity",
+        color: "#3B99FC"
+    },
+    {
+        id: 229,
+        text: "Dance Class",
+        color: "#127ef1"
+    },
+    {
+        id: 230,
+        text: "Dance Practice",
+        color: "#1067c5"
+    },
+]
+
+export let physicalActivityTypes = [
+    {
+        id: 222,
+        text: "Physical Activity",
+        color: "#3B99FC"
+    },
+    {
+        id: 229,
+        text: "Dance Class",
+        color: "#127ef1"
+    },
+    {
+        id: 230,
+        text: "Dance Practice",
+        color: "#1067c5"
+    },
+    {
+        id: 156,
+        text: "Workout",
+        color: "#F4511E"
+    },
+    {
+        id: 158,
+        text: "Exercise",
+        color: "#F4511E"
+    },
+]
+
+// Server-driven activity-type lists (e.g. physicalActivityTypeIDs from
+// GetPhysicalBatteryData) can include child types under "Physical Activity"
+// that aren't in todoActivityTypes above — fall back to a deterministic
+// palette pick, keyed by the id's position in the full list, so colors stay
+// consistent across renders/components rather than being random per-call.
+let activityTypeFallbackColors = ['#3B99FC', '#F4511E', '#14b8a6', '#8B5CF6', '#EC4899', '#F59E0B'];
+
+export function getActivityTypeColor(typeId, allTypeIds) {
+    let known = todoActivityTypes.find(t => t.id === typeId);
+    if (known && known.color) {
+        return known.color;
+    }
+    let index = Math.max(0, (allTypeIds || []).indexOf(typeId));
+    return activityTypeFallbackColors[index % activityTypeFallbackColors.length];
+}
+
+export let blurbTypes = [
+    {
+        id: 162,
+        text: "Advice"
+    },
+    {
+        id: 163,
+        text: "Reason"
+    },
+    {
+        id: 164,
+        text: "Measure Of Success"
+    },
+    {
+        id: 165,
+        text: "Note"
+    },
+    {
+        id: 166,
+        text: "Blurb"
+    },
+    {
+        id: 167,
+        text: "Question"
+    },
+    {
+        id: 168,
+        text: "Answer"
+    },
+    {
+        id: 169,
+        text: "Insecurity"
+    },
+    {
+        id: 170,
+        text: "Reminder"
+    },
+    {
+        id: 172,
+        text: "Briefing"
+    },
+    {
+        id: 173,
+        text: "De-Briefing"
+    },
+    {
+        id: 184,
+        text: "Issue"
+    },
+    {
+        id: 185,
+        text: "Solution"
+    },
+]
+
+export let workoutTypes = [
+    {
+        id: 224,
+        text: "Progressive Overload"
+    },
+    {
+        id: 225,
+        text: "Mobility"
+    },
+    {
+        id: 226,
+        text: "Physical Therapy"
+    },
+    {
+        id: 227,
+        text: "Skill"
+    },
+    {
+        id: 228,
+        text: "Ballet Conditioning"
+    },
 ]
 
 export let workoutSectionTypes = [
@@ -354,6 +559,36 @@ export let workoutSectionTypes = [
     },
 ]
 
+export let exerciseTempos = [
+    {
+        id: 193,
+        text: "Eccentric"
+    },
+    {
+        id: 194,
+        text: "Top Isometric"
+    },
+    {
+        id: 195,
+        text: "Concentric"
+    },
+    {
+        id: 196,
+        text: "Bottom Isometric"
+    },
+]
+
+export let exerciseLaterality = [
+    {
+        id: 198,
+        text: "Unilateral"
+    },
+    {
+        id: 199,
+        text: "Bilateral"
+    },
+]
+
 export let todoMappingTypes = [
     {
         id: 186,
@@ -370,5 +605,95 @@ export let todoMappingTypes = [
     {
         id: 189,
         text: "Class"
+    },
+]
+
+export let blurbMappingTypes = [
+    {
+        id: 201,
+        text: "Metric"
+    },
+    {
+        id: 202,
+        text: "Goal"
+    },
+    {
+        id: 203,
+        text: "Todo"
+    },
+    {
+        id: 204,
+        text: "Iteration"
+    },
+    {
+        id: 205,
+        text: "Routine"
+    },
+    {
+        id: 206,
+        text: "Briefing"
+    },
+    {
+        id: 207,
+        text: "Fitness Goal"
+    },
+    {
+        id: 208,
+        text: "Goal Time Pair"
+    },
+    {
+        id: 209,
+        text: "Goal Time Pair Todo"
+    },
+    {
+        id: 210,
+        text: "Todo Repeat"
+    },
+    {
+        id: 211,
+        text: "Todo Time Pair"
+    },
+    {
+        id: 212,
+        text: "Food Item"
+    },
+    {
+        id: 213,
+        text: "Meal"
+    },
+    {
+        id: 214,
+        text: "Workout"
+    },
+    {
+        id: 215,
+        text: "Exercise"
+    },
+    {
+        id: 216,
+        text: "Log Entry"
+    },
+]
+
+export let KanbanColumn = [
+    {
+        id: 217,
+        text: "Kanban Column"
+    },
+    {
+        id: 218,
+        text: "Complete"
+    },
+    {
+        id: 219,
+        text: "Active"
+    },
+    {
+        id: 220,
+        text: "On Hold"
+    },
+    {
+        id: 221,
+        text: "On Deck"
     },
 ]

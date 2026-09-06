@@ -20,16 +20,8 @@
                 </div>
             </div>
         </div>
-        <div v-for="blurb in blurbs" :key="blurb.id"
-             class="blurb d-flex flex-column">
-            <span class="date">{{ blurb.date }}</span>
-            <span class="time">{{ blurb.time }}</span>
-            <span v-if="blurb.title" class="title">{{ blurb.title }}</span>
-            <span class="text">{{ blurb.text }}</span>
-            <div class="d-flex flex-row">
-                <span v-for="(tag, index) in blurb.tags" :key="index" class="tag">{{ tag }}</span>
-            </div>
-        </div>
+        <BlurbCard v-for="blurbID in blurbIDs" :key="blurbID" :idBlurb="blurbID"
+                    class="blurb d-flex flex-column" />
     </div>
 </template>
 
@@ -39,10 +31,11 @@ import { useUniversalStore } from '@/store/universalStore'
 import { TIMEFRAME } from '../../../../model/constants'
 import { toLongDateString, toShortTimeString, formatInputDateTime, today } from '../../../../../utility/timeUtility'
 import { sortDateDesc } from '../../../../../utility'
+import BlurbCard from '../../../blog/BlurbTimelineCard.vue'
 
 export default {
     name: 'MetricTimeline',
-    components: {  },
+    components: { BlurbCard },
     props: {
         idMetric: Number
     },
@@ -69,25 +62,14 @@ export default {
         selectedDate() {
             return (this.plannerStore) ? this.plannerStore.selectedDate : today();
         },
-        blurbs() {
+        blurbIDs() {
             let blurbs = [];
             if (this.universalStore) {
-                let blurbsModels = this.universalStore.blurbs.filter(blurb => blurb.idMetric == this.idMetric);
-                blurbsModels = sortDateDesc(blurbsModels, 'datetime');
-                blurbsModels.forEach(blurb => {
-                    let blurb_new = {
-                        id: blurb.id,
-                        date: toLongDateString(blurb.datetime),
-                        time: toShortTimeString(blurb.datetime),
-                        title:blurb.title,
-                        text: blurb.text,
-                        tags: []
-                    };
-                    blurbs.push(blurb_new);
-                });
+                blurbs = this.universalStore.blurbs.filter(blurb => blurb.idMetric == this.idMetric);
+                blurbs = sortDateDesc(blurbs, 'datetime');
             }
-            return blurbs;
-        }
+            return blurbs.map(x => x.id);
+        },
     },
     methods: {
         refreshNewPost() {

@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { getWorkoutInfo, getWorkout, getWorkouts, getExercises, getWorkoutIDFromEvent, getExerciseHistory } from '../api/workoutAPI'
 import { replaceOrAddItem, removeItemByID, sortAsc, sortNumAsc } from '../../utility';
-import { getSocketConnection } from './socket'
+import { getSocketConnection, deferUpdate } from './socket'
 import { postEndpoint } from '../api/api';
 
 let initialized = false;
@@ -24,6 +24,9 @@ export const useWorkoutStore = defineStore('workout', {
     getters: {
         getDragged() {
             return this.dragged;
+        },
+        getSets: (state) => (idWorkoutSectionExercise) => {
+            return state.sets.filter(s => s.idWorkoutSectionExercise == idWorkoutSectionExercise);
         }
     },
     actions: {
@@ -44,6 +47,11 @@ export const useWorkoutStore = defineStore('workout', {
                 this.variations = res.variations;
                 this.muscleGroups = res.muscleGroups;
                 this.muscles = res.muscles;
+                this.sets = res.workouts.flatMap(w =>
+                    w.sections.flatMap(s =>
+                        s.exercises.flatMap(e => e.sets ?? [])
+                    )
+                );
             });
             return promise;
         },
@@ -307,6 +315,19 @@ export const useWorkoutStore = defineStore('workout', {
             return postEndpoint("Physical", "SaveWorkout", model)
                 .then(this.onResponse);
         },
+        async saveWorkoutExercise(id, circuit, position, tempo_4DigitCode, tempo_CR, tempo_BPM, restSeconds) {
+            let model = {
+                workoutSectionExerciseID: id,
+                circuit,
+                position,
+                tempo_4DigitCode,
+                tempo_CR,
+                tempo_BPM,
+                restSeconds
+            }
+            return postEndpoint("Physical", "SaveWorkoutExercise", model)
+                .then(this.onResponse);
+        },
         async copyAndStartWorkout(workoutID, startAt) {
             let data = { workoutID, startAt };
             return postEndpoint("Physical", "CopyAndStartWorkout", data)
@@ -321,7 +342,7 @@ export const useWorkoutStore = defineStore('workout', {
                 .then(this.onResponse);
         },
         async logAllSets(idWorkoutExercise) {
-            return postEndpoint("Physical", "LogAllSets", { idWorkoutExercise})
+            return postEndpoint("Physical", "LogAllSets", { idWorkoutSectionExercise: idWorkoutExercise })
                 .then(this.onResponse);
         },
         async completeWorkout(workoutID, startAt, endAt, createEvent) {
@@ -335,7 +356,7 @@ export const useWorkoutStore = defineStore('workout', {
                 .then(this.onResponse);
         },
         async removeExerciseFromWorkout(idWorkoutExercise) {
-            return postEndpoint("Physical", "RemoveExerciseFromWorkout", { idWorkoutExercise})
+            return postEndpoint("Physical", "RemoveExerciseFromWorkout", { idWorkoutSectionExercise: idWorkoutExercise })
                 .then(this.onResponse);
         },
         async createFitnessGoal(idGoalTimePairTodo, frequency, sets, reps, weight, time) {
@@ -355,24 +376,33 @@ export const useWorkoutStore = defineStore('workout', {
         },
         runUpdates(updates) {
             let _this = this;
-            if (updates.workouts && updates.workouts.length > 0) {
-                updates.workouts.forEach(workout => {
-                    replaceOrAddItem(workout, _this.workouts);
-                })
-                sortAsc(_this.workouts);
+            let sets = [..._this.sets];
+            if (updates.workouts?.length > 0 || updates.workoutIDsRemoved?.length > 0) {
+                let workouts = [..._this.workouts];
+                if (updates.workouts?.length > 0) {
+                    updates.workouts.forEach(workout => {
+                        replaceOrAddItem(workout, workouts);
+                        workout.sections.flatMap(s => s.exercises.flatMap(e => e.sets ?? []))
+                            .forEach(set => replaceOrAddItem(set, sets));
+                    });
+                }
+                if (updates.workoutIDsRemoved?.length > 0) {
+                    updates.workoutIDsRemoved.forEach(id => removeItemByID(id, workouts));
+                }
+                deferUpdate(() => { _this.workouts = sortAsc(workouts); });
             }
-            if (updates.workoutIDsRemoved && updates.workoutIDsRemoved.length > 0) {
-                updates.workoutIDsRemoved.forEach(workoutID => {
-                    removeItemByID(workoutID, _this.workouts);
-                })
-                sortAsc(_this.workouts);
+            if (updates.exercises?.length > 0) {
+                let exercises = [..._this.exercises];
+                updates.exercises.forEach(exercise => replaceOrAddItem(exercise, exercises));
+                deferUpdate(() => { _this.exercises = sortAsc(exercises); });
             }
-            if (updates.exercises && updates.exercises.length > 0) {
-                updates.exercises.forEach(exercise => {
-                    replaceOrAddItem(exercise, _this.exercises);
-                })
-                sortAsc(_this.exercises);
+            if (updates.sets?.length > 0) {
+                updates.sets.forEach(set => replaceOrAddItem(set, sets));
             }
+            if (updates.setIDsRemoved?.length > 0) {
+                updates.setIDsRemoved.forEach(setID => removeItemByID(setID, sets));
+            }
+            deferUpdate(() => { _this.sets = sets; });
         },
         connectSocket() {
             if (!initialized) {

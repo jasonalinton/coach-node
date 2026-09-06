@@ -21,6 +21,8 @@ export const useAppStore = defineStore('app', {
         bodyOuterHeight: undefined,
         bodyOuterWidth: undefined,
         windowOuterHeight: undefined,
+        mouseX: undefined,
+        mouseY: undefined,
         browserType: undefined,
         isTouchscreen: undefined,
         isExtraSmall: undefined,
@@ -50,12 +52,13 @@ export const useAppStore = defineStore('app', {
                 title: "Briefing"
             },
             todo: {
+                selectedTask: undefined,
                 showRepeat: true,
                 showTimeline: false,
                 showRecommended: true,
                 showHierarchy: true,
                 sort: {
-                    by: 'Default2',
+                    by: 'Default',
                     items: [
                         { id: 1, text: "Default" },
                         { id: 1, text: "Default2" },
@@ -102,6 +105,7 @@ export const useAppStore = defineStore('app', {
                 selectedWorkoutID: undefined,
                 selectedExerciseID: undefined,
                 activeExerciseID: undefined,
+                exerciseFormID: undefined,
                 exerciseList: {
                     selectedSectionID: undefined,
                     nextExercisePosition: undefined,
@@ -139,6 +143,10 @@ export const useAppStore = defineStore('app', {
         setBodyOuterSize(width, height) {
             this.bodyOuterWidth = width;
             this.bodyOuterHeight = height;
+        },
+        setMouseXY(x, y) {
+            this.mouseX = x;
+            this.mouseY = y;
         },
         onMenuButtonClicked() {
             if (this.navbar.active == "main") {
@@ -209,7 +217,15 @@ export const useAppStore = defineStore('app', {
                 this.itemPanel.selected = "event";
                 this.itemPanel.event.type = EVENTTYPE.ROUTINE;
                 this.itemPanel.event.event = eevent;
+            } else if (eevent.type.id == EVENTTYPE.BLOCKROUTINE) {
+                this.itemPanel.selected = "event";
+                this.itemPanel.event.type = EVENTTYPE.BLOCKROUTINE;
+                this.itemPanel.event.event = eevent;
             }
+        },
+        setSelectedTask(task) {
+            this.itemPanel.selected = "todo";
+            this.itemPanel.todo.selectedTask = task;
         },
         toggleTabBar() {
             this.isTabBarShown = !this.isTabBarShown;
@@ -251,6 +267,10 @@ export const useAppStore = defineStore('app', {
         },
         setActiveExercise(id) {
             this.itemPanel.workout.activeExerciseID = id;
+        },
+        selectExerciseForm(idExercise) {
+            this.itemPanel.workout.exerciseFormID = idExercise;
+            this.selectWorkoutView("exerciseForm");
         },
         selectExerciseHistory(idExercise, variationIDs) {
             this.itemPanel.workout.exerciseHistory.idExercise = idExercise;

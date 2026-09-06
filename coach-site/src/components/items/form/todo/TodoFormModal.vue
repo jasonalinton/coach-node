@@ -29,23 +29,23 @@
                                               @click="toggleMetric(metric.id)">{{ metric.text }}</span>
                                     </div>
                                     <!-- Points -->
-                                    <div class="input-wrrapper d-flex flex-row">
+                                    <div class="input-wrapper d-flex flex-row">
                                         <label class="me-1" :for="`todo-${id}-points`">Points</label>
                                         <input type="number" class="form-control form-control-sm" :id="`todo-${id}-points`"
                                                :value="points.value"
                                                @blur="points.value = $event.target.value">
                                     </div>
                                     <!-- Type -->
-                                    <div class="input-wrrapper d-flex flex-row">
+                                    <div class="input-wrapper d-flex flex-row">
                                         <label class="me-1" :for="`todo-${id}-type`">Type</label>
                                         <select :id="`todo-${id}-type`" class="form-select form-select-sm" aria-label="select" v-model="typeID.value"> 
                                             <option :value="null">None</option> 
                                             <option v-for="todoType in todoTypes" v-bind:key="todoType.id" :value="todoType.id">{{todoType.text}}</option> 
                                         </select>
                                     </div>
-                                    <!-- Meduim -->
-                                    <div class="input-wrrapper d-flex flex-row">
-                                        <label class="me-1" :for="`todo-${id}-type`">Meduim</label>
+                                    <!-- Medium -->
+                                    <div class="input-wrapper d-flex flex-row">
+                                        <label class="me-1" :for="`todo-${id}-type`">Medium</label>
                                         <select :id="`todo-${id}-type`" class="form-select form-select-sm" aria-label="select" v-model="mediumID.value"> 
                                             <option :value="null">None</option> 
                                             <option v-for="medium in mediums" v-bind:key="medium.id" :value="medium.id">{{medium.text}}</option> 
@@ -566,7 +566,7 @@ export default {
     font-size: 32px;
 }
 
-.input-wrrapper {
+.input-wrapper {
     height: 31px;
     line-height: 31px;
 }

@@ -6,7 +6,7 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-            <div v-if="!mapper.isShown" class="container-fluid">
+            <div v-if="!mapper.isShown && !isKanbanShown" class="container-fluid">
                 <div class="label row gx-0">
                     <div class="col">
                         <input id="text" class="textbox" type="text" placeholder="Title"
@@ -121,21 +121,28 @@
                 <div class="row g-2">
                     <div class="col-12">
                         <ItemMapper v-if="mapper.type == 'parent'"
-                                    itemType="goal" :selectedIDs="parentIDs" 
+                                    itemType="goal" :selectedIDs="parentIDs"
                                     @close="mapper.isShown=false" @cancel="cancelMapping" @select="(x,y) => selectItems('parent', x, y)"/>
                         <ItemMapper v-if="mapper.type == 'child'"
-                                    itemType="goal" :selectedIDs="childIDs" 
+                                    itemType="goal" :selectedIDs="childIDs"
                                     @close="mapper.isShown=false" @cancel="cancelMapping" @select="(x,y) => selectItems('child', x, y)"/>
                         <ItemMapper v-if="mapper.type == 'todo'"
                                     itemType="todo" :selectedIDs="todoIDs"
                                     @close="mapper.isShown=false" @cancel="cancelMapping" @select="(x,y) => selectItems('todo', x, y)"/>
                     </div>
                 </div>
-            </div>  
+            </div>
+            <div v-if="isKanbanShown" class="container-fluid">
+                <ItemKanban :idParent="id" :idKanbanType="ITEMTYPES.GOAL" />
+            </div>
         </div>
-        <div v-if="!mapper.isShown" class="modal-footer">
+        <div v-if="!mapper.isShown && !isKanbanShown" class="modal-footer">
+            <button type="button" class="btn btn-info" @click="showKanban">Kanban</button>
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             <button type="button" class="btn btn-primary" @click="save()">Save changes</button>
+        </div>
+        <div v-if="isKanbanShown" class="modal-footer">
+            <button type="button" class="btn btn-secondary" @click="isKanbanShown = false">Back</button>
         </div>
         </div>
     </div>
@@ -148,13 +155,14 @@ import GoalTimePairControl from '../component/GoalTimePairControl.vue';
 import FormItemList from '../component/FormItemList.vue';
 import ItemMapper from '../component/ItemMapper.vue';
 import BlurbFormControl from '../component/BlurbFormControl.vue';
+import ItemKanban from '../component/ItemKanban.vue';
 import { clone, replaceItem, addOrReplaceItem, sortItems, sortAsc } from '../../../../../utility';
 import { getShortDateString } from '../../../../../utility/timeUtility';
-import { INHERITANCE, BLURBTYPE } from '../../../../model/constants'
+import { INHERITANCE, BLURBTYPE, ITEMTYPES } from '../../../../model/constants'
 
 export default {
     name: "GoalFormModal",
-    components: { RepeatControl, GoalTimePairControl, ItemMapper, FormItemList, BlurbFormControl },
+    components: { RepeatControl, GoalTimePairControl, ItemMapper, FormItemList, BlurbFormControl, ItemKanban },
     props: {
       id: Number
     },
@@ -163,6 +171,7 @@ export default {
             store: null,
             plannerStore: null,
             BLURBTYPE: BLURBTYPE,
+            ITEMTYPES: ITEMTYPES,
             text: {
                 value: undefined,
                 oldValue: undefined,
@@ -204,6 +213,7 @@ export default {
                 isShown: false,
                 type: undefined
             },
+            isKanbanShown: false,
             isRepetitionShown: true,
             isTimeShown: true
         }
@@ -457,6 +467,9 @@ export default {
             }
             return "";
         },
+        showKanban() {
+            this.isKanbanShown = true;
+        }
     },
     watch: {
         'text.value'(value) {

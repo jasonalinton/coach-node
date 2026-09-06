@@ -1,7 +1,8 @@
 import { defineStore } from 'pinia'
-import { getMetrics, getLogItems, deleteLogEntry } from '../api/metricAPI'
+import { markRaw } from 'vue'
+import { getMetrics, getLogItems, deleteLogEntry, getMetricKanban as fetchMetricKanban } from '../api/metricAPI'
 import { replaceOrAddItem, sortAsc, clone, capitalize } from '../../utility';
-import { getSocketConnection } from './socket'
+import { getSocketConnection, deferUpdate } from './socket'
 import { useGoalStore } from '@/store/goalStore'
 import { useTodoStore } from '@/store/todoStore'
 import { useRoutineStore } from '@/store/routineStore'
@@ -12,10 +13,11 @@ let initialized = false;
 export const useMetricStore = defineStore('metric', {
     state: () => ({
         metrics: [],
-        logItems: []
+        logItems: [],
+        draggedKanbanTask: null
     }),
     getters: {
-        
+        getDraggedKanbanTask: (state) => state.draggedKanbanTask
     },
     actions: {
         async initialize() {
@@ -27,18 +29,19 @@ export const useMetricStore = defineStore('metric', {
         async fill() {
             return getMetrics().then(res => this.metrics = res);
         },
-        initializeItems(metrics) {
+        initializeItems(metrics, allMetrics) {
             let goalStore = useGoalStore();
             let todoStore = useTodoStore();
             let routineStore = useRoutineStore();
 
-            metrics = metrics || this.metrics;
+            allMetrics = allMetrics || this.metrics;
+            metrics = metrics || allMetrics;
             metrics.forEach(metric => {
-                metric.parents = this.metrics.filter(x => metric.parentIDs.includes(x.id));
-                metric.children = this.metrics.filter(x => metric.childIDs.includes(x.id));
-                metric.goals = goalStore.getItems().filter(x => metric.goalIDs.includes(x.id));
-                metric.todos = todoStore.getItems().filter(x => metric.todoIDs.includes(x.id));
-                metric.routines = routineStore.getItems().filter(x => metric.routineIDs.includes(x.id));
+                metric.parents  = markRaw(allMetrics.filter(x => metric.parentIDs.includes(x.id)));
+                metric.children = markRaw(allMetrics.filter(x => metric.childIDs.includes(x.id)));
+                metric.goals    = markRaw(goalStore.getItems().filter(x => metric.goalIDs.includes(x.id)));
+                metric.todos    = markRaw(todoStore.getItems().filter(x => metric.todoIDs.includes(x.id)));
+                metric.routines = markRaw(routineStore.getItems().filter(x => metric.routineIDs.includes(x.id)));
             })
         },
         getItems() {
@@ -56,6 +59,68 @@ export const useMetricStore = defineStore('metric', {
             parentType = capitalize(parentType);
 
             return postEndpoint(parentType, `Reposition${itemType}In${parentType}`, data);
+        },
+        createAndMapItem(metricID, itemType, itemText) {
+            let data = { metricID, itemType, itemText };
+            return postEndpoint("Metric", "CreateAndMapItemToMetric", data)
+            .then(response => response.result);
+        },
+        mapItems(metricID, itemType, addedIDs, removedIDs) {
+            let data = { metricID, itemType, addedIDs, removedIDs };
+            return postEndpoint("Metric", "MapItemsToMetric", data)
+            .then(response => response.result);
+        },
+        saveMetric(model) {
+            return postEndpoint("Metric", "SaveMetric", model)
+            .then(response => response.result);
+        },
+        saveDescription(metricID, description) {
+            let model = {
+                id: metricID,
+                description: {
+                    value: description
+                }
+            };
+            this.saveMetric(model);
+        },
+        addBlurb(idMetric, blurb) {
+            let data = {
+                ...blurb,
+                idMetric,
+                idBlurbType: blurb.idType,
+            }
+            return postEndpoint("Metric", "AddBlurbToMetric", data)
+            .then(response => response.result);
+        },
+        updateBlurb(blurb) {
+            let data = {
+                idBlurb: blurb.id,
+                idBlurbType: blurb.idType,
+                ...blurb
+            }
+            return postEndpoint("Metric", "UpdateBlurbInMetric", data)
+            .then(response => response.result);
+        },
+        setDraggedKanbanTask(item) {
+            this.draggedKanbanTask = item;
+        },
+        clearDraggedKanbanTask() {
+            this.draggedKanbanTask = null;
+        },
+        getMetricKanban(idMetric) {
+            return fetchMetricKanban(idMetric);
+        },
+        // MetricController's SetMetricKanbanTaskProps names the goal slot "idGoal" (not
+        // "idDescendant" like the Goal-owned kanban) - idDescendant here is just the
+        // shared cross-store parameter name KanbanColumn calls positionally.
+        setKanbanTask(idParent, idDescendant, idTodo, idIteration, idColumn, idTimeframe, positionDescendant, date, dateAdded, dateRemoved) {
+            let data = { idParent, idGoal: idDescendant, idTodo, idIteration, idColumn, idTimeframe, positionDescendant, date, dateAdded, dateRemoved };
+            return postEndpoint("Metric", "SetMetricKanbanTask", data)
+            .then(response => response.result);
+        },
+        removeKanbanTask(id, dateRemoved) {
+            return postEndpoint("Metric", "RemoveMetricKanbanTask", { id, dateRemoved })
+            .then(response => response.result);
         },
         initializeLogItems() {
             let _this = this;
@@ -87,14 +152,12 @@ export const useMetricStore = defineStore('metric', {
             });
         },
         runUpdates(updates) {
-            let _this = this;
-            if (updates.metrics && updates.metrics.length > 0) {
-                updates.metrics.forEach(metric => {
-                    replaceOrAddItem(metric, _this.metrics);
-                })
-                this.initializeItems(updates.metrics);
-                sortAsc(this.metrics);
-            }
+            if (!updates.metrics?.length) return;
+
+            let metrics = [...this.metrics];
+            updates.metrics.forEach(metric => replaceOrAddItem(metric, metrics));
+            this.initializeItems(updates.metrics, metrics);
+            deferUpdate(() => { this.metrics = sortAsc(metrics); });
         },
         connectSocket() {
             if (!initialized) {

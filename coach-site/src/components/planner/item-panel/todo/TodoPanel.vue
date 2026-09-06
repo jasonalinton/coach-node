@@ -3,36 +3,36 @@
         <div class="col h-100 d-flex flex-column flex-grow-1 overflow-hidden">
             <!-- Header -->
             <ItemPanelNavbar v-if="showHead" />
-            <template v-if="!iteration_Form">
+            <template v-if="!selectedTask">
                 <TodoPanelByMetric v-if="sortBy=='Metric'" 
                                    :selectedDate="selectedDate"
-                                   @editIteration="iteration => iteration_Form = iteration">
+                                   @editIteration="iteration => selectedTask = iteration">
                 </TodoPanelByMetric>
                 <TodoPanelBacklog v-if="sortBy=='Backlog'" 
                                  :selectedDate="selectedDate"
-                                 @editIteration="iteration => iteration_Form = iteration">
+                                 @editIteration="iteration => selectedTask = iteration">
                 </TodoPanelBacklog>
                 <TodoPanelByRepetition v-if="sortBy=='Repetition'" 
                                        :selectedDate="selectedDate"
-                                       @editIteration="iteration => iteration_Form = iteration">
+                                       @editIteration="iteration => selectedTask = iteration">
                 </TodoPanelByRepetition>
                 <TodoPanelByCustom v-if="sortBy=='Custom'" 
                                    :selectedDate="selectedDate"
-                                   @editIteration="iteration => iteration_Form = iteration">
+                                   @editIteration="iteration => selectedTask = iteration">
                 </TodoPanelByCustom>
                 <TodoPanelDefault v-if="sortBy=='Default'" 
                                     :selectedDate="selectedDate"
-                                    @editIteration="iteration => iteration_Form = iteration">
+                                    @editIteration="iteration => selectedTask = iteration">
                 </TodoPanelDefault>
                 <TodoPanelDefault2 v-if="sortBy=='Default2'" 
                                     :selectedDate="selectedDate"
-                                    @editIteration="iteration => iteration_Form = iteration">
+                                    @editIteration="iteration => selectedTask = iteration">
                 </TodoPanelDefault2>
                 <TodoPanelMemorization v-if="sortBy=='Memorization'" />
             </template>
-            <IterationForm v-if="iteration_Form" 
-                           :iteration="iteration_Form"
-                           @closeForm="iteration_Form = null">
+            <IterationForm v-if="selectedTask" 
+                           :iteration="selectedTask"
+                           @closeForm="selectedTask = null">
             </IterationForm>
         </div>
     </div>
@@ -63,7 +63,6 @@ export default {
         return {
             appStore: undefined,
             plannerStore: undefined,
-            iteration_Form: null,
         }
     },
     created: async function() {
@@ -95,6 +94,12 @@ export default {
                 return this.appStore.itemPanel.todo.sort.by;
             }
             return undefined;
+        },
+        selectedTask: {
+            get() { return (this.appStore) ? this.appStore.itemPanel.todo.selectedTask : undefined; },
+            set(value) {
+                this.appStore.itemPanel.todo.selectedTask = value;
+            }
         }
     },
     methods: {

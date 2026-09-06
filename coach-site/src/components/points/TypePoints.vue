@@ -1,7 +1,7 @@
 <template>
     <div class="d-flex flex-column" @click.prevent.stop="item.isExpanded = !item.isExpanded">
         <div class="d-flex flex-row flex-grow-1">
-            <span class="label" :style="{ 'padding-left': `${level * 10}px`}">{{ item.label }}</span>
+            <span class="label" :style="{ 'padding-left': `0px`}">{{ item.label }}</span>
             <div v-if="item.showPoints" class="d-flex flex-row justify-content-between flex-grow-1 pe-2">
                 <span class="dot" :style="{ 'background-color': item.color || 'gray' }"></span>
                 <span class="dot" :style="{ 'background-color': item.color || 'gray' }"></span>

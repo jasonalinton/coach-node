@@ -1,7 +1,8 @@
 import { defineStore } from 'pinia'
-import { getGoals, getGoalsWithTimeframe } from '../api/goalAPI'
+import { markRaw } from 'vue'
+import { getGoals, getGoalsWithTimeframe, getGoalKanban as fetchGoalKanban } from '../api/goalAPI'
 import { capitalize, replaceOrAddItem, sortAsc, sum } from '../../utility';
-import { getSocketConnection } from './socket'
+import { getSocketConnection, deferUpdate } from './socket'
 import { useMetricStore } from '@/store/metricStore'
 import { useTodoStore } from '@/store/todoStore'
 import { useRoutineStore } from '@/store/routineStore'
@@ -15,10 +16,20 @@ let initialized = false;
 
 export const useGoalStore = defineStore('goal', {
     state: () => ({
-        goals: []
+        goals: [],
+        draggedKanbanTask: null
     }),
     getters: {
-        
+        fitnessGoals: (state) => {
+            let fitnessGoals = state.goals.filter(goal => {
+                let isFitness = goal.types.some(type => type.id == GOAL_TYPE.FITNESS);
+                return isFitness;
+            });
+            return fitnessGoals;
+        },
+        getDraggedKanbanTask: (state) => {
+            return state.draggedKanbanTask;
+        }
     },
     actions: {
         async initialize() {
@@ -33,21 +44,21 @@ export const useGoalStore = defineStore('goal', {
         },
         async fill() {
             let promise = getGoals().then(res => this.goals = res);
-            this.initializeItems();
             return promise;
         },
-        initializeItems(goals) {
+        initializeItems(goals, allGoals) {
             let metricStore = useMetricStore();
             let todoStore = useTodoStore();
             let routineStore = useRoutineStore();
 
-            goals = goals || this.goals;
+            allGoals = allGoals || this.goals;
+            goals = goals || allGoals;
             goals.forEach(goal => {
-                goal.parents = this.goals.filter(x => goal.parentIDs.includes(x.id));
-                goal.children = this.goals.filter(x => goal.childIDs.includes(x.id));
-                goal.metrics = metricStore.getItems().filter(x => goal.metricIDs.includes(x.id));
-                goal.todos = todoStore.getItems().filter(x => goal.todoIDs.includes(x.id));
-                goal.routines = routineStore.getItems().filter(x => goal.routineIDs.includes(x.id));
+                goal.parents  = markRaw(allGoals.filter(x => goal.parentIDs.includes(x.id)));
+                goal.children = markRaw(allGoals.filter(x => goal.childIDs.includes(x.id)));
+                goal.metrics  = markRaw(metricStore.getItems().filter(x => goal.metricIDs.includes(x.id)));
+                goal.todos    = markRaw(todoStore.getItems().filter(x => goal.todoIDs.includes(x.id)));
+                goal.routines = markRaw(routineStore.getItems().filter(x => goal.routineIDs.includes(x.id)));
             })
         },
         getItems() {
@@ -57,14 +68,12 @@ export const useGoalStore = defineStore('goal', {
             return this.goals.find(x => x.id == id);
         },
         getTimeframeItems(start, end) {
-            let _this = this;
             return getGoalsWithTimeframe(start, end)
                 .then(goals => {
-                    goals.forEach(goal => {
-                        replaceOrAddItem(goal, _this.goals);
-                    })
-                    this.initializeItems(goals);
-                    sortAsc(_this.goals);
+                    let allGoals = [...this.goals];
+                    goals.forEach(goal => replaceOrAddItem(goal, allGoals));
+                    this.initializeItems(goals, allGoals);
+                    this.goals = sortAsc(allGoals);
                     return goals;
                 });
         },
@@ -119,25 +128,30 @@ export const useGoalStore = defineStore('goal', {
         },
         getIterationIDs(goalID) {
             let idsChecked = { goals: [], todos: [], iterations: [] };
-            this.getAncensorIterationsFromGoal(goalID, idsChecked);
+            this.getDescendantIterationsFromGoal(goalID, idsChecked);
             return idsChecked.iterations;
         },
-        getAncensorIterationsFromGoal(goalID, idsChecked) {
+        getDescendantTodoIDs(goalID) {
+            let idsChecked = { goals: [], todos: [], iterations: [] };
+            this.getDescendantIterationsFromGoal(goalID, idsChecked);
+            return idsChecked.todos;
+        },
+        getDescendantIterationsFromGoal(goalID, idsChecked) {
             if (!idsChecked.goals.includes(goalID)) {
                 idsChecked.goals.push(goalID);
                 let goal = this.goals.find(goal => goal.id == goalID);
                 
                 /* Loop through todos */
                 goal.todoIDs.forEach(todoID => {
-                    this.getAncestorIterationsFromTodo(todoID, idsChecked);
+                    this.getDescendantIterationsFromTodo(todoID, idsChecked);
                 })
                 /* Loop through goals */
                 goal.childIDs.forEach(goalID => {
-                    this.getAncensorIterationsFromGoal(goalID, idsChecked);
+                    this.getDescendantIterationsFromGoal(goalID, idsChecked);
                 })
             }
         },
-        getAncestorIterationsFromTodo(todoID, idsChecked) {
+        getDescendantIterationsFromTodo(todoID, idsChecked) {
             if (!idsChecked.todos.includes(todoID)) {
                 idsChecked.todos.push(todoID);
                 
@@ -145,7 +159,7 @@ export const useGoalStore = defineStore('goal', {
                 let todoStore = useTodoStore();
                 let todo = todoStore.getItem(todoID);
                 todo.childIDs.forEach(childID => {
-                    this.getAncestorIterationsFromTodo(childID, idsChecked);
+                    this.getDescendantIterationsFromTodo(childID, idsChecked);
                 })
                 
                 /* Record iteration ids */
@@ -228,29 +242,46 @@ export const useGoalStore = defineStore('goal', {
             .then(response => response.result);
         },
         updateBlurb(blurb) {
-            let data = { 
-                idBlurb: blurb.id, 
+            let data = {
+                idBlurb: blurb.id,
                 idBlurbType: blurb.idType,
                 ...blurb
             }
             return postEndpoint("Goal", "UpdateBlurbInGoal", data)
             .then(response => response.result);
         },
+        setDraggedKanbanTask(item) {
+            this.draggedKanbanTask = item;
+        },
+        clearDraggedKanbanTask() {
+            this.draggedKanbanTask = null;
+        },
+        getGoalKanban(idGoal) {
+            return fetchGoalKanban(idGoal);
+        },
+        setKanbanTask(idParent, idDescendant, idTodo, idIteration, idColumn, idTimeframe, positionDescendant, date, dateAdded, dateRemoved) {
+            let data = { idParent, idDescendant, idTodo, idIteration, idColumn, idTimeframe, positionDescendant, date, dateAdded, dateRemoved };
+            return postEndpoint("Goal", "SetGoalKanbanTask", data)
+            .then(response => response.result);
+        },
+        removeKanbanTask(id, dateRemoved) {
+            return postEndpoint("Goal", "RemoveGoalKanbanTask", { id, dateRemoved })
+            .then(response => response.result);
+        },
         runUpdates(updates) {
-            let _this = this;
-            if (updates.goals && updates.goals.length > 0) {
-                updates.goals.forEach(goal => {
-                    replaceOrAddItem(goal, _this.goals);
-                })
-                this.initializeItems(updates.goals);
-                sortAsc(_this.goals);
+            const hasGoals = updates.goals?.length > 0;
+            const hasRemovals = updates.goalIDsRemoved?.length > 0;
+            if (!hasGoals && !hasRemovals) return;
+
+            let goals = [...this.goals];
+            if (hasGoals) {
+                updates.goals.forEach(goal => replaceOrAddItem(goal, goals));
+                this.initializeItems(updates.goals, goals);
             }
-            if (updates.goalIDsRemoved && updates.goalIDsRemoved.length > 0) {
-                updates.goalIDsRemoved.forEach(goalID => {
-                    removeItemByID(goalID, _this.goals);
-                })
-                sortAsc(_this.goals);
+            if (hasRemovals) {
+                updates.goalIDsRemoved.forEach(id => removeItemByID(id, goals));
             }
+            deferUpdate(() => { this.goals = sortAsc(goals); });
         },
         connectSocket() {
             if (!initialized) {

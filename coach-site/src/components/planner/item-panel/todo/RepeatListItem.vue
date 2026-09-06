@@ -236,7 +236,7 @@ export default {
             return this.todoRepeat ? this.todoRepeat.isRecommended : false;
         },
         points() {
-            return this.todoRepeat.points || this.todo.points || 0;
+            return this.todoRepeat?.points || this.todo.points || 0;
         },
         pointsFamily() {
             let descendantIDs = this.todoStore.getDescendantIDs(this.todoID);

@@ -20,6 +20,14 @@
             <span class="text-start cursor-default"
                 @click="settings.isShown = !settings.isShown">Settings</span>
             <div v-if="settings.isShown" class="d-flex flex-column mt-2">
+                <!-- Type -->
+                <div class="input-wrapper d-flex flex-row mb-2">
+                    <label class="me-1" :for="`workout-type`">Type</label>
+                    <select :id="`workout-type`" class="form-select form-select-sm" aria-label="select" v-model="workout.idType"> 
+                        <option :value="null">None</option> 
+                        <option v-for="workoutType in workoutTypes" v-bind:key="workoutType.id" :value="workoutType.id">{{workoutType.text}}</option> 
+                    </select>
+                </div>
                 <!-- Time -->
                 <div class="d-flex flex-column">
                     <DateTimeSelector class="date-selector" :class="{ 'invalid': !completion.isValid }"
@@ -85,6 +93,7 @@ import WorkoutSection from './WorkoutSection.vue';
 import DateTimeSelector from '../../../controls/select/DateTimeSelector.vue';
 import { timeSince } from '../../../../../utility/timeUtility';
 import QuickLogExercise from './QuickLogExercise.vue';
+import { workoutTypes } from '../../../../model/types.js';
 
 export default {
     name: 'WorkoutActive',
@@ -96,6 +105,7 @@ export default {
         return {
             appStore: null,
             workoutStore: null,
+            workoutTypes: workoutTypes,
             now: Date.now(),
             settings: {
                 isShown: false,
@@ -283,6 +293,8 @@ function deleteWorkout() {
 function saveSettings() {
     let model = { 
         id: this.id,
+        idType: this.workout.idType,
+        isTypeUpdated: true,
         isUpdated: true,
         startAt: {
             isUpdated: this.startAt != undefined,

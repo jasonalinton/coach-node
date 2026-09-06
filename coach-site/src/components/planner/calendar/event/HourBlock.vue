@@ -1,24 +1,42 @@
 <template>
-    <div class="hour-block position-relative d-flex flex-wrap align-items-baseline" :style="{ 'height': `${blockHeight}px` }">
+    <div class="hour-block position-relative d-flex flex-wrap align-items-baseline"
+         :style="{ 'height': `${blockHeight}px` }">
         <span v-if="isCurrentHour" class="time circle" :style="{ 'top': `${timeTop - 4}px`}"></span>
         <span v-if="isCurrentHour" class="time line" :style="{ 'top': `${timeTop}px`}"></span>
-        <template v-for="(item, index) in items">
-            <Event v-if="item.type == 'event'" :key="index"
-                   :style="{'width': 100/events.length + '% !important'}"
-                   :_event="item.data"
-                   :minuteHeight="minuteHeight"
-                   :zIndex="zIndex">
-            </Event>
-            <Task v-if="item.type == 'iteration'" :task="item.data"></Task>
-        </template>
+        <div>
+
+            <template v-for="(item, index) in items">
+                <Event v-if="item.type == 'event'" :key="index"
+                       class="position-absolute float-start"
+                       :style="{'width': `calc(100% - ${(item.level * 20) + 4}px) !important`, 'margin-left': `${item.level * 20}px`}"
+                       :_event="item.data" :data-overlaps="item.overlaps" :data-level="item.level"
+                       :minuteHeight="minuteHeight"
+                       :zIndex="zIndex">
+                </Event>
+                <Task v-if="item.type == 'iteration'" 
+                      class="position-absolute float-start"
+                      :style="{'width': `calc(100% - ${(item.level * 20) + 4}px) !important`, 'margin-left': `${item.level * 20}px`}"
+                      :idTask="item.data.id" :data-overlaps="item.overlaps" :data-level="item.level"
+                      :minuteHeight="minuteHeight"
+                      :zIndex="zIndex">
+                </Task>
+            </template>
+        </div>
+        <div class="d-flex flex-column h-100 w-100 position-absolute">
+            <span v-for="n in 4" :key="n" class="block-15 flex-grow-1" :class="{ 'dragged-over': draggedOver[n-1] }"
+                  :data-min="(n-1) * 15"
+                  @dragenter.prevent="draggedOver[n-1] = true" @dragover.prevent="draggedOver[n-1] = true" 
+                  @dragleave.prevent="draggedOver[n-1] = false" @drop.prevent="onDrop"></span>
+        </div>
     </div>
 </template>
 
 <script>
 import Event from './Event.vue'
-import Task from '../Task.vue';
+import Task from './TaskEvent.vue'
 import { startOfDay } from '../../../../../utility/timeUtility';
 import { TIMEFRAME } from '../../../../model/constants';
+import { sortDateAsc } from '../../../../../utility';
 
 export default {
     components: { Event, Task },
@@ -34,6 +52,8 @@ export default {
             plannerStore: undefined,
             eventStore: undefined,
             iterationStore: undefined,
+            draggedOverCount: 4,
+            draggedOver: [],
         };
     },
     created: async function() {
@@ -45,6 +65,10 @@ export default {
 
         let iterationStore = await import(`@/store/iterationStore`);
         this.iterationStore = iterationStore.useIterationStore();
+
+        for (let i = 0; i < this.draggedOverCount; i++) {
+            this.draggedOver.push(false);
+        }
     },
     computed: {
         timeTop() {
@@ -75,14 +99,65 @@ export default {
             let items = [];
             if (this.events) {
                 items = items.concat(this.events.map(event => {
-                    return { type: "event", data: event }
+                    return { 
+                        type: "event", 
+                        data: event, 
+                        startAt: event.startAt, 
+                        overlaps: 0,
+                        level: 0
+                    }
                 }));
             }
             if (this.iterations) {
                 items = items.concat(this.iterations.map(iteration => {
-                    return { type: "iteration", data: iteration }
+                    return { 
+                        type: "iteration", 
+                        data: iteration, startAt: 
+                        iteration.startAt, 
+                        overlaps: 0,
+                        level: 0
+                    }
                 }));
             }
+            items = sortDateAsc(items, 'startAt');
+
+            // let i = 0;
+            items.forEach((item, index) => {
+                let overlaps = 0;
+                for (let i = 0; i < index; i++) {
+                    let compareItem = items[i];
+                    let itemStart = new Date(item.startAt).getTime();
+                    let itemEnd = new Date(item.data.endAt).getTime();
+                    let compareItemStart = new Date(compareItem.startAt).getTime();
+                    let compareItemEnd = new Date(compareItem.data.endAt).getTime();
+
+                    if ((itemStart >= compareItemStart && itemStart < compareItemEnd) ||
+                        (itemEnd > compareItemStart && itemEnd <= compareItemEnd) ||
+                        (itemStart <= compareItemStart && itemEnd >= compareItemEnd)) {
+                            compareItem.overlaps++;
+                            item.level = ++overlaps;
+                        }
+
+                }
+                // i++;
+                // let overlaps = 0;
+                // for (let i = 0; i < items.length; i++) {
+                //     if (i != index) {
+                //         let itemStart = new Date(item.startAt).getTime();
+                //         let itemEnd = new Date(item.data.endAt).getTime();
+                //         let compareItemStart = new Date(items[i].startAt).getTime();
+                //         let compareItemEnd = new Date(items[i].data.endAt).getTime();
+
+                //         if ((itemStart >= compareItemStart && itemStart < compareItemEnd) ||
+                //             (itemEnd > compareItemStart && itemEnd <= compareItemEnd) ||
+                //             (itemStart <= compareItemStart && itemEnd >= compareItemEnd)) {
+                //                 overlaps++;
+                //             }
+                //     }
+                // }
+                // item.overlaps = overlaps;
+            });
+
             return items;
         },
         events() {
@@ -111,6 +186,7 @@ export default {
 
                 let iterations = this.iterationStore.getIterationsInTimeframe(TIMEFRAME.DAY, this.date);
                 iterations = iterations.filter(x => +x.startAt.toDate().getTime() >= start && +x.startAt.toDate().getTime() <= end)
+                iterations = iterations.filter(iteration => !iteration.eventID);
 
                 return iterations;
             }
@@ -118,7 +194,40 @@ export default {
         },
     },
     methods: {
+        onDrop
+    }
+}
+
+function onDrop(ev) {
+    ev.preventDefault();    
+    let data = ev.dataTransfer.getData("text");
+    data = JSON.parse(data);
+
+    if (data.type && data.type == "event") {
+        console.log("Event dropped on hour block");
+        let event = this.eventStore.getEvent(data.id, false);
+        let duration = (new Date(event.endAt)).getTime() - (new Date(event.startAt)).getTime();
+        let minutes = parseInt(ev.currentTarget.dataset.min);
+        let newStart = new Date(this.date);
+        newStart.setHours(this.hour.military, minutes, 0, 0);
+        event.startAt = newStart.toJSON();
+        let newEnd = new Date(newStart.getTime() + duration);
+        event.endAt = newEnd.toJSON();
+
+        this.eventStore.updateEvent(event.id, event.title, event.startAt, event.endAt);
+    } else if (data.type && data.type == "task") {
+        console.log("Task dropped on hour block");
+        let task = this.iterationStore.getIteration(data.id);
+        let duration = (new Date(task.endAt)).getTime() - (new Date(task.startAt)).getTime();
+        let minutes = parseInt(ev.currentTarget.dataset.min);
+        let newStart = new Date(this.date);
+        newStart.setHours(this.hour.military, minutes, 0, 0);
+        task.startAt = newStart.toJSON();
+        let newEnd = new Date(newStart.getTime() + duration);
+        task.endAt = newEnd.toJSON();
         
+        this.iterationStore.updateIteration(task.id, task.text, task.blurb, 
+            task.points, task.startAt, task.endAt);
     }
 }
 </script>
@@ -126,6 +235,16 @@ export default {
 <style scoped>
 .hour-block {
     border-bottom: solid 1px #DCDCDC;
+    padding-right: 4px;
+}
+
+.block-15.dragged-over {
+    background-color: var(--pill-default);
+}
+
+.block-15 {
+    width: 100%;
+    border: solid 1px white;
 }
 
 .time {

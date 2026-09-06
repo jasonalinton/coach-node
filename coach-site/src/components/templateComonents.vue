@@ -64,6 +64,7 @@ export default {
         return {
             appStore: undefined,
             plannerStore: undefined,
+            eventStore: undefined,
             iterationStore: undefined,
             todoStore: undefined,
             goalStore: undefined,
@@ -75,6 +76,9 @@ export default {
 
         let plannerStore = await import(`@/store/plannerStore`);
         this.plannerStore = plannerStore.usePlannerStore();
+
+        let eventStore = await import(`@/store/eventStore`);
+        this.eventStore = eventStore.useEventStore();
 
         let iterationStore = await import(`@/store/iterationStore`);
         this.iterationStore = iterationStore.useIterationStore();

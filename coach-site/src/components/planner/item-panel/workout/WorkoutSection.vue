@@ -50,8 +50,8 @@ export default {
     },
     computed: {
         sectionName() {
-            let sectionType = this.workoutSectionTypes.find(x => x.id == this.section.id);
-            return sectionType.text;
+            let sectionType = this.workoutSectionTypes.find(x => x.id == this.section.idSectionType);
+            return sectionType ? sectionType.text : '';
         },
         exercises() {
             let exercises = [];
@@ -65,6 +65,10 @@ export default {
                     exercises.push(exercise);
                 })
             }
+            exercises.sort((a, b) => {
+                if ((a.circuit ?? 0) !== (b.circuit ?? 0)) return (a.circuit ?? 0) - (b.circuit ?? 0);
+                return (a.position ?? 0) - (b.position ?? 0);
+            });
             return exercises;
         }
     },

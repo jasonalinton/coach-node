@@ -129,8 +129,12 @@ pnpm-debug.log*
 *.sw?
 
 /live/
+coach-server/
 
 .db
 
 # Except
 !/coach-site/dist
+
+# coach-server isn't used anymore
+coach-server/
