@@ -1,7 +1,7 @@
 <template>
     <div class="physical-view">
         <div class="d-flex flex-column flex-grow-1">
-            <div class="hero m-auto">
+            <div class="hero m-auto" :style="{ maxWidth: width + 'px' }">
                 <img v-if="hero === 'image'" class="img-fluid" src="/metric/physical/Badass Workout Photo.jpg" />
                 <WeightChart v-if="hero === 'weightChart'" />
             <div v-if="hero === 'battery'" class="activity-chart d-flex flex-column justify-content-center">
@@ -49,6 +49,7 @@
 </template>
 
 <script>
+import { useAppStore } from '@/store/appStore'
 import { usePlannerStore } from '@/store/plannerStore'
 import { METRIC } from '../../../model/constants'
 import MetricTimeline from '../component/blog/MetricTimeline.vue'
@@ -64,6 +65,7 @@ export default {
     },
     data: function () {
         return {
+            appStore: undefined,
             plannerStore: undefined,
             universalStore: undefined,
             idMetric: METRIC.PHYSICAL,
@@ -72,7 +74,13 @@ export default {
         }
     },
     created: async function() {
+        this.appStore = useAppStore();
         this.plannerStore = usePlannerStore();
+    },
+    computed: {
+        width() {
+            return (this.appStore && this.appStore.bodyOuterWidth) ? this.appStore.bodyOuterWidth : 0
+        },
     },
     methods: {
 

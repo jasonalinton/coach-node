@@ -1,9 +1,11 @@
 <template>
     <div class="physical-activity-chart d-flex flex-column">
-        <div class="header d-flex flex-column">
-            <span class="title">Activity Trends</span>
-            <span class="subtitle">Points from exercise &amp; physical activity</span>
-            <div class="timeframe-toggle d-flex flex-row">
+        <div class="header d-flex flex-row justify-content-between">
+            <div class="d-flex flex-column">
+                <span class="title">Activity Trends</span>
+                <span class="subtitle">Points from exercise &amp; physical activity</span>
+            </div>
+            <div class="timeframe-toggle d-flex flex-row me-2">
                 <button v-for="option in timeframeOptions" :key="option.id"
                         type="button"
                         class="toggle-option"
@@ -25,7 +27,7 @@
                              :style="{ height: segmentHeight(bucket, typeId), backgroundColor: typeInfo(typeId).color }"></div>
                     </div>
                     <span class="bucket-label has-tooltip"
-                          :class="{ 'is-current': +bucket.bucketStart === currentPeriodKey }"
+                          :class="{ 'is-current': +bucket.bucketStart === currentPeriodKey, 'is-selected': +bucket.bucketStart === selectedPeriodKey }"
                           :data-tooltip="`${visibleBucketTotal(bucket)} pts`"
                           @click="selectDate(bucket.bucketStart)">
                         {{ bucket.label }}
@@ -49,7 +51,7 @@
             </div>
         </div>
         <hr />
-        <div class="stat-grid d-flex flex-row flex-wrap">
+        <div class="stat-grid d-flex flex-row flex-wrap justify-content-around">
             <div class="stat">
                 <span class="stat-label">Current Velocity</span>
                 <span class="stat-value current">{{ periodTotals.current }} pts</span>
@@ -79,7 +81,7 @@ import { useAppStore } from '@/store/appStore'
 import { usePhysicalStore } from '@/store/physicalStore'
 import { usePlannerStore } from '@/store/plannerStore'
 import { TIMEFRAME } from '../../../model/constants'
-import { todoActivityTypes, timeframes, getActivityTypeColor } from '../../../model/types'
+import { physicalActivityTypes, timeframes, getActivityTypeColor } from '../../../model/types'
 import { startOfDay, firstDayOfWeek, firstDayOfMonth, addDay, addWeek, addMonth, getMonthDate } from '../../../../utility/timeUtility';
 
 const TIMEFRAME_CONFIG = {
@@ -136,6 +138,10 @@ export default {
         },
         currentPeriodKey() {
             return +this.periodConfig.start(new Date());
+        },
+        selectedPeriodKey() {
+            let selectedDate = this.plannerStore ? this.plannerStore.selectedDate : null;
+            return selectedDate ? +this.periodConfig.start(new Date(selectedDate)) : null;
         },
         // Every actual data point grouped into buckets, keyed by bucket start — the single
         // source of truth for both the bar chart and the (window-independent) stat grid.
@@ -224,13 +230,15 @@ export default {
         }
     },
     methods: {
-        selectDate(date) {
-            this.plannerStore.selectDate(date);
+        selectDate(bucketStart) {
+            if (this.plannerStore) {
+                this.plannerStore.selectDate(bucketStart);
+            }
         },
         typeInfo(typeId) {
             // physicalActivityTypeIDs can include child types under "Physical Activity" that
             // aren't in the static todoActivityTypes list — fall back rather than break.
-            let known = todoActivityTypes.find(t => t.id === typeId);
+            let known = physicalActivityTypes.find(t => t.id === typeId);
             return {
                 id: typeId,
                 text: known ? known.text : `Type ${typeId}`,
@@ -443,10 +451,19 @@ export default {
     font-size: 11px;
     color: #767676;
     margin-top: 8px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    cursor: pointer;
 }
 
 .bucket-label.is-current {
     color: #1a1a1a;
+    font-weight: 700;
+}
+
+.bucket-label.is-selected {
+    background-color: #1a1a1a;
+    color: #fff;
     font-weight: 700;
 }
 
@@ -493,12 +510,14 @@ hr {
 .stat-grid {
     column-gap: 24px;
     row-gap: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
 .stat {
     display: flex;
     flex-direction: column;
-    width: calc(50% - 12px);
+    width: calc(200px);
 }
 
 .stat-label {

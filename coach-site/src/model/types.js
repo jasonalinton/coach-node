@@ -69,6 +69,24 @@ export let todoTypes = [
         id: 190,
         text: "Memorization"
     },
+    // NOTE: This doesn't belong here. remove after todo form refactor
+    {
+        id: 222,
+        text: "Physical Activity",
+        color: "#3B99FC"
+    },
+    // NOTE: This doesn't belong here. remove after todo form refactor
+    {
+        id: 229,
+        text: "Dance",
+        color: "#127ef1"
+    },
+    // NOTE: This doesn't belong here. remove after todo form refactor
+    {
+        id: 230,
+        text: "Dance Practice",
+        color: "#1067c5"
+    },
 ]
 
 export let routineTypes = [
@@ -367,6 +385,44 @@ export let todoActivityTypes = [
         id: 222,
         text: "Physical Activity",
         color: "#3B99FC"
+    },
+    {
+        id: 229,
+        text: "Dance Class",
+        color: "#127ef1"
+    },
+    {
+        id: 230,
+        text: "Dance Practice",
+        color: "#1067c5"
+    },
+]
+
+export let physicalActivityTypes = [
+    {
+        id: 222,
+        text: "Physical Activity",
+        color: "#3B99FC"
+    },
+    {
+        id: 229,
+        text: "Dance Class",
+        color: "#127ef1"
+    },
+    {
+        id: 230,
+        text: "Dance Practice",
+        color: "#1067c5"
+    },
+    {
+        id: 156,
+        text: "Workout",
+        color: "#F4511E"
+    },
+    {
+        id: 158,
+        text: "Exercise",
+        color: "#F4511E"
     },
 ]
 
