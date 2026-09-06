@@ -15,7 +15,7 @@ let initialized = false;
 export const useTodoStore = defineStore('todo', {
     state: () => ({
         todos: [],
-        todoModels: [],,
+        todoModels: [],
         draggedKanbanTask: null
     }),
     getters: {

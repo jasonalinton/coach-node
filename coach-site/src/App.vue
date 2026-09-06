@@ -151,7 +151,7 @@ export default {
         onResize,
         selectPage(page) {
             this.appStore.selectPage(page)
-        },,
+        },
         resetEventStartY,
         startPanelResize(e) {
             this._resizeStartX = e.clientX;
