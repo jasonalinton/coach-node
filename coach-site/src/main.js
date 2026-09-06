@@ -65,6 +65,14 @@ Number.prototype.round = function() {
   return Math.round(this);
 }
 
+// NOTE: This was changed with a merge conflict. I don't know if it was correctly changed so I'm leaving it here for now.
+// const routes = [
+//   { path: '/', component: Planner },
+//   { path: '/planner', component: Planner },
+//   { path: '/items', component: ItemTabs },
+//   { path: '/physical-view', component: PhysicalView },
+// ]
+
 const routes = [
   { 
     path: '/:page', 
