@@ -158,6 +158,12 @@ export default {
             } else if (page == 'physical') {
                 this.appStore.setLeftPanelVisibility(false);
             }
+        },
+        gridColumns: {
+            handler() {
+                this.onResize();
+            },
+            flush: 'post'
         }
     },
 };
