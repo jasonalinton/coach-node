@@ -58,9 +58,10 @@ import { useAppStore } from '@/store/appStore'
 import { usePlannerStore } from '@/store/plannerStore'
 import { usePhysicalStore } from '@/store/physicalStore'
 import { useTodoStore } from '@/store/todoStore'
+import { useWorkoutStore } from '@/store/workoutStore'
 import { TODO_ACTIVITY_TYPE, TIMEFRAME } from '../../../model/constants'
 import { getActivityTypeColor } from '../../../model/types'
-import { today, startOfDay, firstDayOfWeek, addDay, isSameDate, getDayOfWeekShort, getMonthDate } from '../../../../utility/timeUtility';
+import { today, startOfDay, firstDayOfWeek, lastDayOfWeek, addDay, isSameDate, getDayOfWeekShort, getMonthDate } from '../../../../utility/timeUtility';
 
 export default {
     name: 'PhysicalActivitySchedule',
@@ -74,7 +75,7 @@ export default {
             plannerStore: undefined,
             physicalStore: undefined,
             todoStore: undefined,
-            workouts: [],
+            workoutStore: undefined,
             physicalActivityIterations: [],
             physicalActivityTypeIDs: []
         }
@@ -84,10 +85,16 @@ export default {
         this.plannerStore = usePlannerStore();
         this.physicalStore = usePhysicalStore();
         this.todoStore = useTodoStore();
+        this.workoutStore = useWorkoutStore();
+        this.ensureWeekWorkouts();
         let batteryData = await this.physicalStore.getPhysicalBatteryData(false);
-        this.workouts = batteryData?.workouts || [];
         this.physicalActivityIterations = batteryData?.physicalActivityIterations || [];
         this.physicalActivityTypeIDs = batteryData?.physicalActivityTypeIDs || [];
+    },
+    watch: {
+        selectedDate() {
+            this.ensureWeekWorkouts();
+        }
     },
     computed: {
         selectedDate() {
@@ -99,20 +106,30 @@ export default {
         width() {
             return (this.appStore && this.appStore.bodyOuterWidth) ? this.appStore.bodyOuterWidth : 0
         },
+        weekStart() {
+            return firstDayOfWeek(this.selectedDate);
+        },
+        weekEnd() {
+            return lastDayOfWeek(this.selectedDate);
+        },
         weekDays() {
             let days = [];
-            let start = firstDayOfWeek(this.selectedDate);
             for (let i = 0; i < 7; i++) {
-                days.push(addDay(start, i));
+                days.push(addDay(this.weekStart, i));
             }
             return days;
+        },
+        weekWorkouts() {
+            return this.workoutStore
+                ? this.workoutStore.getWorkoutsInRange(this.weekStart, this.weekEnd)
+                : [];
         },
         // A block is anything shown on the schedule — either a logged/scheduled Workout or a
         // standalone physical-activity todo iteration — normalized into one common shape.
         // Planned/unplanned is a property of the block, not a pre-filter, since unplanned
         // items still need to show up (in the unplanned list) rather than being dropped.
         blocks() {
-            let workoutBlocks = this.workouts.map(workout => {
+            let workoutBlocks = this.weekWorkouts.map(workout => {
                 let iteration = workout.iteration;
                 let type = this.resolveType(iteration);
                 return {
@@ -180,6 +197,11 @@ export default {
     methods: {
         getDayOfWeekShort,
         getMonthDate,
+        ensureWeekWorkouts() {
+            if (this.workoutStore) {
+                this.workoutStore.ensureWorkoutsInRange(this.weekStart, this.weekEnd);
+            }
+        },
         isToday(day) {
             return isSameDate(day, today());
         },
