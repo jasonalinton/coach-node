@@ -193,6 +193,12 @@ export default {
             if (selectedTodoId === undefined) return;
             this.selectedId_TodoForm = parseInt(selectedTodoId);
         },
+        gridColumns: {
+            handler() {
+                this.onResize();
+            },
+            flush: 'post'
+        }
     },
 };
 

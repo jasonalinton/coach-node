@@ -74,29 +74,14 @@ Number.prototype.round = function() {
 // ]
 
 const routes = [
-  { 
-    path: '/:page', 
-    component: Planner,
-    props: true,
-   },
-  { 
-    component: Planner,
-    // path: '/planner', 
-    props: route => ({ page: route.query.page, showLeft: route.query.showLeft }), 
-    path: '/', 
-    // props: { page: }, 
-    name: 'planner',
-  },
-  { 
-    path: '/items/:type', 
-    component: ItemTabs, 
-    name: 'items'
-  },
+  { path: '/', component: Planner },
+  { path: '/planner', component: Planner },
+  { path: '/items', component: ItemTabs },
   { path: '/physical-view', component: PhysicalView },
 ]
 
 const router = createRouter({
-  history: createWebHistory(),
+  history: createMemoryHistory(),
   routes,
 })
 

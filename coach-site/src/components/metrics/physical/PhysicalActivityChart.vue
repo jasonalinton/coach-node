@@ -517,7 +517,7 @@ hr {
 .stat {
     display: flex;
     flex-direction: column;
-    width: calc(200px);
+    width: 160px;
 }
 
 .stat-label {

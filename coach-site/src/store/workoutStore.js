@@ -16,6 +16,7 @@ export const useWorkoutStore = defineStore('workout', {
         muscles: [],
         exerciseHistory: [],
         displaySettings: [],
+        requests: [],
         loadedRange: {
             startAt: undefined,
             endAt: undefined
@@ -148,6 +149,77 @@ export const useWorkoutStore = defineStore('workout', {
                 })
             }
             return this.workouts;
+        },
+        // Ensure the store holds every workout in [startAt, endAt]. Coverage is
+        // judged against loadedRange and the ranges already requested via
+        // fetchWorkoutsInRange (tracked in this.requests); only an uncovered range
+        // hits the server.
+        ensureWorkoutsInRange(startAt, endAt) {
+            if (!this.isRangeLoaded(startAt, endAt)) {
+                this.fetchWorkoutsInRange(startAt, endAt);
+            }
+            return this.getWorkoutsInRange(startAt, endAt);
+        },
+        isRangeLoaded(startAt, endAt) {
+            let start = +new Date(startAt);
+            let end = +new Date(endAt);
+            let covers = (s, e) => +new Date(s) <= start && +new Date(e) >= end;
+
+            if (this.loadedRange.startAt && this.loadedRange.endAt
+                && covers(this.loadedRange.startAt, this.loadedRange.endAt)) {
+                return true;
+            }
+            return this.requests.some(r =>
+                r.endpoint == "GetWorkoutsInRange" && r.requestProps
+                && covers(r.requestProps.startAt, r.requestProps.endAt));
+        },
+        fetchWorkoutsInRange(startAt, endAt) {
+            let request = {
+                endpoint: "GetWorkoutsInRange",
+                requestProps: { startAt, endAt },
+                requestTime: new Date(),
+                isProcessing: true
+            };
+            this.requests.push(request);
+
+            // Keep the record only if the fetch actually succeeds. postEndpoint
+            // swallows network/parse errors and resolves undefined, and returns an
+            // envelope with status.success === false on a server error — in every
+            // non-success case drop the record so isRangeLoaded() won't treat the
+            // range as covered and the next navigation retries.
+            let dropRequest = () => { this.requests = this.requests.filter(r => r !== request); };
+
+            postEndpoint("Physical", "GetWorkoutsInRange", { startAt, endAt })
+                .then(response => {
+                    if (!response || !response.status || !response.status.success) {
+                        dropRequest();
+                        return;
+                    }
+                    let workouts = response.result ?? [];
+                    if (workouts.length > 0) {
+                        let merged = [...this.workouts];
+                        workouts.forEach(workout => replaceOrAddItem(workout, merged));
+                        deferUpdate(() => { this.workouts = sortAsc(merged); });
+                    }
+                    if (response.updates) {
+                        this.runUpdates(response.updates);
+                    }
+                    request.isProcessing = false;
+                })
+                .catch(dropRequest);
+
+            return this.workouts;
+        },
+        getWorkoutsInRange(startAt, endAt) {
+            let start = +new Date(startAt);
+            let end = +new Date(endAt);
+            return this.workouts.filter(workout => {
+                if (!workout.iteration || !workout.iteration.startAt) {
+                    return false;
+                }
+                let t = +new Date(workout.iteration.startAt);
+                return t >= start && t <= end;
+            });
         },
         async getWorkoutsCount(startAt, count) {
             let response = await postEndpoint("Physical", "GetWorkoutsCount", { startAt, count });

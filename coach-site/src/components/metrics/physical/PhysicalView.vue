@@ -70,7 +70,7 @@ export default {
             universalStore: undefined,
             idMetric: METRIC.PHYSICAL,
             blurbs: [],
-            hero: "weightChart"
+            hero: "battery"
         }
     },
     created: async function() {
