@@ -95,7 +95,6 @@ import EventPanel from './event/EventPanel.vue'
 import InventoryPanel from './inventory/InventoryPanel.vue'
 import NutritionPanel from './nutrition/NutritionPanel.vue'
 import WorkoutPanel from './workout/WorkoutPanel.vue'
-import { EVENTTYPE } from '../../../model/constants'
 
 export default {
     name: 'ItemPanel',
@@ -108,13 +107,6 @@ export default {
     },
     created: function() {
         this.appStore = useAppStore();
-        let selectedPanel_Store = localStorage.getItem(`selected-item-panel`);
-        if (selectedPanel_Store) {
-            selectedPanel_Store = (selectedPanel_Store == "undefined") ? undefined : selectedPanel_Store;
-            this.$emit('setSelectedPanel', selectedPanel_Store);
-        } else {
-            localStorage.setItem(`selected-item-panel`, this.selectedPanel);
-        }
     },
     computed: {
         selectedPanel() {
@@ -122,21 +114,14 @@ export default {
         }
     },
     methods: {
-        setSelectedPanel,
+        setSelectedPanel(panel) {
+            if (this.selectedPanel != panel) {
+                this.appStore.setSelectedItemPanel(panel);
+            } else {
+                this.appStore.setSelectedItemPanel(undefined);
+            }
+        }
     },
-    watch: {
-        selectedPanel(value) {
-            localStorage.setItem(`selected-item-panel`, value);
-        },
-    }
-}
-
-function setSelectedPanel(panel) {
-    if (this.selectedPanel != panel) {
-        this.appStore.setSelectedItemPanel(panel);
-    } else {
-        this.appStore.setSelectedItemPanel(undefined);
-    }
 }
 </script>
 

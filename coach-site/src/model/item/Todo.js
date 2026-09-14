@@ -39,7 +39,7 @@ class Todo {
                 isProcessing: false,
             });
         }
-        return newVersion;
+        return this;
     }
     
     removeVersion(component) {

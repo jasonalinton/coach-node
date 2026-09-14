@@ -51,7 +51,6 @@
 <script>
 import ItemCheckbox from './ItemCheckbox.vue';
 import { clone } from '../../../../../utility'
-import it from 'date-and-time/locale/it';
 
 /* 
 Parent Types
@@ -83,6 +82,7 @@ export default {
     },
     data: function () {
         return {
+            appStore: undefined,
             iterationStore: undefined,
             iteration: undefined,
             showChildren: false,
@@ -91,11 +91,17 @@ export default {
     },
     created: async function() {
         this.iteration = this.viewModel.iterations[0];
+
+        let appStore = await import(`@/store/appStore`);
+        this.appStore = appStore.useAppStore();
+
         let iterationStore = await import(`@/store/iterationStore`);
         this.iterationStore = iterationStore.useIterationStore();
     },
     computed: {
         checked() {
+            if (!this.iteration)
+                return false;
             if (this.iteration.attemptedAt) {
                 return true;
             } else {
@@ -131,7 +137,8 @@ export default {
 }
 
 function showTodoForm() {
-    this.$router.push({ path: '/', query: { page: 'todoForm', selectedId_TodoForm: this.viewModel.todoID }});
+    this.appStore.setSelectedTodoFormId(this.viewModel.todoID);
+    // this.$router.push({ path: '/', query: { page: 'todoForm', selectedId_TodoForm: this.viewModel.todoID }});
 }
 
 function toggleChildren() {

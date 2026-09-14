@@ -3,7 +3,8 @@
         <div class="d-flex">
             <span class="me-2">Todo {{ (todo) ? todo.id : "" }}</span>
             <span class="activity-type" :style="{ 'background-color': activityTypeColor || 'lightskyblue' }">{{ activityType }}</span>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+                    @click="close"></button>
         </div>
         <div>
 
@@ -157,6 +158,7 @@ export default {
     data: function() {
         return {
             store: null,
+            appStore: null,
             plannerStore: null,
             todoClone: undefined,
             metrics: clone(metrics),
@@ -221,6 +223,9 @@ export default {
     created: async function() {
         let todoStore = await import(`@/store/todoStore`);
         this.store = todoStore.useTodoStore();
+
+        let appStore = await import(`@/store/appStore`);
+        this.appStore = appStore.useAppStore();
 
         let plannerStore = await import(`@/store/plannerStore`);
         this.plannerStore = plannerStore.usePlannerStore();
@@ -490,6 +495,9 @@ export default {
         deleteFutureRepetitionsForRepeat(repeatID, selectedDate) {
             this.store.deleteFutureRepetitionsForRepeat(this.id, repeatID, selectedDate)
         },
+        close() {
+            this.appStore.selectPage('items');
+        }
     },
     watch: {
         todoModel(todo) {

@@ -13,9 +13,9 @@
                 <!-- <RouterView /> -->
                 <Planner v-show="selectedPage == 'planner'" />
                 <ItemTabs v-show="selectedPage == 'items'" />
-                <GoalForm v-show="selectedPage == 'goalForm'" :id="selectedId_GoalForm" />
-                <TodoForm v-show="selectedPage == 'todoForm'" :id="selectedId_TodoForm" />
                 <BlogTimeline v-show="selectedPage == 'timeline'" />
+                <GoalForm v-if="selectedPage == 'goalForm'" :id="selectedId_GoalForm" />
+                <TodoForm v-if="selectedPage == 'todoForm'" :id="selectedTodoFormId" />
                 <PhysicalView v-show="selectedPage == 'physical'" />
                 <MentalView v-show="selectedPage == 'mental'" />
                 <EmotionalView v-show="selectedPage == 'emotional'" />
@@ -57,6 +57,7 @@ import { useRoutineStore } from '@/store/routineStore'
 import { useUniversalStore } from '@/store/universalStore'
 import { createSocketConnection } from "./store/socket";
 // import { RouterView } from 'vue-router'
+import { LEFT_PANEL_WIDTH, RIGHT_PANEL_WIDTH, RIGHT_PANEL_TAB_WIDTH } from './model/appDefaults.js'
 
 export default {
     name: "App",
@@ -88,7 +89,6 @@ export default {
             appStore: undefined,
             plannerStore: undefined,
             eventStore: undefined,
-            itemPanelWidth: parseInt(localStorage.getItem('item-panel-width') || '352'),
             _resizeStartX: 0,
             _resizeStartWidth: 0,
             selectedId_GoalForm: undefined,
@@ -113,37 +113,28 @@ export default {
         // });
     },
     computed: {
-        leftPanelVisibility() {
-            return (this.showLeftPanel) ? `show-left-panel` : 'hide-left-panel'
-        },
         isExtraSmall() {
             return (this.appStore) ? this.appStore.isExtraSmall : true;
         },
-        itemPanelVisibility() {
-            return (this.appStore.itemPanel.selected) ? 'show-item-panel' : 'hide-item-panel'
+        leftPanelWidth() {
+            return (this.appStore) ? this.appStore.leftPanel.width : LEFT_PANEL_WIDTH;
+        },
+        rightPanelWidth() {
+            return (this.appStore) ? this.appStore.rightPanel.width : RIGHT_PANEL_WIDTH;
         },
         gridColumns() {
-            const left = this.showLeftPanel ? '242px' : '0px';
-            const right = this.appStore?.itemPanel?.selected ? `${this.itemPanelWidth}px` : '57px';
+            const left = this.showLeftPanel ? `${this.leftPanelWidth}px` : '0px';
+            const right = this.appStore?.itemPanel?.selected ? `${this.rightPanelWidth}px` : `${RIGHT_PANEL_TAB_WIDTH}px`;
             return `${left} auto ${right}`;
         },
-        selectedItemPanel() {
-            return (this.appStore) ? this.appStore.itemPanel.selected : "todo";
+        showLeftPanel() {
+            return (this.appStore) ? this.appStore.leftPanel.isShown : true;
         },
         selectedPage() {
-            // if (this.appStore) {
-            //     if (this.page) {
-            //         return this.page;
-            //     } else {
-            //         return this.appStore.navbar.selectedPage;
-            //     }
-            // } else {
-            //     return "planner";
-            // }
-            return (this.appStore) ? this.appStore.navbar.selectedPage : "planner";
+            return (this.appStore) ? this.appStore.nav.selectedPage : "planner";
         },
-        showLeftPanel() {
-            return (this.appStore) ? this.appStore.showLeftPanel : true;
+        selectedTodoFormId() {
+            return (this.appStore) ? this.appStore.body.selectedTodoFormId : undefined;
         },
     },
     methods: {
@@ -152,10 +143,13 @@ export default {
         selectPage(page) {
             this.appStore.selectPage(page)
         },
+        setRightPanelWidth(width) {
+            this.appStore.setRightPanelWidth(width);
+        },
         resetEventStartY,
         startPanelResize(e) {
             this._resizeStartX = e.clientX;
-            this._resizeStartWidth = this.itemPanelWidth;
+            this._resizeStartWidth = this.rightPanelWidth;
             document.addEventListener('mousemove', this._onPanelResize);
             document.addEventListener('mouseup', this._stopPanelResize);
             document.body.style.userSelect = 'none';
@@ -163,14 +157,13 @@ export default {
         },
         _onPanelResize(e) {
             const delta = this._resizeStartX - e.clientX;
-            this.itemPanelWidth = Math.max(280, Math.min(800, this._resizeStartWidth + delta));
+            this.setRightPanelWidth(Math.max(280, Math.min(800, this._resizeStartWidth + delta)));
         },
         _stopPanelResize() {
             document.removeEventListener('mousemove', this._onPanelResize);
             document.removeEventListener('mouseup', this._stopPanelResize);
             document.body.style.userSelect = '';
             document.body.style.cursor = '';
-            localStorage.setItem('item-panel-width', this.itemPanelWidth);
         },
     },
     watch: {
@@ -183,7 +176,7 @@ export default {
         },
         '$route.query.showRight'(showRight) {
             if (showRight === undefined) return;
-            this.appStore.setLeftPanelVisibility(JSON.parse(showRight));
+            this.appStore.setRightPanelVisibility(JSON.parse(showRight));
         },
         '$route.query.selectedId_GoalForm'(selectedGoalId) {
             if (selectedGoalId === undefined) return;

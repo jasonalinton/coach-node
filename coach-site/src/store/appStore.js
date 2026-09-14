@@ -1,10 +1,7 @@
 import { defineStore } from 'pinia'
 import { EVENTTYPE, CALENDAR_TYPES } from '../model/constants'
 import { useWorkoutStore } from '@/store/workoutStore'
-import { getWorkoutIDFromEvent } from '../api/workoutAPI'
-import { now } from 'jquery'
-
-// let initialized = false;
+import { LEFT_PANEL_WIDTH, RIGHT_PANEL_WIDTH } from '../model/appDefaults'
 
 /*
 Local Storage:
@@ -47,7 +44,9 @@ export const useAppStore = defineStore('app', {
             dayCount: 7
         },
         itemPanel: {
-            selected: "todo",
+            selected: (localStorage.getItem(`selected-item-panel`) == "undefined") 
+                ? undefined : localStorage.getItem(`selected-item-panel`) 
+                    || "todo",
             briefing: {
                 title: "Briefing"
             },
@@ -118,6 +117,25 @@ export const useAppStore = defineStore('app', {
                 panelQueue: [ ],
 
             },
+        },
+        nav: {
+            selectedPage: localStorage.getItem(`selected-page`) || "planner",
+            pages: [
+                { id: 1, text: "Planner", route: "/planner" },
+                { id: 2, text: "Items", route: "/items/todo" },
+                { id: 3, text: "Physical View", route: "/physical-view" },
+            ]
+        },
+        leftPanel: {
+            isShown: true,
+            width: parseInt(localStorage.getItem('left-panel-width') || `${LEFT_PANEL_WIDTH}`),
+        },
+        rightPanel: {
+            isShown: true,
+            width: parseInt(localStorage.getItem('right-panel-width') || `${RIGHT_PANEL_WIDTH}`),
+        },
+        body: {
+            selectedTodoFormId: undefined,
         }
     }),
     getters: {
@@ -163,14 +181,37 @@ export const useAppStore = defineStore('app', {
                 }
             }
         },
-        setLeftPanelVisibility(isVisible) {
-            this.showLeftPanel = isVisible;
-        },
+        /* Left Panel */
         toggleLeftPanel() {
-            this.showLeftPanel = !this.showLeftPanel;
+            this.setLeftPanelVisibility(!this.leftPanel.isShown);
+        },
+        setLeftPanelVisibility(isVisible) {
+            this.leftPanel.isShown = isVisible;
+            localStorage.setItem('left-panel-visibility', isVisible);
+        },
+        setLeftPanelWidth(width) {
+            this.leftPanel.width = width;
+            localStorage.setItem('left-panel-width', width);
+        },
+        /* Right Panel */
+        toggleRightPanel() {
+            this.setRightPanelVisibility(!this.rightPanel.isShown);
+        },
+        setRightPanelVisibility(isVisible) {
+            this.rightPanel.isShown = isVisible;
+            localStorage.setItem('right-panel-visibility', isVisible);
+        },
+        setRightPanelWidth(width) {
+            this.rightPanel.width = width;
+            localStorage.setItem('right-panel-width', width);
         },
         selectPage(page) {
-            this.navbar.selectedPage = page;
+            this.nav.selectedPage = page;
+            localStorage.setItem('selected-page', page);
+        },
+        setSelectedTodoFormId(id) {
+            this.selectPage('todoForm');
+            this.body.selectedTodoFormId = id;
         },
         selectPlannerView(view) {
             this.planner.selectedView = view;
@@ -189,12 +230,13 @@ export const useAppStore = defineStore('app', {
                     this.isTabBarShown = false;
                 }
             } else {
-                this.itemPanel.selected = panel;
+                this.setSelectedItemPanel(panel);
                 this.navbar.active = "itemPanel";
             }
         },
         setSelectedItemPanel(panel) {
             this.itemPanel.selected = panel;
+            localStorage.setItem(`selected-item-panel`, panel);
         },
         setItemPanelSetting(panel, prop, value) {
             this.itemPanel[panel][prop] = value;

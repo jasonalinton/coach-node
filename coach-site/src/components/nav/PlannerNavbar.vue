@@ -9,10 +9,12 @@
                     <a class="navbar-brand float-left" href="#">Inventory Planner</a>
                 </div>
                 <div class="d-flex flex-row">
-                    <RouterLink class="btn btn-sm" :to="{path: '/planner', query: {page: 'planner', showLeft: true}}">Planner</RouterLink>
-                    <RouterLink class="btn btn-sm" :to="{path: '/items', query: {page: 'items', showLeft: false}}">Items</RouterLink>
+                    <!-- <RouterLink class="btn btn-sm" :to="{path: '/planner', query: {page: 'planner', showLeft: true}}">Planner</RouterLink>
+                    <RouterLink class="btn btn-sm" :to="{path: '/items', query: {page: 'items', showLeft: false}}">Items</RouterLink> -->
                     <!-- <button class="btn btn-sm" type="button" @click="selectPlanner">Planner</button>
                     <button class="btn btn-sm" type="button" @click="selectItems">Items</button> -->
+                    <button class="btn btn-sm" type="button" @click="selectPage('planner')">Planner</button>
+                    <button class="btn btn-sm" type="button" @click="selectPage('items')">Items</button>
                     <button class="btn btn-sm" type="button" @click="selectPage('timeline')">Timeline</button>
                     <button class="btn btn-sm" type="button" @click="selectPage('physical')">Physical</button>
                     <button class="btn btn-sm" type="button" @click="selectPage('mental')">Mental</button>
@@ -78,7 +80,7 @@ export default {
             return (this.plannerStore) ? this.plannerStore.selectedDate : today();
         },
         selectedPage() {
-            return (this.appStore) ? this.appStore.navbar.selectedPage : "planner";
+            return (this.appStore) ? this.appStore.nav.selectedPage : "planner";
         },
         selectedView() {
             return (this.appStore) ? this.appStore.planner.selectedView : "week";
@@ -143,6 +145,13 @@ export default {
 
 .menu-button {
     margin-right: 12px;
+}
+
+.btn:focus {
+    box-shadow: none;
+}
+a.btn {
+    line-height: 36px;
 }
 
 select {
