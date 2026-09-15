@@ -3,13 +3,13 @@
         <nav id="nav-tab">
             <div class="nav nav-tabs justify-content-between" role="tablist">
                 <button id="item-metric-tab" class="nav-link flex-fill" :class="[{ active: selectedTab == 'metric' }]" 
-                        data-bs-toggle="tab" data-bs-target="#nav-metric" type="button" role="tab" aria-controls="nav-home" aria-selected="true" @click="selectedTab = 'metric'">Metrics</button>
+                        data-bs-toggle="tab" data-bs-target="#nav-metric" type="button" role="tab" aria-controls="nav-home" aria-selected="true" @click="selectTab('metric')">Metrics</button>
                 <button id="item-goal-tab" class="nav-link flex-fill" :class="[{ active: selectedTab == 'goal' }]"
-                        data-bs-toggle="tab" data-bs-target="#nav-goal" type="button" role="tab" aria-controls="nav-goal" aria-selected="false" @click="selectedTab = 'goal'">Goals</button>
+                        data-bs-toggle="tab" data-bs-target="#nav-goal" type="button" role="tab" aria-controls="nav-goal" aria-selected="false" @click="selectTab('goal')">Goals</button>
                 <button id="item-todo-tab" class="nav-link flex-fill" :class="[{ active: selectedTab == 'todo' }]"
-                        data-bs-toggle="tab" data-bs-target="#nav-todo" type="button" role="tab" aria-controls="nav-todo" aria-selected="false" @click="selectedTab = 'todo'">Todos</button>
+                        data-bs-toggle="tab" data-bs-target="#nav-todo" type="button" role="tab" aria-controls="nav-todo" aria-selected="false" @click="selectTab('todo')">Todos</button>
                 <button id="item-routine-tab" class="nav-link flex-fill" :class="[{ active: selectedTab == 'routine' }]"
-                        data-bs-toggle="tab" data-bs-target="#nav-routine" type="button" role="tab" aria-controls="nav-routine" aria-selected="false" @click="selectedTab = 'routine'">Routines</button>
+                        data-bs-toggle="tab" data-bs-target="#nav-routine" type="button" role="tab" aria-controls="nav-routine" aria-selected="false" @click="selectTab('routine')">Routines</button>
             </div>
         </nav>
         <ItemTab v-show="selectedTab == 'metric'" 
@@ -37,19 +37,21 @@
 </template>
 
 <script>
+import { useAppStore } from '@/store/appStore'
 import MetricConfig from '../../config/items/metric-config'
 import GoalConfig from '../../config/items/goal-config'
 import TodoConfig from '../../config/items/todo-config'
 import RoutineConfig from '../../config/items/routine-config'
 import ItemConfigModel from '../../config/items/item-config'
 import ItemTab from './ItemTab.vue'
+import { SELECTED_ITEM_TAB } from '../../model/appDefaults'
 
 export default {
   name: 'ItemTabs',
   components: { ItemTab },
   data: function() {
     return {
-      selectedTab: null,
+      appStore: undefined,
       metricConfig: null,
       goalConfig: null,
       todoConfig: null,
@@ -58,18 +60,12 @@ export default {
     }
   },
   created: function() {
+    this.appStore = useAppStore();
+
     this.metricConfig = new ItemConfigModel(MetricConfig);
     this.goalConfig = new ItemConfigModel(GoalConfig);
     this.todoConfig = new ItemConfigModel(TodoConfig);
     this.routineConfig = new ItemConfigModel(RoutineConfig);
-
-    let selectedTab_Store = localStorage.getItem(`selected-item-tab`);
-    if (selectedTab_Store) {
-        this.selectedTab = selectedTab_Store;
-    } else {
-        localStorage.setItem(`selected-item-tab`, this.selectedTab);
-        this.selectedTab = 'goal';
-    }
   },
   async mounted() {
     let itemTableStore = await import(`@/store/itemTableStore`);
@@ -82,9 +78,14 @@ export default {
       }
     });
   },
-  watch: {
-      selectedTab(value) {
-          localStorage.setItem(`selected-item-tab`, value);
+  computed: {
+      selectedTab() {
+          return this.appStore?.itemTabs?.selectedTab || SELECTED_ITEM_TAB;
+      }
+  },
+  methods: {
+      selectTab(tab) {
+          this.appStore.selectItemTab(tab);
       }
   }
 }

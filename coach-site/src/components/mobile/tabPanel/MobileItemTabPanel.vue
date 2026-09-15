@@ -1,18 +1,26 @@
 <template>
     <div class="mobile-tab-panel d-flex flex-grow-1">
-        <DashboardPanel v-show="selectedPanel == 'dashboard'" class="item-panel" :showHead="false" />
-        <MetricPanel v-show="selectedPanel == 'metric'" class="item-panel" :showHead="false" />
-        <GoalPanel v-show="selectedPanel == 'goal'" class="item-panel" :showHead="false" />
-        <TodoPanel v-show="selectedPanel == 'todo'" class="item-panel" :showHead="false" />
-        <RoutinePanel v-show="selectedPanel == 'routine'" class="item-panel" :showHead="false"/>
-        <TaskRoutinePanel v-show="selectedPanel == 'task-routine'" class="item-panel" :showHead="false"/>
-        <PlannerPanel v-show="selectedPanel == 'planner'" class="item-panel" :dayCount="2" :showHead="false"/>
-        <EventPanel v-show="selectedPanel == 'event'" :props="eventPanelProps" class="item-panel" :showHead="false"/>
-        <InventoryPanel v-show="selectedPanel == 'inventory'" class="item-panel" :showHead="false"/>
-        <NutritionPanel v-if="selectedPanel == 'nutrition'" class="item-panel" :showHead="false"/>
-        <WorkoutPanel v-show="selectedPanel == 'workout'" class="item-panel" :showHead="false"
-                        :selectedWorkoutID="workoutPanelProps.selectedWorkoutID"
-                        @selectWorkout="selectWorkout"/>
+        <template v-if="selectedPage == 'items'">
+            <ItemTableAndToolbar v-if="selectedItemTab == 'metric'" itemType="metric" />
+            <ItemTableAndToolbar v-if="selectedItemTab == 'goal'" itemType="goal" />
+            <ItemTableAndToolbar v-if="selectedItemTab == 'todo'" itemType="todo" />
+            <ItemTableAndToolbar v-if="selectedItemTab == 'routine'" itemType="routine" />
+        </template>
+        <template v-else>
+            <DashboardPanel v-show="selectedPanel == 'dashboard'" class="item-panel" :showHead="false" />
+            <MetricPanel v-show="selectedPanel == 'metric'" class="item-panel" :showHead="false" />
+            <GoalPanel v-show="selectedPanel == 'goal'" class="item-panel" :showHead="false" />
+            <TodoPanel v-show="selectedPanel == 'todo'" class="item-panel" :showHead="false" />
+            <RoutinePanel v-show="selectedPanel == 'routine'" class="item-panel" :showHead="false"/>
+            <TaskRoutinePanel v-show="selectedPanel == 'task-routine'" class="item-panel" :showHead="false"/>
+            <PlannerPanel v-show="selectedPanel == 'planner'" class="item-panel" :dayCount="2" :showHead="false"/>
+            <EventPanel v-show="selectedPanel == 'event'" :props="eventPanelProps" class="item-panel" :showHead="false"/>
+            <InventoryPanel v-show="selectedPanel == 'inventory'" class="item-panel" :showHead="false"/>
+            <NutritionPanel v-if="selectedPanel == 'nutrition'" class="item-panel" :showHead="false"/>
+            <WorkoutPanel v-show="selectedPanel == 'workout'" class="item-panel" :showHead="false"
+                            :selectedWorkoutID="workoutPanelProps.selectedWorkoutID"
+                            @selectWorkout="selectWorkout"/>
+        </template>
     </div>
 </template>
 
@@ -29,11 +37,13 @@ import EventPanel from '../../planner/item-panel/event/EventPanel.vue'
 import InventoryPanel from '../../planner/item-panel/inventory/InventoryPanel.vue'
 import NutritionPanel from '../../planner/item-panel/nutrition/NutritionPanel.vue'
 import WorkoutPanel from '../../planner/item-panel/workout/WorkoutPanel.vue'
+import ItemTableAndToolbar from '../../items/table/ItemTableAndToolbar.vue'
+import { SELECTED_PAGE } from '../../../model/appDefaults'
 
 export default {
     name: 'MobileItemTabPanel',
     components: { DashboardPanel, MetricPanel, GoalPanel, TodoPanel, RoutinePanel, TaskRoutinePanel, 
-        PlannerPanel, EventPanel, InventoryPanel, NutritionPanel, WorkoutPanel },
+        PlannerPanel, EventPanel, InventoryPanel, NutritionPanel, WorkoutPanel, ItemTableAndToolbar },
     props: {
         
     },
@@ -50,11 +60,17 @@ export default {
         this.appStore = useAppStore();
     },
     computed: {
+        selectedPage() {
+            return this.appStore?.nav?.selectedPage || SELECTED_PAGE;
+        },
         selectedPanel() {
             if (this.appStore) {
                 return this.appStore.itemPanel.selected;
             }
             return "";
+        },
+        selectedItemTab() {
+            return this.appStore?.itemTabs?.selectedTab || SELECTED_ITEM_TAB;
         }
     },
     methods: {

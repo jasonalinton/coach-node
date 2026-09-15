@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { EVENTTYPE, CALENDAR_TYPES } from '../model/constants'
 import { useWorkoutStore } from '@/store/workoutStore'
-import { LEFT_PANEL_WIDTH, RIGHT_PANEL_WIDTH } from '../model/appDefaults'
+import { LEFT_PANEL_WIDTH, RIGHT_PANEL_WIDTH, SELECTED_ITEM_TAB } from '../model/appDefaults'
 
 /*
 Local Storage:
@@ -136,6 +136,9 @@ export const useAppStore = defineStore('app', {
         },
         body: {
             selectedTodoFormId: undefined,
+        },
+        itemTabs: {
+            selectedTab: localStorage.getItem('selected-item-tab') || SELECTED_ITEM_TAB
         }
     }),
     getters: {
@@ -218,6 +221,10 @@ export const useAppStore = defineStore('app', {
         },
         setPlannerDayCount(count) {
             this.planner.dayCount = count;
+        },
+        selectItemTab(tab) {
+            this.itemTabs.selectedTab = tab;
+            localStorage.setItem('selected-item-tab', tab);
         },
         initItemPanels() {
 

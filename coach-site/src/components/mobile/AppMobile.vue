@@ -7,7 +7,8 @@
             <CalendarMobile  />
         </div>
         <div class="item-panel-tabbar">
-            <ItemPanelTabBar />
+            <MobileItemTabBar v-if="selectedPage == 'items'" />
+            <ItemPanelTabBar v-else />
         </div>
         <div class="tab-panel d-flex">
             <MobileItemTabPanel />
@@ -20,6 +21,7 @@
 import { useAppStore } from '@/store/appStore'
 import MobileNavbar from './navbar/MobileNavbar.vue';
 import ItemPanelTabBar from '../planner/item-panel/ItemPanelTabBar.vue';
+import MobileItemTabBar from './tabPanel/MobileItemTabBar.vue';
 import MobileItemTabPanel from './tabPanel/MobileItemTabPanel.vue';
 import ItemPanel from '../planner/item-panel/ItemPanel.vue';
 import CalendarMobile from './calendar/CalendarMobile.vue';
@@ -31,6 +33,7 @@ export default {
         MobileNavbar,
         CalendarMobile,
         ItemPanelTabBar,
+        MobileItemTabBar,
         MobileItemTabPanel,
         ItemPanel
     },
@@ -45,6 +48,9 @@ export default {
         this.appStore = useAppStore();
     },
     computed: {
+        selectedPage() {
+            return this.appStore?.nav?.selectedPage || SELECTED_PAGE;
+        },
         showTabBar() {
             if (this.appStore) {
                 return this.appStore.isTabBarShown;
