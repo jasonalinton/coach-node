@@ -186,6 +186,15 @@ export default {
             if (selectedTodoId === undefined) return;
             this.selectedId_TodoForm = parseInt(selectedTodoId);
         },
+        selectedPage(page) {
+            if (page == 'planner') {
+                this.appStore.setLeftPanelVisibility(true);
+            } else if (page == 'items') {
+                this.appStore.setLeftPanelVisibility(false);
+            } else if (page == 'physical') {
+                this.appStore.setLeftPanelVisibility(false);
+            }
+        },
         gridColumns: {
             handler() {
                 this.onResize();
