@@ -11,6 +11,7 @@ let initialized = false;
 export const useIterationStore = defineStore('iteration', {
     state: () => ({
         iterations: [],
+        requests: [],
     }),
     getters: {
         
@@ -20,32 +21,76 @@ export const useIterationStore = defineStore('iteration', {
         async initialize() {
             // let promise = this.fill();
             this.connectSocket();
+            this.getIterationsInRange(new Date().firstDayOfMonth(), new Date().lastDayOfMonth());
             initialized = true;
             // return promise;
         },
         // async fill() {
         //     return getIterations().then(res => this.iterations = res);
         // },
+        isRangeLoaded(startAt, endAt) {
+            let start = +new Date(startAt);
+            let end = +new Date(endAt);
+            let covers = (s, e) => +new Date(s) <= start && +new Date(e) >= end;
+
+            return this.requests.some(r =>
+                r.endpoint == "GetIterationsInRange" && r.requestProps
+                && covers(r.requestProps.startAt, r.requestProps.endAt));
+        },
         getIteration(id) {
             return this.iterations.find(x => x.id == id);
         },
         getIterations() {
             return this.iterations;
         },
-        getIterationsInRange(startAt, endAt, shouldRequestServer) {
-            let _this = this;
-            if (shouldRequestServer) {
-                getAllIterationsInRange(startAt, endAt)
-                .then(_iterations => {
-                    let iterations = [..._this.iterations];
-                    _iterations.forEach(iteration => replaceOrAddItem(iteration, iterations));
-                    _this.iterations = sortAsc(iterations, 'startAt');
-                });
+        getIterationsInRange(startAt, endAt) {
+            if (!this.isRangeLoaded(startAt, endAt)) {
+                let request = {
+                    endpoint: "GetIterationsInRange",
+                    requestProps: { startAt, endAt },
+                    requestTime: new Date(),
+                    isProcessing: true
+                };
+                this.requests.push(request);
+                
+                let dropRequest = () => { this.requests = this.requests.filter(r => r !== request); };
+
+                postEndpoint("Planner", "GetIterationsInRange", { startAt, endAt })
+                .then(response => {
+                    if (!response || !response.status || !response.status.success) {
+                        dropRequest();
+                        return;
+                    }
+                    
+                    let iterations = [...this.iterations];
+                    response.result.forEach(iteration => replaceOrAddItem(iteration, iterations));
+                    this.iterations = sortAsc(iterations);
+                    
+                    this.runUpdates(response);
+                    request.isProcessing = false;
+                    return response;
+                })
+                .catch(dropRequest);
             }
+
             return this.iterations.filter(iteration => {
-                return (new Date(iteration.startAt)).getTime() >= startAt && (new Date(iteration.startAt)).getTime() <= endAt;
+                return +iteration.startAt.toDate() >= startAt && +iteration.startAt.toDate() <= endAt;
             });
         },
+        // getIterationsInRange(startAt, endAt, shouldRequestServer) {
+        //     let _this = this;
+        //     if (shouldRequestServer) {
+        //         getAllIterationsInRange(startAt, endAt)
+        //         .then(_iterations => {
+        //             let iterations = [..._this.iterations];
+        //             _iterations.forEach(iteration => replaceOrAddItem(iteration, iterations));
+        //             _this.iterations = sortAsc(iterations, 'startAt');
+        //         });
+        //     }
+        //     return this.iterations.filter(iteration => {
+        //         return +iteration.startAt.toDate() >= startAt && +iteration.startAt.toDate() <= endAt;
+        //     });
+        // },
         getIterationsInTimeframe(idTimeframe, selectedDate) {
             var { start, end } = getTimeframeEndpoints(idTimeframe, selectedDate);
             return this.iterations.filter(iteration => {

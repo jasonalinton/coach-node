@@ -26,6 +26,12 @@ Date.prototype.firstDayOfWeek = function() {
 Date.prototype.lastDayOfWeek = function() {
   return moment(this).endOf('week').toDate();
 }
+Date.prototype.firstDayOfMonth = function() {
+  return moment(this).startOf('month').toDate();
+}
+Date.prototype.lastDayOfMonth = function() {
+  return moment(this).endOf('month').toDate();
+}
 String.prototype.startOfDay = function() {
   let date = this.toDate();
   return date.startOfDay();
@@ -41,6 +47,14 @@ String.prototype.firstDayOfWeek = function() {
 String.prototype.lastDayOfWeek = function() {
   let date = this.toDate();
   return date.firstDayOfWeek()
+}
+String.prototype.firstDayOfMonth = function() {
+  let date = this.toDate();
+  return date.firstDayOfMonth();
+}
+String.prototype.lastDayOfMonth = function() {
+  let date = this.toDate();
+  return date.lastDayOfMonth()
 }
 String.prototype.toDate = function() {
   let array = this.split("T");
