@@ -1,0 +1,1 @@
+import{d}from"./index-FU09jgde.js";const g=d("itemTable",{state:()=>({dragged:{item:void 0,parent:void 0},containerWidth:0}),getters:{getDragged(){return this.dragged}},actions:{setDraggedProps(e,t){this.dragged.item=e,this.dragged.parent=t},clearDraggedProps(){this.dragged.item=void 0,this.dragged.parent=void 0}}});export{g as useItemTableStore};
