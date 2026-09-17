@@ -48,7 +48,9 @@ export default {
         },
     },
     methods: {
-        selectPage,
+        selectPage(page) {
+            this.appStore.selectPage(page)
+        },
     },
 }
 

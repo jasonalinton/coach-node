@@ -21,9 +21,6 @@ export const useItemTableStore = defineStore('itemTable', {
         clearDraggedProps() {
             this.dragged.item = undefined;
             this.dragged.parent = undefined;
-        },
-        setContainerWidth(width) {
-            this.containerWidth = width;
         }
     },
 })

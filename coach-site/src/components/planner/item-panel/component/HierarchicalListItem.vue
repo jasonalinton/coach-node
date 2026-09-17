@@ -137,7 +137,7 @@ export default {
 }
 
 function showTodoForm() {
-    this.appStore.setSelectedTodoFormId(this.viewModel.todoID);
+    this.appStore.selectTodoForm(this.viewModel.todoID);
     // this.$router.push({ path: '/', query: { page: 'todoForm', selectedId_TodoForm: this.viewModel.todoID }});
 }
 

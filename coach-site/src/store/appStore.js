@@ -135,7 +135,8 @@ export const useAppStore = defineStore('app', {
             width: parseInt(localStorage.getItem('right-panel-width') || `${RIGHT_PANEL_WIDTH}`),
         },
         body: {
-            selectedTodoFormId: undefined,
+            selectedTodoFormId: localStorage.getItem('selected-todo-form-id'),
+            selectedGoalFormId: localStorage.getItem('selected-goal-form-id'),
         },
         itemTabs: {
             selectedTab: localStorage.getItem('selected-item-tab') || SELECTED_ITEM_TAB
@@ -212,9 +213,15 @@ export const useAppStore = defineStore('app', {
             this.nav.selectedPage = page;
             localStorage.setItem('selected-page', page);
         },
-        setSelectedTodoFormId(id) {
+        selectTodoForm(id) {
             this.selectPage('todoForm');
             this.body.selectedTodoFormId = id;
+            localStorage.setItem('selected-todo-form-id', id);
+        },
+        selectGoalForm(id) {
+            this.selectPage('goalForm');
+            this.body.selectedGoalFormId = id;
+            localStorage.setItem('selected-goal-form-id', id);
         },
         selectPlannerView(view) {
             this.planner.selectedView = view;

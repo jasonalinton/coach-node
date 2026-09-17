@@ -1,5 +1,5 @@
 <template>
-    <div id="items" ref="itemContainer">
+    <div id="items">
         <nav id="nav-tab">
             <div class="nav nav-tabs justify-content-between" role="tablist">
                 <button id="item-metric-tab" class="nav-link flex-fill" :class="[{ active: selectedTab == 'metric' }]" 
@@ -56,7 +56,6 @@ export default {
       goalConfig: null,
       todoConfig: null,
       routineConfig: null,
-      itemTableStore: undefined,
     }
   },
   created: function() {
@@ -66,17 +65,6 @@ export default {
     this.goalConfig = new ItemConfigModel(GoalConfig);
     this.todoConfig = new ItemConfigModel(TodoConfig);
     this.routineConfig = new ItemConfigModel(RoutineConfig);
-  },
-  async mounted() {
-    let itemTableStore = await import(`@/store/itemTableStore`);
-    this.itemTableStore = itemTableStore.useItemTableStore();
-    let _this = this;
-    this.itemTableStore.setContainerWidth(_this.$refs.itemContainer.clientWidth)
-    window.addEventListener('resize', function() {
-      if (_this.$refs.itemContainer.clientWidth) {
-        _this.itemTableStore.setContainerWidth(_this.$refs.itemContainer.clientWidth)
-      }
-    });
   },
   computed: {
       selectedTab() {

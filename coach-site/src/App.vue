@@ -14,7 +14,7 @@
                 <Planner v-show="selectedPage == 'planner'" />
                 <ItemTabs v-show="selectedPage == 'items'" />
                 <BlogTimeline v-show="selectedPage == 'timeline'" />
-                <GoalForm v-if="selectedPage == 'goalForm'" :id="selectedId_GoalForm" />
+                <GoalForm v-if="selectedPage == 'goalForm'" :id="selectedGoalFormId" />
                 <TodoForm v-if="selectedPage == 'todoForm'" :id="selectedTodoFormId" />
                 <PhysicalView v-show="selectedPage == 'physical'" />
                 <MentalView v-show="selectedPage == 'mental'" />
@@ -91,8 +91,6 @@ export default {
             eventStore: undefined,
             _resizeStartX: 0,
             _resizeStartWidth: 0,
-            selectedId_GoalForm: undefined,
-            selectedId_TodoForm: undefined,
         };
     },
     created: async function () {
@@ -135,6 +133,9 @@ export default {
         },
         selectedTodoFormId() {
             return (this.appStore) ? this.appStore.body.selectedTodoFormId : undefined;
+        },
+        selectedGoalFormId() {
+            return (this.appStore) ? this.appStore.body.selectedGoalFormId : undefined;
         },
     },
     methods: {
@@ -180,11 +181,11 @@ export default {
         },
         '$route.query.selectedId_GoalForm'(selectedGoalId) {
             if (selectedGoalId === undefined) return;
-            this.selectedId_GoalForm = parseInt(selectedGoalId);
+            this.appStore.selectGoalForm(selectedGoalId);
         },
         '$route.query.selectedId_TodoForm'(selectedTodoId) {
             if (selectedTodoId === undefined) return;
-            this.selectedId_TodoForm = parseInt(selectedTodoId);
+            this.appStore.selectTodoForm(selectedTodoId);
         },
         selectedPage(page) {
             if (page == 'planner') {
@@ -192,6 +193,8 @@ export default {
             } else if (page == 'items') {
                 this.appStore.setLeftPanelVisibility(false);
             } else if (page == 'physical') {
+                this.appStore.setLeftPanelVisibility(false);
+            } else if (['todoForm', 'goalForm'].includes(page)) {
                 this.appStore.setLeftPanelVisibility(false);
             }
         },
@@ -240,7 +243,9 @@ async function initStores() {
 function onResize() {
     this.appStore.setWindowSize(window.innerWidth, window.innerHeight);
     this.appStore.setWindowOuterSize(window.outerWidth, window.outerHeight);
-    this.appStore.setBodyOuterSize(this.$refs['body'].clientWidth, this.$refs['body'].clientHeight);
+    if (!this.isExtraSmall) {
+        this.appStore.setBodyOuterSize(this.$refs['body'].clientWidth, this.$refs['body'].clientHeight);
+    }
 }
 
 function resetEventStartY() {

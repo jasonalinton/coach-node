@@ -151,16 +151,16 @@ export default {
             tableWidth: this.width,
             shownItems: [],
             store: null,
+            appStore: null,
             metricStore: undefined,
             goalStore: undefined,
             routineStore: undefined,
             todoStore: undefined,
-            itemTableStore: undefined,
         }
     },
     created: async function() {
-        let itemTableStore = await import(`@/store/itemTableStore`);
-        this.itemTableStore = itemTableStore.useItemTableStore();
+        let appStore = await import(`@/store/appStore`);
+        this.appStore = appStore.useAppStore();
         
         let metricStore = await import(`@/store/metricStore`);
         this.metricStore = metricStore.useMetricStore();
@@ -180,7 +180,7 @@ export default {
     },
     computed: {
         itemTypeCapitalized() { return capitalize(this.itemType); },
-        width() { return (this.itemTableStore) ? this.itemTableStore.containerWidth : 0 },
+        width() { return this.appStore?.bodyOuterWidth || 0; },
         showRootOnly() { return (this.options.showRootOnly && this.searchTerm == "") ? true : false },
         columns() {
             let columns = [];

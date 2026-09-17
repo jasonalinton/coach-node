@@ -1,13 +1,13 @@
 <template>
-    <div v-if="todoClone" :id="`todo-form-${id}`" class="d-flex flex-column h-100">
-        <div class="d-flex">
-            <span class="me-2">Todo {{ (todo) ? todo.id : "" }}</span>
-            <span class="activity-type" :style="{ 'background-color': activityTypeColor || 'lightskyblue' }">{{ activityType }}</span>
+    <div v-if="todoClone" :id="`todo-form-${id}`" class="@container todo-form d-flex flex-column h-100">
+        <!-- Header -->
+        <div class="form-header d-flex flex-row justify-content-between">
+            <div class="d-flex">
+                <span class="me-2">Todo {{ (todo) ? todo.id : "" }}</span>
+                <span class="activity-type" :style="{ 'background-color': activityTypeColor || 'lightskyblue' }">{{ activityType }}</span>
+            </div>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
                     @click="close"></button>
-        </div>
-        <div>
-
         </div>
         <div v-if="!mapper.isShown" class="d-flex flex-column">
             <div class="d-flex flex-column">
@@ -18,56 +18,60 @@
                         spellcheck="true"/>
                 </div>
                 <!-- Toolbar -->
-                <div class="toolbar d-flex flex-row mt-1">
+                <div class="toolbar d-flex flex-col @3xl:flex-row mt-1">
                     <!-- Metrics -->
                     <div class="metrics d-flex flex-row">
                         <span v-for="metric in metrics" :key="metric.id"
                                 class="metric" :class="{ 'active': hasMetric(metric.id)}"
                                 @click="toggleMetric(metric.id)">{{ metric.text }}</span>
                     </div>
-                    <!-- Points -->
-                    <div class="input-wrrapper d-flex flex-row">
-                        <label class="me-1" :for="`todo-${id}-points`">Points</label>
-                        <input type="number" class="form-control form-control-sm" :id="`todo-${id}-points`"
-                                :value="points.value"
-                                @blur="points.value = $event.target.value">
-                    </div>
-                    <!-- Type -->
-                    <div class="input-wrrapper d-flex flex-row">
-                        <label class="me-1" :for="`todo-${id}-type`">Type</label>
-                        <select :id="`todo-${id}-type`" class="form-select form-select-sm" aria-label="select" v-model="typeID.value"> 
-                            <option :value="null">None</option> 
-                            <option v-for="todoType in todoTypes" v-bind:key="todoType.id" :value="todoType.id">{{todoType.text}}</option> 
-                        </select>
-                    </div>
-                    <!-- Meduim -->
-                    <div class="input-wrrapper d-flex flex-row">
-                        <label class="me-1" :for="`todo-${id}-type`">Meduim</label>
-                        <select :id="`todo-${id}-type`" class="form-select form-select-sm" aria-label="select" v-model="mediumID.value"> 
-                            <option :value="null">None</option> 
-                            <option v-for="medium in mediums" v-bind:key="medium.id" :value="medium.id">{{medium.text}}</option> 
-                        </select>
+                    <div class="flex mx-2">          
+                        <!-- Points -->
+                        <div class="input-wrrapper d-flex flex-row">
+                            <label class="me-1" :for="`todo-${id}-points`">Points</label>
+                            <input type="number" class="form-control form-control-sm" :id="`todo-${id}-points`"
+                                    :value="points.value"
+                                    @blur="points.value = $event.target.value">
+                        </div>
+                        <!-- Type -->
+                        <div class="input-wrrapper d-flex flex-row">
+                            <label class="me-1" :for="`todo-${id}-type`">Type</label>
+                            <select :id="`todo-${id}-type`" class="form-select form-select-sm" aria-label="select" v-model="typeID.value"> 
+                                <option :value="null">None</option> 
+                                <option v-for="todoType in todoTypes" v-bind:key="todoType.id" :value="todoType.id">{{todoType.text}}</option> 
+                            </select>
+                        </div>
+                        <!-- Meduim -->
+                        <div class="input-wrrapper d-flex flex-row">
+                            <label class="me-1" :for="`todo-${id}-type`">Meduim</label>
+                            <select :id="`todo-${id}-type`" class="form-select form-select-sm" aria-label="select" v-model="mediumID.value"> 
+                                <option :value="null">None</option> 
+                                <option v-for="medium in mediums" v-bind:key="medium.id" :value="medium.id">{{medium.text}}</option> 
+                            </select>
+                        </div>
                     </div>
                 </div>
             </div>
-                <div class="d-flex g-2 pt-2">
-                    <div class="col-12 col-sm-4">
-                        <!-- Description -->
-                        <div class="d-flex flex-column">
-                            <div class="header d-flex flex-column">
-                                <div class="d-flex flex-row justify-content-between">
-                                    <span class="text-start">Description</span>
-                                    <img class="mt-auto mb-auto me-2" src="/icon/caret-right.png" width="5" height="8"/>
-                                </div>
-                                <hr/>
+            <div class="form-body d-flex flex-col @xl:flex-row flex-wrap g-2 pt-2">
+                <!-- <div class="col-12 col-sm-4"> -->
+                <div class="grow-1 @xl:basis-full @5xl:basis-auto">
+                    <!-- Description -->
+                    <div class="d-flex flex-column">
+                        <div class="header d-flex flex-column">
+                            <div class="d-flex flex-row justify-content-between">
+                                <span class="text-start">Description</span>
+                                <img class="mt-auto mb-auto me-2" src="/icon/caret-right.png" width="5" height="8"/>
                             </div>
-                            <textarea class="textarea" 
-                                        v-model.lazy.trim="description.value"
-                                        spellcheck="true"></textarea>
+                            <hr/>
                         </div>
+                        <textarea class="textarea" 
+                                    v-model.lazy.trim="description.value"
+                                    spellcheck="true"></textarea>
                     </div>
+                </div>
+                <div class="flex flex-col @xl:flex-row flex-wrap grow-1 g-2 pt-2">
                     <!-- Item Mapping -->
-                    <div class="col-6 col-sm-4 form-column">
+                    <div class="form-column grow-1">
                         <!-- Parents -->
                         <FormItemList itemType="todo" :itemIDs="parentIDs" :isParent="true"
                                         parentType="todo" :parentID="id" :repeatIDs="repeatIDs"
@@ -81,7 +85,7 @@
                                         parentType="todo" :parentID="id" :repeatIDs="repeatIDs"
                                         @addItemClicked="addItemClicked" @addItem="addItem"/>
                     </div>
-                    <div class="col-6 col-sm-4 d-flex flex-column">
+                    <div class="d-flex flex-column">
                         <!-- Repetition -->
                         <div>
                             <span class="form-head">Repetition</span>
@@ -116,6 +120,7 @@
                         </div>
                     </div>
                 </div>
+            </div>
             <div v-if="mapper.isShown" class="container">
                 <div class="row g-2">
                     <div class="col-12">
@@ -132,7 +137,8 @@
                 </div>
             </div>
         </div>
-        <div v-if="!mapper.isShown" class="modal-footer">
+        <!-- Footer -->
+        <div v-if="!mapper.isShown" class="form-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @click="createTask">{{`Create Task ${dateString}`}}</button>
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             <button type="button" class="btn btn-primary" @click="save">Save</button>
@@ -503,7 +509,7 @@ export default {
         todoModel(todo) {
             // handler(todo) {
                 if (todo) {
-                    this.todoClone = this.todoModel.clone(this.componentName);
+                    this.todoClone = this.todoModel.clone(this.componentName).data;
                 }
             // },
             // deep: true
@@ -550,24 +556,28 @@ export default {
         },
     },
     unmounted() {
-        if (this.todoClone) {
-            this.todoClone.removeVersion(this.componentName);
+        if (this.todoModel) {
+            this.todoModel.removeVersion(this.componentName);
         }
-        if (this.todoClone && this.todoClone.id < 0) {
-            this.store.removeNewTodo(this.todoClone.id);
+        if (this.todoModel && this.todoModel.id < 0) {
+            this.store.removeNewTodo(this.todoModel.id);
         }
     }
 }
 </script>
 
 <style scoped>
-.modal-header {
+.todo-form {
+    padding: 16px 0;
+}
+
+.form-header {
     padding: 4px 16px 0 26px;
     border-bottom: none;
 }
 
-.modal-body {
-    padding: 0px;
+.form-body {
+    padding: 0px 16px;
 }
 
 .modal-tital {
@@ -613,7 +623,8 @@ export default {
 }
 
 .toolbar {
-    height: 60px;
+    /* height: 60px; */
+    padding: 6px 0;
     background-color: #F5F5F5;
 }
 
@@ -650,4 +661,8 @@ hr {
 .points {
     height: 30px;
 }
+</style>
+
+<style scoped>
+@import "tailwindcss";
 </style>

@@ -142,6 +142,9 @@ function getGoalIDs(idTodo, goalIDs, todoIDs_Checked) {
     todoIDs_Checked.push(idTodo);
 
     let todo = this.todoStore.getItem(idTodo);
+    if (!todo) {
+        return;
+    }
     todo.goalIDs.forEach(id => {
         if (!goalIDs.includes(id)) {
             goalIDs.push(id);

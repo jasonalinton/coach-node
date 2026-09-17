@@ -6,11 +6,11 @@
         <div class="calendar" :class="[{'empty': !showCalendar}]">
             <CalendarMobile  />
         </div>
-        <div class="item-panel-tabbar">
+        <div class="tabbar">
             <MobileItemTabBar v-if="selectedPage == 'items'" />
             <ItemPanelTabBar v-else />
         </div>
-        <div class="tab-panel d-flex">
+        <div class="tab-panel d-flex" ref="body">
             <MobileItemTabPanel />
         </div>
         <ItemPanel v-show="false" class="item-panel" />
@@ -47,6 +47,15 @@ export default {
     created: async function () {
         this.appStore = useAppStore();
     },
+    beforeUnmount () {
+        if (typeof window !== 'undefined') {
+            window.removeEventListener('resize', this.onResize, { passive: true });
+        }
+    },
+    mounted () {
+        this.onResize()
+        window.addEventListener('resize', this.onResize, { passive: true });
+    },
     computed: {
         selectedPage() {
             return this.appStore?.nav?.selectedPage || SELECTED_PAGE;
@@ -65,7 +74,9 @@ export default {
         }
     },
     methods: {
-        
+        onResize() {
+            this.appStore.setBodyOuterSize(this.$refs['body'].clientWidth, this.$refs['body'].clientHeight);
+        }
     },
     watch: {
         
@@ -108,7 +119,7 @@ export default {
     border: none;
 }
 
-.item-panel-tabbar {
+.tabbar {
     grid-row: 3;
     grid-column: 1;
     height: 100%;

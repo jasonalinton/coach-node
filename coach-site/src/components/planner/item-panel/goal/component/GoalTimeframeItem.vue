@@ -136,6 +136,7 @@ export default {
     data: function () {
         return {
             TIMEFRAME,
+            appStore: undefined,
             plannerStore: undefined,
             goalStore: undefined,
             iterationStore: undefined,
@@ -152,6 +153,9 @@ export default {
         }
     },
     created: async function() {
+        let appStore = await import(`@/store/appStore`);
+        this.appStore = appStore.useAppStore();
+
         let plannerStore = await import(`@/store/plannerStore`);
         this.plannerStore = plannerStore.usePlannerStore();
 
@@ -365,7 +369,7 @@ function onSetToTimeframe(idTimeframe) {
 }
 
 function showGoalForm() {
-    this.$router.push({ path: '/', query: { page: 'goalForm', selectedId_GoalForm: this.goalID }});
+    this.appStore.selectGoalForm(this.goalID);
 }
 </script>
 
