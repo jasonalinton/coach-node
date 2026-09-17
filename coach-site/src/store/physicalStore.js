@@ -20,7 +20,7 @@ export const usePhysicalStore = defineStore('physical', {
     },
     actions: {
         async initialize() {
-            let _this = this;
+            this.fill();
             this.connectSocket();
             let now = new Date();
             this.getNutritionHistory(null, addYear(now, -1), addDay(now, 1))
@@ -34,6 +34,13 @@ export const usePhysicalStore = defineStore('physical', {
                 });
 
             initialized = true;
+        },
+        async fill() {
+            return this.getNutritionHistory(null, addYear(now, -1), addDay(now, 1))
+            .then(result => {  
+                this.mealHistories = result.meals;
+                this.waterLogs = result.waterLogs;
+             });
         },
         async getNutritionHistory(idTimeframe, startAt, endAt) {
             return postEndpoint("Physical", "GetNutritionHistory", { idTimeframe, startAt, endAt })

@@ -222,15 +222,16 @@ async function initStores() {
     let todoStore = useTodoStore();
     let routineStore = useRoutineStore();
 
+    let metricPromise = metricStore.initialize();
+    let goalPromise = goalStore.initialize();
+    let todoPromise = todoStore.initialize();
+    let routinePromise = routineStore.initialize();
+    
     this.plannerStore.initialize();
     universalStore.initialize();
     this.eventStore.initialize();
     iterationStore.initialize();
     physicalStore.initialize();
-    let metricPromise = metricStore.initialize();
-    let goalPromise = goalStore.initialize();
-    let todoPromise = todoStore.initialize();
-    let routinePromise = routineStore.initialize();
 
     await Promise.all([metricPromise, goalPromise, todoPromise, routinePromise]).then(() => {
         metricStore.initializeItems();

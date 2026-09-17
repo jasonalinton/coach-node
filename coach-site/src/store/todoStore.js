@@ -16,6 +16,7 @@ export const useTodoStore = defineStore('todo', {
     state: () => ({
         todos: [],
         todoModels: [],
+        requests: [],
         draggedKanbanTask: null
     }),
     getters: {
@@ -29,9 +30,9 @@ export const useTodoStore = defineStore('todo', {
             return promise;
         },
         async fill() {
-            return getTodos().then(res => {
-                this.todos = res;
-                res.forEach(todo => {
+            return this.requestTodos().then(todos => {
+                this.todos = todos;
+                todos.forEach(todo => {
                     this.todoModels.push(new Todo(todo));
                 });
             });
@@ -51,7 +52,43 @@ export const useTodoStore = defineStore('todo', {
                 todo.routines = markRaw(routineStore.getItems().filter(x => todo.routineIDs.includes(x.id)));
             })
         },
+        isRequestProcessing() {
+            return this.requests.some(r => r.endpoint == "GetTodos" && r.isProcessing);
+        },
+        // getTodos() {
+        //     return postEndpoint("Todo", "GetTodos")
+        //     .then(response => response.result);
+        // },
         getItems() {
+            return this.todos;
+        },
+        requestTodos() {
+            let request = {
+                endpoint: "GetTodos",
+                requestProps: undefined,
+                requestTime: new Date(),
+                isProcessing: true
+            };
+            this.requests.push(request);
+            let dropRequest = () => { this.requests = this.requests.filter(r => r !== request); };
+
+            postEndpoint("Todo", "GetTodos")
+            .then(response => {
+                if (!response || !response.status || !response.status.success) {
+                    dropRequest();
+                    return;
+                }
+                
+                let todos = [...this.todos];
+                response.result.forEach(todo => replaceOrAddItem(todo, todos));
+                this.todos = sortAsc(todos);
+                
+                this.runUpdates(response);
+                request.isProcessing = false;
+                return response;
+            })
+            .catch(dropRequest);
+
             return this.todos;
         },
         getItemsByID(ids) {
