@@ -181,6 +181,7 @@ export default {
     computed: {
         itemTypeCapitalized() { return capitalize(this.itemType); },
         width() { return this.appStore?.bodyOuterWidth || 0; },
+        shownItemsById() { return new Map(this.shownItems.map(x => [x.id, x])); },
         showRootOnly() { return (this.options.showRootOnly && this.searchTerm == "") ? true : false },
         columns() {
             let columns = [];
@@ -242,9 +243,9 @@ export default {
         newStateModel,
         getUpdatedSelectedColumns,
         getStore(itemType) { return this[`${itemType}Store`]; },
-        states(item) { return  this.shownItems.find(x => x.id === item.id).states; },
+        states(item) { return this.shownItemsById.get(item.id).states; },
         showItems(id, prop) {
-            let states = this.shownItems.find(x => x.id === id).states;
+            let states = this.shownItemsById.get(id).states;
             let value = !states[prop.toLowerCase()];
             for (let _prop in states) { states[_prop] = false; }
             states[prop.toLowerCase()] = value;
