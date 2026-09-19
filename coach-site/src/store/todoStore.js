@@ -30,12 +30,7 @@ export const useTodoStore = defineStore('todo', {
             return promise;
         },
         async fill() {
-            return this.requestTodos().then(todos => {
-                this.todos = todos;
-                todos.forEach(todo => {
-                    this.todoModels.push(new Todo(todo));
-                });
-            });
+            return this.requestTodos();
         },
         initializeItems(todos, allTodos) {
             let metricStore = useMetricStore();
@@ -72,7 +67,7 @@ export const useTodoStore = defineStore('todo', {
             this.requests.push(request);
             let dropRequest = () => { this.requests = this.requests.filter(r => r !== request); };
 
-            postEndpoint("Todo", "GetTodos")
+            return postEndpoint("Todo", "GetTodos")
             .then(response => {
                 if (!response || !response.status || !response.status.success) {
                     dropRequest();
@@ -80,7 +75,12 @@ export const useTodoStore = defineStore('todo', {
                 }
                 
                 let todos = [...this.todos];
+                // Replace items
                 response.result.forEach(todo => replaceOrAddItem(todo, todos));
+                // Fill todo models
+                todos.forEach(todo => {
+                    this.todoModels.push(new Todo(todo));
+                });
                 this.todos = sortAsc(todos);
                 
                 this.runUpdates(response);
@@ -88,8 +88,6 @@ export const useTodoStore = defineStore('todo', {
                 return response;
             })
             .catch(dropRequest);
-
-            return this.todos;
         },
         getItemsByID(ids) {
             return this.todos.filter(x => ids.includes(x.id));
