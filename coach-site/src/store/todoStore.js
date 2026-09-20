@@ -6,7 +6,7 @@ import { getSocketConnection, deferUpdate } from './socket'
 import { useMetricStore } from '@/store/metricStore'
 import { useGoalStore } from '@/store/goalStore'
 import { useRoutineStore } from '@/store/routineStore'
-import { postEndpoint } from '../api/api';
+import { attemptPostEndpoint, postEndpoint } from '../api/api';
 import { TODOTYPE } from '../model/constants';
 import Todo from '../model/item/Todo';
 
@@ -50,6 +50,10 @@ export const useTodoStore = defineStore('todo', {
         isRequestProcessing() {
             return this.requests.some(r => r.endpoint == "GetTodos" && r.isProcessing);
         },
+        wasRequested(endpoint, props) {
+            var wasRequested = this.requests.some(r => r.endpoint == endpoint && JSON.stringify(r.props) == JSON.stringify(props));
+            return wasRequested;
+        },
         // getTodos() {
         //     return postEndpoint("Todo", "GetTodos")
         //     .then(response => response.result);
@@ -57,11 +61,21 @@ export const useTodoStore = defineStore('todo', {
         getItems() {
             return this.todos;
         },
+        requestTodo(idTodo) {
+            return attemptPostEndpoint("Todo", "GetTodo", { id: idTodo }, { 'All-Properties': "true" })
+                .then(response => {
+                    replaceOrAddItem(response.result, this.todos);
+                    replaceOrAddItem(new Todo(response.result), this.todoModels);
+                    
+                    this.runUpdates(response);
+                    return response;
+                });
+        },
         requestTodos() {
             let request = {
                 endpoint: "GetTodos",
-                requestProps: undefined,
-                requestTime: new Date(),
+                props: undefined,
+                time: new Date(),
                 isProcessing: true
             };
             this.requests.push(request);
@@ -96,6 +110,7 @@ export const useTodoStore = defineStore('todo', {
             return this.todos.find(x => x.id == id);
         },
         getItemModel(id) {
+            this.requestTodo(id);
             return this.todoModels.find(x => x.id == id);
         },
         getMemorizationTodos(shouldRequestServer) {

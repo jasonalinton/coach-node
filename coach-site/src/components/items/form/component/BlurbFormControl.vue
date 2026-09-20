@@ -86,6 +86,7 @@
                      :class="{ selected: blurb.id == selectedID}"
                      @click="editBlurb(blurb.id)">
                     <!-- <span class="text-start">{{ getDateString(blurb.datetime) }}</span> -->
+                    <h6 class="text-start">{{ blurb.title }}</h6>
                     <span class="text-start">{{ blurb.text }}</span>
                     <!-- Goal-TimePair IDs -->
                     <div v-if="blurb.goalTimePairs.length > 0" class="goal-timepair d-flex flex-row gap-2">

@@ -47,6 +47,7 @@ export default {
     },
     data: function() {
         return {
+            appStore: undefined,
             sortBy: null,
             searchTerm: "",
             selectedColumns: null,
@@ -60,20 +61,26 @@ export default {
             modal: undefined
         }
     },
+    created: async function() {
+        let appStore = await import(`@/store/appStore`);
+        this.appStore = appStore.useAppStore();
+    },
     methods: {
         async openItemForm(data) {
-            this.form.id = undefined;
-            this.form.itemType = undefined
-            await this.$nextTick();
-            this.form.id = data.id;
-            this.form.itemType = data.itemType;
-            await this.$nextTick();
-            this.modal = new Modal(this.$refs[`${data.itemType}-${data.id}-Modal`]);
-            if (data.itemType == "goal" || data.itemType == "todo" || data.itemType == "routine" || data.itemType == "metric") {
-                this.modal.show();
-            } 
-
-            // myModal.handleUpdate()
+            if (data.itemType == "todo") {
+                this.appStore.selectTodoForm(data.id);
+            } else {
+                this.form.id = undefined;
+                this.form.itemType = undefined
+                await this.$nextTick();
+                this.form.id = data.id;
+                this.form.itemType = data.itemType;
+                await this.$nextTick();
+                this.modal = new Modal(this.$refs[`${data.itemType}-${data.id}-Modal`]);
+                if (data.itemType == "goal" || data.itemType == "todo" || data.itemType == "routine" || data.itemType == "metric") {
+                    this.modal.show();
+                } 
+            }
         },
         async addItem(itemType) {
             this.form.id = undefined;

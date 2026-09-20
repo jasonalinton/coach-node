@@ -30,6 +30,19 @@ export const useUniversalStore = defineStore('universal', {
             }
             return blurb;
         },
+        getBlurbsWithID(ids) {
+            let blurbs = this.blurbs.filter(b => ids.includes(b.id))
+            if (blurbs.length != ids.length) {
+                postEndpoint("Universal", "GetBlurbsWithIDs", { ids })
+                    .then(response => {
+                        response.result.forEach(blurb => {
+                            replaceOrAddItem(blurb, this.blurbs);
+
+                        })
+                    });
+            }
+            return blurbs;
+        },
         getBlurbs(idTimeframe, datetime) {
             let _this = this;
             postEndpoint("Universal", "GetBlurbs", { idTimeframe, datetime})

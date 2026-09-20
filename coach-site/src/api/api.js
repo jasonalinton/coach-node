@@ -12,12 +12,43 @@ import { useIterationStore } from '@/store/iterationStore'
 import { useEventStore } from '@/store/eventStore'
 import { usePhysicalStore } from '@/store/physicalStore'
 
-export async function postEndpoint(controller, endpoint, data) {
+const requests = [];
+
+function shouldRequest(endpoint, props) {
+    var doRequest = requests.some(r => r.endpoint == endpoint && JSON.stringify(r.props) == JSON.stringify(props));
+    return doRequest;
+}
+
+export async function attemptPostEndpoint(controller, endpoint, props, headers)  {
+    let request = {
+        controller,
+        endpoint,
+        props,
+        time: new Date(),
+        isProcessing: true
+    };
+    if (!shouldRequest(endpoint, props)) {
+        requests.push(request);
+        let dropRequest = () => { requests = requests.filter(r => r !== request); };
+
+        return postEndpoint(controller, endpoint, props, headers).then(response => {
+            if (!response || !response.status || !response.status.success) {
+                dropRequest();
+                return;
+            }
+            request.isProcessing = false;
+            return response;
+        })
+    }
+}
+
+export async function postEndpoint(controller, endpoint, data, headers) {
     return fetch(`${URL}/api/${controller}/${endpoint}`, {
         method: 'POST',
         headers: { 
             'Content-Type': 'application/json',
-            'Return-Updates': !isSignalRConnected()
+            'Return-Updates': !isSignalRConnected(),
+            ...headers
          },
         body: JSON.stringify(data)
     })

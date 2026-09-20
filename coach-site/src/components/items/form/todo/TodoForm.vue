@@ -9,7 +9,7 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
                     @click="close"></button>
         </div>
-        <div v-if="!mapper.isShown" class="d-flex flex-column">
+        <div v-if="!fullscreen" class="d-flex flex-column">
             <div class="d-flex flex-column">
                 <!-- Text -->
                 <div class="text-wrapper">
@@ -68,6 +68,9 @@
                                     v-model.lazy.trim="description.value"
                                     spellcheck="true"></textarea>
                     </div>
+                    <!-- Blurbs -->
+                    <BlurbFormControl header="Blurbs" placeholder="Click to add Blurb" :blurbs="blurbs" :showTitle="true"
+                        @addBlurb="addBlurb($event)" @saveBlurb="updateBlurb($event)" />
                 </div>
                 <div class="flex flex-col @xl:flex-row flex-wrap grow-1 g-2 pt-2">
                     <!-- Item Mapping -->
@@ -121,24 +124,30 @@
                     </div>
                 </div>
             </div>
-            <div v-if="mapper.isShown" class="container">
-                <div class="row g-2">
-                    <div class="col-12">
-                        <ItemMapper v-if="mapper.type == 'parent'" 
-                                    itemType="todo" :selectedIDs="parentIDs" 
-                                    @close="mapper.isShown=false" @cancel="cancelMapping" @select="(x,y) => selectItems('parent', x, y)"/>
-                        <ItemMapper v-if="mapper.type == 'child'" 
-                                    itemType="todo" :selectedIDs="childIDs" 
-                                    @close="mapper.isShown=false" @cancel="cancelMapping" @select="(x,y) => selectItems('child', x, y)"/>
-                        <ItemMapper v-if="mapper.type == 'goal'" 
-                                    itemType="goal" :selectedIDs="goalIDs" 
-                                    @close="mapper.isShown=false" @cancel="cancelMapping" @select="(x,y) => selectItems('goal', x, y)"/>
-                    </div>
+        </div>
+        <div v-if="fullscreen == 'mapper'" class="container">
+            <div class="row g-2">
+                <div class="col-12">
+                    <ItemMapper v-if="mapper.type == 'parent'" 
+                                itemType="todo" :selectedIDs="parentIDs" 
+                                @close="mapper.isShown=false" @cancel="cancelMapping" @select="(x,y) => selectItems('parent', x, y)"/>
+                    <ItemMapper v-if="mapper.type == 'child'" 
+                                itemType="todo" :selectedIDs="childIDs" 
+                                @close="mapper.isShown=false" @cancel="cancelMapping" @select="(x,y) => selectItems('child', x, y)"/>
+                    <ItemMapper v-if="mapper.type == 'goal'" 
+                                itemType="goal" :selectedIDs="goalIDs" 
+                                @close="mapper.isShown=false" @cancel="cancelMapping" @select="(x,y) => selectItems('goal', x, y)"/>
                 </div>
             </div>
         </div>
+        <div v-if="fullscreen == 'blurbs'" class="flex flex-col">
+            <!-- Blurbs -->
+            <BlurbFormControl header="Blurbs" placeholder="Click to add Blurb" :blurbs="blurbs" :showTitle="true"
+                @addBlurb="addBlurb($event)" @saveBlurb="updateBlurb($event)" />
+        </div>
         <!-- Footer -->
-        <div v-if="!mapper.isShown" class="form-footer">
+        <div v-if="!fullscreen" class="form-footer flex gap-1 justify-content-end">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @click="fullscreen = 'blurbs'">Blurbs</button>
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @click="createTask">{{`Create Task ${dateString}`}}</button>
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             <button type="button" class="btn btn-primary" @click="save">Save</button>
@@ -151,13 +160,14 @@ import RepeatControl from '../component/RepeatControl2.vue';
 import TimePairControl from '../component/TimePairControl.vue';
 import FormItemList from '../component/FormItemList.vue';
 import ItemMapper from '../component/ItemMapper.vue'
+import BlurbFormControl from '../component/BlurbFormControl.vue';
 import { clone, replaceItem, addOrReplaceItem, sortItems, sortAsc } from '../../../../../utility';
 import { metrics, todoTypes, mediums, todoActivityTypes } from '../../../../model/types';
 import { today, toShortWeekdayString } from '../../../../../utility/timeUtility';
 
 export default {
     name: "TodoForm",
-    components: { RepeatControl, TimePairControl, ItemMapper, FormItemList },
+    components: { RepeatControl, TimePairControl, ItemMapper, FormItemList, BlurbFormControl },
     props: {
       id: Number
     },
@@ -166,6 +176,7 @@ export default {
             store: null,
             appStore: null,
             plannerStore: null,
+            universalStore: null,
             todoClone: undefined,
             metrics: clone(metrics),
             todoTypes: clone(todoTypes),
@@ -224,6 +235,7 @@ export default {
                 isShown: false,
                 type: undefined
             },
+            fullscreen: undefined
         }
     },
     created: async function() {
@@ -235,6 +247,9 @@ export default {
 
         let plannerStore = await import(`@/store/plannerStore`);
         this.plannerStore = plannerStore.usePlannerStore();
+
+        let universalStore = await import(`@/store/universalStore`);
+        this.universalStore = universalStore.useUniversalStore();
     },
     computed: {
         selectedDate() {
@@ -319,6 +334,13 @@ export default {
                 return true;
             }
             return false;
+        },
+        blurbs() {
+            if (this.todoClone?.blurbIds) {
+                let blurbs = this.universalStore.getBlurbsWithID(this.todoClone.blurbIds);
+                return blurbs;
+            }
+            return [];
         }
     },
     methods: {
@@ -464,6 +486,7 @@ export default {
         addItemClicked(itemType) {
             this.mapper.isShown = true;
             this.mapper.type = itemType;
+            this.fullscreen = "mapper";
         },
         addTimeClicked() {
             let timePairs = sortAsc(this.timePairs.value, 'id');
@@ -480,6 +503,7 @@ export default {
         cancelMapping() {
             this.mapper.isShown = false;
             this.mapper.type = undefined;
+            this.fullscreen = undefined;
         },
         cancelRepeatEditing(id) {
             if (id < 0) {
@@ -500,6 +524,22 @@ export default {
         },
         deleteFutureRepetitionsForRepeat(repeatID, selectedDate) {
             this.store.deleteFutureRepetitionsForRepeat(this.id, repeatID, selectedDate)
+        },
+        addBlurb(blurb) {
+            if (this.id > 0) {
+                if (blurb.text.trim() != "") {
+                    blurb.idType = BLURBTYPE.BLURB;
+                    this.store.addBlurb(this.id, blurb);
+                }
+            }
+        },
+        updateBlurb(blurb) {
+            if (this.id > 0) {
+                if (blurb.text.trim() != "") {
+                    blurb.idType = BLURBTYPE.BLURB;
+                    this.store.updateBlurb(blurb);
+                }
+            }
         },
         close() {
             this.appStore.selectPage('items');
