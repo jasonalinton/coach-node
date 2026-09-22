@@ -38,6 +38,10 @@ export const usePhysicalStore = defineStore('physical', {
             return postEndpoint("Physical", "GetNutritionHistory", { idTimeframe, startAt, endAt })
             .then(response => response.result);
         },
+        async getNutrientHistory(startAt, endAt) {
+            return postEndpoint("Physical", "GetNutrientHistory", { startAt, endAt })
+            .then(response => response.result);
+        },
         getMealsInRange(startAt, endAt, shouldRequestServer) {
             let _this = this;
             if (shouldRequestServer) {

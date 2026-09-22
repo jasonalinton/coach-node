@@ -4,9 +4,13 @@
             <div class="hero m-auto" :style="{ maxWidth: width + 'px' }">
                 <img v-if="hero === 'image'" class="img-fluid" src="/metric/physical/Badass Workout Photo.jpg" />
                 <WeightChart v-if="hero === 'weightChart'" />
+                <CaloriesWeightChart v-if="hero === 'caloriesWeight'" />
             <div v-if="hero === 'battery'" class="activity-chart d-flex flex-column justify-content-center">
                 <PhysicalActivityChart />
                 <PhysicalActivitySchedule />
+            </div>
+            <div v-if="hero === 'nutrition'" class="activity-chart d-flex flex-column justify-content-center">
+                <NutritionHistoryChart />
             </div>
             </div>
             <div class="cards d-flex flex-row justify-content-center overflow-scroll">
@@ -26,8 +30,14 @@
                      @click="hero = 'battery'">
                     Battery
                 </div>
-                <div class="card"></div>
-                <div class="card"></div>
+                <div class="card"
+                     @click="hero = 'nutrition'">
+                    Nutrition
+                </div>
+                <div class="card"
+                     @click="hero = 'caloriesWeight'">
+                    Weight &amp; Calories
+                </div>
                 <div class="card"></div>
                 <div class="card"></div>
             </div>
@@ -56,10 +66,12 @@ import MetricTimeline from '../component/blog/MetricTimeline.vue'
 import WeightChart from './WeightChart.vue';
 import PhysicalActivityChart from './PhysicalActivityChart.vue';
 import PhysicalActivitySchedule from './PhysicalActivitySchedule.vue';
+import NutritionHistoryChart from './NutritionHistoryChart.vue';
+import CaloriesWeightChart from './CaloriesWeightChart.vue';
 
 export default {
     name: 'PhysicalView',
-    components: { MetricTimeline, WeightChart, PhysicalActivityChart, PhysicalActivitySchedule },
+    components: { MetricTimeline, WeightChart, PhysicalActivityChart, PhysicalActivitySchedule, NutritionHistoryChart, CaloriesWeightChart },
     props: {
         
     },
