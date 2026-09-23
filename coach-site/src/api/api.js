@@ -12,7 +12,7 @@ import { useIterationStore } from '@/store/iterationStore'
 import { useEventStore } from '@/store/eventStore'
 import { usePhysicalStore } from '@/store/physicalStore'
 
-const requests = [];
+let requests = [];
 
 function shouldRequest(endpoint, props) {
     var doRequest = requests.some(r => r.endpoint == endpoint && JSON.stringify(r.props) == JSON.stringify(props));

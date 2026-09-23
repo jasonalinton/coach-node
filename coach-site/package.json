@@ -10,6 +10,7 @@
     "lint": "eslint --ext .js,.vue --ignore-path .gitignore --fix src"
   },
   "dependencies": {
+    "@azure/storage-blob": "^12.33.0",
     "@editorjs/editorjs": "^2.30.8",
     "@fortawesome/fontawesome-free": "^5.15.3",
     "@microsoft/signalr": "^7.0.0",

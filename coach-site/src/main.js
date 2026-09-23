@@ -11,6 +11,9 @@ import { createWebHistory, createRouter } from 'vue-router'
 import Planner from './components/planner/Planner.vue'
 import ItemTabs from './components/items/ItemTabs.vue'
 import PhysicalView from './components/metrics/physical/PhysicalView.vue'
+// Dev-only harness for the media upload API (phase 2). Not linked from the nav; remove this
+// route once phase 5 wires a real media gallery into the todo form.
+import MediaUploadTest from './dev/MediaUploadTest.vue'
 
 // https://stackoverflow.com/questions/31096130/how-to-json-stringify-a-javascript-date-and-preserve-timezone
 // Send an unspecified date when serializing to JSON
@@ -106,6 +109,7 @@ const routes = [
     name: 'items'
   },
   { path: '/physical-view', component: PhysicalView },
+  { path: '/dev/media-upload-test', component: MediaUploadTest },
 ]
 
 const router = createRouter({
