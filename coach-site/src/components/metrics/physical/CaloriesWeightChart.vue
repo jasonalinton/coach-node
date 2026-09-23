@@ -1,9 +1,17 @@
 <template>
     <div class="calories-weight-chart" ref="calories-weight-chart-container">
+        <div class="controls d-flex flex-row align-items-center justify-content-end">
+            <label for="calorie-average-window">Calorie avg (days)</label>
+            <input id="calorie-average-window"
+                   type="number"
+                   min="1"
+                   v-model.number="calorieAverageWindowDays" />
+        </div>
         <div id="calories-weight-chart" ref="calories-weight-chart" class="mt-2"></div>
         <div v-if="tooltip.visible" class="chart-tooltip" :style="{ left: tooltip.x + 'px', top: tooltip.y + 'px' }">
             <div class="tooltip-date">{{ tooltip.dateLabel }}</div>
             <div v-if="tooltip.calories != null" class="tooltip-row"><span class="swatch calories"></span>{{ tooltip.calories }} cal</div>
+            <div v-if="tooltip.calorieAverage != null" class="tooltip-row"><span class="swatch calorie-average"></span>{{ tooltip.calorieAverage }} cal avg</div>
             <div v-if="tooltip.weight != null" class="tooltip-row"><span class="swatch weight"></span>{{ tooltip.weight }} lbs</div>
         </div>
     </div>
@@ -30,7 +38,9 @@ export default {
             nutrientHistory: [],
             weightSeries: undefined,
             caloriesSeries: undefined,
-            tooltip: { visible: false, x: 0, y: 0, dateLabel: '', calories: 0, weight: null },
+            calorieAverageSeries: undefined,
+            calorieAverageWindowDays: 30,
+            tooltip: { visible: false, x: 0, y: 0, dateLabel: '', calories: 0, calorieAverage: null, weight: null },
         }
     },
     created: async function () {
@@ -67,12 +77,34 @@ export default {
         calorieHistories() {
             return sortDateAsc(this.nutrientHistory, 'date')
                 .map(day => ({ date: startOfDay(new Date(day.date)), calories: day.calories || 0 }));
+        },
+        // Trailing average over the last calorieAverageWindowDays calendar days, averaged
+        // over whichever of those days actually have logged calories (so sparse logging
+        // doesn't artificially deflate the average toward zero).
+        calorieAverageHistories() {
+            let windowDays = this.calorieAverageWindowDays > 0 ? this.calorieAverageWindowDays : 1;
+            let byDay = new Map();
+            this.calorieHistories.forEach(day => byDay.set(+day.date, day.calories));
+
+            return this.calorieHistories.map(day => {
+                let sum = 0;
+                let count = 0;
+                for (let i = 0; i < windowDays; i++) {
+                    let key = +addDay(day.date, -i);
+                    if (byDay.has(key)) {
+                        sum += byDay.get(key);
+                        count++;
+                    }
+                }
+                return { date: day.date, average: count > 0 ? sum / count : 0 };
+            });
         }
     },
     methods: {
         createCaloriesWeightChart,
         setWeightSeries,
         setCaloriesSeries,
+        setCalorieAverageSeries,
         handleCrosshairMove
     },
     watch: {
@@ -88,9 +120,15 @@ export default {
             handler(value) {
                 if (value.length > 0) {
                     this.setCaloriesSeries();
+                    this.setCalorieAverageSeries();
                 }
             },
             deep: true
+        },
+        calorieAverageWindowDays() {
+            if (this.calorieAverageSeries) {
+                this.setCalorieAverageSeries();
+            }
         },
         width() {
             this.createCaloriesWeightChart();
@@ -132,6 +170,16 @@ function createCaloriesWeightChart() {
         scaleMargins: { top: 0.3, bottom: 0.02 },
     });
 
+    // Shares the calories scale/band so it reads directly against the bars.
+    this.calorieAverageSeries = chart.addLineSeries({
+        priceScaleId: 'right',
+        color: '#1baf7a',
+        lineWidth: 2,
+        lastValueVisible: false,
+        priceLineVisible: false,
+        crosshairMarkerVisible: false,
+    });
+
     this.weightSeries = chart.addLineSeries({
         priceScaleId: 'left',
         color: '#EA8919',
@@ -146,6 +194,7 @@ function createCaloriesWeightChart() {
     chart.subscribeCrosshairMove(param => this.handleCrosshairMove(param));
 
     this.setCaloriesSeries();
+    this.setCalorieAverageSeries();
     this.setWeightSeries();
 }
 
@@ -157,6 +206,7 @@ function handleCrosshairMove(param) {
     }
 
     let caloriesPoint = param.seriesData.get(this.caloriesSeries);
+    let calorieAveragePoint = param.seriesData.get(this.calorieAverageSeries);
     let weightPoint = param.seriesData.get(this.weightSeries);
     if (!caloriesPoint && !weightPoint) {
         this.tooltip.visible = false;
@@ -175,6 +225,7 @@ function handleCrosshairMove(param) {
         y,
         dateLabel: getMonthDate(new Date(param.time * 1000)),
         calories: caloriesPoint ? Math.round(caloriesPoint.value) : null,
+        calorieAverage: calorieAveragePoint ? Math.round(calorieAveragePoint.value) : null,
         weight: weightPoint ? Math.round(weightPoint.value) : null
     };
 }
@@ -229,11 +280,38 @@ function setCaloriesSeries() {
     this.chart.timeScale().fitContent();
 }
 
+function setCalorieAverageSeries() {
+    let seriesData = this.calorieAverageHistories.map(day => ({
+        time: day.date / 1000,
+        value: Math.round(day.average)
+    }));
+    this.calorieAverageSeries.setData(seriesData);
+    this.chart.timeScale().fitContent();
+}
+
 </script>
 
 <style scoped>
 .calories-weight-chart {
     position: relative;
+}
+
+.controls {
+    gap: 8px;
+    padding: 0 4px;
+}
+
+.controls label {
+    font-size: 12px;
+    color: #767676;
+}
+
+.controls input {
+    width: 56px;
+    padding: 4px 6px;
+    border: 1px solid #e5e5e5;
+    border-radius: 6px;
+    font-size: 13px;
 }
 
 .chart-tooltip {
@@ -273,6 +351,10 @@ function setCaloriesSeries() {
 
 .swatch.calories {
     background-color: #2a78d6;
+}
+
+.swatch.calorie-average {
+    background-color: #1baf7a;
 }
 
 .swatch.weight {
