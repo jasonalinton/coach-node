@@ -20,7 +20,7 @@
                 <!-- Toolbar -->
                 <div class="toolbar d-flex flex-col @3xl:flex-row mt-1">
                     <!-- Metrics -->
-                    <div class="metrics d-flex flex-row">
+                    <div class="metrics d-flex flex-row overflow-scroll">
                         <span v-for="metric in metrics" :key="metric.id"
                                 class="metric" :class="{ 'active': hasMetric(metric.id)}"
                                 @click="toggleMetric(metric.id)">{{ metric.text }}</span>

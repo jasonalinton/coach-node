@@ -230,8 +230,12 @@ export const useAppStore = defineStore('app', {
             this.planner.dayCount = count;
         },
         selectItemTab(tab) {
-            this.itemTabs.selectedTab = tab;
-            localStorage.setItem('selected-item-tab', tab);
+            if (this.itemTabs.selectedTab == tab) {
+                this.isTabBarShown = false;
+            } else {
+                this.itemTabs.selectedTab = tab;
+                localStorage.setItem('selected-item-tab', tab);
+            }
         },
         initItemPanels() {
 

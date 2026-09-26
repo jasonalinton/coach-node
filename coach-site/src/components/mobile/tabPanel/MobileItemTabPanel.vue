@@ -6,6 +6,8 @@
             <ItemTableAndToolbar v-if="selectedItemTab == 'todo'" itemType="todo" />
             <ItemTableAndToolbar v-if="selectedItemTab == 'routine'" itemType="routine" />
         </template>
+        <GoalForm v-else-if="selectedPage == 'goalForm'" :id="selectedGoalFormId" />
+        <TodoForm v-else-if="selectedPage == 'todoForm'" :id="selectedTodoFormId" />
         <template v-else>
             <DashboardPanel v-show="selectedPanel == 'dashboard'" class="item-panel" :showHead="false" />
             <MetricPanel v-show="selectedPanel == 'metric'" class="item-panel" :showHead="false" />
@@ -38,12 +40,15 @@ import InventoryPanel from '../../planner/item-panel/inventory/InventoryPanel.vu
 import NutritionPanel from '../../planner/item-panel/nutrition/NutritionPanel.vue'
 import WorkoutPanel from '../../planner/item-panel/workout/WorkoutPanel.vue'
 import ItemTableAndToolbar from '../../items/table/ItemTableAndToolbar.vue'
+import GoalForm from '../../items/form/goal/GoalForm.vue'
+import TodoForm from '../../items/form/todo/TodoForm.vue'
 import { SELECTED_PAGE } from '../../../model/appDefaults'
 
 export default {
     name: 'MobileItemTabPanel',
     components: { DashboardPanel, MetricPanel, GoalPanel, TodoPanel, RoutinePanel, TaskRoutinePanel, 
-        PlannerPanel, EventPanel, InventoryPanel, NutritionPanel, WorkoutPanel, ItemTableAndToolbar },
+        PlannerPanel, EventPanel, InventoryPanel, NutritionPanel, WorkoutPanel, ItemTableAndToolbar,
+        GoalForm, TodoForm },
     props: {
         
     },
@@ -62,6 +67,12 @@ export default {
     computed: {
         selectedPage() {
             return this.appStore?.nav?.selectedPage || SELECTED_PAGE;
+        },
+        selectedTodoFormId() {
+            return (this.appStore) ? this.appStore.body.selectedTodoFormId : undefined;
+        },
+        selectedGoalFormId() {
+            return (this.appStore) ? this.appStore.body.selectedGoalFormId : undefined;
         },
         selectedPanel() {
             if (this.appStore) {

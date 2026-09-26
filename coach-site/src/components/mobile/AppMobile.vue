@@ -7,13 +7,12 @@
             <CalendarMobile  />
         </div>
         <div class="tabbar">
-            <MobileItemTabBar v-if="selectedPage == 'items'" />
+            <MobileItemTabBar v-if="['items', 'todoForm', 'goalForm'].includes(selectedPage)" />
             <ItemPanelTabBar v-else />
         </div>
         <div class="tab-panel d-flex" ref="body">
             <MobileItemTabPanel />
         </div>
-        <ItemPanel v-show="false" class="item-panel" />
     </div>
 </template>
 
