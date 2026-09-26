@@ -71,6 +71,8 @@
                     <!-- Blurbs -->
                     <BlurbFormControl header="Blurbs" placeholder="Click to add Blurb" :blurbs="blurbs" :showTitle="true"
                         @addBlurb="addBlurb($event)" @saveBlurb="updateBlurb($event)" />
+                    <!-- Media -->
+                    <MediaGallery v-if="id" class="mt-2" :idTodo="id" header="Photos & Videos" />
                 </div>
                 <div class="flex flex-col @xl:flex-row flex-wrap grow-1 g-2 pt-2">
                     <!-- Item Mapping -->
@@ -161,13 +163,14 @@ import TimePairControl from '../component/TimePairControl.vue';
 import FormItemList from '../component/FormItemList.vue';
 import ItemMapper from '../component/ItemMapper.vue'
 import BlurbFormControl from '../component/BlurbFormControl.vue';
+import MediaGallery from '../component/media/MediaGallery.vue';
 import { clone, replaceItem, addOrReplaceItem, sortItems, sortAsc } from '../../../../../utility';
 import { metrics, todoTypes, mediums, todoActivityTypes } from '../../../../model/types';
 import { today, toShortWeekdayString } from '../../../../../utility/timeUtility';
 
 export default {
     name: "TodoForm",
-    components: { RepeatControl, TimePairControl, ItemMapper, FormItemList, BlurbFormControl },
+    components: { RepeatControl, TimePairControl, ItemMapper, FormItemList, BlurbFormControl, MediaGallery },
     props: {
       id: Number
     },

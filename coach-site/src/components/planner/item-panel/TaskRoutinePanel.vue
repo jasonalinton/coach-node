@@ -35,7 +35,6 @@ export default {
         routines() {
             if (this.routineStore){
                 let routines = this.routineStore.getTaskRoutinesForDay(this.selectedDate);
-                console.log(routines)
                 return routines;
             }
             return [];

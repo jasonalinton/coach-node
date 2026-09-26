@@ -50,15 +50,12 @@ export default {
             let workouts = [];
             if (this.workoutStore) {
                 workouts = this.workoutStore.getWorkoutsInDate(this.selectedDate);
-                console.log(workouts);
             }
             return workouts
         },
         iterations() {
             if (this.iterationStore) {
                 let iterations = this.workouts.map(workout => workout.iteration);
-                
-                console.log(iterations);
                 return iterations;
             }
             return [];

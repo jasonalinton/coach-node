@@ -1,11 +1,5 @@
 <template>
     <div id="app" >
-        <!-- Dev-only harness for the media upload API (phase 2), outside the normal page-switching
-             system below (that system is driven by appStore.nav.selectedPage, not vue-router - see
-             the commented-out RouterView further down). Remove this block along with the route in
-             main.js once phase 5 wires a real media gallery into the todo form. -->
-        <MediaUploadTest v-if="$route.path === '/dev/media-upload-test'" />
-        <template v-else>
         <AppMobile v-if="isExtraSmall"/>
         <div v-else class="grid-container" :style="{ gridTemplateColumns: gridColumns }">
             <div class="nav-bar d-flex overflow-scroll">
@@ -33,7 +27,6 @@
                 <ItemPanel />
             </div>
         </div>
-        </template>
     </div>
 </template>
 
@@ -52,7 +45,6 @@ import MentalView from "./components/metrics/mental/MentalView.vue";
 import EmotionalView from "./components/metrics/emotional/EmotionalView.vue";
 import SocialView from "./components/metrics/social/SocialView.vue";
 import FinancialView from "./components/metrics/financial/FinancialView.vue";
-import MediaUploadTest from "./dev/MediaUploadTest.vue";
 import { useAppStore } from '@/store/appStore'
 import { usePlannerStore } from '@/store/plannerStore'
 import { useEventStore } from '@/store/eventStore'
@@ -63,6 +55,7 @@ import { useGoalStore } from '@/store/goalStore'
 import { useTodoStore } from '@/store/todoStore'
 import { useRoutineStore } from '@/store/routineStore'
 import { useUniversalStore } from '@/store/universalStore'
+import { useMediaStore } from '@/store/mediaStore'
 import { createSocketConnection } from "./store/socket";
 // import { RouterView } from 'vue-router'
 import { LEFT_PANEL_WIDTH, RIGHT_PANEL_WIDTH, RIGHT_PANEL_TAB_WIDTH } from './model/appDefaults.js'
@@ -84,7 +77,6 @@ export default {
         EmotionalView,
         SocialView,
         FinancialView,
-        MediaUploadTest,
         // RouterView
     },
     // defineProps: {
@@ -230,6 +222,7 @@ async function initStores() {
     let goalStore = useGoalStore();
     let todoStore = useTodoStore();
     let routineStore = useRoutineStore();
+    let mediaStore = useMediaStore();
 
     let metricPromise = metricStore.initialize();
     let goalPromise = goalStore.initialize();
@@ -241,6 +234,7 @@ async function initStores() {
     this.eventStore.initialize();
     iterationStore.initialize();
     physicalStore.initialize();
+    mediaStore.initialize();
 
     await Promise.all([metricPromise, goalPromise, todoPromise, routinePromise]).then(() => {
         metricStore.initializeItems();

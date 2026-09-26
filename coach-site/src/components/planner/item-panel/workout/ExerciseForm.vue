@@ -13,6 +13,13 @@
                     placeholder="Exercise Description"
                     v-model="description.value"
                     spellcheck="true"></textarea>
+            <!-- Demo & Thumbnail -->
+            <div class="d-flex flex-row gap-3 mt-2 mb-2">
+                <MediaSlot label="Demo video" :media="demoMedia" defaultKind="video" :allowKindChoice="true"
+                           @set="setDemoMedia" @clear="setDemoMedia(null)" />
+                <MediaSlot label="Thumbnail" :media="thumbnailMedia" defaultKind="image" :allowKindChoice="false"
+                           @set="setThumbnailMedia" @clear="setThumbnailMedia(null)" />
+            </div>
             <!-- Laterality -->
             <div class="label mt-2">Laterality</div>
             <select v-model="idLaterality.value" class="form-select form-select-sm mb-2">
@@ -102,10 +109,12 @@ import { exerciseLaterality, exerciseTempos } from '../../../../model/types';
 import MuscleSelector from './MuscleSelector.vue';
 import VariationList from './VariationList.vue';
 import ExerciseVariationForm from './ExerciseVariationForm.vue';
+import MediaSlot from '../../../items/form/component/media/MediaSlot.vue';
+import { useMediaStore } from '../../../../store/mediaStore';
 
 export default {
     name: 'ExerciseForm',
-    components: { MuscleSelector, VariationList, ExerciseVariationForm },
+    components: { MuscleSelector, VariationList, ExerciseVariationForm, MediaSlot },
     props: {
         id: {
             type: Number,
@@ -115,7 +124,10 @@ export default {
     data: function () {
         return {
             workoutStore: null,
+            mediaStore: null,
             exercise: null,
+            demoMedia: null,
+            thumbnailMedia: null,
             name: {
                 value: undefined,
                 oldValue: undefined,
@@ -152,6 +164,7 @@ export default {
     },
     created: function() {
         this.workoutStore = useWorkoutStore();
+        this.mediaStore = useMediaStore();
         this.setProps();
     },
     computed: {
@@ -208,8 +221,41 @@ export default {
         closeVariationForm,
         setVariations,
         saveExerciseVariation,
-        save
+        save,
+        setDemoMedia,
+        setThumbnailMedia,
+        loadMediaSlots,
     },
+}
+
+async function loadMediaSlots() {
+    this.demoMedia = await this.mediaStore.ensure(this.exercise?.idDemoMediaAsset);
+    this.thumbnailMedia = await this.mediaStore.ensure(this.exercise?.idThumbnailMediaAsset);
+}
+
+async function setDemoMedia(media) {
+    let idMediaAsset = media?.id ?? null;
+    let success = await this.mediaStore.setExerciseDemo(this.id, idMediaAsset);
+    if (success) {
+        this.demoMedia = media;
+        this.exercise.idDemoMediaAsset = idMediaAsset;
+        /* Keep the store's cached exercise (used by ExerciseCard/WorkoutExercise views) in sync too,
+         * without a full round trip - SetExerciseDemoMedia doesn't go through the normal
+         * Updates/SignalR pipeline (see MediaController), so nothing else will refresh this. */
+        let cached = this.workoutStore.getExercise(this.id);
+        if (cached) cached.idDemoMediaAsset = idMediaAsset;
+    }
+}
+
+async function setThumbnailMedia(media) {
+    let idMediaAsset = media?.id ?? null;
+    let success = await this.mediaStore.setExerciseThumbnail(this.id, idMediaAsset);
+    if (success) {
+        this.thumbnailMedia = media;
+        this.exercise.idThumbnailMediaAsset = idMediaAsset;
+        let cached = this.workoutStore.getExercise(this.id);
+        if (cached) cached.idThumbnailMediaAsset = idMediaAsset;
+    }
 }
 
 function setProps() {
@@ -232,6 +278,8 @@ function setProps() {
             this.idTempoStart.value = this.exercise.idTempoStart ?? null;
             this.idTempoStart.oldValue = this.exercise.idTempoStart ?? null;
             this.idTempoStart.isUpdated = false;
+
+            this.loadMediaSlots();
 
             this.muscleGroups.value = clone(this.exercise.muscleGroups);
             this.muscleGroups.oldValue = clone(this.exercise.muscleGroups);
