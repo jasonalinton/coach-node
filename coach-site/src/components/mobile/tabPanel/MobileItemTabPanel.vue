@@ -1,5 +1,5 @@
 <template>
-    <div class="mobile-tab-panel d-flex flex-grow-1">
+    <div class="mobile-tab-panel d-flex flex-column flex-grow-1">
         <template v-if="selectedPage == 'items'">
             <ItemTableAndToolbar v-if="selectedItemTab == 'metric'" itemType="metric" />
             <ItemTableAndToolbar v-if="selectedItemTab == 'goal'" itemType="goal" />
