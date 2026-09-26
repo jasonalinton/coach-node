@@ -64,6 +64,8 @@ export const useTodoStore = defineStore('todo', {
         requestTodo(idTodo) {
             return attemptPostEndpoint("Todo", "GetTodo", { id: idTodo }, { 'All-Properties': "true" })
                 .then(response => {
+                    if (!response) return;
+                    
                     replaceOrAddItem(response.result, this.todos);
                     replaceOrAddItem(new Todo(response.result), this.todoModels);
                     

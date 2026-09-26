@@ -22,7 +22,7 @@ let metricProperties = [
             id: 0,
             text: "Order",
             position: 1,
-            isSelected: true
+            isSelected: false
         },
         {
             id: 1,

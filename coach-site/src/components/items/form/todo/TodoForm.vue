@@ -284,16 +284,20 @@ export default {
             }
         },
         parentIDs() {
-            if (this.todo) {
+            if (this.todoClone) {
                 var parents = sortItems(this.todo.parents, "todo", this.id);
+
+                var parents = this.store.todos.filter(todo => this.todoClone.parentIDs.includes(todo.id));
+                parents = sortItems(parents, "todo", this.id);
                 return parents.map(x => x.id);
             } else {
                 return [];
             }
         },
         childIDs() {
-            if (this.todo) {
-                var children = sortItems(this.todo.children, "todo", this.id);
+            if (this.todoClone) {
+                var children = this.store.todos.filter(todo => this.todoClone.childIDs.includes(todo.id));
+                children = sortItems(children, "todo", this.id);
                 return children.map(x => x.id);
             } else {
                 return [];
@@ -339,7 +343,7 @@ export default {
             return false;
         },
         blurbs() {
-            if (this.todoClone?.blurbIds) {
+            if (this.universalStore && this.todoClone?.blurbIds) {
                 let blurbs = this.universalStore.getBlurbsWithID(this.todoClone.blurbIds);
                 return blurbs;
             }
