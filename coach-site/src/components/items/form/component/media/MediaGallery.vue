@@ -33,7 +33,8 @@
         <MediaPicker v-if="showPicker" header="Add photo or video"
                      @picked="onPicked" @cancel="showPicker = false" />
         <MediaViewer v-if="viewingLink" :media="viewingLink.media"
-                     @close="viewingLink = null" @remove="removeLink(viewingLink); viewingLink = null" />
+                     @close="viewingLink = null" @remove="removeLink(viewingLink); viewingLink = null"
+                     @saveCopy="onSaveCopy(viewingLink)" />
     </div>
 </template>
 
@@ -92,6 +93,16 @@ export default {
             if (index == this.links.length - 1) return;
             [this.links[index], this.links[index + 1]] = [this.links[index + 1], this.links[index]];
             await this.mediaStore.reorderForTodo(this.idTodo, this.links.map(x => x.id));
+        },
+        /* Adds the downloaded copy alongside the original link, rather than replacing it - lets the
+         * person confirm the copy looks right before removing the link themselves. */
+        async onSaveCopy(link) {
+            let copy = await this.mediaStore.saveCopy(link.media.id);
+            if (copy) {
+                let newLink = await this.mediaStore.attachToTodo(this.idTodo, copy.id);
+                if (newLink) this.links.push(newLink);
+            }
+            this.viewingLink = null;
         },
     },
 }

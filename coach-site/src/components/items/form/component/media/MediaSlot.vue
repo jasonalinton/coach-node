@@ -15,11 +15,13 @@
         <MediaPicker v-if="showPicker" :header="pickerHeader" :defaultKind="defaultKind" :allowKindChoice="allowKindChoice"
                      @picked="onPicked" @cancel="showPicker = false" />
         <MediaViewer v-if="viewing && media" :media="media" :showRemove="true"
-                     @close="viewing = false" @remove="viewing = false; $emit('clear')" />
+                     @close="viewing = false" @remove="viewing = false; $emit('clear')"
+                     @saveCopy="onSaveCopy" />
     </div>
 </template>
 
 <script>
+import { useMediaStore } from '@/store/mediaStore';
 import MediaThumb from './MediaThumb.vue';
 import MediaPicker from './MediaPicker.vue';
 import MediaViewer from './MediaViewer.vue';
@@ -52,9 +54,13 @@ export default {
     emits: ['set', 'clear'],
     data() {
         return {
+            mediaStore: undefined,
             showPicker: false,
             viewing: false,
         };
+    },
+    created() {
+        this.mediaStore = useMediaStore();
     },
     computed: {
         pickerHeader() {
@@ -65,6 +71,15 @@ export default {
         onPicked(media) {
             this.showPicker = false;
             this.$emit('set', media);
+        },
+        /* A single slot has room for one item, so a saved copy replaces the link outright rather than
+         * sitting alongside it (unlike the gallery's multi-item case). */
+        async onSaveCopy() {
+            let copy = await this.mediaStore.saveCopy(this.media.id);
+            if (copy) {
+                this.viewing = false;
+                this.$emit('set', copy);
+            }
         },
     },
 }

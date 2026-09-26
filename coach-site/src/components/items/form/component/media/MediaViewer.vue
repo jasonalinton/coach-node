@@ -7,12 +7,36 @@
             </div>
 
             <div class="viewer-body d-flex align-items-center justify-content-center">
-                <video v-if="media.kind == 'video' && media.status == 'ready'"
+                <!-- YouTube / Vimeo: play inline -->
+                <div v-if="media.embedUrl" class="embed-wrap">
+                    <iframe :src="media.embedUrl" frameborder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowfullscreen></iframe>
+                </div>
+
+                <!-- iCloud: it blocks embedding, so this is a click-through, not a player -->
+                <div v-else-if="media.embedProvider == 'icloud'" class="viewer-status">
+                    <i class="fa-solid fa-cloud"></i>
+                    <span>iCloud links can't play here</span>
+                    <a :href="media.url" target="_blank" rel="noopener" class="retry-btn link-btn">Open in iCloud</a>
+                </div>
+
+                <!-- A direct video file - an upload, or a link that points straight at an .mp4 etc. -->
+                <video v-else-if="media.kind == 'video' && media.status == 'ready' && isDirectFile"
                        controls preload="metadata" :poster="media.posterUrl" class="viewer-media">
                     <source :src="media.url" />
                 </video>
-                <img v-else-if="media.kind == 'image' && media.status == 'ready'"
+                <!-- A direct image file - an upload, or a link that points straight at a .jpg etc. -->
+                <img v-else-if="media.kind == 'image' && media.status == 'ready' && isDirectFile"
                      :src="media.url" class="viewer-media" :alt="media.title || 'photo'" />
+
+                <!-- A bookmarked page: no file to play, just a preview and a way in -->
+                <div v-else-if="media.source == 'link' && !isDirectFile" class="link-preview">
+                    <img v-if="media.posterUrl" :src="media.posterUrl" class="link-preview-image" alt="" />
+                    <i v-else class="fa-solid fa-link link-preview-icon"></i>
+                    <span class="link-preview-title">{{ media.title || media.url }}</span>
+                    <a :href="media.url" target="_blank" rel="noopener" class="retry-btn link-btn">Open link</a>
+                </div>
 
                 <div v-else-if="isWorking" class="viewer-status">
                     <SpinningLoader :isVisible="true" />
@@ -31,7 +55,12 @@
                     <template v-if="media.durationSeconds"> · {{ formattedDuration }}</template>
                     <template v-if="media.sizeBytes"> · {{ formattedSize }}</template>
                 </span>
-                <button v-if="showRemove" type="button" class="remove-btn" @click="$emit('remove')">Remove</button>
+                <div class="d-flex flex-row gap-2">
+                    <button v-if="canSaveCopy" type="button" class="save-copy-btn" @click="$emit('saveCopy')">
+                        Save a copy
+                    </button>
+                    <button v-if="showRemove" type="button" class="remove-btn" @click="$emit('remove')">Remove</button>
+                </div>
             </div>
         </div>
     </div>
@@ -53,10 +82,22 @@ export default {
             default: () => true,
         },
     },
-    emits: ['close', 'remove', 'retry'],
+    emits: ['close', 'remove', 'retry', 'saveCopy'],
     computed: {
         isWorking() {
             return this.media.status == 'pending' || this.media.status == 'processing';
+        },
+        /* True when Url itself is a playable file (an upload, or a link that points straight at an
+         * image/video) rather than a bookmarked page that only has a scraped preview. MimeType is
+         * only ever set server-side for exactly this case - see MediaService.CreateLinkAsync. */
+        isDirectFile() {
+            return this.media.source == 'upload' ||
+                (!!this.media.mimeType && (this.media.mimeType.startsWith('image/') || this.media.mimeType.startsWith('video/')));
+        },
+        /* "Save a copy" only makes sense when there's an actual file at Url to download - not a
+         * YouTube/Vimeo page (their real video isn't at that URL) or a bookmarked page. */
+        canSaveCopy() {
+            return this.media.source == 'link' && this.isDirectFile;
         },
         formattedDuration() {
             let total = Math.round(this.media.durationSeconds);
@@ -133,15 +174,15 @@ export default {
     font-size: 14px;
 }
 
+.viewer-status i {
+    font-size: 28px;
+}
+
 .viewer-status.failed {
     color: #ff9d9d;
 }
 
-.viewer-status.failed i {
-    font-size: 28px;
-}
-
-.retry-btn, .remove-btn {
+.retry-btn, .remove-btn, .save-copy-btn {
     height: 28px;
     background-color: #BAD8F1;
     border: #3B99FC solid 1px;
@@ -150,10 +191,57 @@ export default {
     padding: 0 10px;
 }
 
+.link-btn {
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+    color: #16456e;
+}
+
 .remove-btn {
     background-color: #FBE1E1;
     border-color: #E25555;
     color: #B33939;
+}
+
+.embed-wrap {
+    width: min(90vw, 900px);
+    aspect-ratio: 16 / 9;
+}
+
+.embed-wrap iframe {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    display: block;
+}
+
+.link-preview {
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 40px;
+    max-width: min(90vw, 500px);
+    text-align: center;
+}
+
+.link-preview-image {
+    max-width: 320px;
+    max-height: 240px;
+    border-radius: 4px;
+    object-fit: cover;
+}
+
+.link-preview-icon {
+    font-size: 32px;
+    color: rgba(255, 255, 255, .6);
+}
+
+.link-preview-title {
+    font-size: 14px;
+    overflow-wrap: anywhere;
 }
 
 .viewer-footer {

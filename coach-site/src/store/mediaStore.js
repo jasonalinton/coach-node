@@ -3,7 +3,7 @@ import { getSocketConnection } from './socket';
 import {
     uploadMedia, createLink, getMedia, deleteMedia,
     getMediaForTodo, attachMediaToTodo, detachMediaFromTodo, reorderTodoMedia,
-    setExerciseDemoMedia, setExerciseThumbnailMedia,
+    setExerciseDemoMedia, setExerciseThumbnailMedia, saveMediaCopy,
 } from '../api/mediaAPI';
 import { replaceOrAddItem } from '../../utility';
 
@@ -82,6 +82,12 @@ export const useMediaStore = defineStore('media', {
         async setExerciseThumbnail(idExercise, idMediaAsset) {
             let response = await setExerciseThumbnailMedia(idExercise, idMediaAsset);
             return response?.status?.success ?? false;
+        },
+
+        /** Downloads a link's file into our own storage; returns the new, separate upload-sourced media. */
+        async saveCopy(id) {
+            let response = await saveMediaCopy(id);
+            return response?.status?.success ? this.cache(response.result) : undefined;
         },
 
         connectSocket() {

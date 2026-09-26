@@ -5,8 +5,9 @@
         <img v-if="imageSrc" :src="imageSrc" class="thumb-img" :alt="media.title || media.originalFileName || 'media'" />
         <div v-else class="thumb-placeholder"></div>
 
-        <!-- Play badge, video only, once it has something to show -->
-        <i v-if="media.kind == 'video' && imageSrc" class="fa-solid fa-circle-play play-badge"></i>
+        <!-- Play badge for an inline-playable video; an external-link badge for a click-through (iCloud blocks embedding) -->
+        <i v-if="media.embedProvider == 'icloud'" class="fa-solid fa-arrow-up-right-from-square badge"></i>
+        <i v-else-if="media.kind == 'video' && imageSrc" class="fa-solid fa-circle-play badge"></i>
 
         <!-- Processing / pending overlay -->
         <div v-if="isWorking" class="overlay working">
@@ -56,10 +57,14 @@ export default {
             return this.media.status == 'pending' || this.media.status == 'processing';
         },
         imageSrc() {
-            /* Video shows its poster frame; an image shows itself. Links may have neither yet
-             * (e.g. a non-image, non-embeddable page) - the placeholder box covers that. */
-            if (this.media.kind == 'video') return this.media.posterUrl || null;
-            return this.media.url || this.media.posterUrl || null;
+            /* A poster/preview - an upload's own generated thumbnail, or a link's scraped og:image or
+             * provider thumbnail - is always the lightest, most correct thing to show in a tile, so it
+             * wins whenever there is one. Without one: a direct image link can show itself; a video, a
+             * plain web link, or an embed with no thumbnail (e.g. Vimeo, iCloud) has nothing an <img>
+             * can render, so the placeholder box covers it instead. */
+            if (this.media.posterUrl) return this.media.posterUrl;
+            if (this.media.kind == 'image') return this.media.url || null;
+            return null;
         },
     },
 }
@@ -91,7 +96,7 @@ export default {
     background-color: #E4E4E4;
 }
 
-.play-badge {
+.badge {
     position: absolute;
     bottom: 4px;
     right: 4px;

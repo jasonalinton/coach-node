@@ -48,6 +48,11 @@ export async function setExerciseThumbnailMedia(idExercise, idMediaAsset) {
     return postEndpoint('Media', 'SetExerciseThumbnailMedia', { idExercise, idMediaAsset });
 }
 
+/** Downloads a link's file into our own storage and runs it through the normal upload pipeline - protection against the original link rotting. */
+export async function saveMediaCopy(id) {
+    return postEndpoint('Media', 'SaveMediaCopy', { id });
+}
+
 /**
  * Uploads a File straight to Blob Storage - the file's bytes never pass through the Coach API -
  * then tells the API the upload finished. Returns the finished media (kind: "image" | "video").
