@@ -56,6 +56,9 @@
                     <template v-if="media.sizeBytes"> · {{ formattedSize }}</template>
                 </span>
                 <div class="d-flex flex-row gap-2">
+                    <button type="button" class="add-to-story-btn" :disabled="addedToStory" @click="onAddToStory">
+                        {{ addedToStory ? 'Added ✓' : 'Add to Story' }}
+                    </button>
                     <button v-if="canSaveCopy" type="button" class="save-copy-btn" @click="$emit('saveCopy')">
                         Save a copy
                     </button>
@@ -68,6 +71,7 @@
 
 <script>
 import SpinningLoader from '@/components/loader/SpinningLoader.vue';
+import { useMediaStore } from '@/store/mediaStore';
 
 export default {
     name: 'MediaViewer',
@@ -83,6 +87,12 @@ export default {
         },
     },
     emits: ['close', 'remove', 'retry', 'saveCopy'],
+    data() {
+        return {
+            mediaStore: undefined,
+            addedToStory: false,
+        };
+    },
     computed: {
         isWorking() {
             return this.media.status == 'pending' || this.media.status == 'processing';
@@ -111,11 +121,21 @@ export default {
         },
     },
     created() {
+        this.mediaStore = useMediaStore();
         this._onKeydown = (e) => { if (e.key === 'Escape') this.$emit('close'); };
         window.addEventListener('keydown', this._onKeydown);
     },
     beforeUnmount() {
         window.removeEventListener('keydown', this._onKeydown);
+    },
+    methods: {
+        /* No date given - defaults server-side to now/today. This button doesn't know or care
+         * whether a StoryViewer happens to be open elsewhere; it works from anywhere a single media
+         * item is shown (a todo's gallery, an exercise's demo/thumbnail slot, anywhere). */
+        async onAddToStory() {
+            let result = await this.mediaStore.addToStory(this.media.id);
+            if (result) this.addedToStory = true;
+        },
     },
 }
 </script>
@@ -182,13 +202,17 @@ export default {
     color: #ff9d9d;
 }
 
-.retry-btn, .remove-btn, .save-copy-btn {
+.retry-btn, .remove-btn, .save-copy-btn, .add-to-story-btn {
     height: 28px;
     background-color: #BAD8F1;
     border: #3B99FC solid 1px;
     border-radius: 4px;
     font-size: 13px;
     padding: 0 10px;
+}
+
+.add-to-story-btn:disabled {
+    opacity: .6;
 }
 
 .link-btn {

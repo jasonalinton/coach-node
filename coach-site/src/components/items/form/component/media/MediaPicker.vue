@@ -9,9 +9,10 @@
             <div class="tabs d-flex flex-row">
                 <span class="tab" :class="{ active: tab == 'upload' }" @click="tab = 'upload'">Upload</span>
                 <span class="tab" :class="{ active: tab == 'link' }" @click="tab = 'link'">Link</span>
+                <span class="tab" :class="{ active: tab == 'library' }" @click="onLibraryTabClicked">Library</span>
             </div>
 
-            <div v-if="allowKindChoice" class="kind-row d-flex flex-row gap-2 mt-2">
+            <div v-if="allowKindChoice && tab != 'library'" class="kind-row d-flex flex-row gap-2 mt-2">
                 <span class="app-pill" :class="{ selected: kind == 'image' }" @click="kind = 'image'">Photo</span>
                 <span class="app-pill" :class="{ selected: kind == 'video' }" @click="kind = 'video'">Video</span>
             </div>
@@ -38,15 +39,26 @@
                 </button>
                 <p class="hint">Direct .jpg/.mp4 links, YouTube and Vimeo work best. iCloud share links open in a new tab instead of playing inline.</p>
             </div>
+
+            <!-- Library: browse everything already on the site -->
+            <div v-if="tab == 'library'" class="library-grid" @scroll="onLibraryScroll" ref="libraryGrid">
+                <MediaThumb v-for="item in libraryItems" :key="item.id" :media="item" :size="72"
+                            :clickable="true" :removable="false" @click="$emit('picked', item)" />
+                <p v-if="!libraryLoading && libraryItems.length == 0" class="hint">Nothing here yet.</p>
+                <SpinningLoader v-if="libraryLoading" :isVisible="true" class="library-loader" />
+            </div>
         </div>
     </div>
 </template>
 
 <script>
 import { useMediaStore } from '@/store/mediaStore';
+import MediaThumb from './MediaThumb.vue';
+import SpinningLoader from '@/components/loader/SpinningLoader.vue';
 
 export default {
     name: 'MediaPicker',
+    components: { MediaThumb, SpinningLoader },
     props: {
         /* Preselected/fixed kind ("image" | "video"). Ignored (and pickable by the user) unless allowKindChoice is false. */
         defaultKind: {
@@ -76,6 +88,11 @@ export default {
             linkTitle: '',
             addingLink: false,
             linkError: undefined,
+            libraryItems: [],
+            libraryLoading: false,
+            libraryDone: false,
+            libraryCursor: undefined,
+            libraryLoaded: false,
         };
     },
     created() {
@@ -118,6 +135,35 @@ export default {
                 this.addingLink = false;
             }
         },
+        onLibraryTabClicked() {
+            this.tab = 'library';
+            if (!this.libraryLoaded) this.loadLibraryPage();
+        },
+        async loadLibraryPage() {
+            if (this.libraryLoading || this.libraryDone) return;
+            this.libraryLoading = true;
+            try {
+                const pageSize = 30;
+                let items = await this.mediaStore.getLibrary(this.libraryCursor, pageSize);
+                this.libraryItems.push(...items);
+                this.libraryLoaded = true;
+                if (items.length < pageSize) {
+                    this.libraryDone = true;
+                } else {
+                    this.libraryCursor = items[items.length - 1].id;
+                }
+            } finally {
+                this.libraryLoading = false;
+            }
+        },
+        onLibraryScroll(e) {
+            const el = e.target;
+            /* Start the next page a little before the user actually hits bottom, so it's ready by
+             * the time they get there instead of showing a stall. */
+            if (el.scrollTop + el.clientHeight >= el.scrollHeight - 100) {
+                this.loadLibraryPage();
+            }
+        },
     },
 }
 </script>
@@ -139,6 +185,26 @@ export default {
     padding: 14px 16px 16px;
     width: 340px;
     max-width: 90vw;
+}
+
+.media-picker:has(.library-grid) {
+    width: 320px;
+}
+
+.library-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 8px;
+    max-height: 320px;
+    overflow-y: auto;
+}
+
+.library-loader {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    padding: 8px 0;
 }
 
 .picker-header {

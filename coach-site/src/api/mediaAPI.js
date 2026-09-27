@@ -53,6 +53,21 @@ export async function saveMediaCopy(id) {
     return postEndpoint('Media', 'SaveMediaCopy', { id });
 }
 
+/** All story-tagged media whose day falls within [startAt, endAt] - for the planner's slideshow. */
+export async function getStoriesInRange(startAt, endAt) {
+    return postEndpoint('Media', 'GetStoriesInRange', { startAt, endAt });
+}
+
+/** Tags an existing media asset into a story day. dateTime defaults to now on the server if omitted. */
+export async function addMediaToStory(idMediaAsset, dateTime) {
+    return postEndpoint('Media', 'AddMediaToStory', { idMediaAsset, dateTime });
+}
+
+/** Cursor-paginated "browse everything" list, newest first - pass the last item's id as beforeId for the next page. */
+export async function getMediaLibrary(beforeId, pageSize) {
+    return postEndpoint('Media', 'GetMediaLibrary', { beforeId, pageSize });
+}
+
 /**
  * Uploads a File straight to Blob Storage - the file's bytes never pass through the Coach API -
  * then tells the API the upload finished. Returns the finished media (kind: "image" | "video").

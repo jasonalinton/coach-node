@@ -5,7 +5,7 @@
                 <!-- Head -->
                 <div class="head d-flex flex-column">
                     <!-- Date Label -->
-                    <div class="date-label d-flex flex-column justify-content-between">
+                    <div class="date-label d-flex flex-column justify-content-between" @click="selectDate(day.date)">
                         <div v-if="weekIndex == 0" class="dow">{{ day.dow }}</div> <!-- Day of Week -->
                         <div class="date-icon">{{ day.day }}</div><!-- Date -->
                     </div>
@@ -32,6 +32,7 @@ export default {
     data: function() {
         return {
             plannerStore: undefined,
+            mediaStore: undefined,
             rows: 5,
             weeks: [],
             weekModels: [],
@@ -47,6 +48,9 @@ export default {
     created: async function() {
         let plannerStore = await import(`@/store/plannerStore`);
         this.plannerStore = plannerStore.usePlannerStore();
+
+        let mediaStore = await import(`@/store/mediaStore`);
+        this.mediaStore = mediaStore.useMediaStore();
     },
     computed: {
         dayWidth() { return this.$refs.monthView.clientWidth / 7  },
@@ -57,6 +61,10 @@ export default {
     },
     methods: {
         initTimeline,
+        selectDate(date) {
+            this.plannerStore.selectDate(date);
+            this.mediaStore.openStory(date);
+        },
     },
     watch: {
         selectedDate() {
@@ -112,6 +120,7 @@ function initTimeline() {
     height: 33px;
     margin: 8px auto 4px auto;
     font-family: SF Pro Rounded, 'Roboto', sans-serif;
+    cursor: pointer;
 }
 
 .week.first .date-label {

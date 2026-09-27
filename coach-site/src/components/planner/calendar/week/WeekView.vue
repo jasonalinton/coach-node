@@ -86,7 +86,8 @@ export default {
             lastDay: null,
             plannerStore: undefined,
             eventStore: undefined,
-            iterationStore: undefined
+            iterationStore: undefined,
+            mediaStore: undefined
         };
     },
     created: async function() {
@@ -101,6 +102,9 @@ export default {
         let plannerStore = await import(`@/store/plannerStore`);
         this.plannerStore = plannerStore.usePlannerStore();
         this.plannerStore.startClock();
+
+        let mediaStore = await import(`@/store/mediaStore`);
+        this.mediaStore = mediaStore.useMediaStore();
     },
     beforeMount: function () {},
     mounted: function () {
@@ -140,6 +144,7 @@ export default {
         },
         selectDate(date) {
             this.plannerStore.selectDate(date);
+            this.mediaStore.openStory(date);
         }
     },
     watch: {

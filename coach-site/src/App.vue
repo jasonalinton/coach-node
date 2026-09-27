@@ -1,5 +1,6 @@
 <template>
     <div id="app" >
+        <StoryViewer />
         <AppMobile v-if="isExtraSmall"/>
         <div v-else class="grid-container" :style="{ gridTemplateColumns: gridColumns }">
             <div class="nav-bar d-flex overflow-scroll">
@@ -45,6 +46,7 @@ import MentalView from "./components/metrics/mental/MentalView.vue";
 import EmotionalView from "./components/metrics/emotional/EmotionalView.vue";
 import SocialView from "./components/metrics/social/SocialView.vue";
 import FinancialView from "./components/metrics/financial/FinancialView.vue";
+import StoryViewer from "./components/planner/story/StoryViewer.vue";
 import { useAppStore } from '@/store/appStore'
 import { usePlannerStore } from '@/store/plannerStore'
 import { useEventStore } from '@/store/eventStore'
@@ -77,6 +79,7 @@ export default {
         EmotionalView,
         SocialView,
         FinancialView,
+        StoryViewer,
         // RouterView
     },
     // defineProps: {
