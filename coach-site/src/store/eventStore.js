@@ -55,6 +55,9 @@ export const useEventStore = defineStore('event', {
         async updateEvent(eventID, text, start, end) {
             return postEndpoint("Event", "UpdateEvent", {eventID, text, start, end});
         },
+        async deleteEvent(eventID) {
+            return postEndpoint("Event", "DeleteEvent", { eventID });
+        },
         runUpdates(updates) {
             let _this = this;
             const deferred = [];
