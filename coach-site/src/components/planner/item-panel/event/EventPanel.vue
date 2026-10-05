@@ -102,8 +102,9 @@ export default {
 }
 
 function onSortChange(sortBy) {
-    this.sort.by = sortBy;
-    localStorage.setItem(`event-panel-sort-by`, sortBy);
+    this.appStore.itemPanel.event.type = undefined;
+    // this.sort.by = sortBy;
+    // localStorage.setItem(`event-panel-sort-by`, sortBy);
 }
 </script>
 
