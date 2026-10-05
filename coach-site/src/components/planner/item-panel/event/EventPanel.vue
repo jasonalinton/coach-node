@@ -8,7 +8,8 @@
                              @onSortChange="onSortChange" />
             <template v-if="!iteration_Form">
                 <!-- Body -->
-                <EventTodoPanel v-if="type == EVENTTYPE.TODO" 
+                <DynamicPlannerPanel v-if="!type" />
+                <EventTodoPanel v-if="type == EVENTTYPE.TODO"
                                 :_event="eventt" 
                                 @editIteration="iteration => iteration_Form = iteration"/>
                 <EventRoutinePanel v-if="type == EVENTTYPE.ROUTINE"
@@ -35,6 +36,7 @@ import EventTodoPanel from './EventTodoPanel.vue';
 import EventRoutinePanel from './EventRoutinePanel.vue';
 import EventBlockPanel from './EventBlockPanel.vue';
 import IterationForm from '../component/form/IterationForm.vue';
+import DynamicPlannerPanel from '../dynamic-planner/DynamicPlannerPanel.vue';
 
 var sortItems = [
     { id: 1, text: "Metric" },
@@ -51,12 +53,13 @@ var sortItems = [
 
 export default {
     name: 'EventPanel',
-    components: { 
-        ItemPanelHeader, 
-        EventTodoPanel, 
-        EventRoutinePanel, 
+    components: {
+        ItemPanelHeader,
+        EventTodoPanel,
+        EventRoutinePanel,
         EventBlockPanel,
-        IterationForm },
+        IterationForm,
+        DynamicPlannerPanel },
     props: {
         props: Object,
         showHead: {
