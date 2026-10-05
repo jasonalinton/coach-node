@@ -23,18 +23,18 @@
         <div class="timeline d-flex flex-column">
             <div v-for="item in timeline" :key="item.id" class="time-block d-flex flex-row">
                 <div class="time-rail d-flex flex-column align-items-center">
-                    <span class="start-time">{{ toShortTimeString(item.startAt) }}</span>
-                    <span class="end-time">{{ toShortTimeString(item.endAt) }}</span>
+                    <span class="start-time">{{ toNumberTimeString(item.startAt) }}</span>
+                    <span class="end-time">{{ toNumberTimeString(item.endAt) }}</span>
                 </div>
-                <DPBlockEvent class="flex-grow-1" :event-id="item.id" />
+                <DyBlockEvent class="flex-grow-1" :event-id="item.id" />
             </div>
         </div>
     </div>
 </template>
 
 <script>
-import DPBlockEvent from './DPBlockEvent.vue';
-import { toShortWeekdayString, startOfDay, endOfDay, isToday, toShortTimeString } from '../../../../../utility/timeUtility';
+import DyBlockEvent from './DyBlockEvent.vue';
+import { toShortWeekdayString, startOfDay, endOfDay, isToday, toNumberTimeString } from '../../../../../utility/timeUtility';
 import { sortAsc } from '../../../../../utility';
 import { EVENTTYPE } from '../../../../model/constants';
 import iconRefreshCw from '@/assets/icons/icon-refresh-cw.svg';
@@ -42,7 +42,7 @@ import iconTrim from '@/assets/icons/icon-trim.svg';
 
 export default {
     name: 'DynamicPlannerPanel',
-    components: { DPBlockEvent },
+    components: { DyBlockEvent },
     props: {
 
     },
@@ -52,9 +52,10 @@ export default {
             eventStore: undefined,
             routineStore: undefined,
             todoStore: undefined,
+            iterationStore: undefined,
             iconRefreshCw,
             iconTrim,
-            toShortTimeString,
+            toNumberTimeString,
         }
     },
     created: async function() {
@@ -66,7 +67,10 @@ export default {
         this.routineStore = routineStore.useRoutineStore();
         let todoStore = await import('@/store/todoStore');
         this.todoStore = todoStore.useTodoStore();
+        let iterationStore = await import('@/store/iterationStore');
+        this.iterationStore = iterationStore.useIterationStore();
         this.syncPhantomEvents();
+        this.fetchBlockEvents();
     },
     computed: {
         selectedDate() {
@@ -85,7 +89,7 @@ export default {
             return [];
         },
         phantomEvents() {
-            if (!this.selectedDate || !this.routineStore || !this.todoStore) return [];
+            if (!this.selectedDate || !this.routineStore || !this.todoStore || !this.iterationStore) return [];
 
             let date = this.selectedDate;
             let blockRepeats = this.blockRepeats.filter(repeat => {
@@ -95,8 +99,12 @@ export default {
                 return true;
             });
             blockRepeats = blockRepeats.filter(repeat => !!repeat.startTime);
+            blockRepeats = blockRepeats.filter(repeat => repeat.isRoutineRepeat);
 
-            return blockRepeats.map(repeat => {
+            // var newID = this.eventStore.newID();
+            let newID = -1;
+
+            let events = blockRepeats.map(repeat => {
                 const [sh, sm] = repeat.startTime.split(':').map(Number);
                 let startAt = startOfDay(date);
                 startAt.setHours(sh, sm, 0, 0);
@@ -112,18 +120,11 @@ export default {
                     endAt = new Date(startAt.getTime() + 60 * 60000);
                 }
 
-                let text = "";
-                if (repeat.isRoutineRepeat) {
-                    let routine = this.routineStore.routines.find(routine => routine.id == repeat.idRoutine);
-                    text = routine ? routine.text : "";
-                }
-                if (repeat.isTodoRepeat) {
-                    let todo = this.todoStore.todos.find(todo => todo.id == repeat.idTodo);
-                    text = todo ? todo.text : "";
-                }
+                let routine = this.routineStore.routines.find(routine => routine.id == repeat.idRoutine);
+                let text = routine ? routine.text : "";
 
-                return {
-                    id: repeat.id,
+                let event = {
+                    id: newID--,
                     repeat: repeat,
                     text: text,
                     startAt: startAt.toJSON(),
@@ -144,7 +145,35 @@ export default {
                         text: "Block",
                     }
                 };
+
+                if (routine) {
+                    routine.todoIDs.forEach(idTodo => {
+                        let todo = this.todoStore.getItemModel(idTodo)?.data;
+                        if (todo) {
+                            let repeatChild = todo.repeats.find(r => r.routineRepeatID == repeat.id);
+                            let iterations = this.iterationStore.getIterationsForTodo(idTodo);
+                            iterations = sortAsc(iterations, 'attemptedAt');
+
+                            let task = iterations.find(iteration => {
+                                return iteration.startAt 
+                                    && +iteration.startAt.toDate() == +this.selectedDate 
+                                    && +iteration.endAt.toDate() == +this.selectedDate;
+                            });
+                            if (!task) {
+                                task = this.iterationStore.newTask(todo, repeatChild);
+                            } else {
+                                console.log('Task found:', task);
+                            }
+                            event.iterations.push(task);
+                        }
+                    });
+                }
+                
+                return event;
             });
+
+            events = events.filter(e => e.iterations.length > 0);
+            return events;
         },
         blockEvents() {
             // Temporary for testing: returns today's persisted block events.
@@ -152,31 +181,41 @@ export default {
             let start = +startOfDay(this.selectedDate);
             let end = +endOfDay(this.selectedDate);
             let events = this.eventStore.getEvents(start, end, false);
-            return events.filter(e => e.type && e.type.id == EVENTTYPE.BLOCKROUTINE);
+            // return events.filter(e => e.type && e.type.id == EVENTTYPE.BLOCKROUTINE);
+            return events;
         },
         timeline() {
-            return sortAsc([...this.phantomEvents, ...this.blockEvents], 'startAt');
+            // return sortAsc([...this.phantomEvents, ...this.blockEvents], 'startAt');
+            return sortAsc([...this.blockEvents], 'startAt');
         },
         planButtonText() {
             return this.blockEvents.length === 0 ? 'Plan' : 'Replan';
         },
     },
     methods: {
-        onPlanClick, onTrimClick, syncPhantomEvents,
+        onPlanClick, onTrimClick, syncPhantomEvents, fetchBlockEvents,
     },
     watch: {
         phantomEvents() {
             this.syncPhantomEvents();
+        },
+        selectedDate() {
+            this.fetchBlockEvents();
         }
     }
+}
+
+function fetchBlockEvents() {
+    if (!this.eventStore || !this.selectedDate) return;
+    let start = startOfDay(this.selectedDate);
+    let end = endOfDay(this.selectedDate);
+    this.eventStore.getEvents(start, end, true);
 }
 
 function syncPhantomEvents() {
     if (!this.eventStore) return;
     this.phantomEvents.forEach(p => {
-        if (!this.eventStore.events.some(e => e.id == p.id)) {
-            this.eventStore.events.push(p);
-        }
+        this.eventStore.replaceOrAddEvent(p);
     });
 }
 
@@ -191,6 +230,7 @@ function onTrimClick() {
 
 <style scoped>
 .dynamic-planner-panel {
+    text-align: start;
     padding: 12px 20px;
 }
 

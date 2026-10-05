@@ -1,5 +1,5 @@
 <template>
-    <div class="dp-block-event d-flex flex-column">
+    <div class="dp-block-event d-flex flex-column" :data-event-id="eventId">
         <div v-if="isComplete" class="header d-flex flex-row align-items-center complete">
             <div class="action-icon complete">
                 <img :src="iconComplete" class="glyph complete-glyph" />
@@ -19,21 +19,21 @@
             </div>
         </div>
         <div v-if="isExpanded" class="task-list d-flex flex-column">
-            <DPTaskItem v-for="task in tasks" :key="task.id" :iteration-id="task.id" />
+            <DyTaskItem v-for="task in tasks" :key="task.id" :iteration-id="task.id" />
         </div>
     </div>
 </template>
 
 <script>
-import DPTaskItem from './DPTaskItem.vue';
+import DyTaskItem from './DyTaskItem.vue';
 import iconComplete from '@/assets/icons/icon-block-complete.svg';
 import iconStart from '@/assets/icons/icon-block-start.svg';
 import iconStop from '@/assets/icons/icon-block-stop.png';
 import iconDeleteX from '@/assets/icons/icon-delete-x.svg';
 
 export default {
-    name: 'DPBlockEvent',
-    components: { DPTaskItem },
+    name: 'DyBlockEvent',
+    components: { DyTaskItem },
     props: {
         eventId: { type: Number, required: true },
     },
@@ -42,7 +42,6 @@ export default {
             eventStore: undefined,
             appStore: undefined,
             iterationStore: undefined,
-            event: undefined,
             isExpanded: false,
             iconComplete,
             iconStart,
@@ -57,11 +56,13 @@ export default {
         this.appStore = appStore.useAppStore();
         let iterationStore = await import('@/store/iterationStore');
         this.iterationStore = iterationStore.useIterationStore();
-        this.event = this.eventStore.getEvent(this.eventId);
     },
     computed: {
+        event() {
+            return this.eventStore ? this.eventStore.getEvent(this.eventId) : undefined;
+        },
         isPending() {
-            return !this.event || !this.event.startAt;
+            return true;
         },
         isActive() {
             return !!this.event && !!this.event.startAt && !this.event.endAt;
@@ -122,8 +123,10 @@ function onDeleteEvent() {
 
 <style scoped>
 .dp-block-event {
-    background-color: white;
+    background-color: #F9FAFB;
     user-select: none;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
 }
 
 .header {

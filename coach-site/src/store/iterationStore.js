@@ -3,7 +3,7 @@ import { getSocketConnection, deferUpdate } from './socket'
 import { getRepetitiveTodoIterations } from '../api/todoAPI';
 import { getAllIterationsInRange, getUnplannedIterations } from '../api/plannerAPI'
 import { removeItemByID, replaceOrAddItem, sortAsc } from '../../utility'
-import { postEndpoint } from '../api/api';
+import { attemptPostEndpoint, postEndpoint } from '../api/api';
 import { getTimeframeEndpoints } from '../../utility/timeUtility';
 
 let initialized = false;
@@ -38,7 +38,21 @@ export const useIterationStore = defineStore('iteration', {
                 && covers(r.requestProps.startAt, r.requestProps.endAt));
         },
         getIteration(id) {
-            return this.iterations.find(x => x.id == id);
+            let iteration = this.iterations.find(x => x.id == id);
+            if (!iteration) {
+                attemptPostEndpoint("Planner", "GetIteration", { id })
+                .then(response => {
+                    if (response?.result) {
+                        iteration = response.result;
+                        replaceOrAddItem(iteration, this.iterations)
+                        this.iterations = sortAsc(this.iterations);
+                    }
+                    
+                    this.runUpdates(response);
+                    return response;
+                });
+            }
+            return iteration;
         },
         getIterations() {
             return this.iterations;
@@ -74,7 +88,7 @@ export const useIterationStore = defineStore('iteration', {
             }
 
             return this.iterations.filter(iteration => {
-                return +iteration.startAt.toDate() >= startAt && +iteration.startAt.toDate() <= endAt;
+                return iteration.startAt && +iteration.startAt.toDate() >= startAt && +iteration.startAt.toDate() <= endAt;
             });
         },
         // getIterationsInRange(startAt, endAt, shouldRequestServer) {
@@ -140,6 +154,21 @@ export const useIterationStore = defineStore('iteration', {
                 return response.result;
             })
             .then(response => response.result);
+        },
+        newTask(todo, repeat) {
+            let negativeIDs = this.iterations.filter(x => x.id < 0).map(x => x.id);
+            let nextID = (negativeIDs.length > 0) ? Math.min(...negativeIDs) + - 1 : -1;
+            let newTask = { 
+                id: nextID, 
+                text: todo ? todo.text : "", 
+                points: todo?.points,
+                startAt: undefined, 
+                endAt: undefined, 
+                idTodo: todo?.id,
+                repeatID: repeat?.id
+            };
+            this.iterations.push(newTask);
+            return newTask;
         },
         updateIteration(iterationID, text, blurb, points, startAt, endAt) {
             let dateTime = new Date();

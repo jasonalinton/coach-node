@@ -52,8 +52,16 @@ export const useEventStore = defineStore('event', {
             });
             return events;
         },
+        newID() {
+            let negativeIDs = this.events.filter(x => x.id < 0).map(x => x.id);
+            let nextID = (negativeIDs.length > 0) ? Math.min(...negativeIDs) + - 1 : -1;
+            return nextID;
+        },
         async updateEvent(eventID, text, start, end) {
             return postEndpoint("Event", "UpdateEvent", {eventID, text, start, end});
+        },
+        replaceOrAddEvent(event) {
+            replaceOrAddItem(event, this.events);
         },
         async deleteEvent(eventID) {
             return postEndpoint("Event", "DeleteEvent", { eventID });

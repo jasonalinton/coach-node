@@ -1,6 +1,6 @@
 <template>
-    <div class="dp-task-item d-flex flex-row justify-content-between align-items-center">
-        <div class="d-flex flex-row align-items-center flex-grow-1">
+    <div class="dp-task-item d-flex flex-row justify-content-between align-items-center" :data-iteration-id="`${iterationId}`">
+        <div class="d-flex flex-row align-items-center flex-grow-1 gap-3">
             <div class="status-icon" :class="status" @click="onStatusClick">
                 <img v-if="status === 'incomplete'" :src="iconStatusIncomplete" class="status-img" />
                 <img v-else-if="status === 'complete'" :src="iconStatusCheck" class="check-img" />
@@ -8,7 +8,7 @@
             </div>
             <div class="d-flex" :class="{ 'flex-column': iteration && iteration.points }">
                 <span v-if="iteration && iteration.points" class="points">{{ iteration.points }} pts</span>
-                <span class="text" @click="onTextClick" @dblclick="onTextDblClick">{{ iteration ? iteration.text : '' }}</span>
+                <span class="text" @click="onTextClick" @dblclick="onTextDblClick">{{ text }}</span>
             </div>
         </div>
         <div class="button-group">
@@ -25,16 +25,18 @@ import iconStatusCheck from '@/assets/icons/icon-status-check.svg';
 import iconDeleteX from '@/assets/icons/icon-delete-x.svg';
 
 export default {
-    name: 'DPTaskItem',
+    name: 'DyTaskItem',
     components: {  },
     props: {
-        iterationId: { type: Number, required: true },
+        iterationId: { type: Number },
+        // phantomTask: { type: Object }
     },
     data: function () {
         return {
+            todoStore: undefined,
             iterationStore: undefined,
             appStore: undefined,
-            iteration: undefined,
+            plannerStore: undefined,
             clickTimer: null,
             iconStatusIncomplete,
             iconStatusCheck,
@@ -42,13 +44,39 @@ export default {
         }
     },
     created: async function() {
+        let todoStore = await import('@/store/todoStore');
+        this.todoStore = todoStore.useTodoStore();
         let iterationStore = await import('@/store/iterationStore');
         this.iterationStore = iterationStore.useIterationStore();
         let appStore = await import('@/store/appStore');
         this.appStore = appStore.useAppStore();
-        this.iteration = this.iterationStore.getIteration(this.iterationId);
+        let plannerStore = await import('@/store/plannerStore');
+        this.plannerStore = plannerStore.usePlannerStore();
     },
     computed: {
+        selectedDate() {
+            return this.plannerStore ? this.plannerStore.selectedDate : undefined;
+        },
+        iteration() {
+            // if (this.phantomTask) {
+            //     let iteraton = {
+            //         text: this.phantomTask.text,
+            //         points: this.phantomTask.points
+            //     };
+            //     return iteration;
+            // }
+            if (this.iterationStore) {
+                let iteration = this.iterationStore.getIteration(this.iterationId);
+                return iteration;
+            }
+        },
+        text() {
+            if (this.iteration && !this.iteration.text) {
+                let todo = this.todoStore.getItem(this.iteration.idTodo);
+                return todo ? todo.text : "";
+            }
+            return this.iteration ? this.iteration.text : "";
+        },
         status() {
             if (!this.iteration) return 'incomplete';
             if (this.iteration.completedAt) return 'complete';
@@ -67,7 +95,12 @@ function markComplete() {
     let now = new Date().toJSON();
     this.iteration.attemptedAt = now;
     this.iteration.completedAt = now;
-    this.iterationStore.toggleCompletion(this.iteration.id, this.iteration.attemptedAt, this.iteration.completedAt);
+
+    if (this.iteration.id < 0) {
+        this.iterationStore.completeRepeatIteration(this.iteration.idTodo, this.iteration.repeatID, null, this.iteration.points, now, this.selectedDate, this.selectedDate);
+    } else {
+        this.iterationStore.toggleCompletion(this.iteration.id, now, now);
+    }
 }
 
 function markIncomplete() {
@@ -110,7 +143,7 @@ function onDelete() {
 
 <style scoped>
 .dp-task-item {
-    background-color: white;
+    background-color: #F9FAFB;
     user-select: none;
     padding: 4px 0px;
     gap: 12px;

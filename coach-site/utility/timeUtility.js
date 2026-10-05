@@ -64,6 +64,16 @@ export function toShortTimeString(dateTimeJSON) {
     return date.format(datetime, 'h:mm A') // Ex. 7:50 AM
 }
 
+export function toNumberTimeString(dateTimeJSON) {
+    let datetime = new Date(dateTimeJSON);
+    return date.format(datetime, 'h:mm') // Ex. 7:50
+}
+
+export function toMilitaryNumberTimeString(dateTimeJSON) {
+    let datetime = new Date(dateTimeJSON);
+    return date.format(datetime, 'H:mm') // Ex. 19:50
+}
+
 // Ex. Jun 28, 2025 · 9:15 AM
 export function toShortDateTimeString(dateTimeJSON) {
     let datetime = new Date(dateTimeJSON);

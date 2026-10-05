@@ -24,6 +24,13 @@
                                     Task-Routine
                                 </label>
                             </div>
+                            <div class="form-check">
+                                <input class="form-check-input mt-1" type="checkbox" value="" id="is-block-routine" 
+                                       v-model="isBlockRoutine">
+                                <label class="form-check-label float-start" for="is-block-routine">
+                                    Block-Routine
+                                </label>
+                            </div>
                         </div>
                     </div>
                     <div class="row g-2">
@@ -88,6 +95,7 @@ export default {
             initialized: false,
             text: undefined,
             isTaskRoutine: undefined,
+            isBlockRoutine: undefined,
             repeats: {
                 value: [],
                 added: [],
@@ -151,6 +159,7 @@ export default {
             this.text = (routine) ? routine.text : "";
 
             this.isTaskRoutine = routine.isTaskRoutine;
+            this.isBlockRoutine = routine.isBlockRoutine;
 
             this.repeats.value = (routine) ? clone(routine.repeats) : [],
             this.repeats.added = [];
@@ -192,7 +201,8 @@ export default {
                 let model = {
                     id: this.id,
                     text: this.text,
-                    isTaskRoutine: this.isTaskRoutine
+                    isTaskRoutine: this.isTaskRoutine,
+                    isBlockRoutine: this.isBlockRoutine
                 };
                 this.store.saveRoutine(model);
                 this.$emit("closeItemModal");

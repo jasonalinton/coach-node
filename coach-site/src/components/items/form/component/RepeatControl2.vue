@@ -143,6 +143,14 @@
                     <input class="form-control form-control-sm me-1" type="number" min="1" v-model="updatedRepeat.points"
                             :style="{'width': '41px'}" required/>
                 </div>
+                <!-- Is Block -->
+                <div class="form-check">
+                    <input class="form-check-input mt-1" type="checkbox" value="" id="isBlock" 
+                           v-model="updatedRepeat.isBlock">
+                    <label class="form-check-label float-start" for="isBlock">
+                        Is Block
+                    </label>
+                </div>
                 <!-- Is Event Visible -->
                 <div class="form-check">
                     <input class="form-check-input mt-1" type="checkbox" value="" id="isEventVisible" 
@@ -562,6 +570,7 @@ function save() {
         endDate: this.updatedRepeat.endDate,
         startTime: this.updatedRepeat.startTime,
         endTime: this.updatedRepeat.endTime,
+        isBlock: this.updatedRepeat.isBlock,
         isEventVisible: this.updatedRepeat.isEventVisible,
         isRecommended: this.updatedRepeat.isRecommended,
     };
