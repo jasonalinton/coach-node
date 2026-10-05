@@ -181,8 +181,7 @@ export default {
             let start = +startOfDay(this.selectedDate);
             let end = +endOfDay(this.selectedDate);
             let events = this.eventStore.getEvents(start, end, false);
-            // return events.filter(e => e.type && e.type.id == EVENTTYPE.BLOCKROUTINE);
-            return events;
+            return events.filter(e => e.type && e.type.id == EVENTTYPE.BLOCKROUTINE);
         },
         timeline() {
             // return sortAsc([...this.phantomEvents, ...this.blockEvents], 'startAt');
