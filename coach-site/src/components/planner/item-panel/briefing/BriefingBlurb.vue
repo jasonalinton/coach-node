@@ -143,7 +143,7 @@ export default {
     },
     methods: {
         addBlurb(blurb, idMetric) {
-            this.universalStore.addBriefingBlurb(blurb.text, this.selectedDate, blurb.idBlurbType, idMetric, this.idTimeframe)
+            this.universalStore.addBriefingBlurb(blurb.text, this.selectedDate, blurb.idBlurbType, idMetric, this.idTimeframe, blurb.json)
         },
         saveBlurb(blurb) {
             let index = this.blurbs.findIndex(x => x.id == blurb.id);

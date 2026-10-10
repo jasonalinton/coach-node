@@ -14,8 +14,7 @@
             <!-- Body -->
             <div class="field">
                 <div class="field-label"><span>Body</span><span class="required">*</span></div>
-                <textarea class="field-textarea" placeholder="Write your thoughts..."
-                          v-model.trim="text" spellcheck="true"></textarea>
+                <EditorJS class="field-editor" v-model="json" placeholder="Write your thoughts..."/>
             </div>
             <!-- Types -->
             <div class="field">
@@ -97,7 +96,9 @@
 
 <script>
 import ItemMapper from '../items/form/component/ItemMapper.vue';
+import EditorJS from '../controls/input/EditorJS.vue';
 import { clone, toDateString, addDay } from '../../../utility';
+import { extractPlainText, isEmptyOutputData, legacyTextToOutputData } from '../../../utility/editorjsUtility';
 import { BLURB_MAPPING_TYPE } from '../../model/constants';
 import { blurbTypes, blurbMappingTypes, timeframes } from '../../model/types';
 
@@ -118,7 +119,7 @@ const LOCAL_SINGLE_LEVEL_TYPES = [
 
 export default {
     name: 'BlurbForm',
-    components: { ItemMapper },
+    components: { ItemMapper, EditorJS },
     props: {
         blurb: { type: Object, default: undefined },
         datetime: { type: [String, Date], default: undefined }
@@ -136,7 +137,7 @@ export default {
             plannerStore: undefined,
 
             title: '',
-            text: '',
+            json: null,
             idMappingType: undefined,
             selectedTypeIDs: [],
             mappings: [],
@@ -184,7 +185,7 @@ export default {
             return !!this.blurb;
         },
         isValid() {
-            return !!(this.title && this.title.trim()) && !!(this.text && this.text.trim());
+            return !!(this.title && this.title.trim()) && !isEmptyOutputData(this.json);
         },
         canAddMapping() {
             return !!this.idMappingType;
@@ -390,7 +391,7 @@ export default {
             if (!this.blurb) return;
 
             this.title = this.blurb.title || '';
-            this.text = this.blurb.text || '';
+            this.json = this.blurb.json ? JSON.parse(this.blurb.json) : legacyTextToOutputData(this.blurb.text);
             this.idMappingType = this.blurb.idMappingType;
             this.selectedTypeIDs = (this.blurb.typeIDs || []).map(x => x.id);
 
@@ -442,6 +443,8 @@ export default {
             if (!this.isValid) return;
 
             let datetime = this.referenceDate;
+            let text = extractPlainText(this.json);
+            let json = JSON.stringify(this.json);
             let typeIDs = this.selectedTypeIDs.map((id, index) => ({ id, position: index }));
             let mappingProps = this.mappings.map(m => ({
                 mappingType: m.mappingType,
@@ -463,11 +466,11 @@ export default {
                 await this.universalStore.updateBlurb(
                     this.blurb.id, this.idMappingType,
                     typeIDs_Added, typeIDs_Removed,
-                    this.text, this.title, datetime,
-                    mappingProps, []
+                    text, this.title, datetime,
+                    mappingProps, [], json
                 );
             } else {
-                await this.universalStore.addBlurb(this.idMappingType, typeIDs, this.text, this.title, datetime, mappingProps);
+                await this.universalStore.addBlurb(this.idMappingType, typeIDs, text, this.title, datetime, mappingProps, json);
             }
 
             this.$emit('saved');
@@ -563,6 +566,16 @@ export default {
     height: 180px;
     padding: 12px 16px;
     resize: vertical;
+}
+
+.field-editor {
+    min-height: 180px;
+    padding: 12px 16px;
+    background-color: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    font-size: 15px;
+    color: #1a1c1e;
 }
 
 .type-pills {

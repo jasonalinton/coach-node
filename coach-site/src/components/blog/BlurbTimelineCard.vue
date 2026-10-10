@@ -14,7 +14,7 @@
                 <span class="date-time">{{ dateTimeDisplay }}</span>
                 <span v-if="blurb.title" class="title">{{ blurb.title }}</span>
             </div>
-            <p class="body-text">{{ blurb.text }}</p>
+            <BlurbContent class="body-text" :blurb="blurb"/>
         </div>
         <template v-if="mappingRows.length">
             <div class="divider"></div>
@@ -39,6 +39,7 @@ import { metrics, blurbMappingTypes, blurbTypes } from '../../model/types';
 import iconActivity from '@/assets/icons/icon-activity.svg';
 import iconList from '@/assets/icons/icon-list.svg';
 import iconTarget from '@/assets/icons/icon-target.svg';
+import BlurbContent from '../controls/display/BlurbContent.vue';
 
 const MAPPING_THEMES = {
     [BLURB_MAPPING_TYPE.METRIC]: { bg: '#e0f2f1', text: '#00897b' },
@@ -49,7 +50,7 @@ const DEFAULT_MAPPING_THEME = { bg: '#f3f4f6', text: '#4b5563' };
 
 export default {
     name: 'BlurbTimelineCard',
-    components: {  },
+    components: { BlurbContent },
     props: {
         idBlurb: Number
     },
@@ -80,6 +81,7 @@ export default {
                         datetime: blurb.datetime,
                         title: blurb.title,
                         text: blurb.text,
+                        json: blurb.json,
                         metricIDs: blurb.metricIDs || [],
                         goalIDs: blurb.goalIDs || [],
                         todoIDs: blurb.todoIDs || [],

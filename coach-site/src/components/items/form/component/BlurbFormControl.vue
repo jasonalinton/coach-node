@@ -19,17 +19,15 @@
         <div v-if="isShown" class="d-flex flex-column">
             <div v-if="showTextarea" class="d-flex flex-column gap-2">
                 <input v-if="showTitle" class="textbox text" type="text" placeholder="Title"
-                       v-model.lazy.trim="title" 
+                       v-model.lazy.trim="title"
                        spellcheck="true"/>
-                <textarea class="textarea" ref="textbox"
-                          v-model.trim="text"
-                          v-on:keyup.enter.ctrl="saveBlurb"
-                          v-on:keyup.esc.stop="cancelBlurb"
-                          :placeholder="placeholder"
-                          spellcheck="true"
-                          @focus="showButtons = true"
-                          @blur="onTextareaBlur">
-                </textarea>
+                <div class="editor-wrapper" ref="editorWrapper"
+                     v-on:keyup.enter.ctrl="saveBlurb"
+                     v-on:keyup.esc.stop="cancelBlurb"
+                     @focusin="showButtons = true"
+                     @focusout="onEditorBlur">
+                    <EditorJS class="textarea" ref="textbox" v-model="json" :placeholder="placeholder"/>
+                </div>
                 <!-- Goal-TimePair -->
                 <div class="d-flex flex-column mt-2">
                     <span class="label text-start">Goal-TimePair IDs</span>
@@ -87,7 +85,7 @@
                      @click="editBlurb(blurb.id)">
                     <!-- <span class="text-start">{{ getDateString(blurb.datetime) }}</span> -->
                     <h6 class="text-start">{{ blurb.title }}</h6>
-                    <span class="text-start">{{ blurb.text }}</span>
+                    <BlurbContent :blurb="blurb" class="text-start"/>
                     <!-- Goal-TimePair IDs -->
                     <div v-if="blurb.goalTimePairs.length > 0" class="goal-timepair d-flex flex-row gap-2">
                         <span v-for="id in blurb.goalTimePairs.map(x => x.id)" :key="id">{{ id }}</span>
@@ -105,11 +103,14 @@
 <script>
 import { getShortDateString } from '../../../../../utility/timeUtility';
 import { clone, sortAsc } from '../../../../../utility';
+import { extractPlainText, isEmptyOutputData, legacyTextToOutputData } from '../../../../../utility/editorjsUtility';
 import { BLURBTYPE } from '../../../../model/constants';
+import EditorJS from '../../../controls/input/EditorJS.vue';
+import BlurbContent from '../../../controls/display/BlurbContent.vue';
 
 export default {
     name: 'BlurbFormControl',
-    components: {  },
+    components: { EditorJS, BlurbContent },
     props: {
         header: {
             type: String,
@@ -134,7 +135,7 @@ export default {
             BLURBTYPE: clone(BLURBTYPE),
             universalStore: undefined,
             title: undefined,
-            text: undefined,
+            json: undefined,
             selectedID: undefined,
             isShown: true,
             showButtons: false,
@@ -177,7 +178,7 @@ export default {
         editBlurb,
         cancelBlurb,
         saveBlurb,
-        onTextareaBlur,
+        onEditorBlur,
         getDateString(datetime) {
             if (datetime) {
                 let date = new Date(datetime);
@@ -191,7 +192,7 @@ export default {
 function reset() {
     this.selectedID = undefined;
     this.title = undefined;
-    this.text = undefined;
+    this.json = undefined;
     this.goalTimePairIDs = [];
     this.goalTimePairTodoIDs = [];
 }
@@ -233,18 +234,18 @@ function editBlurb(id) {
     let index = this.blurbs_Sorted.findIndex(x => x.id == id);
     if (index > -1) {
         let blurb = this.blurbs_Sorted[index];
-        this.text = blurb.text;
+        this.json = blurb.json ? JSON.parse(blurb.json) : legacyTextToOutputData(blurb.text);
         this.title = blurb.title;
         this.goalTimePairIDs = [ ...blurb.goalTimePairs.map(x => x.id) ];
         this.goalTimePairTodoIDs = [ ...blurb.goalTimePairTodos.map(x => x.id) ];
         this.showTextarea = true;
-        this.$refs["textbox"].focus();
+        this.$nextTick(() => this.$refs["textbox"] && this.$refs["textbox"].focus());
     }
 }
 
 function cancelBlurb() {
+    if (this.$refs["textbox"]) this.$refs["textbox"].blur();
     this.reset();
-    this.$refs["textbox"].blur();
     this.showButtons = false;
     this.showTextarea = false;
 }
@@ -253,7 +254,8 @@ function saveBlurb() {
     let blurb = {
         id: undefined,
         title: this.title,
-        text: this.text,
+        text: extractPlainText(this.json),
+        json: this.json ? JSON.stringify(this.json) : undefined,
         datetime: (!this.selectedID) ? new Date() : undefined,
         goalTimePairIDs: this.goalTimePairIDs,
         goalTimePairTodoIDs: this.goalTimePairTodoIDs,
@@ -269,8 +271,11 @@ function saveBlurb() {
     this.cancelBlurb();
 }
 
-function onTextareaBlur() {
-    if (!this.text) {
+function onEditorBlur(event) {
+    if (this.$refs.editorWrapper && event.relatedTarget && this.$refs.editorWrapper.contains(event.relatedTarget)) {
+        return;
+    }
+    if (isEmptyOutputData(this.json)) {
         this.showButtons = false;
         this.showTextarea = false;
         this.selectedID = undefined;

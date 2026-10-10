@@ -202,8 +202,8 @@ export const useIterationStore = defineStore('iteration', {
             return postEndpoint("Planner", "AttemptIteration", data)
             .then(response => response.result);
         },
-        completeAndCreatSibling(iterationID, completedAt, newText, newStart, newEnd, points, blurb) {
-            let data = { iterationID, completedAt, newText, newStart, newEnd, points, blurb };
+        completeAndCreatSibling(iterationID, completedAt, newText, newStart, newEnd, points, blurb, blurbJson) {
+            let data = { iterationID, completedAt, newText, newStart, newEnd, points, blurb, blurbJson };
             return postEndpoint("Planner", "CompleteAndCreatSibling", data)
             .then(response => response.result);
         },

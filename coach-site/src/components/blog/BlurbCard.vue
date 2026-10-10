@@ -5,7 +5,7 @@
         <span class="time">{{ blurb.time }}</span>
         <div v-if="head">{{ head }}</div>
         <span v-if="blurb.title" class="title">{{ blurb.title }}</span>
-        <span class="text">{{ blurb.text }}</span>
+        <BlurbContent :blurb="blurb"/>
         <div class="d-flex flex-row">
             <span v-for="(tag, index) in blurb.tags" :key="index" class="tag">{{ tag }}</span>
         </div>
@@ -15,10 +15,11 @@
 <script>
 import { toLongDateString, toShortTimeString } from '../../../utility/timeUtility';
 import { BLURBTYPE } from '../../model/constants';
+import BlurbContent from '../controls/display/BlurbContent.vue';
 
 export default {
     name: 'BlurbCard',
-    components: {  },
+    components: { BlurbContent },
     props: {
         idBlurb: Number
     },
@@ -46,6 +47,7 @@ export default {
                         time: toShortTimeString(blurb.datetime),
                         title:blurb.title,
                         text: blurb.text,
+                        json: blurb.json,
                         tags: [],
                     };
                 }

@@ -84,8 +84,8 @@ export const useUniversalStore = defineStore('universal', {
             let blurbs = this.blurbs.filter(blurb => blurb.idType == BLURBTYPE.BRIEFING || blurb.idType == BLURBTYPE.DEBRIEFING);
             return blurbs;
         },
-        addBriefingBlurb(text, datetime, idBlurbType, idMetric, idTimeframe) {
-            let data = { text, datetime, idBlurbType, idMetric, idTimeframe };
+        addBriefingBlurb(text, datetime, idBlurbType, idMetric, idTimeframe, json) {
+            let data = { text, json, datetime, idBlurbType, idMetric, idTimeframe };
             return postEndpoint("Universal", "AddBriefingBlurb", data)
                 .then(this.onResponse);
         },
@@ -104,18 +104,18 @@ export const useUniversalStore = defineStore('universal', {
             if (hasRemovals) updates.blurbIDsRemoved.forEach(id => removeItemByID(id, blurbs));
             deferUpdate(() => { this.blurbs = sortAsc(blurbs); });
         },
-        addMetricBlurb(idMetric, datetime, text, title) {
-            return postEndpoint("Universal", "AddMetricBlurb", { idMetric, datetime, text, title })
+        addMetricBlurb(idMetric, datetime, text, title, json) {
+            return postEndpoint("Universal", "AddMetricBlurb", { idMetric, datetime, text, title, json })
                 .then(response => response.result);
         },
-        addBlurb(idMappingType, typeIDs, text, title, datetime, mappings) {
-            let data = { idMappingType, typeIDs, text, title, datetime, mappings };
+        addBlurb(idMappingType, typeIDs, text, title, datetime, mappings, json) {
+            let data = { idMappingType, typeIDs, text, title, json, datetime, mappings };
             return postEndpoint("Universal", "AddBlurb", data)
                 .then(this.onResponse);
         },
-        updateBlurb(idBlurb, idMappingType, typeIDs_Added, typeIDs_Removed, text, title, datetime, mappings_Added, mappings_Removed) {
+        updateBlurb(idBlurb, idMappingType, typeIDs_Added, typeIDs_Removed, text, title, datetime, mappings_Added, mappings_Removed, json) {
             let data = {
-                idBlurb, idMappingType, text, title, datetime,
+                idBlurb, idMappingType, text, title, json, datetime,
                 typeIDs_Added, typeIDs_Removed,
                 mappings_Added, mappings_Removed
             };

@@ -39,11 +39,11 @@
                                             v-model.lazy.trim="field.value" spellcheck="true"
                                             @change="updateEntryField(field)"/>
                                     </div>
-                                    <textarea id="blurb" class="textarea mt-2" 
-                                            type="text"
-                                            placeholder="Blurb"
-                                            v-model.lazy="selectedEntry.blurb" spellcheck="true"
-                                            @change="updateEntryBlurb"></textarea>
+                                    <div class="editor-wrapper mt-2" ref="blurbEditorWrapper" @focusout="onBlurbEditorBlur">
+                                        <EditorJS id="blurb" class="textarea"
+                                                  placeholder="Blurb"
+                                                  v-model="selectedEntry.json"/>
+                                    </div>
                                     
                                     <!-- Delete -->
                                     <button v-if="!confimDelete" type="button" class="btn btn-danger mt-2" @click="confimDelete = true">Delete</button>
@@ -66,14 +66,16 @@
 
 <script>
 import DateTimeSelector from '../../../controls/select/DateTimeSelector.vue'
+import EditorJS from '../../../controls/input/EditorJS.vue'
 import { useMetricStore } from '../../../../store/metricStore';
 import { sortDateAsc, sortDateDesc } from '../../../../../utility';
 import { jsonToDateTimeString } from '../../../../../utility/timeUtility';
+import { extractPlainText, legacyTextToOutputData } from '../../../../../utility/editorjsUtility';
 import { createChart  } from "lightweight-charts";
 
 export default {
     name: 'LogItemHistory',
-    components: { DateTimeSelector },
+    components: { DateTimeSelector, EditorJS },
     props: {
         logItemID: Number
     },
@@ -144,6 +146,7 @@ export default {
         updateEntryDateTime,
         updateEntryField,
         updateEntryBlurb,
+        onBlurbEditorBlur,
         deleteEntry
     },
     watch: {
@@ -167,6 +170,7 @@ function setTableEntries(logItem) {
                 time: new Date(entry.dateTime) / 1000,
                 fieldValues: entry.fieldValues,
                 blurb: entry.reason,
+                blurbJson: entry.reasonJson,
                 isActive: false,
                 isSelected: false,
             };
@@ -267,7 +271,7 @@ function setSelectedEntry(entry) {
             let selectedEntry = {
                 id: entry.id,
                 dateTime: entry.dateTime,
-                blurb: entry.blurb,
+                json: entry.blurbJson ? JSON.parse(entry.blurbJson) : legacyTextToOutputData(entry.blurb),
                 fields: []
             }
             entry.fieldValues.forEach(fv => {
@@ -324,12 +328,20 @@ function updateEntryBlurb() {
         logItemID: this.logItem.id,
         dateTime: this.selectedEntry.dateTime,
         reason: {
-            value: this.selectedEntry.blurb,
+            value: extractPlainText(this.selectedEntry.json),
+            json: this.selectedEntry.json ? JSON.stringify(this.selectedEntry.json) : null,
             isUpdated: true
         },
         isUpdated: true,
     }
     this.metricStore.logLogItem(model);
+}
+
+function onBlurbEditorBlur(event) {
+    if (this.$refs.blurbEditorWrapper && event.relatedTarget && this.$refs.blurbEditorWrapper.contains(event.relatedTarget)) {
+        return;
+    }
+    this.updateEntryBlurb();
 }
 
 function deleteEntry(entryID) {

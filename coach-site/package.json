@@ -12,7 +12,13 @@
   },
   "dependencies": {
     "@azure/storage-blob": "^12.33.0",
+    "@editorjs/checklist": "^1.6.0",
     "@editorjs/editorjs": "^2.30.8",
+    "@editorjs/embed": "^2.8.0",
+    "@editorjs/header": "^2.8.9",
+    "@editorjs/image": "^2.10.3",
+    "@editorjs/list": "^2.0.9",
+    "@editorjs/quote": "^2.7.6",
     "@fortawesome/fontawesome-free": "^5.15.3",
     "@microsoft/signalr": "^7.0.0",
     "@popperjs/core": "^2.11.8",

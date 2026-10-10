@@ -31,26 +31,25 @@
             <DateTimeSelector class="date-selector mt-2"
                               :dateTime="updatedDateTime" 
                               @onChange="updateEntryDateTime"/>
-            <textarea id="blurb" class="textarea mt-2" 
-                      type="text"
+            <EditorJS id="blurb" class="textarea mt-2"
                       placeholder="Blurb"
-                      v-model.lazy="blurb"
-                      spellcheck="true">
-            </textarea>
+                      v-model="json"/>
         </div>
     </div>
 </template>
 
 <script>
 import DateTimeSelector from '../../../controls/select/DateTimeSelector.vue'
+import EditorJS from '../../../controls/input/EditorJS.vue'
 import { useMetricStore } from '../../../../store/metricStore';
 import { useUniversalStore } from '../../../../store/universalStore';
 import { CONTROL } from '../../../../model/constants'
 import { subtractMinutes, getDurationInMinutes } from '../../../../../utility/timeUtility';
+import { extractPlainText, legacyTextToOutputData } from '../../../../../utility/editorjsUtility';
 
 export default {
     name: 'LogItemView',
-    components: { DateTimeSelector },
+    components: { DateTimeSelector, EditorJS },
     props: {
         logItemID: Number,
         clearValues: Number,
@@ -67,7 +66,7 @@ export default {
             fields: [],
             entryDateTime: undefined,
             updatedDateTime: undefined,
-            blurb: null,
+            json: null,
             hasValue: false,
             timeout: undefined,
             showAdditionalValues: false,
@@ -170,14 +169,15 @@ export default {
                 this.updatedDateTime = this.entryDateTime.toJSON();
             }
         },
-        blurb(value) {
-            if (value == null || this.lastEntry.reason == value)
+        json(value) {
+            if (value == null || JSON.stringify(value) == this.lastEntry?.reasonJson)
                 return;
             let model = {
                 logItemID: this.logItem.id,
                 dateTime: this.entryDateTime,
                 reason: {
-                    value,
+                    value: extractPlainText(value),
+                    json: JSON.stringify(value),
                     isUpdated: true
                 },
                 isUpdated: true,
@@ -210,7 +210,7 @@ function setProps(clear) {
                     if (lastEntry.idBlurb) {
                         let blurb = this.universalStore.getBlurb(lastEntry.idBlurb);
                         if (blurb) {
-                            this.blurb = blurb.text;
+                            this.json = blurb.json ? JSON.parse(blurb.json) : legacyTextToOutputData(blurb.text);
                         }
                     }
                     this.entryDateTime = lastEntryDateTime;
@@ -220,7 +220,7 @@ function setProps(clear) {
                 } else {
                     this.entryDateTime = undefined;
                     this.updatedDateTime = undefined;
-                    this.blurb = null;
+                    this.json = null;
                     this.showAdditionalValues = false;
                 }
             }
@@ -229,7 +229,7 @@ function setProps(clear) {
     if (clear) {
         this.entryDateTime = undefined;
         this.updatedDateTime = undefined;
-        this.blurb = null;
+        this.json = null;
         this.showAdditionalValues = false;
     }
     this.fields = fields;

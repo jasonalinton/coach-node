@@ -14,7 +14,7 @@
              <div class="text">{{ todo.text }}</div>
          </div>
         <!-- Blurb -->
-        <div v-if="blurb" class="blurb">{{ blurb.text }}</div>
+        <BlurbContent v-if="blurb" class="blurb" :blurb="blurb" compact/>
         <!-- Footer -->
         <div class="d-flex flex-row justify-content-between align-items-center footer">
             <div class="d-flex flex-row align-items-center gap-3">
@@ -34,6 +34,7 @@
 
 <script>
 import { BLURBTYPE } from '../../../../model/constants';
+import BlurbContent from '../../../controls/display/BlurbContent.vue';
 
 const FLAG = {
     NEGLECTED: "Neglected",
@@ -60,6 +61,7 @@ const PRIORITY_SHOWN_DURATION = 2000;
 
 export default {
     name: "TodoKanbanCard",
+    components: { BlurbContent },
     props: {
         id: Number
     },

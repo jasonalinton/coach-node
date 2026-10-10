@@ -27,14 +27,12 @@
         </div>
         <div v-if="!selected && lastBlurb"
              class="blurb text-start">
-             {{ lastBlurb }}
+             <BlurbContent :blurb="lastBlurb" compact/>
         </div>
         <div v-if="selected" class="blurb flex-grow-1 form-group mt-1">
-            <textarea class="textarea" 
-                v-model.lazy.trim="selected.iteration.blurb"
-                placeholder="Click to add blurb"
-                spellcheck="true">
-            </textarea>
+            <EditorJS class="textarea"
+                v-model="selected.iteration.json"
+                placeholder="Click to add blurb"/>
         </div>
     </div>
 </template>
@@ -43,12 +41,15 @@
 import { clone, sortDateAsc, today } from '../../../../../../utility';
 import { startOfDay, getLongDateString } from '../../../../../../utility/timeUtility';
 import { addSecond, addDay } from '../../../../../../utility/timeUtility';
+import { extractPlainText, legacyTextToOutputData } from '../../../../../../utility/editorjsUtility';
 import TodoMemorizationTimeline from './TodoMemorizationTimeline.vue';
+import EditorJS from '../../../../controls/input/EditorJS.vue';
+import BlurbContent from '../../../../controls/display/BlurbContent.vue';
 
 
 export default {
     name: 'TodoMemorizationItem',
-    components: { TodoMemorizationTimeline },
+    components: { TodoMemorizationTimeline, EditorJS, BlurbContent },
     props: {
         idTodo: Number
     },
@@ -94,7 +95,7 @@ export default {
                 if (this.iterations[i].blurbIds.length > 0) {
                     let blurb = this.universalStore.getBlurb(this.iterations[i].blurbIds[0]);
                     if (blurb) {
-                        return blurb.text;
+                        return blurb;
                     }
                 }
             }
@@ -232,10 +233,10 @@ function loopIterations(index) {
         if (this.iterations[i].blurbIds.length > 0) {
             let blurb = this.universalStore.getBlurb(this.iterations[i].blurbIds[0]);
             if (blurb) {
-                this.iterations[i].blurb = blurb.text;
+                this.iterations[i].json = blurb.json ? JSON.parse(blurb.json) : legacyTextToOutputData(blurb.text);
             }
         } else {
-            this.iterations[i].blurb = undefined;
+            this.iterations[i].json = undefined;
         }
 
         if (d == 0) {
@@ -272,17 +273,19 @@ function selectData(data) {
 
 function markComplete() {
     let now = new Date();
+    let blurbText = extractPlainText(this.selected.iteration.json);
+    let blurbJson = this.selected.iteration.json ? JSON.stringify(this.selected.iteration.json) : undefined;
     if (this.selected.nextDay) {
         let text = this.selected.iteration.text.replace(this.selected.day, this.selected.nextDay);
         let newStart = addDay(this.selected.iteration.startAt.toDate(), this.selected.daysTillNext);
-        
-        this.iterationStore.completeAndCreatSibling(this.selected.iteration.id, now, text, newStart, newStart, 3, this.selected.iteration.blurb);
+
+        this.iterationStore.completeAndCreatSibling(this.selected.iteration.id, now, text, newStart, newStart, 3, blurbText, blurbJson);
     } else {
         // this.iterationStore.toggleCompletion(this.selected.iteration.id, now, now);
         let text = this.selected.iteration.text.replace("D30", "D30+");
         let newStart = addDay(this.selected.iteration.startAt.toDate(), 15);
-        
-        this.iterationStore.completeAndCreatSibling(this.selected.iteration.id, now, text, newStart, newStart, 3, this.selected.iteration.blurb);
+
+        this.iterationStore.completeAndCreatSibling(this.selected.iteration.id, now, text, newStart, newStart, 3, blurbText, blurbJson);
     }
 
 }
@@ -323,7 +326,7 @@ function markComplete() {
     white-space: pre-wrap;
 }
 
-.blurb textarea {
+.blurb .textarea {
     height: 100%;
 }
 

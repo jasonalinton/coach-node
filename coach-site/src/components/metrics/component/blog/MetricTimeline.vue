@@ -8,12 +8,10 @@
                 <input class="textbox mb-2" type="text" placeholder="Title"
                        v-model.lazy.trim="newPost.title" 
                        spellcheck="true"/>
-                <textarea class="textarea mb-2" :class="{ 'invalid': newPost.isTextValid == false}"
-                          v-model.trim="newPost.text"
+                <EditorJS class="textarea mb-2" :class="{ 'invalid': newPost.isTextValid == false}"
+                          v-model="newPost.json"
                           placeholder="Click to write post"
-                          spellcheck="true"
-                          @blur="onTextBlur">
-                </textarea>
+                          @focusout="onTextBlur"/>
                 <div class="d-flex flex-row mt-1 justify-content-end">
                     <button type="button" @click="saveBlurb">Save</button>
                     <button class="ms-1" type="button" @click="cancelBlurb">Cancel</button>
@@ -31,11 +29,13 @@ import { useUniversalStore } from '@/store/universalStore'
 import { TIMEFRAME } from '../../../../model/constants'
 import { toLongDateString, toShortTimeString, formatInputDateTime, today } from '../../../../../utility/timeUtility'
 import { sortDateDesc } from '../../../../../utility'
+import { extractPlainText, isEmptyOutputData } from '../../../../../utility/editorjsUtility'
 import BlurbCard from '../../../blog/BlurbTimelineCard.vue'
+import EditorJS from '../../../controls/input/EditorJS.vue'
 
 export default {
     name: 'MetricTimeline',
-    components: { BlurbCard },
+    components: { BlurbCard, EditorJS },
     props: {
         idMetric: Number
     },
@@ -47,7 +47,7 @@ export default {
                 isShown: false,
                 datetime: undefined,
                 title: undefined,
-                text: undefined,
+                json: undefined,
                 isTextValid: undefined
             }
         }
@@ -74,7 +74,7 @@ export default {
     methods: {
         refreshNewPost() {
             this.newPost.title = undefined;
-            this.newPost.text = undefined;
+            this.newPost.json = undefined;
             this.newPost.isTextValid = undefined;
         },
         onNewPost() {
@@ -87,13 +87,15 @@ export default {
             this.newPost.datetime = value;
         },
         onTextBlur() {
-            this.newPost.isTextValid = (!this.newPost.text) ? false : true;
+            this.newPost.isTextValid = !isEmptyOutputData(this.newPost.json);
         },
         saveBlurb() {
             if (this.newPost.isTextValid) {
                 let date = new Date(this.newPost.datetime);
+                let text = extractPlainText(this.newPost.json);
+                let json = JSON.stringify(this.newPost.json);
                 this.universalStore
-                    .addMetricBlurb(this.idMetric, date, this.newPost.text, this.newPost.title);
+                    .addMetricBlurb(this.idMetric, date, text, this.newPost.title, json);
             this.newPost.isShown = false;
             }
         },
