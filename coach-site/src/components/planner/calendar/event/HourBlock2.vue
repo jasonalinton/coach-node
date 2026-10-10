@@ -334,7 +334,7 @@ function onDrop(ev) {
     position: absolute;
     left: -6px;
     background-color: red;
-    z-index: 1000000;
+    z-index: 1000;
 }
 
 .time.circle {

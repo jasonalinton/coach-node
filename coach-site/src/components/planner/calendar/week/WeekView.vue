@@ -15,6 +15,9 @@
                          @click="selectDate(day.date)">
                         <div class="dow">{{ day.dow }}</div> <!-- Day of Week -->
                         <div class="date-icon">{{ day.day }}</div><!-- Date -->
+                        <button type="button" class="date-add-btn" aria-label="Add to story" @click.stop="addToDayStory(day.date)">
+                            <i class="fa-solid" :class="hasStory(day.date) ? 'fa-play' : 'fa-plus'"></i>
+                        </button>
                     </div>
                     <TaskList :date="day.date"
                              :taskList="taskList(day)">
@@ -87,7 +90,10 @@ export default {
             plannerStore: undefined,
             eventStore: undefined,
             iterationStore: undefined,
-            mediaStore: undefined
+            mediaStore: undefined,
+            /* Date-and-time toDateString()s that already have story media, within the visible
+             * range - drives whether a day's hover + button shows "add" or "view" (play). */
+            storyDates: [],
         };
     },
     created: async function() {
@@ -105,6 +111,7 @@ export default {
 
         let mediaStore = await import(`@/store/mediaStore`);
         this.mediaStore = mediaStore.useMediaStore();
+        this.refreshStoryDates();
     },
     beforeMount: function () {},
     mounted: function () {
@@ -144,8 +151,17 @@ export default {
         },
         selectDate(date) {
             this.plannerStore.selectDate(date);
+        },
+        addToDayStory(date) {
             this.mediaStore.openStory(date);
-        }
+        },
+        hasStory(date) {
+            return this.storyDates.includes(date.toDateString());
+        },
+        async refreshStoryDates() {
+            if (!this.mediaStore || !this.firstDay || !this.lastDay) return;
+            this.storyDates = await this.mediaStore.getStoryDatesInRange(this.firstDay, this.lastDay);
+        },
     },
     watch: {
         dayCount(value) {
@@ -181,6 +197,8 @@ function initTimeline() {
 
     this.lastDay = new Date(indexDate);
     this.dayModels = dayModels;
+
+    this.refreshStoryDates();
 }
 
 function newDay(day) {
@@ -246,10 +264,35 @@ function onScroll() {
 }
 
 .date-label {
+    position: relative;
     width: 48px;
     height: 64px;
     margin: 8px auto 4px auto;
     font-family: SF Pro Rounded, "Roboto", sans-serif;
+}
+
+.date-add-btn {
+    position: absolute;
+    bottom: -4px;
+    right: -4px;
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #1A73E8;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 9px;
+    line-height: 1;
+    padding: 0;
+    opacity: 0;
+    transition: opacity .1s;
+}
+
+.date-label:hover .date-add-btn {
+    opacity: 1;
 }
 
 .past .dow,

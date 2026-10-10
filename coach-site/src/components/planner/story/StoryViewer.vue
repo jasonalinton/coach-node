@@ -4,12 +4,19 @@
             <div class="story-progress d-flex flex-row flex-grow-1">
                 <div v-for="(item, index) in media" :key="item.id" class="story-progress-segment">
                     <div class="story-progress-fill"
+                         :key="index == activeIndex ? restartToken : -1"
                          :class="{ filled: index < activeIndex, active: index == activeIndex }"
-                         :style="index == activeIndex ? { animationDuration: `${activeDurationMs}ms` } : {}">
+                         :style="index == activeIndex
+                             ? { animationDuration: `${activeDurationMs}ms`, animationPlayState: isPaused ? 'paused' : 'running' }
+                             : {}">
                     </div>
                 </div>
             </div>
             <span class="story-date-label">{{ dateLabel }}</span>
+            <button v-if="media.length > 0" type="button" class="story-pause-btn"
+                    :aria-label="isPaused ? 'Play' : 'Pause'" @click="togglePause">
+                <i class="fa-solid" :class="isPaused ? 'fa-play' : 'fa-pause'"></i>
+            </button>
             <button type="button" class="story-add-btn" aria-label="Add to story" @click="openAddPicker">
                 <i class="fa-solid fa-plus"></i>
             </button>
@@ -28,6 +35,7 @@
 
             <template v-else>
                 <div class="story-tap-zone story-tap-zone-prev" @click="prev"></div>
+                <div class="story-tap-zone story-tap-zone-middle" @click="togglePause"></div>
                 <div class="story-tap-zone story-tap-zone-next" @click="next"></div>
 
                 <img v-if="activeMedia && activeMedia.media.kind == 'image'"
@@ -38,7 +46,7 @@
             </template>
         </div>
 
-        <MediaPicker v-if="showPicker" header="Add to Story" @picked="onPicked" @cancel="showPicker = false" />
+        <MediaPicker v-if="showPicker" header="Add to Story" @picked="onPicked" @cancel="onPickerCancel" />
     </div>
 </template>
 
@@ -58,6 +66,19 @@ export default {
             IMAGE_DURATION_MS: 5000,
             activeVideoDurationMs: undefined,
             showPicker: false,
+            /* Whether the current segment is paused. Drives both the <video>/image timer logic
+             * and (via the inline style binding above) the CSS progress-fill's animation-play-state. */
+            isPaused: false,
+            /* Image-segment bookkeeping only - a plain setTimeout can't be paused/resumed natively,
+             * so we track how much time is left ourselves. Unused for video segments, since the
+             * <video> element remembers its own currentTime across pause()/play(). */
+            remainingMs: undefined,
+            segmentStartedAt: undefined,
+            /* Bumped on an in-place restart (prev() on the first slide) and used as part of the
+             * active progress-fill div's :key, forcing Vue to replace that element so its CSS
+             * animation actually restarts - toggling the class alone wouldn't, since nothing about
+             * the active segment's index/class is actually changing in that case. */
+            restartToken: 0,
         };
     },
     created() {
@@ -96,7 +117,13 @@ export default {
             this.mediaStore.closeStory();
         },
         prev() {
-            this.goTo(this.activeIndex - 1);
+            /* Instagram-style behavior: going "back" from the first slide restarts it instead of
+             * being a no-op (goTo(-1) would otherwise just do nothing). */
+            if (this.activeIndex === 0) {
+                this.restartActiveSegment(false);
+            } else {
+                this.goTo(this.activeIndex - 1);
+            }
         },
         next() {
             this.goTo(this.activeIndex + 1);
@@ -109,14 +136,38 @@ export default {
             }
             this.activeIndex = index;
         },
-        restartActiveSegment() {
+        /* isNewSegment is false only for an in-place restart (prev() on the first slide) where the
+         * activeIndex isn't changing, so the <video> element isn't being re-created - unlike a real
+         * segment change, we have to rewind it ourselves, and activeVideoDurationMs must be left
+         * alone since no src change means "loadedmetadata" won't fire again to repopulate it. */
+        restartActiveSegment(isNewSegment = true) {
             this.clearTimer();
-            this.activeVideoDurationMs = undefined;
-            if (this.activeMedia && this.activeMedia.media.kind == 'image') {
-                this.timer = window.setTimeout(this.next, this.IMAGE_DURATION_MS);
+            this.isPaused = false;
+            if (isNewSegment) {
+                this.activeVideoDurationMs = undefined;
+            } else {
+                this.restartToken++;
             }
-            /* video: no timer here - onVideoLoadedMetadata sets the progress bar's duration, and the
-             * video element's own "ended" event calls next() when it actually finishes playing. */
+            if (this.activeMedia && this.activeMedia.media.kind == 'image') {
+                this.remainingMs = this.IMAGE_DURATION_MS;
+                this.startImageTimer();
+            } else if (this.activeMedia && this.activeMedia.media.kind == 'video' && !isNewSegment) {
+                let video = this.$refs.video;
+                if (video) {
+                    video.currentTime = 0;
+                    video.play();
+                }
+            }
+            /* video + isNewSegment: no timer here - onVideoLoadedMetadata sets the progress bar's
+             * duration, and the video element's own "ended" event calls next() when it finishes. */
+        },
+        /* Starts (or resumes) the setTimeout driving the *current* image segment's auto-advance,
+         * counting down whatever is left in remainingMs. Kept separate from restartActiveSegment
+         * so togglePause() can resume a paused image segment from where it left off, instead of
+         * restarting it from the full duration. */
+        startImageTimer() {
+            this.segmentStartedAt = Date.now();
+            this.timer = window.setTimeout(this.next, this.remainingMs);
         },
         onVideoLoadedMetadata(e) {
             this.activeVideoDurationMs = Math.max(1, e.target.duration * 1000);
@@ -127,15 +178,42 @@ export default {
                 this.timer = undefined;
             }
         },
+        /* Pauses/resumes the current segment in place: the CSS progress-fill (via the
+         * animation-play-state binding above, which freezes/resumes a running CSS animation
+         * without restarting it) plus either the <video> element (which remembers its own
+         * currentTime across pause()/play()) or, for an image, the setTimeout driving
+         * auto-advance (for which we have to track remaining time ourselves). */
+        togglePause() {
+            if (!this.activeMedia) return;
+            this.isPaused = !this.isPaused;
+            if (this.activeMedia.media.kind == 'video') {
+                let video = this.$refs.video;
+                if (!video) return;
+                if (this.isPaused) video.pause();
+                else video.play();
+            } else if (this.isPaused) {
+                let elapsed = Date.now() - this.segmentStartedAt;
+                this.remainingMs = Math.max(0, this.remainingMs - elapsed);
+                this.clearTimer();
+            } else {
+                this.startImageTimer();
+            }
+        },
         onKeydown(e) {
             if (!this.isOpen) return;
             if (e.key === 'Escape') this.close();
             else if (e.key === 'ArrowRight') this.next();
             else if (e.key === 'ArrowLeft') this.prev();
         },
+        /* Pauses the current segment (if any) before showing the picker, so it doesn't keep
+         * counting down underneath the modal; onPickerCancel resumes it from the same spot. */
         openAddPicker() {
-            this.clearTimer();
+            if (!this.isPaused) this.togglePause();
             this.showPicker = true;
+        },
+        onPickerCancel() {
+            this.showPicker = false;
+            if (this.isPaused) this.togglePause();
         },
         async onPicked(media) {
             this.showPicker = false;
@@ -143,6 +221,8 @@ export default {
             if (story) {
                 /* mediaStore.addToStory already pushed it into storyMedia (same day) - jump to it. */
                 this.goTo(this.media.length - 1);
+            } else if (this.isPaused) {
+                this.togglePause();
             }
         },
     },
@@ -154,9 +234,16 @@ export default {
             if (value) {
                 this.activeIndex = 0;
                 this.restartActiveSegment();
+                /* Day's story hasn't been started yet - skip the empty state and jump straight to
+                 * the picker. Safe unconditionally because openStory() is only ever triggered by
+                 * the calendar day label's + button, which is the only entry point into stories. */
+                if (this.media.length === 0) {
+                    this.openAddPicker();
+                }
             } else {
                 this.clearTimer();
                 this.showPicker = false;
+                this.isPaused = false;
             }
         },
     },
@@ -218,7 +305,7 @@ export default {
     white-space: nowrap;
 }
 
-.story-add-btn, .story-close-btn {
+.story-pause-btn, .story-add-btn, .story-close-btn {
     background: none;
     border: none;
     color: white;
@@ -257,6 +344,12 @@ export default {
 
 .story-tap-zone-next {
     right: 0;
+}
+
+.story-tap-zone-middle {
+    left: 33%;
+    right: 33%;
+    width: auto;
 }
 
 .story-empty {

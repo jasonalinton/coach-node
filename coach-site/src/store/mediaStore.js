@@ -132,6 +132,13 @@ export const useMediaStore = defineStore('media', {
             }
             return story;
         },
+        /** Distinct day-strings (toDateString()) that already have story media within [startAt, endAt] -
+         * lets a calendar view show which days have a story without opening each one. */
+        async getStoryDatesInRange(startAt, endAt) {
+            let response = await getStoriesInRange(startAt, endAt);
+            if (!response?.status?.success) return [];
+            return [...new Set(response.result.map(story => new Date(story.dateTime).toDateString()))];
+        },
         /** Cursor-paginated "browse everything" list for MediaPicker's Library tab. */
         async getLibrary(beforeId, pageSize) {
             let response = await getMediaLibrary(beforeId, pageSize);

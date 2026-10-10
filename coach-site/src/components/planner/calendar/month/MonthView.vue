@@ -8,6 +8,9 @@
                     <div class="date-label d-flex flex-column justify-content-between" @click="selectDate(day.date)">
                         <div v-if="weekIndex == 0" class="dow">{{ day.dow }}</div> <!-- Day of Week -->
                         <div class="date-icon">{{ day.day }}</div><!-- Date -->
+                        <button type="button" class="date-add-btn" aria-label="Add to story" @click.stop="addToDayStory(day.date)">
+                            <i class="fa-solid" :class="hasStory(day.date) ? 'fa-play' : 'fa-plus'"></i>
+                        </button>
                     </div>
                 </div>
                 <TaskList :date="day.date"
@@ -40,6 +43,9 @@ export default {
             date,
             today: today(),
             maxTasks: 6,
+            /* Date-and-time toDateString()s that already have story media, within the visible
+             * range - drives whether a day's hover + button shows "add" or "view" (play). */
+            storyDates: [],
         }
     },
     beforeMount: function() {
@@ -51,6 +57,7 @@ export default {
 
         let mediaStore = await import(`@/store/mediaStore`);
         this.mediaStore = mediaStore.useMediaStore();
+        this.refreshStoryDates();
     },
     computed: {
         dayWidth() { return this.$refs.monthView.clientWidth / 7  },
@@ -63,7 +70,19 @@ export default {
         initTimeline,
         selectDate(date) {
             this.plannerStore.selectDate(date);
+        },
+        addToDayStory(date) {
             this.mediaStore.openStory(date);
+        },
+        hasStory(date) {
+            return this.storyDates.includes(date.toDateString());
+        },
+        async refreshStoryDates() {
+            if (!this.mediaStore || this.weeks.length === 0) return;
+            let lastWeek = this.weeks[this.weeks.length - 1];
+            let firstDay = this.weeks[0].days[0].date;
+            let lastDay = lastWeek.days[lastWeek.days.length - 1].date;
+            this.storyDates = await this.mediaStore.getStoryDatesInRange(firstDay, lastDay);
         },
     },
     watch: {
@@ -103,6 +122,8 @@ function initTimeline() {
         }
         this.weeks.push(week);
     }
+
+    this.refreshStoryDates();
 }
 
 </script>
@@ -116,11 +137,36 @@ function initTimeline() {
 }
 
 .date-label {
+    position: relative;
     width: 48px;
     height: 33px;
     margin: 8px auto 4px auto;
     font-family: SF Pro Rounded, 'Roboto', sans-serif;
     cursor: pointer;
+}
+
+.date-add-btn {
+    position: absolute;
+    bottom: -4px;
+    right: -4px;
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #1A73E8;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 9px;
+    line-height: 1;
+    padding: 0;
+    opacity: 0;
+    transition: opacity .1s;
+}
+
+.date-label:hover .date-add-btn {
+    opacity: 1;
 }
 
 .week.first .date-label {
