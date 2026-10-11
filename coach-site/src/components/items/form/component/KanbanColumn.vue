@@ -119,9 +119,16 @@ export default {
         },
         laneItems() {
             return this.currentByDescendant
-                .filter(item => item.idColumn == this.idColumn &&
-                    !item.dateRemoved &&
-                    (this.idTimeframe == null || item.idTimeframe == this.idTimeframe))
+                .filter(item => {
+                    if (this.idColumn != KANBAN_COLUMN.ON_DECK) {
+                        return (item.idColumn == this.idColumn 
+                                && !item.dateRemoved 
+                                && (this.idTimeframe == null || item.idTimeframe == this.idTimeframe))
+                    } else {
+                        return (item.idColumn == this.idColumn 
+                                && !item.dateRemoved)
+                    }
+                })
                 .filter(item => this.matchesSearch(item))
                 .sort((a, b) => a.positionDescendant - b.positionDescendant);
         },

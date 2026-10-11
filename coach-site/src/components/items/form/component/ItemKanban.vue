@@ -51,7 +51,8 @@ const TIMEFRAMES = [
     { id: TIMEFRAME.MILESTONE, label: "Milestone" },
     { id: TIMEFRAME.YEAR, label: "Year" },
     { id: TIMEFRAME.MONTH, label: "Month" },
-    { id: TIMEFRAME.WEEK, label: "Week" }
+    { id: TIMEFRAME.WEEK, label: "Week" },
+    { id: TIMEFRAME.DAY, label: "Day" }
 ];
 
 async function loadOwnerStore(idKanbanType) {
@@ -128,8 +129,9 @@ export default {
             let otherIDs = items_Other.map(item => item.idItem);
 
             let positionDescendant = (items_OnDeck.length > 0) ? Math.max(...items_OnDeck.map(item => item.positionDescendant)) + 1 : 1;
-            let placeholders = this.descendantTypeIDs
-                .filter(idItem => !otherIDs.includes(idItem))
+            let descendantTypeIDs = (!this.idTimeframe) 
+                ? this.descendantTypeIDs.filter(idItem => !otherIDs.includes(idItem)) : this.descendantTypeIDs;
+            let placeholders = descendantTypeIDs
                 .map(idItem => ({
                     idParent: this.idParent,
                     idItem,
