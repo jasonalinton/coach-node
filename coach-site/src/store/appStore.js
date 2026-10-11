@@ -82,6 +82,7 @@ export const useAppStore = defineStore('app', {
                         { id: 4, text: "Repetition" },
                         { id: 5, text: "Metric" },
                         { id: 6, text: "Date" },
+                        { id: 7, text: "Priority" },
                     ]
                 },
             },

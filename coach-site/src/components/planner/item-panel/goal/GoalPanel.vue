@@ -6,6 +6,7 @@
             <GoalPanelByCustom v-if="sortBy=='Custom'" />
             <GoalPanelByTimeframe v-if="sortBy=='Timeframe'"/>
             <GoalPanelByDashboard v-if="sortBy=='Dashboard'" />
+            <GoalPanelByPriority v-if="sortBy=='Priority'" />
         </div>
     </div>
 </template>
@@ -14,6 +15,7 @@
 import GoalPanelByCustom from './GoalPanelByCustom.vue';
 import GoalPanelByTimeframe from './GoalPanelByTimeframe.vue';
 import GoalPanelByDashboard from './GoalPanelByDashboard.vue';
+import GoalPanelByPriority from './GoalPanelByPriority.vue';
 import ItemPanelNavbar from '../../../mobile/navbar/ItemPanelNavbar.vue';
 
 var sortItems = [
@@ -21,11 +23,12 @@ var sortItems = [
     { id: 4, text: "Repetition" },
     { id: 5, text: "Custom" },
     { id: 6, text: "Dashboard" },
+    { id: 7, text: "Priority" },
 ];
 
 export default {
     name: 'GoalPanel',
-    components: { ItemPanelNavbar, GoalPanelByTimeframe, GoalPanelByCustom, GoalPanelByDashboard },
+    components: { ItemPanelNavbar, GoalPanelByTimeframe, GoalPanelByCustom, GoalPanelByDashboard, GoalPanelByPriority },
     props: {
         showHead: {
             type: Boolean,

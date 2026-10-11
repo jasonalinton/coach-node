@@ -228,6 +228,12 @@ export let GOAL_TYPE = {
     FITNESS: 183,
 }
 
+export let PRIORITY_GOAL = {
+    PRIMARY: 424,
+    SECONDARY: 183,
+    TERTIARY: 184
+}
+
 export let KANBAN_COLUMN = {
     KANBAN_COLUMN: 217,
     COMPLETE: 218,
