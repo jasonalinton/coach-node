@@ -68,6 +68,7 @@ export default {
     data: function() {
         return {
             todoStore: null,
+            universalStore: null,
             isPriorityShown: true,
             /* Hardcoded until priority has a real data source */
             priority: "High"
@@ -76,6 +77,9 @@ export default {
     created: async function() {
         let todoStore = await import(`@/store/todoStore`);
         this.todoStore = todoStore.useTodoStore();
+
+        let universalStore = await import(`@/store/universalStore`);
+        this.universalStore = universalStore.useUniversalStore();
     },
     mounted: function() {
         setTimeout(() => this.isPriorityShown = false, PRIORITY_SHOWN_DURATION);
@@ -88,11 +92,14 @@ export default {
             return null;
         },
         blurb() {
-            // let blurbs = this.todo.blurbs.filter(x => x.idType == BLURBTYPE.REASON || x.idType == BLURBTYPE.REMINDER);
-            // if (blurbs.length > 0) {
-            //     let index = Math.floor(Math.random() * blurbs.length);
-            //     return blurbs[index];
-            // }
+            if (this.universalStore && this.todo?.blurbIds?.length) {
+                let blurbs = this.universalStore.getBlurbsWithID(this.todo.blurbIds)
+                    .filter(x => x.idType == BLURBTYPE.REASON || x.idType == BLURBTYPE.REMINDER);
+                if (blurbs.length > 0) {
+                    let index = Math.floor(Math.random() * blurbs.length);
+                    return blurbs[index];
+                }
+            }
             return null;
         },
         points() {

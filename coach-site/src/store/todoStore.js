@@ -207,6 +207,14 @@ export const useTodoStore = defineStore('todo', {
             };
             return this.saveTodo(model);
         },
+        addBlurb(idTodo, blurb) {
+            let data = { ...blurb, idTodo, idBlurbType: blurb.idType };
+            return postEndpoint("Todo", "AddBlurbToTodo", data).then(response => response.result);
+        },
+        updateBlurb(blurb) {
+            let data = { ...blurb, idBlurb: blurb.id, idBlurbType: blurb.idType };
+            return postEndpoint("Todo", "UpdateBlurbInTodo", data).then(response => response.result);
+        },
         savePoints(todoID, points) {
             let model = {
                 id: todoID,
