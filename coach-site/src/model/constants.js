@@ -229,9 +229,9 @@ export let GOAL_TYPE = {
 }
 
 export let PRIORITY_GOAL = {
-    PRIMARY: 424,
-    SECONDARY: 183,
-    TERTIARY: 184
+    PRIMARY: 426,
+    SECONDARY: 427,
+    TERTIARY: 428
 }
 
 export let KANBAN_COLUMN = {

@@ -1,5 +1,5 @@
 <template>
-    <div class="priority-goal-card">
+    <div v-if="treeWithPoints.length > 0" class="priority-goal-card">
         <span class="category-tag" :class="tagClass">{{ tagLabel }}</span>
         <div class="goal-rows d-flex flex-column">
             <PriorityGoalTreeItem v-for="node in treeWithPoints" :key="node.item.id" :node="node" :depth="0" />

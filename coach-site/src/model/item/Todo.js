@@ -13,6 +13,7 @@ class Todo {
             data = {
                 text: "",
                 description: "",
+                timeEstimate: undefined,
                 points: undefined,
                 typeID: undefined,
                 mediumID: undefined,

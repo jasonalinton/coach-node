@@ -67,6 +67,17 @@ String.prototype.toDate = function() {
     return new Date(this + "T00:00:00"); 
   }
 }
+String.prototype.toToday = function(selectedDate) {
+  const [eh, em, es] = this.split(':').map(Number);
+  selectedDate.setHours(eh, em, es, 0);
+  let array = this.split("T");
+  if (array.length == 2) {
+    return new Date(this); 
+  } else {
+    // String dates that don't have a time are converted to GMT (prevent that)
+    return new Date(this + "T00:00:00"); 
+  }
+}
 String.prototype.toCamelCase = function() { 
   return this.replace(/(?:^\w|[A-Z]|\b\w)/g, function(word, index) {
     return index === 0 ? word.toLowerCase() : word.toUpperCase();

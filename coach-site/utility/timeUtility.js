@@ -30,6 +30,16 @@ export function getTimeString(datetime) {
     return datetime.toLocaleTimeString([], {hour: 'numeric', minute:'2-digit'});
 }
 
+export function timeToDate(time, date) {
+    let date_time;
+    if (time) {
+        const [eh, em, es] = time.split(':').map(Number);
+        date_time = startOfDay(date);
+        date_time.setHours(eh, em, es || 0, 0);
+    }
+    return date_time;
+}
+
 export function toDateString(dateTimeJSON) {
     let dateTimeArray = dateTimeJSON.split("T");
     let dateArray = dateTimeArray[0].split("-");

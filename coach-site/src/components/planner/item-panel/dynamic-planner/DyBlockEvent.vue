@@ -72,7 +72,7 @@ export default {
             return false;
         },
         tasks() {
-            return this.event ? this.event.iterations : [];
+            return this.event ? this.event.iterations.filter(t => t.wontFit == undefined || !t.wontFit) : [];
         },
         points() {
             let actual = 0;

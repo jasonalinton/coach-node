@@ -34,11 +34,14 @@
 
 <script>
 import DyBlockEvent from './DyBlockEvent.vue';
-import { toShortWeekdayString, startOfDay, endOfDay, isToday, toNumberTimeString } from '../../../../../utility/timeUtility';
+import { toShortWeekdayString, startOfDay, endOfDay, isToday, 
+    toNumberTimeString, timeToDate } from '../../../../../utility/timeUtility';
 import { sortAsc } from '../../../../../utility';
-import { EVENTTYPE } from '../../../../model/constants';
+import { EVENTTYPE, PRIORITY_GOAL, ITEMTYPES, TIMEFRAME, KANBAN_COLUMN } from '../../../../model/constants';
 import iconRefreshCw from '@/assets/icons/icon-refresh-cw.svg';
 import iconTrim from '@/assets/icons/icon-trim.svg';
+
+const DEFAULT_TIME_ESTIMATE_MINUTES = 15;
 
 export default {
     name: 'DynamicPlannerPanel',
@@ -53,9 +56,11 @@ export default {
             routineStore: undefined,
             todoStore: undefined,
             iterationStore: undefined,
+            goalStore: undefined,
             iconRefreshCw,
             iconTrim,
             toNumberTimeString,
+            end: "17:00"
         }
     },
     created: async function() {
@@ -69,6 +74,8 @@ export default {
         this.todoStore = todoStore.useTodoStore();
         let iterationStore = await import('@/store/iterationStore');
         this.iterationStore = iterationStore.useIterationStore();
+        let goalStore = await import('@/store/goalStore');
+        this.goalStore = goalStore.useGoalStore();
         this.syncPhantomEvents();
         this.fetchBlockEvents();
     },
@@ -83,36 +90,25 @@ export default {
             return this.selectedDate ? toShortWeekdayString(this.selectedDate, true) : '';
         },
         blockRepeats() {
-            if (this.plannerStore) {
-                return this.plannerStore.repeats.filter(x => x.isBlock);
-            }
-            return [];
+            let blockRepeats = (this.plannerStore) ? this.plannerStore.activeBlockRepeats : [];
+            return blockRepeats;
         },
         phantomEvents() {
             if (!this.selectedDate || !this.routineStore || !this.todoStore || !this.iterationStore) return [];
 
-            let date = this.selectedDate;
-            let blockRepeats = this.blockRepeats.filter(repeat => {
-                if (!repeat.startDate) return false;
-                if (+repeat.startDate.toDate() > +date) return false;
-                if (repeat.endDate && +repeat.endDate.toDate() < +date) return false;
-                return true;
-            });
-            blockRepeats = blockRepeats.filter(repeat => !!repeat.startTime);
-            blockRepeats = blockRepeats.filter(repeat => repeat.isRoutineRepeat);
-
             // var newID = this.eventStore.newID();
             let newID = -1;
 
-            let events = blockRepeats.map(repeat => {
+            let events = this.blockRepeats.map(repeat => {
                 const [sh, sm] = repeat.startTime.split(':').map(Number);
-                let startAt = startOfDay(date);
+                let startAt = startOfDay(this.selectedDate);
                 startAt.setHours(sh, sm, 0, 0);
 
+                /* Create end date based on repeat end time */
                 let endAt;
                 if (repeat.endTime) {
                     const [eh, em] = repeat.endTime.split(':').map(Number);
-                    endAt = startOfDay(date);
+                    endAt = startOfDay(this.selectedDate);
                     endAt.setHours(eh, em, 0, 0);
                 } else if (repeat.duration) {
                     endAt = new Date(startAt.getTime() + repeat.duration * 60000);
@@ -150,20 +146,24 @@ export default {
                     routine.todoIDs.forEach(idTodo => {
                         let todo = this.todoStore.getItemModel(idTodo)?.data;
                         if (todo) {
-                            let repeatChild = todo.repeats.find(r => r.routineRepeatID == repeat.id);
+                            /* Get iterations for todo, that belong to the routine's repeat */
+                            let repeat_Todo = todo.repeats.find(r => r.routineRepeatID == repeat.id);
                             let iterations = this.iterationStore.getIterationsForTodo(idTodo);
                             iterations = sortAsc(iterations, 'attemptedAt');
 
+                            /* Get the first task for the selected date, attempted first */
                             let task = iterations.find(iteration => {
-                                return iteration.startAt 
-                                    && +iteration.startAt.toDate() == +this.selectedDate 
+                                return iteration.startAt
+                                    && +iteration.startAt.toDate() == +this.selectedDate
                                     && +iteration.endAt.toDate() == +this.selectedDate;
                             });
                             if (!task) {
-                                task = this.iterationStore.newTask(todo, repeatChild);
-                            } else {
-                                console.log('Task found:', task);
+                                task = this.iterationStore.newTask(todo, repeat_Todo);
                             }
+
+                            /* First check if the task/iteration has a time estimate, then check the repeat. Default to 15 minutes. */
+                            task.timeEstimate = task.timeEstimate || repeat_Todo?.timeEstimate || todo.timeEstimate || DEFAULT_TIME_ESTIMATE_MINUTES;
+
                             event.iterations.push(task);
                         }
                     });
@@ -192,7 +192,7 @@ export default {
         },
     },
     methods: {
-        onPlanClick, onTrimClick, syncPhantomEvents, fetchBlockEvents,
+        onPlanClick, onTrimClick, syncPhantomEvents, fetchBlockEvents, getTodosInOrder,
     },
     watch: {
         phantomEvents() {
@@ -218,8 +218,83 @@ function syncPhantomEvents() {
     });
 }
 
-function onPlanClick() {
-    // TODO: user will write Plan/Replan behavior manually.
+async function onPlanClick() {
+    // 1. Determine how much time do you have left?
+    let timeLeft = +(timeToDate(this.end, this.selectedDate)) - +new Date();
+    let minutesLeft = timeLeft / 1000 / 60;
+    let hoursLeft = minutesLeft / 60;
+
+    // 2. Get kanbans for priority goals, and build the ordered todo list
+    //    (used later to trim tasks that won't be completed in time)
+    let todoIDs = await this.getTodosInOrder();
+
+    let timeEstimate = this.blockEvents
+        .flatMap(event => event.iterations)
+        .reduce((total, task) => total + (task.timeEstimate || 0), 0);
+
+    // Get incomplete tasks in phantomEvents
+    let incompleteTasks = this.blockEvents
+        .flatMap(event => event.iterations)
+        .filter(task => !task.completedAt);
+
+    // Sort them based on the todo order using iteration.idTodo
+    incompleteTasks.sort((a, b) => {
+        let aIndex = todoIDs.indexOf(a.idTodo);
+        let bIndex = todoIDs.indexOf(b.idTodo);
+        if (aIndex == -1) aIndex = todoIDs.length;
+        if (bIndex == -1) bIndex = todoIDs.length;
+        return aIndex - bIndex;
+    });
+
+    // Create list of tasks that will fit
+    let tasksThatFit = [];
+    // Create list of tasks that wont fit
+    let tasksThatWontFit = [];
+
+    let minutesRemaining = minutesLeft;
+    incompleteTasks.forEach(task => {
+        let taskMinutes = (task.timeEstimate || 0);
+        if (taskMinutes <= minutesRemaining) {
+            tasksThatFit.push(task);
+            minutesRemaining -= taskMinutes;
+        } else {
+            let iteration = this.iterationStore.getIteration(task.id);
+            iteration.wontFit = true;
+            task.wontFit = true;
+            tasksThatWontFit.push(task);
+        }
+    });
+}
+
+// 2. Get kanbans for priority goals (primary, secondary, and tertiary)
+//    a. Using the kanban, get the id and position of active todos in the day timeframe
+//    b. Put the list of todo ids in order, primary then secondary, then tertiary
+async function getTodosInOrder() {
+    if (!this.goalStore) return [];
+
+    let getActiveDayTodos = (rows) => {
+        return (rows || [])
+            .filter(row => row.idType == ITEMTYPES.TODO
+                && row.idTimeframe == TIMEFRAME.DAY
+                && row.idColumn == KANBAN_COLUMN.ACTIVE
+                && !row.dateRemoved)
+            .sort((a, b) => a.positionDescendant - b.positionDescendant)
+            .map(row => ({ id: row.idItem, position: row.positionDescendant }));
+    };
+
+    let todosByPriority = {};
+    for (let key of ['PRIMARY', 'SECONDARY', 'TERTIARY']) {
+        let rows = (await this.goalStore.getGoalKanban(PRIORITY_GOAL[key])) || [];
+        todosByPriority[key] = getActiveDayTodos(rows);
+    }
+
+    let todoIDs = [
+        ...todosByPriority.PRIMARY,
+        ...todosByPriority.SECONDARY,
+        ...todosByPriority.TERTIARY,
+    ].map(todo => todo.id);
+
+    return todoIDs;
 }
 
 function onTrimClick() {

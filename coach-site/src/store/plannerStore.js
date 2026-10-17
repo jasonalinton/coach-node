@@ -26,7 +26,20 @@ export const usePlannerStore = defineStore('planner', {
                 }
             })
             return repeats;
-        }
+        },
+        activeBlockRepeats() {
+            let selectedDate = this.selectedDate;
+            let blockRepeats = this.repeats.filter(x => x.isBlock);
+            blockRepeats = blockRepeats.filter(repeat => {
+                if (!repeat.startDate) return false;
+                if (+repeat.startDate.toDate() > +selectedDate) return false;
+                if (repeat.endDate && +repeat.endDate.toDate() < +selectedDate) return false;
+                return true;
+            });
+            blockRepeats = blockRepeats.filter(repeat => !!repeat.startTime);
+            blockRepeats = blockRepeats.filter(repeat => repeat.isRoutineRepeat);
+            return blockRepeats;
+        },
     },
     actions: {
         initialize() {

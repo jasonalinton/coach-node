@@ -33,6 +33,13 @@
                                     :value="points.value"
                                     @blur="points.value = $event.target.value">
                         </div>
+                        <!-- Time Estimate -->
+                        <div class="input-wrrapper d-flex flex-row">
+                            <label class="me-1" :for="`todo-${id}-time-estimate`">Time Estimate</label>
+                            <input type="number" class="form-control form-control-sm" :id="`todo-${id}-time-estimate`"
+                                    :value="todoClone.timeEstimate"
+                                    @blur="todoClone.timeEstimate = $event.target.value">
+                        </div>
                         <!-- Type -->
                         <div class="input-wrrapper d-flex flex-row">
                             <label class="me-1" :for="`todo-${id}-type`">Type</label>
@@ -433,6 +440,7 @@ export default {
             let model = {
                 id: this.id,
                 text: this.text,
+                timeEstimate: parseInt(this.todoClone.timeEstimate)
             };
             this.store.saveTodo(model);
             this.$emit("closeItemModal");
