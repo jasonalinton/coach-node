@@ -254,7 +254,7 @@ export default {
         placeholder: String,
         readOnly: Boolean,
     },
-    emits: ['update:modelValue'],
+    emits: ['update:modelValue', 'blur'],
     data: function () {
         return {
             mediaStore: undefined,
@@ -323,11 +323,25 @@ export default {
             this.insertParsedBlocks(parseTopLevelPaste(container));
         };
         this.$refs.htmlelement.parentElement.addEventListener('paste', this.onPasteCapture, true);
+        /* Deferred rather than checked synchronously: Editor.js swaps out a block's DOM element for
+         * some internal operations (eg. rendering pasted content into a previously-empty block),
+         * which fires a real focusout - with focus landing briefly nowhere - before Editor.js has
+         * refocused the new element. Re-checking a tick later, the same technique as the blurb-form
+         * focusout fix, is what tells a real "the user clicked away" apart from that. */
+        this.onFocusOut = () => {
+            setTimeout(() => {
+                if (!this.isFocusedInEditor()) this.$emit('blur');
+            }, 0);
+        };
+        this.$refs.htmlelement.addEventListener('focusout', this.onFocusOut);
     },
     unmounted() {
         if (this.editor && this.editor.destroy) this.editor.destroy();
         document.removeEventListener('selectionchange', this.onSelectionChange);
-        if (this.$refs.htmlelement) this.$refs.htmlelement.parentElement.removeEventListener('paste', this.onPasteCapture, true);
+        if (this.$refs.htmlelement) {
+            this.$refs.htmlelement.parentElement.removeEventListener('paste', this.onPasteCapture, true);
+            this.$refs.htmlelement.removeEventListener('focusout', this.onFocusOut);
+        }
     },
     methods: {
         /** Public: focuses the caret at the end of the editor's content (mirrors a plain

@@ -33,7 +33,8 @@
                               @onChange="updateEntryDateTime"/>
             <EditorJS id="blurb" class="textarea mt-2"
                       placeholder="Blurb"
-                      v-model="json"/>
+                      v-model="json"
+                      @blur="onBlurbBlur"/>
         </div>
     </div>
 </template>
@@ -70,6 +71,7 @@ export default {
             hasValue: false,
             timeout: undefined,
             showAdditionalValues: false,
+            lastSavedBlurbText: undefined,
         }
     },
     created: function() {
@@ -155,6 +157,31 @@ export default {
                 });
             })
             this.metricStore.logLogItem(model);
+        },
+        /** Saves the blurb - called once the editor is blurred (see @blur on the EditorJS element
+         * in the template), not on every keystroke. Dedupes against plain text (not the raw
+         * OutputData JSON) since Editor.js stamps a fresh `time` on every save() - comparing full
+         * JSON never matches twice, even for identical content, so this skips a redundant save if
+         * the blurb wasn't actually touched between one blur and the next. */
+        saveBlurb(value) {
+            let text = extractPlainText(value);
+            if (text === this.lastSavedBlurbText) return;
+            this.lastSavedBlurbText = text;
+            let model = {
+                logItemID: this.logItem.id,
+                dateTime: this.entryDateTime,
+                reason: {
+                    value: text,
+                    json: JSON.stringify(value),
+                    isUpdated: true
+                },
+                isUpdated: true,
+            }
+            this.metricStore.logLogItem(model);
+        },
+        onBlurbBlur() {
+            if (this.json == null) return;
+            this.saveBlurb(this.json);
         }
     },
     watch: {
@@ -168,21 +195,6 @@ export default {
             if (value) {
                 this.updatedDateTime = this.entryDateTime.toJSON();
             }
-        },
-        json(value) {
-            if (value == null || JSON.stringify(value) == this.lastEntry?.reasonJson)
-                return;
-            let model = {
-                logItemID: this.logItem.id,
-                dateTime: this.entryDateTime,
-                reason: {
-                    value: extractPlainText(value),
-                    json: JSON.stringify(value),
-                    isUpdated: true
-                },
-                isUpdated: true,
-            }
-            this.metricStore.logLogItem(model);
         }
     }
 }
@@ -211,6 +223,7 @@ function setProps(clear) {
                         let blurb = this.universalStore.getBlurb(lastEntry.idBlurb);
                         if (blurb) {
                             this.json = blurb.json ? JSON.parse(blurb.json) : legacyTextToOutputData(blurb.text);
+                            this.lastSavedBlurbText = extractPlainText(this.json);
                         }
                     }
                     this.entryDateTime = lastEntryDateTime;
@@ -221,6 +234,7 @@ function setProps(clear) {
                     this.entryDateTime = undefined;
                     this.updatedDateTime = undefined;
                     this.json = null;
+                    this.lastSavedBlurbText = undefined;
                     this.showAdditionalValues = false;
                 }
             }
@@ -230,6 +244,7 @@ function setProps(clear) {
         this.entryDateTime = undefined;
         this.updatedDateTime = undefined;
         this.json = null;
+        this.lastSavedBlurbText = undefined;
         this.showAdditionalValues = false;
     }
     this.fields = fields;
