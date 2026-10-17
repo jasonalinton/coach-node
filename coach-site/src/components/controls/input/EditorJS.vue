@@ -61,6 +61,133 @@ import ImageTool from '@editorjs/image';
 import { useMediaStore } from '@/store/mediaStore';
 import { plainData } from '../../../../utility/editorjsUtility';
 
+/** Collapses whitespace runs (including hard-wrapped newlines many word processors bake into their
+ * clipboard HTML source, eg. OneNote wrapping at ~70 chars) down to a single space, the same way a
+ * browser collapses insignificant whitespace when rendering normal HTML - but done at parse time,
+ * since the list item's own CSS preserves whitespace verbatim (it supports literal line breaks via
+ * Shift+Enter), so an unwrapped source newline would otherwise render as a real line break. */
+function normalizeWhitespace(container) {
+    let walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT);
+    let node;
+    while ((node = walker.nextNode())) {
+        node.textContent = node.textContent.replace(/\s+/g, ' ');
+    }
+    return container.innerHTML.trim();
+}
+
+/** @editorjs/header's own onPaste takes a pasted heading's text straight from the element's
+ * innerHTML, with no whitespace normalization - so a hard-wrapped source heading (eg. OneNote
+ * wrapping its clipboard export at ~70 chars) renders with a literal line break wherever the source
+ * happened to wrap, the same underlying issue the list patch above fixes for list items. Mirrors the
+ * original method (see @editorjs/header's own Header class) apart from that normalization. */
+HeaderTool.prototype.onPaste = function (event) {
+    if (!('data' in event.detail)) return;
+    let element = event.detail.data;
+    let match = /^H([1-6])$/.exec(element.tagName);
+    let level = match ? Number(match[1]) : this.defaultLevel.number;
+    if (this._config && this._config.levels) {
+        level = this._config.levels.reduce((closest, candidate) =>
+            Math.abs(candidate - level) < Math.abs(closest - level) ? candidate : closest);
+    }
+    this.data = { level, text: normalizeWhitespace(element.cloneNode(true)) };
+};
+
+/** Recursively builds Editor.js list data from a pasted <ul>/<ol>/<li> element, the same shape
+ * @editorjs/list's own (buggy) pasteHandler produces - except that an item's `content` only ever
+ * holds that item's own text, never a nested sublist's (see the patch below for why), and a sublist
+ * is recognized whether it's nested *inside* its parent <li> (eg. Google Docs, Apple Notes) or - as
+ * Word/OneNote/Outlook export them - as a *sibling* <ul>/<ol> immediately following the <li> it
+ * actually belongs under, which is invalid HTML but is exactly what those apps' copy puts on the
+ * clipboard, and what a browser's own (lenient) HTML parser leaves as-is rather than fixing up. */
+function parsePastedListElement(element) {
+    let style = element.tagName === 'OL' ? 'ordered' : 'unordered';
+    let contentOf = (li) => {
+        let clone = li.cloneNode(true);
+        let nested = clone.querySelector(':scope > ul, :scope > ol');
+        if (nested) nested.remove();
+        return normalizeWhitespace(clone);
+    };
+    let walk = (listElement) => {
+        let items = [];
+        Array.from(listElement.children).forEach(child => {
+            if (child.tagName === 'LI') {
+                let nested = child.querySelector(':scope > ul, :scope > ol');
+                items.push({ content: contentOf(child), meta: {}, items: nested ? walk(nested) : [] });
+            } else if ((child.tagName === 'UL' || child.tagName === 'OL') && items.length) {
+                items[items.length - 1].items = walk(child);
+            }
+        });
+        return items;
+    };
+    return { style, meta: {}, items: walk(element) };
+}
+
+/** Patches a real bug in the installed @editorjs/list@2.0.9: when pasting a list whose item has a
+ * nested sublist, the library takes that item's `content` from the <li>'s *entire* innerHTML - which
+ * includes the nested <ul>/<ol> markup - while *also* separately parsing that same sublist into a
+ * proper nested item. The sub-item's text ends up both leaked, raw and unstyled, into the parent
+ * item's own content, and duplicated as a real nested item, corrupting the pasted list (the parent
+ * item is left holding unmanaged child markup the tool's own editing/rendering logic doesn't expect,
+ * which is what makes a pasted sub-bullet appear to vanish or merge into the line above it). This
+ * overrides the tool's paste entry point with the same recursive walk, minus the leak. */
+ListTool.prototype.onPaste = function (event) {
+    let tagName = event.detail.data.tagName;
+    if (tagName === 'OL') this.listStyle = 'ordered';
+    else if (tagName === 'UL' || tagName === 'LI') this.listStyle = 'unordered';
+
+    this.list.data = parsePastedListElement(event.detail.data);
+    let wrapper = this.list.listWrapper;
+    if (wrapper && wrapper.parentNode) {
+        wrapper.parentNode.replaceChild(this.list.render(), wrapper);
+    }
+};
+
+/** OneNote's clipboard HTML for a checkbox ("To Do" tag) line carries no checked/unchecked state at
+ * all - checked and unchecked items serialize to the exact same markup, a plain <p> with a left
+ * margin for the indent (see the paste-event capture below for why that forces a different approach
+ * than the list fix above). This is the only signal available, so an indented <p> is treated as a
+ * checklist item, defaulting to unchecked since the real state isn't recoverable from paste. */
+function isIndentedParagraph(node) {
+    return !!node && node.tagName === 'P' && parseFloat(node.style && node.style.marginLeft) > 0;
+}
+
+/** @editorjs/checklist ships no pasteConfig/onPaste at all, so Editor.js's core paste pipeline has
+ * no tag it would ever route to it - unlike the list/header patch above, there's no native per-tag
+ * dispatch to hook into here. This walks the pasted fragment's top-level nodes ourselves, in order,
+ * grouping any run of consecutive indented <p>s into one checklist block, and otherwise building the
+ * same block types (header/list/paragraph) Editor.js's own routing would have produced. Used only
+ * when the paste actually contains an indented paragraph (see the capture listener below) - every
+ * other paste still goes through Editor.js's native, already-tested handling untouched. */
+function parseTopLevelPaste(container) {
+    let blocks = [];
+    let children = Array.from(container.children);
+    let i = 0;
+    while (i < children.length) {
+        let node = children[i];
+        let tag = node.tagName;
+        if (/^H[1-6]$/.test(tag)) {
+            blocks.push({ type: 'header', data: { text: normalizeWhitespace(node.cloneNode(true)), level: Number(tag[1]) } });
+            i++;
+        } else if (tag === 'UL' || tag === 'OL') {
+            blocks.push({ type: 'list', data: parsePastedListElement(node) });
+            i++;
+        } else if (tag === 'P' && isIndentedParagraph(node)) {
+            let items = [];
+            while (i < children.length && isIndentedParagraph(children[i])) {
+                let text = normalizeWhitespace(children[i].cloneNode(true));
+                if (text) items.push({ text, checked: false });
+                i++;
+            }
+            if (items.length) blocks.push({ type: 'checklist', data: { items } });
+        } else {
+            let text = normalizeWhitespace(node.cloneNode(true));
+            if (text) blocks.push({ type: 'paragraph', data: { text } });
+            i++;
+        }
+    }
+    return blocks;
+}
+
 /* Icon set: Lucide (ISC license, https://lucide.dev), matching the Figma "Compact text formatting
  * toolbar" spec (Design Elements board, node 1048:704), which names its icon layers after Lucide's
  * own icon slugs (pilcrow, heading-1..4, bold, italic, underline, strikethrough, indent-decrease/
@@ -179,10 +306,28 @@ export default {
         document.addEventListener('selectionchange', this.onSelectionChange);
         this.$refs.htmlelement.addEventListener('keyup', this.onSelectionChange);
         this.$refs.htmlelement.addEventListener('mouseup', this.onSelectionChange);
+        /* Capture phase, on the wrapper (an ancestor of Editor.js's own holder) - this always runs
+         * before Editor.js's own 'paste' listener (attached to the holder itself, bubble phase), so
+         * it can hand off to parseTopLevelPaste/insertParsedBlocks for the one case Editor.js's
+         * native per-tag paste routing can't handle (see parseTopLevelPaste above), while leaving
+         * every other paste to Editor.js's normal handling, untouched, same as before this existed. */
+        this.onPasteCapture = (event) => {
+            if (!event.clipboardData) return;
+            let html = event.clipboardData.getData('text/html');
+            if (!html) return;
+            let container = document.createElement('div');
+            container.innerHTML = html;
+            if (!Array.from(container.children).some(isIndentedParagraph)) return;
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            this.insertParsedBlocks(parseTopLevelPaste(container));
+        };
+        this.$refs.htmlelement.parentElement.addEventListener('paste', this.onPasteCapture, true);
     },
     unmounted() {
         if (this.editor && this.editor.destroy) this.editor.destroy();
         document.removeEventListener('selectionchange', this.onSelectionChange);
+        if (this.$refs.htmlelement) this.$refs.htmlelement.parentElement.removeEventListener('paste', this.onPasteCapture, true);
     },
     methods: {
         /** Public: focuses the caret at the end of the editor's content (mirrors a plain
@@ -293,6 +438,21 @@ export default {
             let index = this.editor.blocks.getCurrentBlockIndex();
             if (index === -1) return;
             this.editor.blocks.delete(index);
+        },
+        /** Inserts the blocks parseTopLevelPaste built, at the caret - replacing the current block
+         * if it's empty (matching how a normal Editor.js paste behaves), otherwise inserting after
+         * it. Used only by the OneNote-checklist paste capture above. */
+        insertParsedBlocks(blocks) {
+            if (!this.editor || !blocks.length) return;
+            let currentIndex = this.editor.blocks.getCurrentBlockIndex();
+            let currentBlock = currentIndex > -1 ? this.editor.blocks.getBlockByIndex(currentIndex) : undefined;
+            let replaceFirst = !!(currentBlock && currentBlock.isEmpty);
+            let baseIndex = currentIndex === -1 ? this.editor.blocks.getBlocksCount() : (replaceFirst ? currentIndex : currentIndex + 1);
+            blocks.forEach((block, i) => {
+                this.editor.blocks.insert(block.type, block.data, undefined, baseIndex + i, false, i === 0 && replaceFirst);
+            });
+            let lastBlock = this.editor.blocks.getBlockByIndex(baseIndex + blocks.length - 1);
+            if (lastBlock) this.editor.caret.setToBlock(lastBlock.id, 'end');
         },
         /** Throttles refreshState to once per animation frame - selectionchange/keyup/mouseup can
          * all fire in a burst for a single user action. */
