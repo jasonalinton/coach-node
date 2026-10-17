@@ -226,7 +226,7 @@ function onDrop(ev) {
         let newEnd = new Date(newStart.getTime() + duration);
         task.endAt = newEnd.toJSON();
         
-        this.iterationStore.updateIteration(task.id, task.text, task.blurb, 
+        this.iterationStore.updateIteration(task.id, task.text,
             task.points, task.startAt, task.endAt);
     }
 }

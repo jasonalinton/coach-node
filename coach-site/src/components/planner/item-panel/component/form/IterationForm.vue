@@ -50,14 +50,9 @@
                               :dateTime="iteration_updated.endAt" @onChange="iteration_updated.endAt = $event"></DateTimeSelector>
             </div>
         </div>
-        <!-- Blurb -->
-        <div class="form-group mt-1">
-            <textarea class="textarea" 
-                v-model.lazy.trim="iteration_updated.blurb"
-                placeholder="Click to add blurb"
-                spellcheck="true">
-            </textarea>
-        </div>
+        <!-- Blurbs -->
+        <BlurbFormControl header="Blurbs" placeholder="Click to add blurb" :blurbs="blurbs" :showTitle="true"
+            @addBlurb="addBlurb($event)" @saveBlurb="updateBlurb($event)" />
         <div class="d-flex flex-column justify-content-end mt-3">
             <!-- Buttons -->
             <div class="d-flex flex-column">
@@ -95,10 +90,12 @@
 <script>
 import { addDay, addMinutes, startOfDay, getShortTimeString } from "../../../../../../utility/timeUtility";
 import DateTimeSelector from "../../../../controls/select/DateTimeSelector.vue"
+import BlurbFormControl from "../../../../items/form/component/BlurbFormControl.vue";
+import { BLURBTYPE } from "../../../../../model/constants";
 
 export default {
     name: "IterationForm",
-    components: { DateTimeSelector },
+    components: { DateTimeSelector, BlurbFormControl },
     props: {
         iteration: Object
     },
@@ -121,13 +118,14 @@ export default {
         this.initUpdatedIteration();
     },
     computed: {
-        // blurb() {
-        //     if (this.universalStore && this.iteration.blurbIds.length > 0) {
-        //         let blurb = this.universalStore.getBlurb(this.iteration.blurbIds[0]);
-        //         return blurb;
-        //     }
-        //     return undefined;
-        // },
+        blurbs() {
+            if (this.universalStore && this.iterationStore) {
+                let liveIteration = this.iterationStore.getIteration(this.iteration.id);
+                let blurbIds = liveIteration?.blurbIds || this.iteration.blurbIds || [];
+                return this.universalStore.getBlurbsWithID(blurbIds);
+            }
+            return [];
+        },
         isComplete() {
             if (this.iteration.attemptedAt) {
                 return true;
@@ -173,6 +171,8 @@ export default {
         markComplete,
         markIncomplete,
         deleteTask,
+        addBlurb,
+        updateBlurb,
         save,
         close,
     },
@@ -197,12 +197,6 @@ function initUpdatedIteration() {
         startAt: this.iteration.startAt,
         endAt: this.iteration.endAt
     };
-    if (this.iteration.blurbIds.length > 0) {
-        let blurb = this.universalStore.getBlurb(this.iteration.blurbIds[0]);
-        if (blurb) {
-            this.iteration_updated.blurb = blurb.text;
-        }
-    }
 }
 
 function validateTimes() {
@@ -283,11 +277,25 @@ function deleteTask() {
     this.close();
 }
 
+function addBlurb(blurb) {
+    if (blurb.text.trim() != "") {
+        blurb.idType = BLURBTYPE.BLURB;
+        this.iterationStore.addBlurb(this.iteration.id, blurb);
+    }
+}
+
+function updateBlurb(blurb) {
+    if (blurb.text.trim() != "") {
+        blurb.idType = BLURBTYPE.BLURB;
+        this.iterationStore.updateBlurb(blurb);
+    }
+}
+
 function save() {
     var title = this.iteration_updated.text.trim();
     if (title == "") return;
 
-    this.iterationStore.updateIteration(this.iteration_updated.id, this.iteration_updated.text, this.iteration_updated.blurb, 
+    this.iterationStore.updateIteration(this.iteration_updated.id, this.iteration_updated.text,
     this.iteration_updated.points, this.iteration_updated.startAt, this.iteration_updated.endAt);
 
     this.close();

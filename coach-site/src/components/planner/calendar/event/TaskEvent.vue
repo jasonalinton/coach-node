@@ -172,7 +172,7 @@ function updateBottom() {
     newEndAt.setMinutes(mins15);
     this.task.endAt = newEndAt.toJSON();
     
-    this.iterationStore.updateIteration(this.task.id, this.task.text, this.task.blurb, 
+    this.iterationStore.updateIteration(this.task.id, this.task.text,
         this.task.points, this.task.startAt, this.task.endAt);
 
     this.onResizeEnd();

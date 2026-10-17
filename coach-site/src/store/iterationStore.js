@@ -170,11 +170,18 @@ export const useIterationStore = defineStore('iteration', {
             this.iterations.push(newTask);
             return newTask;
         },
-        updateIteration(iterationID, text, blurb, points, startAt, endAt) {
-            let dateTime = new Date();
-            let data = { iterationID, text, blurb, points, startAt, endAt, dateTime };
+        updateIteration(iterationID, text, points, startAt, endAt) {
+            let data = { iterationID, text, points, startAt, endAt };
             return postEndpoint("Planner", "UpdateIteration", data)
             .then(response => response.result);
+        },
+        addBlurb(idIteration, blurb) {
+            let data = { ...blurb, idIteration, idBlurbType: blurb.idType };
+            return postEndpoint("Planner", "AddBlurbToIteration", data).then(response => response.result);
+        },
+        updateBlurb(blurb) {
+            let data = { ...blurb, idBlurb: blurb.id, idBlurbType: blurb.idType };
+            return postEndpoint("Planner", "UpdateBlurbInIteration", data).then(response => response.result);
         },
         rescheduleIteration(iterationID, startAt, endAt) {
             let data = { iterationID, startAt, endAt };
