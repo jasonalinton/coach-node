@@ -271,15 +271,22 @@ function saveBlurb() {
     this.cancelBlurb();
 }
 
-function onEditorBlur(event) {
-    if (this.$refs.editorWrapper && event.relatedTarget && this.$refs.editorWrapper.contains(event.relatedTarget)) {
-        return;
-    }
-    if (isEmptyOutputData(this.json)) {
-        this.showButtons = false;
-        this.showTextarea = false;
-        this.selectedID = undefined;
-    }
+function onEditorBlur() {
+    /* Deferred instead of checked synchronously: pasting into an empty block makes Editor.js
+     * swap out the block's DOM element to render the pasted content, which fires this same
+     * focusout event (with relatedTarget null, since focus briefly lands nowhere) before Editor.js
+     * has refocused the new element or onChange has updated `json`. Waiting a tick lets both
+     * settle, so a real click-away is still caught but a mid-paste blur isn't mistaken for one. */
+    setTimeout(() => {
+        if (this.$refs.editorWrapper && document.activeElement && this.$refs.editorWrapper.contains(document.activeElement)) {
+            return;
+        }
+        if (isEmptyOutputData(this.json)) {
+            this.showButtons = false;
+            this.showTextarea = false;
+            this.selectedID = undefined;
+        }
+    }, 0);
 }
 
 </script>
