@@ -53,6 +53,8 @@
         <!-- Blurbs -->
         <BlurbFormControl header="Blurbs" placeholder="Click to add blurb" :blurbs="blurbs" :showTitle="true"
             @addBlurb="addBlurb($event)" @saveBlurb="updateBlurb($event)" />
+        <!-- Photos & Videos -->
+        <MediaGallery v-if="iteration.id > 0" class="mt-2" itemType="iteration" :itemId="iteration.id" header="Photos & Videos" />
         <div class="d-flex flex-column justify-content-end mt-3">
             <!-- Buttons -->
             <div class="d-flex flex-column">
@@ -91,11 +93,12 @@
 import { addDay, addMinutes, startOfDay, getShortTimeString } from "../../../../../../utility/timeUtility";
 import DateTimeSelector from "../../../../controls/select/DateTimeSelector.vue"
 import BlurbFormControl from "../../../../items/form/component/BlurbFormControl.vue";
+import MediaGallery from "../../../../items/form/component/media/MediaGallery.vue";
 import { BLURBTYPE } from "../../../../../model/constants";
 
 export default {
     name: "IterationForm",
-    components: { DateTimeSelector, BlurbFormControl },
+    components: { DateTimeSelector, BlurbFormControl, MediaGallery },
     props: {
         iteration: Object
     },

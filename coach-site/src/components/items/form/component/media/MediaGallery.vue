@@ -48,7 +48,12 @@ export default {
     name: 'MediaGallery',
     components: { MediaThumb, MediaPicker, MediaViewer },
     props: {
-        idTodo: {
+        itemType: {
+            type: String,
+            required: true,
+            validator: v => ['todo', 'goal', 'iteration'].includes(v),
+        },
+        itemId: {
             type: Number,
             required: true,
         },
@@ -72,11 +77,11 @@ export default {
     },
     methods: {
         async load() {
-            this.links = await this.mediaStore.getForTodo(this.idTodo);
+            this.links = await this.mediaStore.getForItem(this.itemType, this.itemId);
         },
         async onPicked(media) {
             this.showPicker = false;
-            let link = await this.mediaStore.attachToTodo(this.idTodo, media.id);
+            let link = await this.mediaStore.attachToItem(this.itemType, this.itemId, media.id);
             if (link) this.links.push(link);
         },
         async removeLink(link) {
@@ -87,19 +92,19 @@ export default {
         async moveLeft(index) {
             if (index == 0) return;
             [this.links[index - 1], this.links[index]] = [this.links[index], this.links[index - 1]];
-            await this.mediaStore.reorderForTodo(this.idTodo, this.links.map(x => x.id));
+            await this.mediaStore.reorderForItem(this.itemType, this.itemId, this.links.map(x => x.id));
         },
         async moveRight(index) {
             if (index == this.links.length - 1) return;
             [this.links[index], this.links[index + 1]] = [this.links[index + 1], this.links[index]];
-            await this.mediaStore.reorderForTodo(this.idTodo, this.links.map(x => x.id));
+            await this.mediaStore.reorderForItem(this.itemType, this.itemId, this.links.map(x => x.id));
         },
         /* Adds the downloaded copy alongside the original link, rather than replacing it - lets the
          * person confirm the copy looks right before removing the link themselves. */
         async onSaveCopy(link) {
             let copy = await this.mediaStore.saveCopy(link.media.id);
             if (copy) {
-                let newLink = await this.mediaStore.attachToTodo(this.idTodo, copy.id);
+                let newLink = await this.mediaStore.attachToItem(this.itemType, this.itemId, copy.id);
                 if (newLink) this.links.push(newLink);
             }
             this.viewingLink = null;

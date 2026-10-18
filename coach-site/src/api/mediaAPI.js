@@ -40,6 +40,38 @@ export async function reorderTodoMedia(idTodo, orderedTodoMediaAssetIds) {
     return postEndpoint('Media', 'ReorderTodoMedia', { idTodo, orderedTodoMediaAssetIds });
 }
 
+export async function getMediaForGoal(idGoal) {
+    return postEndpoint('Media', 'GetMediaForGoal', { idGoal });
+}
+
+export async function attachMediaToGoal(idGoal, idMediaAsset, position) {
+    return postEndpoint('Media', 'AttachMediaToGoal', { idGoal, idMediaAsset, position });
+}
+
+export async function detachMediaFromGoal(idGoal, idMediaAsset) {
+    return postEndpoint('Media', 'DetachMediaFromGoal', { idGoal, idMediaAsset });
+}
+
+export async function reorderGoalMedia(idGoal, orderedGoalMediaAssetIds) {
+    return postEndpoint('Media', 'ReorderGoalMedia', { idGoal, orderedGoalMediaAssetIds });
+}
+
+export async function getMediaForIteration(idIteration) {
+    return postEndpoint('Media', 'GetMediaForIteration', { idIteration });
+}
+
+export async function attachMediaToIteration(idIteration, idMediaAsset, position) {
+    return postEndpoint('Media', 'AttachMediaToIteration', { idIteration, idMediaAsset, position });
+}
+
+export async function detachMediaFromIteration(idIteration, idMediaAsset) {
+    return postEndpoint('Media', 'DetachMediaFromIteration', { idIteration, idMediaAsset });
+}
+
+export async function reorderIterationMedia(idIteration, orderedIterationMediaAssetIds) {
+    return postEndpoint('Media', 'ReorderIterationMedia', { idIteration, orderedIterationMediaAssetIds });
+}
+
 export async function setExerciseDemoMedia(idExercise, idMediaAsset) {
     return postEndpoint('Media', 'SetExerciseDemoMedia', { idExercise, idMediaAsset });
 }

@@ -3,6 +3,8 @@ import { getSocketConnection } from './socket';
 import {
     uploadMedia, createLink, getMedia, deleteMedia,
     getMediaForTodo, attachMediaToTodo, detachMediaFromTodo, reorderTodoMedia,
+    getMediaForGoal, attachMediaToGoal, detachMediaFromGoal, reorderGoalMedia,
+    getMediaForIteration, attachMediaToIteration, detachMediaFromIteration, reorderIterationMedia,
     setExerciseDemoMedia, setExerciseThumbnailMedia, saveMediaCopy,
     getStoriesInRange, addMediaToStory, getMediaLibrary,
 } from '../api/mediaAPI';
@@ -10,6 +12,16 @@ import { replaceOrAddItem } from '../../utility';
 import { startOfDay, endOfDay, isSameDate } from '../../utility/timeUtility';
 
 let initialized = false;
+
+/* Per-itemType dispatch for the "attach media to an item" surface - Todo, Goal and Iteration
+ * each have their own join table and API methods (Todo_MediaAsset, Goal_MediaAsset,
+ * Iteration_MediaAsset), but the calling shape is identical, so MediaGallery.vue passes an
+ * itemType string instead of this store (or the gallery) needing a copy per entity. */
+const MEDIA_ITEM_API = {
+    todo: { getFor: getMediaForTodo, attachTo: attachMediaToTodo, detachFrom: detachMediaFromTodo, reorder: reorderTodoMedia },
+    goal: { getFor: getMediaForGoal, attachTo: attachMediaToGoal, detachFrom: detachMediaFromGoal, reorder: reorderGoalMedia },
+    iteration: { getFor: getMediaForIteration, attachTo: attachMediaToIteration, detachFrom: detachMediaFromIteration, reorder: reorderIterationMedia },
+};
 
 /* Cache of MediaModel by id, kept fresh by the "SendMediaUpdate" SignalR push (see
  * CoachHub.SendMediaUpdate / MediaService in the API) so a video card flips from "processing" to
@@ -63,23 +75,23 @@ export const useMediaStore = defineStore('media', {
             return response?.status?.success ?? false;
         },
 
-        async getForTodo(idTodo) {
-            let response = await getMediaForTodo(idTodo);
+        async getForItem(itemType, itemId) {
+            let response = await MEDIA_ITEM_API[itemType].getFor(itemId);
             if (!response?.status?.success) return [];
             response.result.forEach(link => this.cache(link.media));
             return response.result;
         },
-        async attachToTodo(idTodo, idMediaAsset, position) {
-            let response = await attachMediaToTodo(idTodo, idMediaAsset, position);
+        async attachToItem(itemType, itemId, idMediaAsset, position) {
+            let response = await MEDIA_ITEM_API[itemType].attachTo(itemId, idMediaAsset, position);
             if (response?.status?.success) this.cache(response.result.media);
             return response?.status?.success ? response.result : undefined;
         },
-        async detachFromTodo(idTodo, idMediaAsset) {
-            let response = await detachMediaFromTodo(idTodo, idMediaAsset);
+        async detachFromItem(itemType, itemId, idMediaAsset) {
+            let response = await MEDIA_ITEM_API[itemType].detachFrom(itemId, idMediaAsset);
             return response?.status?.success ?? false;
         },
-        async reorderForTodo(idTodo, orderedTodoMediaAssetIds) {
-            let response = await reorderTodoMedia(idTodo, orderedTodoMediaAssetIds);
+        async reorderForItem(itemType, itemId, orderedMediaAssetLinkIds) {
+            let response = await MEDIA_ITEM_API[itemType].reorder(itemId, orderedMediaAssetLinkIds);
             return response?.status?.success ?? false;
         },
 

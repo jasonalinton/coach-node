@@ -36,6 +36,8 @@
                                           placeholder="Click to add Description"
                                           spellcheck="true"></textarea>
                             </div>
+                            <!-- Photos & Videos -->
+                            <MediaGallery v-if="id" class="mt-2" itemType="goal" :itemId="id" header="Photos & Videos" />
                             <!-- Reasons -->
                             <BlurbFormControl header="Reasons" placeholder="Click to add Reason" :blurbs="reasons" 
                                               @addBlurb="addReason($event)" @saveBlurb="updateBlurb($event)" />
@@ -155,6 +157,7 @@ import GoalTimePairControl from '../component/GoalTimePairControl.vue';
 import FormItemList from '../component/FormItemList.vue';
 import ItemMapper from '../component/ItemMapper.vue';
 import BlurbFormControl from '../component/BlurbFormControl.vue';
+import MediaGallery from '../component/media/MediaGallery.vue';
 import ItemKanban from '../component/ItemKanban.vue';
 import { clone, replaceItem, addOrReplaceItem, sortItems, sortAsc } from '../../../../../utility';
 import { getShortDateString } from '../../../../../utility/timeUtility';
@@ -162,7 +165,7 @@ import { INHERITANCE, BLURBTYPE, ITEMTYPES } from '../../../../model/constants'
 
 export default {
     name: "GoalFormModal",
-    components: { RepeatControl, GoalTimePairControl, ItemMapper, FormItemList, BlurbFormControl, ItemKanban },
+    components: { RepeatControl, GoalTimePairControl, ItemMapper, FormItemList, BlurbFormControl, ItemKanban, MediaGallery },
     props: {
       id: Number
     },

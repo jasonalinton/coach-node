@@ -79,7 +79,7 @@
                     <BlurbFormControl header="Blurbs" placeholder="Click to add Blurb" :blurbs="blurbs" :showTitle="true"
                         @addBlurb="addBlurb($event)" @saveBlurb="updateBlurb($event)" />
                     <!-- Media -->
-                    <MediaGallery v-if="id" class="mt-2" :idTodo="id" header="Photos & Videos" />
+                    <MediaGallery v-if="id" class="mt-2" itemType="todo" :itemId="id" header="Photos & Videos" />
                 </div>
                 <div class="flex flex-col @xl:flex-row flex-wrap grow-1 g-2 pt-2">
                     <!-- Item Mapping -->
