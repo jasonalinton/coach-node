@@ -1,5 +1,6 @@
 <template>
-    <div v-if="blurb" class="blurb-timeline-card">
+    <BlurbForm v-if="blurb && isEditing" :blurb="rawBlurb" @saved="onSaved" @cancel="onCancel"/>
+    <div v-else-if="blurb" class="blurb-timeline-card" @click="startEditing">
         <div class="universal-content">
             <div class="title-badges">
                 <div class="badges-row">
@@ -40,6 +41,7 @@ import iconActivity from '@/assets/icons/icon-activity.svg';
 import iconList from '@/assets/icons/icon-list.svg';
 import iconTarget from '@/assets/icons/icon-target.svg';
 import BlurbContent from '../controls/display/BlurbContent.vue';
+import BlurbForm from './BlurbForm.vue';
 
 const MAPPING_THEMES = {
     [BLURB_MAPPING_TYPE.METRIC]: { bg: '#e0f2f1', text: '#00897b' },
@@ -50,7 +52,7 @@ const DEFAULT_MAPPING_THEME = { bg: '#f3f4f6', text: '#4b5563' };
 
 export default {
     name: 'BlurbTimelineCard',
-    components: { BlurbContent },
+    components: { BlurbContent, BlurbForm },
     props: {
         idBlurb: Number
     },
@@ -59,6 +61,7 @@ export default {
             universalStore: undefined,
             goalStore: undefined,
             todoStore: undefined,
+            isEditing: false,
         }
     },
     created: async function() {
@@ -90,6 +93,10 @@ export default {
                 }
             }
             return undefined;
+        },
+        rawBlurb() {
+            if (!this.universalStore) return undefined;
+            return this.universalStore.blurbs.find(x => x.id == this.idBlurb);
         },
         mappingType() {
             if (!this.blurb) return undefined;
@@ -133,6 +140,15 @@ export default {
     methods: {
         getMetric(idMetric) {
             return metrics.find(x => x.id == idMetric);
+        },
+        startEditing() {
+            this.isEditing = true;
+        },
+        onSaved() {
+            this.isEditing = false;
+        },
+        onCancel() {
+            this.isEditing = false;
         }
     },
 }
@@ -152,6 +168,7 @@ export default {
     text-align: start;
     margin: auto;
     margin-bottom: 32px;
+    cursor: pointer;
 }
 
 .universal-content {

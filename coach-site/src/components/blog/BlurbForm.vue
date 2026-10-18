@@ -7,7 +7,7 @@
         <div class="form-fields">
             <!-- Title -->
             <div class="field">
-                <div class="field-label"><span>Title</span><span class="required">*</span></div>
+                <div class="field-label"><span>Title</span></div>
                 <input class="field-input" type="text" placeholder="Enter a title..."
                        v-model.trim="title" spellcheck="true"/>
             </div>
@@ -185,7 +185,7 @@ export default {
             return !!this.blurb;
         },
         isValid() {
-            return !!(this.title && this.title.trim()) && !isEmptyOutputData(this.json);
+            return !isEmptyOutputData(this.json);
         },
         canAddMapping() {
             return !!this.idMappingType;
