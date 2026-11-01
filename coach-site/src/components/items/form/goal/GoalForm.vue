@@ -38,12 +38,14 @@
                             </div>
                             <!-- Photos & Videos -->
                             <MediaGallery v-if="id" class="mt-2" itemType="goal" :itemId="id" header="Photos & Videos" />
+                            <DescendantMedia class="mt-2" header="Media From Descendants" :descendants="descendantRefs" />
                             <!-- Reasons -->
-                            <BlurbFormControl header="Reasons" placeholder="Click to add Reason" :blurbs="reasons" 
+                            <BlurbFormControl header="Reasons" placeholder="Click to add Reason" :blurbs="reasons"
                                               @addBlurb="addReason($event)" @saveBlurb="updateBlurb($event)" />
                             <!-- Blurbs -->
                             <BlurbFormControl header="Blurbs" placeholder="Click to add Blurb" :blurbs="blurbs" :showTitle="true"
                                               @addBlurb="addBlurb($event)" @saveBlurb="updateBlurb($event)" />
+                            <DescendantBlurbs class="mt-2" header="Blurbs From Descendants" :descendants="descendantRefs" />
                         </div>
                         <div class="items col-12 col-sm-6 col-md-4 col-lg-3 mt-2 form-column">
                             <!-- Parents -->
@@ -151,13 +153,15 @@ import FormItemList from '../component/FormItemList.vue';
 import ItemMapper from '../component/ItemMapper.vue';
 import BlurbFormControl from '../component/BlurbFormControl.vue';
 import MediaGallery from '../component/media/MediaGallery.vue';
+import DescendantBlurbs from '../component/DescendantBlurbs.vue';
+import DescendantMedia from '../component/DescendantMedia.vue';
 import { clone, replaceItem, addOrReplaceItem, sortItems, sortAsc } from '../../../../../utility';
 import { getShortDateString } from '../../../../../utility/timeUtility';
 import { INHERITANCE, BLURBTYPE } from '../../../../model/constants'
 
 export default {
     name: "GoalFormModal",
-    components: { RepeatControl, GoalTimePairControl, ItemMapper, FormItemList, BlurbFormControl, MediaGallery },
+    components: { RepeatControl, GoalTimePairControl, ItemMapper, FormItemList, BlurbFormControl, MediaGallery, DescendantBlurbs, DescendantMedia },
     props: {
       id: Number
     },
@@ -165,6 +169,7 @@ export default {
         return {
             store: null,
             plannerStore: null,
+            todoStore: null,
             BLURBTYPE: BLURBTYPE,
             initialized: false,
             text: {
@@ -218,6 +223,9 @@ export default {
 
         let plannerStore = await import(`@/store/plannerStore`);
         this.plannerStore = plannerStore.usePlannerStore();
+
+        let todoStore = await import(`@/store/todoStore`);
+        this.todoStore = todoStore.useTodoStore();
     },
     computed: {
         goal() {
@@ -258,6 +266,26 @@ export default {
             } else {
                 return [];
             }
+        },
+        /* Descendant goals/todos/iterations for the "From Descendants" section - goal/todo labels
+         * come for free from stores that are already loaded app-wide; iteration labels are resolved
+         * inside DescendantContent itself once it lazily fetches those iterations. */
+        descendantRefs() {
+            if (!this.store || !this.todoStore || !this.id || !this.store.getItem(this.id)) return [];
+            let { goalIDs, todoIDs, iterationIDs } = this.store.getDescendantIDs(this.id);
+            let refs = [];
+            goalIDs.forEach(goalID => {
+                let goal = this.store.getItem(goalID);
+                if (goal) refs.push({ itemType: 'goal', itemId: goalID, label: goal.text });
+            });
+            todoIDs.forEach(todoID => {
+                let todo = this.todoStore.getItem(todoID);
+                if (todo) refs.push({ itemType: 'todo', itemId: todoID, label: todo.text });
+            });
+            iterationIDs.forEach(iterationID => {
+                refs.push({ itemType: 'iteration', itemId: iterationID });
+            });
+            return refs;
         }
     },
     methods: {

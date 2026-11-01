@@ -72,6 +72,11 @@ export async function reorderIterationMedia(idIteration, orderedIterationMediaAs
     return postEndpoint('Media', 'ReorderIterationMedia', { idIteration, orderedIterationMediaAssetIds });
 }
 
+/** Media for many goals/todos/iterations at once (e.g. a goal's whole descendant tree), in one round trip. */
+export async function getMediaForItems(goalIds, todoIds, iterationIds) {
+    return postEndpoint('Media', 'GetMediaForItems', { goalIds, todoIds, iterationIds });
+}
+
 export async function setExerciseDemoMedia(idExercise, idMediaAsset) {
     return postEndpoint('Media', 'SetExerciseDemoMedia', { idExercise, idMediaAsset });
 }

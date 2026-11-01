@@ -78,8 +78,10 @@
                     <!-- Blurbs -->
                     <BlurbFormControl header="Blurbs" placeholder="Click to add Blurb" :blurbs="blurbs" :showTitle="true"
                         @addBlurb="addBlurb($event)" @saveBlurb="updateBlurb($event)" />
+                    <DescendantBlurbs class="mt-2" header="Blurbs From Descendants" :descendants="descendantRefs" />
                     <!-- Media -->
                     <MediaGallery v-if="id" class="mt-2" itemType="todo" :itemId="id" header="Photos & Videos" />
+                    <DescendantMedia class="mt-2" header="Media From Descendants" :descendants="descendantRefs" />
                 </div>
                 <div class="flex flex-col @xl:flex-row flex-wrap grow-1 g-2 pt-2">
                     <!-- Item Mapping -->
@@ -171,6 +173,8 @@ import FormItemList from '../component/FormItemList.vue';
 import ItemMapper from '../component/ItemMapper.vue'
 import BlurbFormControl from '../component/BlurbFormControl.vue';
 import MediaGallery from '../component/media/MediaGallery.vue';
+import DescendantBlurbs from '../component/DescendantBlurbs.vue';
+import DescendantMedia from '../component/DescendantMedia.vue';
 import { clone, replaceItem, addOrReplaceItem, sortItems, sortAsc } from '../../../../../utility';
 import { metrics, todoTypes, mediums, todoActivityTypes } from '../../../../model/types';
 import { today, toShortWeekdayString } from '../../../../../utility/timeUtility';
@@ -178,7 +182,7 @@ import { BLURBTYPE } from '../../../../model/constants';
 
 export default {
     name: "TodoForm",
-    components: { RepeatControl, TimePairControl, ItemMapper, FormItemList, BlurbFormControl, MediaGallery },
+    components: { RepeatControl, TimePairControl, ItemMapper, FormItemList, BlurbFormControl, MediaGallery, DescendantBlurbs, DescendantMedia },
     props: {
       id: Number
     },
@@ -188,6 +192,7 @@ export default {
             appStore: null,
             plannerStore: null,
             universalStore: null,
+            iterationStore: null,
             todoClone: undefined,
             metrics: clone(metrics),
             todoTypes: clone(todoTypes),
@@ -261,6 +266,9 @@ export default {
 
         let universalStore = await import(`@/store/universalStore`);
         this.universalStore = universalStore.useUniversalStore();
+
+        let iterationStore = await import(`@/store/iterationStore`);
+        this.iterationStore = iterationStore.useIterationStore();
     },
     computed: {
         selectedDate() {
@@ -356,6 +364,25 @@ export default {
                 return blurbs;
             }
             return [];
+        },
+        /* Descendant todos/iterations for the "From Descendants" section - todo labels come for
+         * free from todoStore (already loaded app-wide); iteration labels are resolved inside
+         * DescendantContent itself once it lazily fetches those iterations. Iterations scheduled
+         * directly from this todo count as descendant content too, not "own" content. */
+        descendantRefs() {
+            if (!this.store || !this.iterationStore || !this.id || !this.store.getItem(this.id)) return [];
+            let descendantTodoIDs = this.store.getDescendantIDs(this.id);
+            let refs = [];
+            descendantTodoIDs.forEach(todoID => {
+                let todo = this.store.getItem(todoID);
+                if (todo) refs.push({ itemType: 'todo', itemId: todoID, label: todo.text });
+            });
+            [this.id, ...descendantTodoIDs].forEach(todoID => {
+                this.iterationStore.getIterationsForTodo(todoID).forEach(iteration => {
+                    refs.push({ itemType: 'iteration', itemId: iteration.id });
+                });
+            });
+            return refs;
         }
     },
     methods: {

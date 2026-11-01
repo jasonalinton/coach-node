@@ -57,6 +57,22 @@ export const useIterationStore = defineStore('iteration', {
         getIterations() {
             return this.iterations;
         },
+        /** Iterations by id, regardless of date range - e.g. a goal/todo's descendant tree, which can
+         * reach outside whatever date window is currently loaded. Mirrors universalStore.getBlurbsWithID:
+         * returns what's already cached, and kicks off a batched fetch for whatever's missing. */
+        getIterationsWithIDs(ids) {
+            let iterations = this.iterations.filter(x => ids.includes(x.id));
+            if (iterations.length != ids.length) {
+                postEndpoint("Planner", "GetIterations", { ids })
+                    .then(response => {
+                        if (!response?.status?.success) return;
+                        let all = [...this.iterations];
+                        response.result.forEach(iteration => replaceOrAddItem(iteration, all));
+                        this.iterations = sortAsc(all);
+                    });
+            }
+            return iterations;
+        },
         getIterationsInRange(startAt, endAt) {
             if (!this.isRangeLoaded(startAt, endAt)) {
                 let request = {

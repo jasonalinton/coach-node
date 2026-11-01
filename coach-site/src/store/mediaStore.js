@@ -5,6 +5,7 @@ import {
     getMediaForTodo, attachMediaToTodo, detachMediaFromTodo, reorderTodoMedia,
     getMediaForGoal, attachMediaToGoal, detachMediaFromGoal, reorderGoalMedia,
     getMediaForIteration, attachMediaToIteration, detachMediaFromIteration, reorderIterationMedia,
+    getMediaForItems,
     setExerciseDemoMedia, setExerciseThumbnailMedia, saveMediaCopy,
     getStoriesInRange, addMediaToStory, getMediaLibrary,
 } from '../api/mediaAPI';
@@ -80,6 +81,24 @@ export const useMediaStore = defineStore('media', {
             if (!response?.status?.success) return [];
             response.result.forEach(link => this.cache(link.media));
             return response.result;
+        },
+        /**
+         * Media for many goals/todos/iterations at once (e.g. a goal's whole descendant tree), in
+         * one round trip - returns a single flat array, each link tagged with the itemType/itemId
+         * it belongs to so a caller doesn't need to know which of the three lists it came from.
+         */
+        async getForItems({ goalIds = [], todoIds = [], iterationIds = [] }) {
+            let response = await getMediaForItems(goalIds, todoIds, iterationIds);
+            if (!response?.status?.success) return [];
+
+            let tag = (itemType, idKey) => (link) => { link.itemType = itemType; link.itemId = link[idKey]; return link; };
+            let links = [
+                ...response.result.goalMedia.map(tag('goal', 'idGoal')),
+                ...response.result.todoMedia.map(tag('todo', 'idTodo')),
+                ...response.result.iterationMedia.map(tag('iteration', 'idIteration')),
+            ];
+            links.forEach(link => this.cache(link.media));
+            return links;
         },
         async attachToItem(itemType, itemId, idMediaAsset, position) {
             let response = await MEDIA_ITEM_API[itemType].attachTo(itemId, idMediaAsset, position);

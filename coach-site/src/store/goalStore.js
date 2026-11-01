@@ -136,6 +136,17 @@ export const useGoalStore = defineStore('goal', {
             this.getDescendantIterationsFromGoal(goalID, idsChecked);
             return idsChecked.todos;
         },
+        /** Everything under goalID - descendant goals (excluding goalID itself), their todos (and
+         * those todos' sub-todos), and every iteration scheduled from any of those todos. */
+        getDescendantIDs(goalID) {
+            let idsChecked = { goals: [], todos: [], iterations: [] };
+            this.getDescendantIterationsFromGoal(goalID, idsChecked);
+            return {
+                goalIDs: idsChecked.goals.filter(id => id != goalID),
+                todoIDs: idsChecked.todos,
+                iterationIDs: idsChecked.iterations
+            };
+        },
         getDescendantIterationsFromGoal(goalID, idsChecked) {
             if (!idsChecked.goals.includes(goalID)) {
                 idsChecked.goals.push(goalID);

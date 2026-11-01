@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "additionalDirectories": [
+      "/Users/jasonalinton/Documents/Devloper/Coach/Code/Coach.Model/RequestModel/Planner",
+      "/Users/jasonalinton/Documents/Devloper/Coach/Code/Coach.Service/Planner"
+    ]
+  }
+}
