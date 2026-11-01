@@ -94,6 +94,10 @@ export const usePhysicalStore = defineStore('physical', {
             return postEndpoint("Physical", "SearchFoodUPC", { upc })
             .then(response => response.result);
         },
+        async searchLocalFoodItems(searchTerm) {
+            return postEndpoint("Physical", "SearchFoodItem2s", { query: searchTerm })
+            .then(response => response.result);
+        },
         async saveFoodItem(foodItem) {
             return postEndpoint("Physical", "SaveFoodItem", { model: foodItem })
             .then(response => response.result);

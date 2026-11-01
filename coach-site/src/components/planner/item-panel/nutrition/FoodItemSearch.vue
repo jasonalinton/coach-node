@@ -43,6 +43,14 @@
                             :item="item" :meal="meal"
                             @selectFoodItem="$emit('selectFoodItem', $event)" />
         </div>
+        <!-- Local -->
+        <div v-if="['All'].includes(tab) && local.length > 0"
+             class="local d-flex flex-column">
+            <span class="text-start ms-2">Your Foods</span>
+            <FoodSearchItem v-for="(item, index) in local" :key="index"
+                            :item="item" :meal="meal"
+                            @selectFoodItem="$emit('selectFoodItem', $event)" />
+        </div>
         <!-- Common -->
         <div v-if="['All', 'Common'].includes(tab) && common.length > 0"
              class="common d-flex flex-column">
@@ -123,6 +131,7 @@ export default {
             recents: [],
             common: [],
             branded: [],
+            local: [],
             upc: [],
             noUPCResult: undefined
         }
@@ -176,12 +185,17 @@ function clearResults() {
     this.common = [];
     this.branded = [];
     this.upc = [];
+    this.local = [];
 }
 
 async function searchFoodItem() {
-    let result = await this.physicalStore.foodSearchAutoComplete(this.searchTerm);
+    let [result, local] = await Promise.all([
+        this.physicalStore.foodSearchAutoComplete(this.searchTerm),
+        this.physicalStore.searchLocalFoodItems(this.searchTerm)
+    ]);
     this.common = result.common;
     this.branded = result.branded;
+    this.local = local || [];
 }
 
 async function searchUPC() {
