@@ -443,7 +443,7 @@ export default {
             if (this.id > 0) {
                 if (blurb.text.trim() != "") {
                     blurb.idType = BLURBTYPE.REASON;
-                    this.store.addBlurb(this.id, blurb);
+                    return this.store.addBlurb(this.id, blurb);
                 }
             }
         },
@@ -451,7 +451,7 @@ export default {
             if (this.id > 0) {
                 if (blurb.text.trim() != "") {
                     blurb.idType = BLURBTYPE.BLURB;
-                    this.store.addBlurb(this.id, blurb);
+                    return this.store.addBlurb(this.id, blurb);
                 }
             }
         },
@@ -459,7 +459,7 @@ export default {
             if (this.id > 0) {
                 if (blurb.text.trim() != "") {
                     blurb.idType = BLURBTYPE.BLURB;
-                    this.store.updateBlurb(blurb);
+                    return this.store.updateBlurb(blurb);
                 }
             }
         },

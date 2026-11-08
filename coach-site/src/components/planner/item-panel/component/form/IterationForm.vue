@@ -283,14 +283,14 @@ function deleteTask() {
 function addBlurb(blurb) {
     if (blurb.text.trim() != "") {
         blurb.idType = BLURBTYPE.BLURB;
-        this.iterationStore.addBlurb(this.iteration.id, blurb);
+        return this.iterationStore.addBlurb(this.iteration.id, blurb);
     }
 }
 
 function updateBlurb(blurb) {
     if (blurb.text.trim() != "") {
         blurb.idType = BLURBTYPE.BLURB;
-        this.iterationStore.updateBlurb(blurb);
+        return this.iterationStore.updateBlurb(blurb);
     }
 }
 
