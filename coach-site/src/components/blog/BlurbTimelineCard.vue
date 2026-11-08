@@ -79,6 +79,7 @@ export default {
             iterationStore: undefined,
             workoutStore: undefined,
             metricStore: undefined,
+            physicalStore: undefined,
             isEditing: false,
         }
     },
@@ -95,6 +96,8 @@ export default {
         this.workoutStore = workoutStore.useWorkoutStore();
         let metricStore = await import(`@/store/metricStore`);
         this.metricStore = metricStore.useMetricStore();
+        let physicalStore = await import(`@/store/physicalStore`);
+        this.physicalStore = physicalStore.usePhysicalStore();
     },
     computed: {
         blurb() {
@@ -163,7 +166,7 @@ export default {
             addRows(T.TODOTIMEPAIR, lookupIDs(blurb.todoTimePairIDs, () => undefined));
             addRows(T.TODOREPEAT, lookupIDs(blurb.todoRepeatIDs, () => undefined));
             addRows(T.ITERATION, lookupIDs(blurb.iterationIDs, id => this.iterationStore?.getIteration(id)?.text));
-            addRows(T.FOODITEM, lookupIDs(blurb.foodItemIDs, () => undefined));
+            addRows(T.FOODITEM, lookupIDs(blurb.foodItemIDs, id => this.physicalStore?.getFoodItem(id)?.name));
             addRows(T.MEAL, lookupIDs(blurb.mealIDs, () => undefined));
             addRows(T.WORKOUT, lookupIDs(blurb.workoutIDs, id => this.workoutStore?.getWorkout(id)?.name));
             addRows(T.EXERCISE, lookupIDs(blurb.exerciseIDs, id => this.workoutStore?.getExercise(id)?.name));

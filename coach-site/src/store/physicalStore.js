@@ -6,6 +6,8 @@ import { postEndpoint } from '../api/api';
 import { addYear } from '../../utility/timeUtility';
 
 let initialized = false;
+// Food item IDs already requested by getFoodItem, so missing items aren't fetched on every render
+let pendingFoodItemIDs = new Set();
 
 export const usePhysicalStore = defineStore('physical', {
     state: () => ({
@@ -70,6 +72,17 @@ export const usePhysicalStore = defineStore('physical', {
                 });
 
             return this.foodItems;
+        },
+        getFoodItem(id) {
+            let foodItem = this.foodItems.find(x => x.id == id);
+            if (!foodItem && !pendingFoodItemIDs.has(id)) {
+                pendingFoodItemIDs.add(id);
+                postEndpoint("Physical", "GetFoodItem", { id })
+                    .then(response => {
+                        if (response?.result) replaceOrAddItem(response.result, this.foodItems);
+                    });
+            }
+            return foodItem;
         },
         async getWaterLogs() {
             let result = await getWaterLogs();

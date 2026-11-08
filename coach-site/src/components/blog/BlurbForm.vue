@@ -45,7 +45,7 @@
                     <div v-if="group.mappings.length" class="mapping-chips">
                         <span v-for="(mapping, index) in group.mappings" :key="index" class="mapping-chip">
                             <span v-if="mapping.idEntity != null" class="mapping-chip-id">{{ mapping.idEntity }}</span>
-                            <span v-if="mapping.text && mapping.text != `#${mapping.idEntity}`">{{ mapping.text }}</span>
+                            <span v-if="mappingDisplayText(mapping)">{{ mappingDisplayText(mapping) }}</span>
                             <span class="mapping-chip-remove" @click="removeMapping(groupIndex, index)">&times;</span>
                         </span>
                     </div>
@@ -322,6 +322,11 @@ export default {
                 idMetric: null
             });
         },
+        // Looked up at render time so names that load after the mapping was added still show
+        mappingDisplayText(mapping) {
+            let text = (mapping.idEntity != null && this.mappingTextByID(mapping.mappingType, mapping.idEntity)) || mapping.text;
+            return text == `#${mapping.idEntity}` ? '' : text;
+        },
         mappingTextByID(idMappingType, id) {
             const T = this.BLURB_MAPPING_TYPE;
             switch (idMappingType) {
@@ -329,6 +334,7 @@ export default {
                 case T.GOAL:
                 case T.FITNESSGOAL: return this.goalStore.getItem(id)?.text;
                 case T.TODO: return this.todoStore.getItem(id)?.text;
+                case T.FOODITEM: return this.physicalStore.getFoodItem(id)?.name;
                 case T.ITERATION: return this.iterationStore.getIteration(id)?.text;
                 case T.WORKOUT: return this.workoutStore.getWorkout(id)?.name;
                 case T.EXERCISE: return this.workoutStore.getExercise(id)?.name;
@@ -461,7 +467,7 @@ export default {
                 [T.TODO]: { ids: this.blurb.todoIDs, lookup: id => this.todoStore.getItem(id)?.text },
                 [T.ITERATION]: { ids: this.blurb.iterationIDs, lookup: id => this.iterationStore.getIteration(id)?.text },
                 [T.FITNESSGOAL]: { ids: this.blurb.fitnessGoalIDs, lookup: id => this.goalStore.getItem(id)?.text },
-                [T.FOODITEM]: { ids: this.blurb.foodItemIDs, lookup: () => undefined },
+                [T.FOODITEM]: { ids: this.blurb.foodItemIDs, lookup: id => this.physicalStore.getFoodItem(id)?.name },
                 [T.MEAL]: { ids: this.blurb.mealIDs, lookup: () => undefined },
                 [T.WORKOUT]: { ids: this.blurb.workoutIDs, lookup: id => this.workoutStore.getWorkout(id)?.name },
                 [T.EXERCISE]: { ids: this.blurb.exerciseIDs, lookup: id => this.workoutStore.getExercise(id)?.name },
