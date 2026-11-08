@@ -1,5 +1,5 @@
 <template>
-    <div class="blog-timeline">
+    <div class="blog-timeline px-3">
         <div class="d-flex flex-column">
             <!-- Button - New Post -->
             <button v-if="!newPost.isShown" type="button" class="btn btn-primary mt-3 mb-2" 

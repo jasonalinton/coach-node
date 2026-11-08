@@ -328,7 +328,7 @@ export default {
             this.timePairs.deletedIDs = [];
 
             this.reasons = goal.blurbs.filter(x => x.idType == this.BLURBTYPE.REASON);
-            this.blurbs = goal.blurbs.filter(x => x.idType == this.BLURBTYPE.BLURB);
+            this.blurbs = goal.blurbs;
         },
         setSelectedRepeat(repeatID) {
             this.selectedRepeatID = repeatID;

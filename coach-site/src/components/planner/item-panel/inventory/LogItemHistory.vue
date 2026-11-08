@@ -30,6 +30,7 @@
                         <tr v-if="entry.isSelected">
                             <td :colspan="entry.fieldValues.length + 1">
                                 <div  class="additional-values d-flex flex-column">
+                                    <span>{{ selectedEntry.id }}</span>
                                     <DateTimeSelector class="date-selector mt-2"
                                                     :dateTime="selectedEntry.dateTime" 
                                                     @onChange="updateEntryDateTime"/>

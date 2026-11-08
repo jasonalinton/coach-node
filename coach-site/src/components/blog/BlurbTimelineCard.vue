@@ -36,8 +36,10 @@
 <script>
 import { toShortDateTimeString } from '../../../utility/timeUtility';
 import { BLURB_MAPPING_TYPE } from '../../model/constants';
-import { metrics, blurbMappingTypes, blurbTypes } from '../../model/types';
+import { toDateString } from '../../../utility';
+import { metrics, blurbMappingTypes, blurbTypes, timeframes } from '../../model/types';
 import iconActivity from '@/assets/icons/icon-activity.svg';
+import iconClock from '@/assets/icons/icon-clock.svg';
 import iconList from '@/assets/icons/icon-list.svg';
 import iconTarget from '@/assets/icons/icon-target.svg';
 import BlurbContent from '../controls/display/BlurbContent.vue';
@@ -50,6 +52,19 @@ const MAPPING_THEMES = {
 };
 const DEFAULT_MAPPING_THEME = { bg: '#f3f4f6', text: '#4b5563' };
 
+const MAPPING_ICONS = {
+    [BLURB_MAPPING_TYPE.METRIC]: iconActivity,
+    [BLURB_MAPPING_TYPE.GOAL]: iconTarget,
+    [BLURB_MAPPING_TYPE.FITNESSGOAL]: iconTarget,
+    [BLURB_MAPPING_TYPE.GOALTIMEPAIR]: iconClock,
+    [BLURB_MAPPING_TYPE.GOALTIMEPAIRTODO]: iconList,
+    [BLURB_MAPPING_TYPE.TODO]: iconList,
+    [BLURB_MAPPING_TYPE.TODOTIMEPAIR]: iconClock,
+    [BLURB_MAPPING_TYPE.TODOREPEAT]: iconClock,
+    [BLURB_MAPPING_TYPE.ITERATION]: iconClock,
+    [BLURB_MAPPING_TYPE.BRIEFING]: iconClock,
+};
+
 export default {
     name: 'BlurbTimelineCard',
     components: { BlurbContent, BlurbForm },
@@ -61,6 +76,9 @@ export default {
             universalStore: undefined,
             goalStore: undefined,
             todoStore: undefined,
+            iterationStore: undefined,
+            workoutStore: undefined,
+            metricStore: undefined,
             isEditing: false,
         }
     },
@@ -71,6 +89,12 @@ export default {
         this.goalStore = goalStore.useGoalStore();
         let todoStore = await import(`@/store/todoStore`);
         this.todoStore = todoStore.useTodoStore();
+        let iterationStore = await import(`@/store/iterationStore`);
+        this.iterationStore = iterationStore.useIterationStore();
+        let workoutStore = await import(`@/store/workoutStore`);
+        this.workoutStore = workoutStore.useWorkoutStore();
+        let metricStore = await import(`@/store/metricStore`);
+        this.metricStore = metricStore.useMetricStore();
     },
     computed: {
         blurb() {
@@ -118,26 +142,53 @@ export default {
             return this.blurb ? toShortDateTimeString(this.blurb.datetime) : '';
         },
         mappingRows() {
-            if (!this.blurb || !this.mappingType) return [];
+            let blurb = this.rawBlurb;
+            if (!blurb) return [];
 
+            const T = BLURB_MAPPING_TYPE;
             let rows = [];
-            if (this.mappingType.id == BLURB_MAPPING_TYPE.METRIC) {
-                let metric = this.getMetric(this.blurb.metricIDs[0]?.id);
-                if (metric) rows.push({ icon: iconActivity, label: 'Metric:', value: metric.text });
-            } else if (this.mappingType.id == BLURB_MAPPING_TYPE.GOAL) {
-                let goal = this.goalStore?.getItem(this.blurb.goalIDs[0]?.id);
-                if (goal) rows.push({ icon: iconTarget, label: 'Goal:', value: goal.text });
-            } else if (this.mappingType.id == BLURB_MAPPING_TYPE.TODO) {
-                let todo = this.todoStore?.getItem(this.blurb.todoIDs[0]?.id);
-                if (todo) rows.push({ icon: iconList, label: 'Todo:', value: todo.text });
+            let addRows = (idMappingType, values) => {
+                let label = `${blurbMappingTypes.find(x => x.id == idMappingType)?.text || ''}:`;
+                let icon = MAPPING_ICONS[idMappingType] || iconActivity;
+                values.forEach(value => rows.push({ idMappingType, icon, label, value }));
+            };
+            let lookupIDs = (childIDs, lookup) => (childIDs || []).map(childID => lookup(childID.id) || `#${childID.id}`);
 
-                let metric = this.getMetric(this.blurb.idMetric);
-                if (metric) rows.push({ icon: iconActivity, label: 'Metric:', value: metric.text });
-            }
-            return rows;
+            addRows(T.METRIC, lookupIDs(blurb.metricIDs, id => this.getMetric(id)?.text));
+            addRows(T.GOAL, lookupIDs(blurb.goalIDs, id => this.goalStore?.getItem(id)?.text));
+            addRows(T.FITNESSGOAL, lookupIDs(blurb.fitnessGoalIDs, id => this.goalStore?.getItem(id)?.text));
+            addRows(T.GOALTIMEPAIR, (blurb.goalTimePairs || []).map(tp => this.timePairLabel(tp)));
+            addRows(T.GOALTIMEPAIRTODO, (blurb.goalTimePairTodos || []).map(gtpt => this.todoStore?.getItem(gtpt.todoID)?.text || `#${gtpt.id}`));
+            addRows(T.TODO, lookupIDs(blurb.todoIDs, id => this.todoStore?.getItem(id)?.text));
+            addRows(T.TODOTIMEPAIR, lookupIDs(blurb.todoTimePairIDs, () => undefined));
+            addRows(T.TODOREPEAT, lookupIDs(blurb.todoRepeatIDs, () => undefined));
+            addRows(T.ITERATION, lookupIDs(blurb.iterationIDs, id => this.iterationStore?.getIteration(id)?.text));
+            addRows(T.FOODITEM, lookupIDs(blurb.foodItemIDs, () => undefined));
+            addRows(T.MEAL, lookupIDs(blurb.mealIDs, () => undefined));
+            addRows(T.WORKOUT, lookupIDs(blurb.workoutIDs, id => this.workoutStore?.getWorkout(id)?.name));
+            addRows(T.EXERCISE, lookupIDs(blurb.exerciseIDs, id => this.workoutStore?.getExercise(id)?.name));
+            addRows(T.LOGENTRY, lookupIDs(blurb.logEntryIDs, id => this.metricStore?.getLogItem(id)?.name));
+            addRows(T.BRIEFING, (blurb.positions || [])
+                .filter(position => position.parentType == 'Timeframe')
+                .map(position => {
+                    let timeframe = timeframes.find(t => t.id == position.parentID);
+                    let metric = this.getMetric(position.idMetric);
+                    return `${timeframe ? timeframe.text : ''} / ${metric ? metric.text : ''}`;
+                }));
+
+            // Keep the blurb's primary mapping type first
+            return rows.sort((a, b) => (b.idMappingType == blurb.idMappingType) - (a.idMappingType == blurb.idMappingType));
         }
     },
     methods: {
+        timePairLabel(timePair) {
+            if (!timePair) return '';
+            let start = timePair.startAt || timePair.startTime;
+            let end = timePair.endAt || timePair.endTime;
+            let startText = start ? toDateString(start.dateTime || start) : '?';
+            let endText = end ? toDateString(end.dateTime || end) : '?';
+            return `${startText} - ${endText}`;
+        },
         getMetric(idMetric) {
             return metrics.find(x => x.id == idMetric);
         },
