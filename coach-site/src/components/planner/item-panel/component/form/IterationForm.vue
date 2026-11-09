@@ -1,90 +1,101 @@
 <template>
     <form v-if="iteration_updated"
-          :id="`iteration-form`" class="pb-2" v-on:submit.prevent>
+          :id="`iteration-form`" class="d-flex flex-column gap-3 pb-3" v-on:submit.prevent>
         <!-- Header -->
-        <div class="d-flex flew-row justify-content-between mt-2">
+        <div class="header d-flex flex-row align-items-center gap-2 mt-2">
             <!-- Back Button -->
-            <div class="form-group d-flex justify-content-start">
-                <img class="icon-button"
-                     src='/icon/previous.png' width="16" height="16"
-                        @click.prevent="close"/>
-            </div>
+            <img class="icon-button"
+                 src='/icon/previous.png' width="16" height="16"
+                 @click.prevent="close"/>
+            <!-- Title/Text -->
+            <input class="title textbox flex-grow-1" type="text" ref="text" placeholder="Title"
+                   v-model.lazy.trim="iteration_updated.text"
+                   v-on:keyup.enter="save"
+                   spellcheck="true"/>
+            <!-- ID -->
+            <span class="iteration-id">#{{ iteration.id }}</span>
         </div>
-        <!-- ID -->
-        <span class="mt-1 float-start">{{ iteration.id }}</span>
-        <!-- Title/Text -->
-        <div class="form-group mt-3">
-            <input class="title textbox" type="text" ref="text" placeholder="Title"
-                    v-model.lazy.trim="iteration_updated.text"
-                    v-on:keyup.enter="save"
-                    spellcheck="true"/>
+        <!-- Todo -->
+        <div v-if="todoID" class="todo-link-row d-flex flex-row align-items-center gap-2">
+            <span class="field-label">TODO</span>
+            <span class="todo-link" @click="openTodoForm">
+                {{ todo ? todo.text : 'Open todo' }}
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M4.5 2.5h5v5M9.5 2.5L3 9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+            <span class="todo-id">#{{ todoID }}</span>
         </div>
         <!-- Points -->
-         <div class="points d-flex flex-column">
-             <div class="d-flex flex-row align-items-center mt-1">
-                 <span class="me-1">Points</span>
-                 <input class="form-control form-control-sm me-1" type="number" min="1" v-model="iteration_updated.points"
-                         :style="{'width': '41px'}" required/>
-             </div>
-            <div class="app-pills d-flex flex-row justify-content-between mt-1 gap-1">
-                <span v-for="point in [0,1,3,5,8]" :key="point" class="app-pill flex-grow-1"
-                      @click="addPoints(point)">{{ point }}</span>
+        <div class="points d-flex flex-column gap-1">
+            <span class="field-label">POINTS</span>
+            <div class="app-pills d-flex flex-row align-items-center gap-1">
+                <input class="small-input" type="number" min="1" v-model.number="iteration_updated.points"/>
+                <span v-for="point in [1,3,5,8]" :key="point" class="app-pill flex-grow-1"
+                      @click="addPoints(point)">+{{ point }}</span>
+                <span class="app-pill clear-pill flex-grow-1" @click="addPoints(0)">Clear</span>
             </div>
-         </div>
+        </div>
+        <!-- Timeframe -->
+        <div class="timeframe d-flex flex-column gap-1">
+            <span class="field-label">TIMEFRAME</span>
+            <div class="app-pills d-flex flex-row gap-1">
+                <span v-for="timeframe in timeframes" :key="timeframe.id" class="app-pill flex-grow-1"
+                      :class="{ 'selected': iteration_updated.idTimeframe == timeframe.id }"
+                      @click="iteration_updated.idTimeframe = timeframe.id">{{ timeframe.text }}</span>
+            </div>
+        </div>
         <!-- Time -->
-        <div class="form-group mt-2">
-            <div class="d-flex flex-column">
-                <DateTimeSelector class="date-selector mt-1" :class="{ 'invalid': !isValid }"
-                              :dateTime="iteration_updated.startAt" @onChange="iteration_updated.startAt = $event"></DateTimeSelector>
-                <div class="app-pills d-flex flex-row flex-wrap justify-content-between mt-1 gap-1">
-                    <span v-for="time in startSuggestions" :key="time" class="app-pill flex-grow-1"
-                        @click="setTime(time.object, 'start')">{{ time.string }}</span>
-                </div>
+        <div class="time d-flex flex-column gap-1">
+            <span class="field-label">START</span>
+            <DateTimeSelector class="date-selector"
+                              :dateTime="iteration_updated.startAt" @onChange="setStart($event)"></DateTimeSelector>
+            <div class="app-pills d-flex flex-row gap-1">
+                <span v-for="time in startSuggestions" :key="time.string" class="app-pill flex-grow-1"
+                      @click="setStart(time.object)">{{ time.string }}</span>
             </div>
-            <div class="d-flex flex-column mt-3">
-                <div class="app-pills d-flex flex-row flex-wrap justify-content-between mt-1 gap-1">
-                    <span v-for="minutes in [5,10,15,30,60]" :key="time" class="app-pill flex-grow-1"
-                        @click="addTime(minutes)">{{ minutes }}</span>
-                </div>
-                <DateTimeSelector class="date-selector mt-1" :class="{ 'invalid': !isValid }"
-                              :dateTime="iteration_updated.endAt" @onChange="iteration_updated.endAt = $event"></DateTimeSelector>
+            <div class="d-flex flex-row align-items-center gap-2 mt-1">
+                <span class="field-label">END</span>
+                <input class="small-input duration-input" type="number" min="0"
+                       :value="duration" :disabled="!iteration_updated.startAt"
+                       @change="setDuration($event.target.value)"/>
+                <span class="duration-unit">min</span>
+            </div>
+            <DateTimeSelector class="date-selector"
+                              :dateTime="iteration_updated.endAt" @onChange="setEnd($event)"></DateTimeSelector>
+            <div class="app-pills d-flex flex-row gap-1">
+                <span v-for="minutes in [5,10,15,30,60]" :key="minutes" class="app-pill flex-grow-1"
+                      @click="addTime(minutes)">+{{ minutes }}</span>
+            </div>
+        </div>
+        <!-- Quick Actions -->
+        <div class="quick-actions d-flex flex-column gap-1">
+            <span class="field-label">QUICK ACTIONS</span>
+            <div class="app-pills d-flex flex-row gap-1">
+                <span class="app-pill flex-grow-1" @click="isAllDay">All day</span>
+                <span class="app-pill flex-grow-1" @click="toNextDay">Next day</span>
+                <span class="app-pill flex-grow-1" @click="markAttempted">Attempt</span>
+                <span v-if="!isComplete" class="app-pill flex-grow-1" @click="markComplete">Complete</span>
+                <span v-if="isComplete" class="app-pill selected flex-grow-1" @click="markIncomplete">Incomplete</span>
             </div>
         </div>
         <!-- Blurbs -->
         <BlurbFormControl header="Blurbs" placeholder="Click to add blurb" :blurbs="blurbs" :showTitle="true"
             @addBlurb="addBlurb($event)" @saveBlurb="updateBlurb($event)" />
         <!-- Photos & Videos -->
-        <MediaGallery v-if="iteration.id > 0" class="mt-2" itemType="iteration" :itemId="iteration.id" header="Photos & Videos" />
-        <div class="d-flex flex-column justify-content-end mt-3">
-            <!-- Buttons -->
-            <div class="d-flex flex-column">
-                <!-- Delete -->
-                <button v-if="!confimDelete" type="button" class="btn btn-danger mb-2" @click="confimDelete = true">Delete</button>
-                <!-- Delete Confirmation -->
-                <div v-if="confimDelete" class="d-flex flex-row mb-2 align-items-center">
-                    <span>Are you sure?</span>
-                    <button type="button" class="btn btn-warning ms-2" @click="confimDelete = false">Cancel</button>
-                    <button type="button" class="btn btn-danger ms-2" @click="deleteTask">Delete</button>
-                </div>
-                <button class="btn-sm btn-secondary mb-2" type="button"
-                        @click.prevent="isAllDay">Is All Day</button>
-                <button class="btn-sm btn-secondary mb-2" type="button"
-                        @click.prevent="toNextDay">To Next Day</button>
-                <button class="btn-sm btn-secondary mb-2" type="button"
-                        @click.prevent="markAttempted">Attempt</button>
-                <button v-if="!isComplete" class="btn-sm btn-secondary mb-2" type="button"
-                        @click.prevent="markComplete">Complete</button>
-                <button v-if="isComplete" class="btn-sm btn-secondary mb-2" type="button"
-                        @click.prevent="markIncomplete">Incomplete</button>
+        <MediaGallery v-if="iteration.id > 0" itemType="iteration" :itemId="iteration.id" header="Photos & Videos" />
+        <!-- Footer -->
+        <div class="footer d-flex flex-row align-items-center gap-2">
+            <!-- Delete -->
+            <span v-if="!confimDelete" class="link delete-link" @click="confimDelete = true">Delete</span>
+            <!-- Delete Confirmation -->
+            <div v-if="confimDelete" class="d-flex flex-row align-items-center gap-2">
+                <span>Delete?</span>
+                <span class="link delete-link fw-medium" @click="deleteTask">Yes, delete</span>
+                <span class="link" @click="confimDelete = false">Keep</span>
             </div>
-            <div class="form-group d-flex justify-content-end">
-                <!-- Save Button -->
-                <button class="btn-sm btn-primary me-2" :class="{ 'btn-primary': isValid, 'btn-danger': !isValid }" type="button"
-                        :disabled="!isValid"
-                        @click.prevent="save">Save</button>
-                <!-- Cancel Button -->
-                <button class="btn-sm btn-warning" type="button" @click.prevent="close">Cancel</button>
-            </div>
+            <!-- Cancel Button -->
+            <span class="link ms-auto" @click="close">Cancel</span>
+            <!-- Save Button -->
+            <button class="save-button" type="button" @click.prevent="save">Save</button>
         </div>
     </form>
 </template>
@@ -94,7 +105,7 @@ import { addDay, addMinutes, startOfDay, getShortTimeString } from "../../../../
 import DateTimeSelector from "../../../../controls/select/DateTimeSelector.vue"
 import BlurbFormControl from "../../../../items/form/component/BlurbFormControl.vue";
 import MediaGallery from "../../../../items/form/component/media/MediaGallery.vue";
-import { BLURBTYPE } from "../../../../../model/constants";
+import { BLURBTYPE, TIMEFRAME } from "../../../../../model/constants";
 
 export default {
     name: "IterationForm",
@@ -106,9 +117,16 @@ export default {
         return {
             iterationStore: undefined,
             universalStore: undefined,
+            todoStore: undefined,
+            appStore: undefined,
             iteration_updated: undefined,
-            isValid: true,
-            confimDelete: false
+            confimDelete: false,
+            timeframes: [
+                { id: TIMEFRAME.DAY, text: "Day" },
+                { id: TIMEFRAME.WEEK, text: "Week" },
+                { id: TIMEFRAME.MONTH, text: "Month" },
+                { id: TIMEFRAME.YEAR, text: "Year" }
+            ]
         }
     },
     created: async function() {
@@ -117,6 +135,12 @@ export default {
 
         let universalStore = await import(`@/store/universalStore`);
         this.universalStore = universalStore.useUniversalStore();
+
+        let todoStore = await import(`@/store/todoStore`);
+        this.todoStore = todoStore.useTodoStore();
+
+        let appStore = await import(`@/store/appStore`);
+        this.appStore = appStore.useAppStore();
 
         this.initUpdatedIteration();
     },
@@ -128,6 +152,21 @@ export default {
                 return this.universalStore.getBlurbsWithID(blurbIds);
             }
             return [];
+        },
+        todoID() {
+            return this.iteration.todoID || this.iteration.idTodo;
+        },
+        todo() {
+            if (this.todoStore && this.todoID) {
+                return this.todoStore.getItem(this.todoID);
+            }
+            return undefined;
+        },
+        duration() {
+            if (this.iteration_updated.startAt && this.iteration_updated.endAt) {
+                return Math.round((+new Date(this.iteration_updated.endAt) - +new Date(this.iteration_updated.startAt)) / 60000);
+            }
+            return "";
         },
         isComplete() {
             if (this.iteration.attemptedAt) {
@@ -146,7 +185,7 @@ export default {
                 start.setSeconds(0);
                 start.setMilliseconds(0);
 
-                let minutes = [105, 90, 75, 60, 45, 30, 15];
+                let minutes = [45, 30, 15];
                 minutes.forEach(minutes => {
                     let date = addMinutes(-minutes, start);
                     suggestions.push({
@@ -164,9 +203,10 @@ export default {
     },
     methods: {
         initUpdatedIteration,
-        validateTimes,
         addPoints,
-        setTime,
+        setStart,
+        setEnd,
+        setDuration,
         addTime,
         isAllDay,
         toNextDay,
@@ -177,17 +217,12 @@ export default {
         addBlurb,
         updateBlurb,
         save,
+        openTodoForm,
         close,
     },
     watch: {
         iteration() {
             this.initUpdatedIteration();
-        },
-        'iteration_updated.startAt'() {
-            this.validateTimes();
-        },
-        'iteration_updated.endAt'() {
-            this.validateTimes();
         }
     }
 }
@@ -198,20 +233,9 @@ function initUpdatedIteration() {
         text: this.iteration.text,
         points: this.iteration.points,
         startAt: this.iteration.startAt,
-        endAt: this.iteration.endAt
+        endAt: this.iteration.endAt,
+        idTimeframe: this.iteration.idTimeframe
     };
-}
-
-function validateTimes() {
-    if (this.iteration_updated.startAt && this.iteration_updated.endAt) {
-        if (+new Date(this.iteration_updated.startAt) > +new Date(this.iteration_updated.endAt)) {
-            this.isValid = false;
-        } else if (+new Date(this.iteration_updated.startAt) <= +new Date(this.iteration_updated.endAt)) {
-            this.isValid = true;
-        }
-    } else {
-        this.isValid = true;
-    }
 }
 
 function addPoints(points) {
@@ -226,9 +250,25 @@ function addPoints(points) {
     }
 }
 
-function setTime(time) {
+// End follows start, keeping the duration
+function setStart(time) {
+    let duration = this.duration || 0;
     this.iteration_updated.startAt = time;
+    this.iteration_updated.endAt = (time) ? addMinutes(duration, time) : time;
+}
+
+// End can't be before start, so it snaps to start
+function setEnd(time) {
+    let startAt = this.iteration_updated.startAt;
+    if (time && startAt && +new Date(time) < +new Date(startAt)) {
+        time = startAt;
+    }
     this.iteration_updated.endAt = time;
+}
+
+function setDuration(minutes) {
+    minutes = Math.max(0, parseInt(minutes) || 0);
+    this.iteration_updated.endAt = addMinutes(minutes, this.iteration_updated.startAt);
 }
 
 function addTime(minutes) {
@@ -299,9 +339,13 @@ function save() {
     if (title == "") return;
 
     this.iterationStore.updateIteration(this.iteration_updated.id, this.iteration_updated.text,
-    this.iteration_updated.points, this.iteration_updated.startAt, this.iteration_updated.endAt);
+    this.iteration_updated.points, this.iteration_updated.startAt, this.iteration_updated.endAt, this.iteration_updated.idTimeframe);
 
     this.close();
+}
+
+function openTodoForm() {
+    this.appStore.selectTodoForm(this.todoID);
 }
 
 function close() {
@@ -315,6 +359,10 @@ form {
     padding-right: 12px;
     height: calc(100vh - 64px - 42px);
     overflow: scroll;
+}
+
+form > * {
+    flex-shrink: 0;
 }
 
 input {
@@ -337,35 +385,89 @@ input[type=number] {
   -moz-appearance: textfield;
 }
 
-.error {
-    color: red;
+.field-label {
     font-size: 12px;
-    border-color: red
-    /* outline-style: none; */
-    /* -webkit-appearance: none; */
+    font-weight: 500;
+    line-height: 16px;
+    color: #6C757D;
+    text-align: start;
 }
 
-.date-selector.invalid {
-    border: solid 1px red;
+.title {
+    font-size: 16px;
+    font-weight: 500;
 }
 
-.pill {
+.iteration-id, .todo-id {
+    font-size: 12px;
+    color: #9A9A9A;
+}
+
+.todo-link-row {
+    padding-left: 24px;
+}
+
+.todo-link {
     cursor: pointer;
-    padding: 4px 0px;
-    line-height: 14px;
     font-size: 14px;
-    background-color: var(--pill-default);
+    color: #3B99FC;
+}
+
+.todo-link:hover {
+    text-decoration: underline;
+}
+
+.small-input {
+    width: 44px;
+    height: 24px;
+    padding: 2px 6px;
+    font-size: 14px;
+    text-align: end;
+    border: 1px solid rgba(0, 0, 0, .08);
     border-radius: 4px;
-    border: transparent solid 1px;
+    outline-style: none;
 }
-.pill:hover {
-    border: var(--pill-border-hover) solid 1px;
+
+.small-input:focus {
+    border-color: #039BE5;
 }
-.pill.selected {
-    border: var(--pill-border-hover) solid 1px;
-    background-color: var(--pill-background-selected);
+
+.duration-unit {
+    font-size: 12px;
+    color: #6C757D;
 }
-.pill:active {
-    background-color: var(--pill-background-selected);
+
+.clear-pill {
+    background-color: #F5F5F5;
+}
+
+.footer {
+    padding-top: 12px;
+    border-top: 1px solid rgba(0, 0, 0, .08);
+    font-size: 14px;
+}
+
+.link {
+    cursor: pointer;
+    color: #6C757D;
+}
+
+.delete-link {
+    color: #DC3545;
+}
+
+.save-button {
+    padding: 5px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 18px;
+    color: white;
+    background-color: #3B99FC;
+    border: none;
+    border-radius: 4px;
+}
+
+.save-button:hover {
+    background-color: #2A86E8;
 }
 </style>
