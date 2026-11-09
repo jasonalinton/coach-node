@@ -146,11 +146,7 @@ export default {
             return this.universalStore.addBriefingBlurb(blurb.text, this.selectedDate, blurb.idBlurbType, idMetric, this.idTimeframe, blurb.json)
         },
         saveBlurb(blurb) {
-            let index = this.blurbs.findIndex(x => x.id == blurb.id);
-            if (index > -1) {
-                let _blurb = this.blurbs[index];
-                _blurb.text = blurb.text;
-            }
+            return this.universalStore.updateBlurb(blurb.id, undefined, [], [], blurb.text, blurb.title, undefined, [], [], blurb.json);
         },
         selectType(metric, id) {
             metric.idBriefingType = undefined;
