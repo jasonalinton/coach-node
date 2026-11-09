@@ -53,6 +53,12 @@ export let TIMEFRAME = {
     LIFE: 57
 };
 
+export let ITERATION_ACTION = {
+    COMPLETE: 1,
+    INCOMPLETE: 2,
+    ATTEMPT: 3
+};
+
 export let REPETITION = {
     MILLISECONDLY: 59,
     SECONDLY: 60,

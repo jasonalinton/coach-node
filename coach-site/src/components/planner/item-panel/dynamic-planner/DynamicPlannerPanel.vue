@@ -161,8 +161,13 @@ export default {
                                 task = this.iterationStore.newTask(todo, repeat_Todo);
                             }
 
-                            /* First check if the task/iteration has a time estimate, then check the repeat. Default to 15 minutes. */
+                            // First check if the task/iteration has a time estimate, then check the repeat. Default to 15 minutes.
                             task.timeEstimate = task.timeEstimate || repeat_Todo?.timeEstimate || todo.timeEstimate || DEFAULT_TIME_ESTIMATE_MINUTES;
+
+                            // If todo's repeat has points set it to the iteration (should this override the tasks points?)
+                            if (repeat_Todo?.points) {
+                                task.points = repeat_Todo.points;
+                            }
 
                             event.iterations.push(task);
                         }
