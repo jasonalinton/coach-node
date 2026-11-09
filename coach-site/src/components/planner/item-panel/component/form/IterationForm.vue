@@ -105,7 +105,7 @@ import { addDay, addMinutes, startOfDay, getShortTimeString } from "../../../../
 import DateTimeSelector from "../../../../controls/select/DateTimeSelector.vue"
 import BlurbFormControl from "../../../../items/form/component/BlurbFormControl.vue";
 import MediaGallery from "../../../../items/form/component/media/MediaGallery.vue";
-import { BLURBTYPE, TIMEFRAME } from "../../../../../model/constants";
+import { BLURBTYPE, TIMEFRAME, ITERATION_ACTION } from "../../../../../model/constants";
 
 export default {
     name: "IterationForm",
@@ -217,6 +217,7 @@ export default {
         addBlurb,
         updateBlurb,
         save,
+        updateIteration,
         openTodoForm,
         close,
     },
@@ -283,33 +284,28 @@ function isAllDay() {
 }
 
 function toNextDay() {
-    let nextDay = addDay(this.iteration_updated.startAt.toDate());
-    this.iterationStore.rescheduleIteration(this.iteration_updated.id, nextDay, nextDay);
+    let nextDay = addDay(new Date(this.iteration_updated.startAt));
+    this.iteration_updated.startAt = nextDay;
+    this.iteration_updated.endAt = nextDay;
+    this.updateIteration();
 
     this.close();
 }
 
 function markAttempted() {
-    this.iterationStore.attemptIteration(this.iteration_updated.id, this.iteration_updated.startAt.toDate());
+    this.updateIteration(ITERATION_ACTION.ATTEMPT, new Date(this.iteration_updated.startAt));
 
     this.close();
 }
 
 function markComplete() {
-    let now = new Date();
-    this.iteration_updated.attemptedAt = now;
-    this.iteration_updated.completedAt = now;
-
-    this.iterationStore.toggleCompletion(this.iteration_updated.id, this.iteration_updated.attemptedAt, this.iteration_updated.completedAt);
+    this.updateIteration(ITERATION_ACTION.COMPLETE, new Date());
 
     this.close();
 }
 
 function markIncomplete() {
-    this.iteration_updated.attemptedAt = null;
-    this.iteration_updated.completedAt = null;
-
-    this.iterationStore.toggleCompletion(this.iteration_updated.id, this.iteration_updated.attemptedAt, this.iteration_updated.completedAt);
+    this.updateIteration(ITERATION_ACTION.INCOMPLETE);
 
     this.close();
 }
@@ -338,10 +334,18 @@ function save() {
     var title = this.iteration_updated.text.trim();
     if (title == "") return;
 
-    this.iterationStore.updateIteration(this.iteration_updated.id, this.iteration_updated.text,
-    this.iteration_updated.points, this.iteration_updated.startAt, this.iteration_updated.endAt, this.iteration_updated.idTimeframe);
+    this.updateIteration();
 
     this.close();
+}
+
+// Saves the form's edits and, optionally, a status change in one request
+function updateIteration(action, actionAt) {
+    let updated = this.iteration_updated;
+    let text = updated.text.trim() || this.iteration.text;
+
+    return this.iterationStore.updateIteration(updated.id, text, updated.points,
+        updated.startAt, updated.endAt, updated.idTimeframe, action, actionAt);
 }
 
 function openTodoForm() {
