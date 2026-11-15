@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { markRaw } from 'vue'
+import { markRaw, nextTick } from 'vue'
 import { getTodos } from '../api/todoAPI';
 import { replaceOrAddItem, removeItemByID, sortAsc, capitalize } from '../../utility';
 import { getSocketConnection, deferUpdate } from './socket'
@@ -9,6 +9,7 @@ import { useRoutineStore } from '@/store/routineStore'
 import { attemptPostEndpoint, postEndpoint } from '../api/api';
 import { TODOTYPE } from '../model/constants';
 import Todo from '../model/item/Todo';
+import { perfStart, perfEnd, perfMeasure } from '../perf';
 
 let initialized = false;
 
@@ -39,6 +40,7 @@ export const useTodoStore = defineStore('todo', {
 
             allTodos = allTodos || this.todos;
             todos = todos || allTodos;
+            let start = perfStart();
             todos.forEach(todo => {
                 todo.parents  = markRaw(allTodos.filter(x => todo.parentIDs.includes(x.id)));
                 todo.children = markRaw(allTodos.filter(x => todo.childIDs.includes(x.id)));
@@ -46,6 +48,7 @@ export const useTodoStore = defineStore('todo', {
                 todo.goals    = markRaw(goalStore.getItems().filter(x => todo.goalIDs.includes(x.id)));
                 todo.routines = markRaw(routineStore.getItems().filter(x => todo.routineIDs.includes(x.id)));
             })
+            perfEnd('todos:init', start, { count: todos.length, total: allTodos.length });
         },
         isRequestProcessing() {
             return this.requests.some(r => r.endpoint == "GetTodos" && r.isProcessing);
@@ -86,13 +89,16 @@ export const useTodoStore = defineStore('todo', {
             this.requests.push(request);
             let dropRequest = () => { this.requests = this.requests.filter(r => r !== request); };
 
+            let fetchStart = perfStart();
             return postEndpoint("Todo", "GetTodos")
             .then(response => {
+                perfEnd('todos:fetch', fetchStart);
                 if (!response || !response.status || !response.status.success) {
                     dropRequest();
                     return;
                 }
                 
+                let processStart = perfStart();
                 let todos = [...this.todos];
                 // Replace items
                 response.result.forEach(todo => replaceOrAddItem(todo, todos));
@@ -101,6 +107,8 @@ export const useTodoStore = defineStore('todo', {
                     this.todoModels.push(new Todo(todo));
                 });
                 this.todos = sortAsc(todos);
+                perfEnd('todos:process', processStart, { count: response.result.length });
+                this.trackRender(processStart);
                 
                 this.runUpdates(response);
                 request.isProcessing = false;
@@ -144,7 +152,6 @@ export const useTodoStore = defineStore('todo', {
                 if (todo == undefined) {
                     return; // Todo is deleted
                 }
-                console.log(todo.text);
                 todo.childIDs.forEach(childID => {
                     this.getDescendantIDsLopp(childID, descentIDs);
                 })
@@ -314,15 +321,28 @@ export const useTodoStore = defineStore('todo', {
             const hasRemovals = updates.todoIDsRemoved?.length > 0;
             if (!hasTodos && !hasRemovals) return;
 
+            let detail = { updated: updates.todos?.length || 0, removed: updates.todoIDsRemoved?.length || 0 };
             let todos = [...this.todos];
-            if (hasTodos) {
-                updates.todos.forEach(todo => replaceOrAddItem(todo, todos));
-                this.initializeItems(updates.todos, todos);
+            perfMeasure('todos:update', () => {
+                if (hasTodos) {
+                    updates.todos.forEach(todo => replaceOrAddItem(todo, todos));
+                    this.initializeItems(updates.todos, todos);
+                }
+                if (hasRemovals) {
+                    updates.todoIDsRemoved.forEach(id => removeItemByID(id, todos));
+                }
+            }, detail);
+            deferUpdate(() => {
+                let start = perfStart();
+                perfMeasure('todos:apply', () => { this.todos = sortAsc(todos); }, detail);
+                this.trackRender(start, detail);
+            });
+        },
+        // Measures from the todos assignment until Vue has finished re-rendering the components that depend on it
+        trackRender(start, detail) {
+            if (start !== undefined) {
+                nextTick(() => perfEnd('todos:render', start, detail));
             }
-            if (hasRemovals) {
-                updates.todoIDsRemoved.forEach(id => removeItemByID(id, todos));
-            }
-            deferUpdate(() => { this.todos = sortAsc(todos); });
         },
         connectSocket() {
             if (!initialized) {
