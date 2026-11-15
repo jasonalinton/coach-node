@@ -235,6 +235,21 @@ export function addOrReplaceItem(item, itemList) {
     }
 }
 
+// Map of id -> [index, item], so related items can be looked up by ID instead of scanning the whole list
+export function indexByID(items) {
+    return new Map(items.map((item, index) => [item.id, [index, item]]));
+}
+
+// Items for the given IDs, in the same order (and without duplicates) as filtering the source list would give
+export function pickByID(ids, index) {
+    let found = [];
+    new Set(ids).forEach(id => {
+        let entry = index.get(id);
+        if (entry) found.push(entry);
+    });
+    return found.sort((a, b) => a[0] - b[0]).map(entry => entry[1]);
+}
+
 // Ten bucks says this causes a probalem in the future JL: 7/4/21
 export function replaceProperties(newObject, oldObject) {
     for (let prop in newObject) {

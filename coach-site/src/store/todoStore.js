@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { markRaw, nextTick } from 'vue'
 import { getTodos } from '../api/todoAPI';
-import { replaceOrAddItem, removeItemByID, sortAsc, capitalize } from '../../utility';
+import { replaceOrAddItem, removeItemByID, sortAsc, capitalize, indexByID, pickByID } from '../../utility';
 import { getSocketConnection, deferUpdate } from './socket'
 import { useMetricStore } from '@/store/metricStore'
 import { useGoalStore } from '@/store/goalStore'
@@ -45,12 +45,16 @@ export const useTodoStore = defineStore('todo', {
             allTodos = allTodos || this.todos;
             todos = todos || allTodos;
             let start = perfStart();
+            let todoIndex    = indexByID(allTodos);
+            let metricIndex  = indexByID(metricStore.getItems());
+            let goalIndex    = indexByID(goalStore.getItems());
+            let routineIndex = indexByID(routineStore.getItems());
             todos.forEach(todo => {
-                todo.parents  = markRaw(allTodos.filter(x => todo.parentIDs.includes(x.id)));
-                todo.children = markRaw(allTodos.filter(x => todo.childIDs.includes(x.id)));
-                todo.metrics  = markRaw(metricStore.getItems().filter(x => todo.metricIDs.includes(x.id)));
-                todo.goals    = markRaw(goalStore.getItems().filter(x => todo.goalIDs.includes(x.id)));
-                todo.routines = markRaw(routineStore.getItems().filter(x => todo.routineIDs.includes(x.id)));
+                todo.parents  = markRaw(pickByID(todo.parentIDs, todoIndex));
+                todo.children = markRaw(pickByID(todo.childIDs, todoIndex));
+                todo.metrics  = markRaw(pickByID(todo.metricIDs, metricIndex));
+                todo.goals    = markRaw(pickByID(todo.goalIDs, goalIndex));
+                todo.routines = markRaw(pickByID(todo.routineIDs, routineIndex));
             })
             perfEnd('todos:init', start, { count: todos.length, total: allTodos.length });
         },

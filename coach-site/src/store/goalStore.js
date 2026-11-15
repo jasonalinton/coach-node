@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { markRaw } from 'vue'
 import { getGoals, getGoalsWithTimeframe, getGoalKanban as fetchGoalKanban } from '../api/goalAPI'
-import { capitalize, replaceOrAddItem, sortAsc, sum } from '../../utility';
+import { capitalize, replaceOrAddItem, sortAsc, sum, indexByID, pickByID } from '../../utility';
 import { getSocketConnection, deferUpdate } from './socket'
 import { useMetricStore } from '@/store/metricStore'
 import { useTodoStore } from '@/store/todoStore'
@@ -53,12 +53,16 @@ export const useGoalStore = defineStore('goal', {
 
             allGoals = allGoals || this.goals;
             goals = goals || allGoals;
+            let goalIndex    = indexByID(allGoals);
+            let metricIndex  = indexByID(metricStore.getItems());
+            let todoIndex    = indexByID(todoStore.getItems());
+            let routineIndex = indexByID(routineStore.getItems());
             goals.forEach(goal => {
-                goal.parents  = markRaw(allGoals.filter(x => goal.parentIDs.includes(x.id)));
-                goal.children = markRaw(allGoals.filter(x => goal.childIDs.includes(x.id)));
-                goal.metrics  = markRaw(metricStore.getItems().filter(x => goal.metricIDs.includes(x.id)));
-                goal.todos    = markRaw(todoStore.getItems().filter(x => goal.todoIDs.includes(x.id)));
-                goal.routines = markRaw(routineStore.getItems().filter(x => goal.routineIDs.includes(x.id)));
+                goal.parents  = markRaw(pickByID(goal.parentIDs, goalIndex));
+                goal.children = markRaw(pickByID(goal.childIDs, goalIndex));
+                goal.metrics  = markRaw(pickByID(goal.metricIDs, metricIndex));
+                goal.todos    = markRaw(pickByID(goal.todoIDs, todoIndex));
+                goal.routines = markRaw(pickByID(goal.routineIDs, routineIndex));
             })
         },
         getItems() {

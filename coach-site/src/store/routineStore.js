@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { markRaw } from 'vue'
 import { getRoutines, refreshRepetitionForRepeat } from '../api/routineAPI'
-import { capitalize, replaceOrAddItem, sortAsc } from '../../utility';
+import { capitalize, replaceOrAddItem, sortAsc, indexByID, pickByID } from '../../utility';
 import { ROUTINETYPES } from '../model/constants';
 import { getSocketConnection, deferUpdate } from './socket'
 import { useMetricStore } from '@/store/metricStore'
@@ -35,12 +35,16 @@ export const useRoutineStore = defineStore('routine', {
 
             allRoutines = allRoutines || this.routines;
             routines = routines || allRoutines;
+            let routineIndex = indexByID(allRoutines);
+            let metricIndex  = indexByID(metricStore.getItems());
+            let todoIndex    = indexByID(todoStore.getItems());
+            let goalIndex    = indexByID(goalStore.getItems());
             routines.forEach(routine => {
-                routine.parents  = markRaw(allRoutines.filter(x => routine.parentIDs.includes(x.id)));
-                routine.children = markRaw(allRoutines.filter(x => routine.childIDs.includes(x.id)));
-                routine.metrics  = markRaw(metricStore.getItems().filter(x => routine.metricIDs.includes(x.id)));
-                routine.todos    = markRaw(todoStore.getItems().filter(x => routine.todoIDs.includes(x.id)));
-                routine.goals    = markRaw(goalStore.getItems().filter(x => routine.goalIDs.includes(x.id)));
+                routine.parents  = markRaw(pickByID(routine.parentIDs, routineIndex));
+                routine.children = markRaw(pickByID(routine.childIDs, routineIndex));
+                routine.metrics  = markRaw(pickByID(routine.metricIDs, metricIndex));
+                routine.todos    = markRaw(pickByID(routine.todoIDs, todoIndex));
+                routine.goals    = markRaw(pickByID(routine.goalIDs, goalIndex));
             })
         },
         getItems(ids) {
