@@ -82,7 +82,8 @@ export const useTodoStore = defineStore('todo', {
             pendingTodoIDs = [];
 
             let fetchStart = perfStart();
-            return postEndpoint("Todo", "GetTodosWithIDs", { ids }, { 'All-Properties': "true" })
+            // Default properties plus blurbIds (used by TodoForm); All-Properties also returns every iteration/event
+            return postEndpoint("Todo", "GetTodosWithIDs", { ids }, { 'Include-Properties': JSON.stringify(['blurbs']) })
                 .then(response => {
                     perfEnd('todos:fetchByID', fetchStart, { count: ids.length });
                     if (!response || !response.status || !response.status.success) {
@@ -143,7 +144,12 @@ export const useTodoStore = defineStore('todo', {
             return this.todos.filter(x => ids.includes(x.id));
         },
         getItem(id) {
-            return this.todos.find(x => x.id == id);
+            let todo = this.todos.find(x => x.id == id);
+            // Fetch todos that aren't loaded, except while the initial GetTodos load is still in flight
+            if (!todo && id > 0 && !this.isRequestProcessing()) {
+                this.requestTodo(id);
+            }
+            return todo;
         },
         getItemModel(id) {
             this.requestTodo(id);
