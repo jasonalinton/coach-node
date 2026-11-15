@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { getSocketConnection, deferUpdate } from './socket'
 import { getRepetitiveTodoIterations } from '../api/todoAPI';
 import { getAllIterationsInRange, getUnplannedIterations } from '../api/plannerAPI'
-import { removeItemByID, replaceOrAddItem, sortAsc } from '../../utility'
+import { removeItemByID, replaceOrAddItem, sortAsc, indexByID, pickByID, getByID } from '../../utility'
 import { attemptPostEndpoint, postEndpoint } from '../api/api';
 import { getTimeframeEndpoints } from '../../utility/timeUtility';
 
@@ -14,7 +14,8 @@ export const useIterationStore = defineStore('iteration', {
         requests: [],
     }),
     getters: {
-        
+        // id -> [index, item]; rebuilt only when the list changes
+        iterationIndex: (state) => indexByID(state.iterations)
     },
     actions: {
         // async initialize() {
@@ -38,7 +39,7 @@ export const useIterationStore = defineStore('iteration', {
                 && covers(r.requestProps.startAt, r.requestProps.endAt));
         },
         getIteration(id) {
-            let iteration = this.iterations.find(x => x.id == id);
+            let iteration = getByID(id, this.iterationIndex);
             if (!iteration) {
                 attemptPostEndpoint("Planner", "GetIteration", { id })
                 .then(response => {
@@ -61,7 +62,7 @@ export const useIterationStore = defineStore('iteration', {
          * reach outside whatever date window is currently loaded. Mirrors universalStore.getBlurbsWithID:
          * returns what's already cached, and kicks off a batched fetch for whatever's missing. */
         getIterationsWithIDs(ids) {
-            let iterations = this.iterations.filter(x => ids.includes(x.id));
+            let iterations = pickByID(ids, this.iterationIndex);
             if (iterations.length != ids.length) {
                 postEndpoint("Planner", "GetIterations", { ids })
                     .then(response => {

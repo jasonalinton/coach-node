@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { markRaw, nextTick } from 'vue'
 import { getTodos } from '../api/todoAPI';
-import { replaceOrAddItem, removeItemByID, sortAsc, capitalize, indexByID, pickByID } from '../../utility';
+import { replaceOrAddItem, removeItemByID, sortAsc, capitalize, indexByID, pickByID, getByID } from '../../utility';
 import { getSocketConnection, deferUpdate } from './socket'
 import { useMetricStore } from '@/store/metricStore'
 import { useGoalStore } from '@/store/goalStore'
@@ -25,7 +25,9 @@ export const useTodoStore = defineStore('todo', {
         draggedKanbanTask: null
     }),
     getters: {
-        getDraggedKanbanTask: (state) => state.draggedKanbanTask
+        getDraggedKanbanTask: (state) => state.draggedKanbanTask,
+        // id -> [index, item]; rebuilt only when the list changes
+        todoIndex: (state) => indexByID(state.todos)
     },
     actions: {
         async initialize() {
@@ -46,9 +48,9 @@ export const useTodoStore = defineStore('todo', {
             todos = todos || allTodos;
             let start = perfStart();
             let todoIndex    = indexByID(allTodos);
-            let metricIndex  = indexByID(metricStore.getItems());
-            let goalIndex    = indexByID(goalStore.getItems());
-            let routineIndex = indexByID(routineStore.getItems());
+            let metricIndex  = metricStore.metricIndex;
+            let goalIndex    = goalStore.goalIndex;
+            let routineIndex = routineStore.routineIndex;
             todos.forEach(todo => {
                 todo.parents  = markRaw(pickByID(todo.parentIDs, todoIndex));
                 todo.children = markRaw(pickByID(todo.childIDs, todoIndex));
@@ -145,10 +147,10 @@ export const useTodoStore = defineStore('todo', {
             .catch(dropRequest);
         },
         getItemsByID(ids) {
-            return this.todos.filter(x => ids.includes(x.id));
+            return pickByID(ids, this.todoIndex);
         },
         getItem(id) {
-            let todo = this.todos.find(x => x.id == id);
+            let todo = getByID(id, this.todoIndex);
             // Fetch todos that aren't loaded, except while the initial GetTodos load is still in flight
             if (!todo && id > 0 && !this.isRequestProcessing()) {
                 this.requestTodo(id);
@@ -171,7 +173,7 @@ export const useTodoStore = defineStore('todo', {
         },
         getDescendantIDs(id) {
             let descentIDs = [];
-            let todo = this.todos.find(x => x.id == id);
+            let todo = getByID(id, this.todoIndex);
             todo.childIDs.forEach(childID => {
                 this.getDescendantIDsLopp(childID, descentIDs);
             })
@@ -181,7 +183,7 @@ export const useTodoStore = defineStore('todo', {
             let _id = descentIDs.includes(id);
             if (!_id) {
                 descentIDs.push(id);
-                let todo = this.todos.find(x => x.id == id);
+                let todo = getByID(id, this.todoIndex);
                 if (todo == undefined) {
                     return; // Todo is deleted
                 }

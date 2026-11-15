@@ -250,6 +250,11 @@ export function pickByID(ids, index) {
     return found.sort((a, b) => a[0] - b[0]).map(entry => entry[1]);
 }
 
+// Item with the given ID from an indexByID map. IDs are converted to numbers so string IDs (URL, localStorage) still match
+export function getByID(id, index) {
+    return index.get(Number(id))?.[1];
+}
+
 // Ten bucks says this causes a probalem in the future JL: 7/4/21
 export function replaceProperties(newObject, oldObject) {
     for (let prop in newObject) {

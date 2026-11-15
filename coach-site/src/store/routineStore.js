@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { markRaw } from 'vue'
 import { getRoutines, refreshRepetitionForRepeat } from '../api/routineAPI'
-import { capitalize, replaceOrAddItem, sortAsc, indexByID, pickByID } from '../../utility';
+import { capitalize, replaceOrAddItem, sortAsc, indexByID, pickByID, getByID } from '../../utility';
 import { ROUTINETYPES } from '../model/constants';
 import { getSocketConnection, deferUpdate } from './socket'
 import { useMetricStore } from '@/store/metricStore'
@@ -16,7 +16,8 @@ export const useRoutineStore = defineStore('routine', {
         routines: []
     }),
     getters: {
-        
+        // id -> [index, item]; rebuilt only when the list changes
+        routineIndex: (state) => indexByID(state.routines)
     },
     actions: {
         async initialize() {
@@ -36,9 +37,9 @@ export const useRoutineStore = defineStore('routine', {
             allRoutines = allRoutines || this.routines;
             routines = routines || allRoutines;
             let routineIndex = indexByID(allRoutines);
-            let metricIndex  = indexByID(metricStore.getItems());
-            let todoIndex    = indexByID(todoStore.getItems());
-            let goalIndex    = indexByID(goalStore.getItems());
+            let metricIndex  = metricStore.metricIndex;
+            let todoIndex    = todoStore.todoIndex;
+            let goalIndex    = goalStore.goalIndex;
             routines.forEach(routine => {
                 routine.parents  = markRaw(pickByID(routine.parentIDs, routineIndex));
                 routine.children = markRaw(pickByID(routine.childIDs, routineIndex));
@@ -48,10 +49,10 @@ export const useRoutineStore = defineStore('routine', {
             })
         },
         getItems(ids) {
-            return this.routines = (ids) ? this.routines.find(x => ids.includes(x.id)) : this.routines;
+            return (ids) ? pickByID(ids, this.routineIndex) : this.routines;
         },
         getItem(id) {
-            return this.routines.find(x => x.id == id);
+            return getByID(id, this.routineIndex);
         },
         getTaskRoutines() {
             let taskRoutines = this.routines.filter(x => x.isTaskRoutine);

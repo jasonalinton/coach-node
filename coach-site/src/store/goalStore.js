@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { markRaw } from 'vue'
 import { getGoals, getGoalsWithTimeframe, getGoalKanban as fetchGoalKanban } from '../api/goalAPI'
-import { capitalize, replaceOrAddItem, sortAsc, sum, indexByID, pickByID } from '../../utility';
+import { capitalize, replaceOrAddItem, sortAsc, sum, indexByID, pickByID, getByID } from '../../utility';
 import { getSocketConnection, deferUpdate } from './socket'
 import { useMetricStore } from '@/store/metricStore'
 import { useTodoStore } from '@/store/todoStore'
@@ -20,6 +20,8 @@ export const useGoalStore = defineStore('goal', {
         draggedKanbanTask: null
     }),
     getters: {
+        // id -> [index, item]; rebuilt only when the list changes
+        goalIndex: (state) => indexByID(state.goals),
         fitnessGoals: (state) => {
             let fitnessGoals = state.goals.filter(goal => {
                 let isFitness = goal.types.some(type => type.id == GOAL_TYPE.FITNESS);
@@ -54,9 +56,9 @@ export const useGoalStore = defineStore('goal', {
             allGoals = allGoals || this.goals;
             goals = goals || allGoals;
             let goalIndex    = indexByID(allGoals);
-            let metricIndex  = indexByID(metricStore.getItems());
-            let todoIndex    = indexByID(todoStore.getItems());
-            let routineIndex = indexByID(routineStore.getItems());
+            let metricIndex  = metricStore.metricIndex;
+            let todoIndex    = todoStore.todoIndex;
+            let routineIndex = routineStore.routineIndex;
             goals.forEach(goal => {
                 goal.parents  = markRaw(pickByID(goal.parentIDs, goalIndex));
                 goal.children = markRaw(pickByID(goal.childIDs, goalIndex));
@@ -69,7 +71,7 @@ export const useGoalStore = defineStore('goal', {
             return this.goals;
         },
         getItem(id) {
-            return this.goals.find(x => x.id == id);
+            return getByID(id, this.goalIndex);
         },
         getTimeframeItems(start, end) {
             return getGoalsWithTimeframe(start, end)
