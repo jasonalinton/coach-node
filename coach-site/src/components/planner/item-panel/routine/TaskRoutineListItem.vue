@@ -85,7 +85,7 @@ export default {
         },
         children() {
             if (this.todo) {
-                let children = this.todoStore.todos.filter(x => this.todo.childIDs.includes(x.id));
+                let children = this.todoStore.getItemsByID(this.todo.childIDs);
                 return children
             }
             return [];

@@ -15,7 +15,18 @@ export const useIterationStore = defineStore('iteration', {
     }),
     getters: {
         // id -> [index, item]; rebuilt only when the list changes
-        iterationIndex: (state) => indexByID(state.iterations)
+        iterationIndex: (state) => indexByID(state.iterations),
+        // todoID -> that todo's iterations, in list order
+        iterationsByTodoID: (state) => {
+            let groups = new Map();
+            state.iterations.forEach(iteration => {
+                if (iteration.todoID == null) return;
+                let todoID = Number(iteration.todoID);
+                if (!groups.has(todoID)) groups.set(todoID, []);
+                groups.get(todoID).push(iteration);
+            });
+            return groups;
+        }
     },
     actions: {
         // async initialize() {
@@ -73,6 +84,10 @@ export const useIterationStore = defineStore('iteration', {
                     });
             }
             return iterations;
+        },
+        /** Like getIterationsWithIDs, but only returns iterations that are already loaded (no fetch) */
+        getLoadedIterationsWithIDs(ids) {
+            return pickByID(ids, this.iterationIndex);
         },
         getIterationsInRange(startAt, endAt) {
             if (!this.isRangeLoaded(startAt, endAt)) {
@@ -158,8 +173,9 @@ export const useIterationStore = defineStore('iteration', {
             });
         },
         getIterationsForTodo(todoID) {
-            let iterations = this.iterations.filter(x => x.todoID == todoID);
-            return iterations;
+            if (todoID == null) return this.iterations.filter(x => x.todoID == todoID);
+            // Copy, since callers sort the result in place
+            return [...(this.iterationsByTodoID.get(Number(todoID)) || [])];
         },
         getIterationsOfTodoType(idType, startAt, endAt) {
             let data = { idType, startAt, endAt };

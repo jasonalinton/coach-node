@@ -188,7 +188,7 @@ export function computeNodePoints(node, iterationStore, goalStore, start, end) {
 
 function getGoalIterations(goalID, iterationStore, goalStore) {
     let iterationIDs = goalStore.getIterationIDs(goalID);
-    return iterationStore.iterations.filter(it => iterationIDs.includes(it.id));
+    return iterationStore.getLoadedIterationsWithIDs(iterationIDs);
 }
 </script>
 

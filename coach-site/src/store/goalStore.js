@@ -73,6 +73,9 @@ export const useGoalStore = defineStore('goal', {
         getItem(id) {
             return getByID(id, this.goalIndex);
         },
+        getItemsByID(ids) {
+            return pickByID(ids, this.goalIndex);
+        },
         getTimeframeItems(start, end) {
             return getGoalsWithTimeframe(start, end)
                 .then(goals => {
@@ -125,8 +128,7 @@ export const useGoalStore = defineStore('goal', {
         getPoints(goalID) {
             let iterationIDs = this.getIterationIDs(goalID);
             let iterationStore = useIterationStore();
-            let iterations = iterationStore.iterations
-                .filter(task => iterationIDs.includes(task.id));
+            let iterations = iterationStore.getLoadedIterationsWithIDs(iterationIDs);
             let iterations_Attempted = iterations.filter(task => task.completedAt || task.attemptedAt);
             let iterations_WithPoints = iterations_Attempted.filter(x => x.points);
             let points = sum(iterations_WithPoints, 'points');
@@ -156,7 +158,7 @@ export const useGoalStore = defineStore('goal', {
         getDescendantIterationsFromGoal(goalID, idsChecked) {
             if (!idsChecked.goals.includes(goalID)) {
                 idsChecked.goals.push(goalID);
-                let goal = this.goals.find(goal => goal.id == goalID);
+                let goal = this.getItem(goalID);
                 
                 /* Loop through todos */
                 goal.todoIDs.forEach(todoID => {
