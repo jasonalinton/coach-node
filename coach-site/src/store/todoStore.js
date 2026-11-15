@@ -6,12 +6,16 @@ import { getSocketConnection, deferUpdate } from './socket'
 import { useMetricStore } from '@/store/metricStore'
 import { useGoalStore } from '@/store/goalStore'
 import { useRoutineStore } from '@/store/routineStore'
-import { attemptPostEndpoint, postEndpoint } from '../api/api';
+import { postEndpoint } from '../api/api';
 import { TODOTYPE } from '../model/constants';
 import Todo from '../model/item/Todo';
 import { perfStart, perfEnd, perfMeasure } from '../perf';
 
 let initialized = false;
+
+// Todo IDs requested through requestTodo, batched into a single GetTodosWithIDs call
+let requestedTodoIDs = new Set();
+let pendingTodoIDs = [];
 
 export const useTodoStore = defineStore('todo', {
     state: () => ({
@@ -65,15 +69,34 @@ export const useTodoStore = defineStore('todo', {
             return this.todos;
         },
         requestTodo(idTodo) {
-            return attemptPostEndpoint("Todo", "GetTodo", { id: idTodo }, { 'All-Properties': "true" })
+            if (requestedTodoIDs.has(idTodo)) return;
+            requestedTodoIDs.add(idTodo);
+            pendingTodoIDs.push(idTodo);
+            // Collect every ID requested in the same tick (e.g. a computed looping over a routine's todos)
+            if (pendingTodoIDs.length == 1) {
+                setTimeout(() => this.requestPendingTodos(), 0);
+            }
+        },
+        requestPendingTodos() {
+            let ids = pendingTodoIDs;
+            pendingTodoIDs = [];
+
+            let fetchStart = perfStart();
+            return postEndpoint("Todo", "GetTodosWithIDs", { ids }, { 'All-Properties': "true" })
                 .then(response => {
-                    if (!response) return;
+                    perfEnd('todos:fetchByID', fetchStart, { count: ids.length });
+                    if (!response || !response.status || !response.status.success) {
+                        ids.forEach(id => requestedTodoIDs.delete(id));
+                        return;
+                    }
 
-                    let todo = response.result;
-                    this.initializeItems([todo]);
+                    let todos = response.result;
+                    this.initializeItems(todos);
 
-                    replaceOrAddItem(todo, this.todos);
-                    replaceOrAddItem(new Todo(todo), this.todoModels);
+                    todos.forEach(todo => {
+                        replaceOrAddItem(todo, this.todos);
+                        replaceOrAddItem(new Todo(todo), this.todoModels);
+                    });
                     
                     this.runUpdates(response);
                     return response;
