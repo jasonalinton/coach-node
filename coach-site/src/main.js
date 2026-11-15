@@ -124,7 +124,8 @@ const router = createRouter({
 })
 
 const app = createApp(App);
-app.config.performance = true;
+// Per-component Vue timings in the Performance panel (dev only). Opt in with ?perf in the URL.
+app.config.performance = new URLSearchParams(window.location.search).has('perf');
 
 const pinia = createPinia();
 
