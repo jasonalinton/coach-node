@@ -87,8 +87,20 @@ export default {
         },
     },
     methods: {
-        onStart, onEnd, onPointsClick, openEventForm, onDeleteEvent,
+        onStart, onEnd, onPointsClick, openEventForm, onDeleteEvent, fetchTaskIterations,
     },
+    watch: {
+        isExpanded(isExpanded) {
+            if (isExpanded) this.fetchTaskIterations();
+        },
+    },
+}
+
+/* Load every task's iteration in one GetIterations request before the DyTaskItems render,
+ * instead of one GetIteration per item. Only requests when some aren't loaded yet. */
+function fetchTaskIterations() {
+    if (!this.iterationStore || this.tasks.length == 0) return;
+    this.iterationStore.getIterationsWithIDs(this.tasks.map(t => t.id));
 }
 
 function onStart() {

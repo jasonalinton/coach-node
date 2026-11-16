@@ -66,7 +66,8 @@ export default {
             //     return iteration;
             // }
             if (this.iterationStore) {
-                let iteration = this.iterationStore.getIteration(this.iterationId);
+                // Read-only lookup: DyBlockEvent batch-fetches its tasks' iterations when it expands
+                let iteration = this.iterationStore.getLoadedIterationsWithIDs([this.iterationId])[0];
                 return iteration;
             }
         },
