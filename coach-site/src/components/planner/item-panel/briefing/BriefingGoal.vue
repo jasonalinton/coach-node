@@ -85,7 +85,7 @@ export default {
                 }).map(x => x.id);
                 // Reasons in the same timeframe or with no timeframe
                 let reasons = this.blurbs.filter(x => {
-                    let isReason = x.idType == BLURBTYPE.REASON;
+                    let isReason = x.typeIDs.findIndex(typeID => typeID.id == BLURBTYPE.REASON) > -1;
                     if (isReason) {
                         if (x.goalTimePairs.length == 0)
                             return true;
