@@ -5,13 +5,21 @@
                 <span class="title">Activity Trends</span>
                 <span class="subtitle">Points from exercise &amp; physical activity</span>
             </div>
-            <div class="timeframe-toggle d-flex flex-row me-2">
-                <button v-for="option in timeframeOptions" :key="option.id"
-                        type="button"
-                        class="toggle-option"
-                        :class="{ selected: timeframe === option.id }"
-                        @click="timeframe = option.id">
-                    {{ option.text }}
+            <div class="d-flex flex-row align-items-start me-2">
+                <div class="timeframe-toggle d-flex flex-row">
+                    <button v-for="option in timeframeOptions" :key="option.id"
+                            type="button"
+                            class="toggle-option"
+                            :class="{ selected: timeframe === option.id }"
+                            @click="timeframe = option.id">
+                        {{ option.text }}
+                    </button>
+                </div>
+                <button type="button" class="refresh-btn has-tooltip"
+                        data-tooltip="Recalculate points"
+                        :disabled="isRefreshing"
+                        @click="refresh">
+                    <i class="fa-solid fa-rotate" :class="{ 'fa-spin': isRefreshing }"></i>
                 </button>
             </div>
         </div>
@@ -112,16 +120,16 @@ export default {
             // set of activity types battery data covers is server-determined.
             segmentOrder: [],
             hiddenTypes: [],
-            draggedTypeId: null
+            draggedTypeId: null,
+            isRefreshing: false
         }
     },
     created: async function() {
         this.appStore = useAppStore();
         this.physicalStore = usePhysicalStore();
         this.plannerStore = usePlannerStore();
-        let batteryData = await this.physicalStore.getPhysicalBatteryData(true);
-        this.points = batteryData?.todoTypePoints || [];
-        this.segmentOrder = batteryData?.physicalActivityTypeIDs || [];
+        // Cached points load quickly; recalculating them is slow, so it only runs from the refresh button
+        await this.loadBatteryData(false);
     },
     mounted: function() {
         this.scrollToLatest();
@@ -230,6 +238,25 @@ export default {
         }
     },
     methods: {
+        async loadBatteryData(shouldRefresh) {
+            let batteryData = await this.physicalStore.getPhysicalBatteryData(shouldRefresh);
+            if (!batteryData) return;
+            this.points = batteryData.todoTypePoints || [];
+            // Keep any drag-reordered legend order across refreshes
+            let typeIDs = batteryData.physicalActivityTypeIDs || [];
+            this.segmentOrder = [
+                ...this.segmentOrder.filter(id => typeIDs.includes(id)),
+                ...typeIDs.filter(id => !this.segmentOrder.includes(id))
+            ];
+        },
+        async refresh() {
+            this.isRefreshing = true;
+            try {
+                await this.loadBatteryData(true);
+            } finally {
+                this.isRefreshing = false;
+            }
+        },
         selectDate(bucketStart) {
             if (this.plannerStore) {
                 this.plannerStore.selectDate(bucketStart);
@@ -341,6 +368,23 @@ export default {
     border-radius: 20px;
     padding: 2px;
     width: fit-content;
+}
+
+.refresh-btn {
+    margin-top: 16px;
+    margin-left: 8px;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 1px solid #e5e5e5;
+    background-color: #fff;
+    color: #767676;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.refresh-btn:disabled {
+    cursor: wait;
 }
 
 .toggle-option {

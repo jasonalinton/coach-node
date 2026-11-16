@@ -6,8 +6,6 @@ import App from './App.vue'
 import moment from 'moment'
 import { createPinia } from 'pinia'
 
-const app = createApp(App)
-
 import { createWebHistory, createRouter } from 'vue-router'
 import Planner from './components/planner/Planner.vue'
 import ItemTabs from './components/items/ItemTabs.vue'
@@ -124,6 +122,10 @@ const router = createRouter({
   history: createWebHistory(),
   routes,
 })
+
+const app = createApp(App);
+// Per-component Vue timings in the Performance panel (dev only). Opt in with ?perf in the URL.
+app.config.performance = new URLSearchParams(window.location.search).has('perf');
 
 const pinia = createPinia();
 

@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { markRaw } from 'vue'
 import { getMetrics, getLogItems, deleteLogEntry, getMetricKanban as fetchMetricKanban } from '../api/metricAPI'
-import { replaceOrAddItem, sortAsc, clone, capitalize } from '../../utility';
+import { replaceOrAddItem, sortAsc, clone, capitalize, indexByID, pickByID, getByID } from '../../utility';
 import { getSocketConnection, deferUpdate } from './socket'
 import { useGoalStore } from '@/store/goalStore'
 import { useTodoStore } from '@/store/todoStore'
@@ -17,7 +17,9 @@ export const useMetricStore = defineStore('metric', {
         draggedKanbanTask: null
     }),
     getters: {
-        getDraggedKanbanTask: (state) => state.draggedKanbanTask
+        getDraggedKanbanTask: (state) => state.draggedKanbanTask,
+        // id -> [index, item]; rebuilt only when the list changes
+        metricIndex: (state) => indexByID(state.metrics)
     },
     actions: {
         async initialize() {
@@ -36,19 +38,23 @@ export const useMetricStore = defineStore('metric', {
 
             allMetrics = allMetrics || this.metrics;
             metrics = metrics || allMetrics;
+            let metricIndex  = indexByID(allMetrics);
+            let goalIndex    = goalStore.goalIndex;
+            let todoIndex    = todoStore.todoIndex;
+            let routineIndex = routineStore.routineIndex;
             metrics.forEach(metric => {
-                metric.parents  = markRaw(allMetrics.filter(x => metric.parentIDs.includes(x.id)));
-                metric.children = markRaw(allMetrics.filter(x => metric.childIDs.includes(x.id)));
-                metric.goals    = markRaw(goalStore.getItems().filter(x => metric.goalIDs.includes(x.id)));
-                metric.todos    = markRaw(todoStore.getItems().filter(x => metric.todoIDs.includes(x.id)));
-                metric.routines = markRaw(routineStore.getItems().filter(x => metric.routineIDs.includes(x.id)));
+                metric.parents  = markRaw(pickByID(metric.parentIDs, metricIndex));
+                metric.children = markRaw(pickByID(metric.childIDs, metricIndex));
+                metric.goals    = markRaw(pickByID(metric.goalIDs, goalIndex));
+                metric.todos    = markRaw(pickByID(metric.todoIDs, todoIndex));
+                metric.routines = markRaw(pickByID(metric.routineIDs, routineIndex));
             })
         },
         getItems() {
             return this.metrics;
         },
         getItem(id) {
-            return this.metrics.find(x => x.id == id);
+            return getByID(id, this.metricIndex);
         },
         repositionItem(parentType, itemType, parentID, itemID, newPosition) {
             var data = { newPosition };

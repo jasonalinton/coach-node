@@ -44,7 +44,7 @@ export default {
         },
         iterations() {
             if (this.iterationStore) {
-                let iterations = this.iterationStore.iterations.filter(x => this.iterationIDs.includes(x.id));
+                let iterations = this.iterationStore.getLoadedIterationsWithIDs(this.iterationIDs);
                 return iterations;
             }
             return [];

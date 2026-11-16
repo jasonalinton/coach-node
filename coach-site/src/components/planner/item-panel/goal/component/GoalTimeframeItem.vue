@@ -223,7 +223,7 @@ export default {
         childIDs() {
             let children = [];
             if (this.goalStore) {
-                children = this.goalStore.goals.filter(x => this.goal.childIDs.includes(x.id));
+                children = this.goalStore.getItemsByID(this.goal.childIDs);
             }
             return children.map(x => x.id);
         },
@@ -232,7 +232,8 @@ export default {
                 let { start, end } = getTimeframeEndpoints(this.timeframeID, this.selectedDate);
                 let iterationIDs = this.goalStore.getIterationIDs(this.goalID);
                 let iterations = this.iterationStore.getIterationsInRange(start, end, false);
-                iterations = iterations.filter(task => iterationIDs.includes(task.id));
+                let idSet = new Set(iterationIDs);
+                iterations = iterations.filter(task => idSet.has(task.id));
                 let iterations_Attempted = iterations.filter(task => task.completedAt || task.attemptedAt);
                 let iterations_WithPoints = iterations_Attempted.filter(x => x.points);
                 return iterations_WithPoints;

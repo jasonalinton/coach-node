@@ -144,7 +144,7 @@ export default {
 
                 if (routine) {
                     routine.todoIDs.forEach(idTodo => {
-                        let todo = this.todoStore.getItemModel(idTodo)?.data;
+                        let todo = this.todoStore.getItem(idTodo);
                         if (todo) {
                             /* Get iterations for todo, that belong to the routine's repeat */
                             let repeat_Todo = todo.repeats.find(r => r.routineRepeatID == repeat.id);

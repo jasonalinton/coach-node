@@ -1,16 +1,21 @@
 import { defineStore } from 'pinia'
-import { markRaw } from 'vue'
+import { markRaw, nextTick } from 'vue'
 import { getTodos } from '../api/todoAPI';
-import { replaceOrAddItem, removeItemByID, sortAsc, capitalize } from '../../utility';
+import { replaceOrAddItem, removeItemByID, sortAsc, capitalize, indexByID, pickByID, getByID } from '../../utility';
 import { getSocketConnection, deferUpdate } from './socket'
 import { useMetricStore } from '@/store/metricStore'
 import { useGoalStore } from '@/store/goalStore'
 import { useRoutineStore } from '@/store/routineStore'
-import { attemptPostEndpoint, postEndpoint } from '../api/api';
+import { postEndpoint } from '../api/api';
 import { TODOTYPE } from '../model/constants';
 import Todo from '../model/item/Todo';
+import { perfStart, perfEnd, perfMeasure } from '../perf';
 
 let initialized = false;
+
+// Todo IDs requested through requestTodo, batched into a single GetTodosWithIDs call
+let requestedTodoIDs = new Set();
+let pendingTodoIDs = [];
 
 export const useTodoStore = defineStore('todo', {
     state: () => ({
@@ -20,7 +25,9 @@ export const useTodoStore = defineStore('todo', {
         draggedKanbanTask: null
     }),
     getters: {
-        getDraggedKanbanTask: (state) => state.draggedKanbanTask
+        getDraggedKanbanTask: (state) => state.draggedKanbanTask,
+        // id -> [index, item]; rebuilt only when the list changes
+        todoIndex: (state) => indexByID(state.todos)
     },
     actions: {
         async initialize() {
@@ -39,13 +46,19 @@ export const useTodoStore = defineStore('todo', {
 
             allTodos = allTodos || this.todos;
             todos = todos || allTodos;
+            let start = perfStart();
+            let todoIndex    = indexByID(allTodos);
+            let metricIndex  = metricStore.metricIndex;
+            let goalIndex    = goalStore.goalIndex;
+            let routineIndex = routineStore.routineIndex;
             todos.forEach(todo => {
-                todo.parents  = markRaw(allTodos.filter(x => todo.parentIDs.includes(x.id)));
-                todo.children = markRaw(allTodos.filter(x => todo.childIDs.includes(x.id)));
-                todo.metrics  = markRaw(metricStore.getItems().filter(x => todo.metricIDs.includes(x.id)));
-                todo.goals    = markRaw(goalStore.getItems().filter(x => todo.goalIDs.includes(x.id)));
-                todo.routines = markRaw(routineStore.getItems().filter(x => todo.routineIDs.includes(x.id)));
+                todo.parents  = markRaw(pickByID(todo.parentIDs, todoIndex));
+                todo.children = markRaw(pickByID(todo.childIDs, todoIndex));
+                todo.metrics  = markRaw(pickByID(todo.metricIDs, metricIndex));
+                todo.goals    = markRaw(pickByID(todo.goalIDs, goalIndex));
+                todo.routines = markRaw(pickByID(todo.routineIDs, routineIndex));
             })
+            perfEnd('todos:init', start, { count: todos.length, total: allTodos.length });
         },
         isRequestProcessing() {
             return this.requests.some(r => r.endpoint == "GetTodos" && r.isProcessing);
@@ -62,15 +75,35 @@ export const useTodoStore = defineStore('todo', {
             return this.todos;
         },
         requestTodo(idTodo) {
-            return attemptPostEndpoint("Todo", "GetTodo", { id: idTodo }, { 'All-Properties': "true" })
+            if (requestedTodoIDs.has(idTodo)) return;
+            requestedTodoIDs.add(idTodo);
+            pendingTodoIDs.push(idTodo);
+            // Collect every ID requested in the same tick (e.g. a computed looping over a routine's todos)
+            if (pendingTodoIDs.length == 1) {
+                setTimeout(() => this.requestPendingTodos(), 0);
+            }
+        },
+        requestPendingTodos() {
+            let ids = pendingTodoIDs;
+            pendingTodoIDs = [];
+
+            let fetchStart = perfStart();
+            // Default properties plus blurbIds (used by TodoForm); All-Properties also returns every iteration/event
+            return postEndpoint("Todo", "GetTodosWithIDs", { ids }, { 'Include-Properties': JSON.stringify(['blurbs']) })
                 .then(response => {
-                    if (!response) return;
+                    perfEnd('todos:fetchByID', fetchStart, { count: ids.length });
+                    if (!response || !response.status || !response.status.success) {
+                        ids.forEach(id => requestedTodoIDs.delete(id));
+                        return;
+                    }
 
-                    let todo = response.result;
-                    this.initializeItems([todo]);
+                    let todos = response.result;
+                    this.initializeItems(todos);
 
-                    replaceOrAddItem(todo, this.todos);
-                    replaceOrAddItem(new Todo(todo), this.todoModels);
+                    todos.forEach(todo => {
+                        replaceOrAddItem(todo, this.todos);
+                        replaceOrAddItem(new Todo(todo), this.todoModels);
+                    });
                     
                     this.runUpdates(response);
                     return response;
@@ -86,13 +119,16 @@ export const useTodoStore = defineStore('todo', {
             this.requests.push(request);
             let dropRequest = () => { this.requests = this.requests.filter(r => r !== request); };
 
+            let fetchStart = perfStart();
             return postEndpoint("Todo", "GetTodos")
             .then(response => {
+                perfEnd('todos:fetch', fetchStart);
                 if (!response || !response.status || !response.status.success) {
                     dropRequest();
                     return;
                 }
                 
+                let processStart = perfStart();
                 let todos = [...this.todos];
                 // Replace items
                 response.result.forEach(todo => replaceOrAddItem(todo, todos));
@@ -101,6 +137,8 @@ export const useTodoStore = defineStore('todo', {
                     this.todoModels.push(new Todo(todo));
                 });
                 this.todos = sortAsc(todos);
+                perfEnd('todos:process', processStart, { count: response.result.length });
+                this.trackRender(processStart);
                 
                 this.runUpdates(response);
                 request.isProcessing = false;
@@ -109,10 +147,15 @@ export const useTodoStore = defineStore('todo', {
             .catch(dropRequest);
         },
         getItemsByID(ids) {
-            return this.todos.filter(x => ids.includes(x.id));
+            return pickByID(ids, this.todoIndex);
         },
         getItem(id) {
-            return this.todos.find(x => x.id == id);
+            let todo = getByID(id, this.todoIndex);
+            // Fetch todos that aren't loaded, except while the initial GetTodos load is still in flight
+            if (!todo && id > 0 && !this.isRequestProcessing()) {
+                this.requestTodo(id);
+            }
+            return todo;
         },
         getItemModel(id) {
             this.requestTodo(id);
@@ -130,7 +173,7 @@ export const useTodoStore = defineStore('todo', {
         },
         getDescendantIDs(id) {
             let descentIDs = [];
-            let todo = this.todos.find(x => x.id == id);
+            let todo = getByID(id, this.todoIndex);
             todo.childIDs.forEach(childID => {
                 this.getDescendantIDsLopp(childID, descentIDs);
             })
@@ -140,11 +183,10 @@ export const useTodoStore = defineStore('todo', {
             let _id = descentIDs.includes(id);
             if (!_id) {
                 descentIDs.push(id);
-                let todo = this.todos.find(x => x.id == id);
+                let todo = getByID(id, this.todoIndex);
                 if (todo == undefined) {
                     return; // Todo is deleted
                 }
-                console.log(todo.text);
                 todo.childIDs.forEach(childID => {
                     this.getDescendantIDsLopp(childID, descentIDs);
                 })
@@ -314,15 +356,28 @@ export const useTodoStore = defineStore('todo', {
             const hasRemovals = updates.todoIDsRemoved?.length > 0;
             if (!hasTodos && !hasRemovals) return;
 
+            let detail = { updated: updates.todos?.length || 0, removed: updates.todoIDsRemoved?.length || 0 };
             let todos = [...this.todos];
-            if (hasTodos) {
-                updates.todos.forEach(todo => replaceOrAddItem(todo, todos));
-                this.initializeItems(updates.todos, todos);
+            perfMeasure('todos:update', () => {
+                if (hasTodos) {
+                    updates.todos.forEach(todo => replaceOrAddItem(todo, todos));
+                    this.initializeItems(updates.todos, todos);
+                }
+                if (hasRemovals) {
+                    updates.todoIDsRemoved.forEach(id => removeItemByID(id, todos));
+                }
+            }, detail);
+            deferUpdate(() => {
+                let start = perfStart();
+                perfMeasure('todos:apply', () => { this.todos = sortAsc(todos); }, detail);
+                this.trackRender(start, detail);
+            });
+        },
+        // Measures from the todos assignment until Vue has finished re-rendering the components that depend on it
+        trackRender(start, detail) {
+            if (start !== undefined) {
+                nextTick(() => perfEnd('todos:render', start, detail));
             }
-            if (hasRemovals) {
-                updates.todoIDsRemoved.forEach(id => removeItemByID(id, todos));
-            }
-            deferUpdate(() => { this.todos = sortAsc(todos); });
         },
         connectSocket() {
             if (!initialized) {

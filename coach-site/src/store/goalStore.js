@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { markRaw } from 'vue'
 import { getGoals, getGoalsWithTimeframe, getGoalKanban as fetchGoalKanban } from '../api/goalAPI'
-import { capitalize, replaceOrAddItem, sortAsc, sum } from '../../utility';
+import { capitalize, replaceOrAddItem, sortAsc, sum, indexByID, pickByID, getByID } from '../../utility';
 import { getSocketConnection, deferUpdate } from './socket'
 import { useMetricStore } from '@/store/metricStore'
 import { useTodoStore } from '@/store/todoStore'
@@ -20,6 +20,8 @@ export const useGoalStore = defineStore('goal', {
         draggedKanbanTask: null
     }),
     getters: {
+        // id -> [index, item]; rebuilt only when the list changes
+        goalIndex: (state) => indexByID(state.goals),
         fitnessGoals: (state) => {
             let fitnessGoals = state.goals.filter(goal => {
                 let isFitness = goal.types.some(type => type.id == GOAL_TYPE.FITNESS);
@@ -53,19 +55,26 @@ export const useGoalStore = defineStore('goal', {
 
             allGoals = allGoals || this.goals;
             goals = goals || allGoals;
+            let goalIndex    = indexByID(allGoals);
+            let metricIndex  = metricStore.metricIndex;
+            let todoIndex    = todoStore.todoIndex;
+            let routineIndex = routineStore.routineIndex;
             goals.forEach(goal => {
-                goal.parents  = markRaw(allGoals.filter(x => goal.parentIDs.includes(x.id)));
-                goal.children = markRaw(allGoals.filter(x => goal.childIDs.includes(x.id)));
-                goal.metrics  = markRaw(metricStore.getItems().filter(x => goal.metricIDs.includes(x.id)));
-                goal.todos    = markRaw(todoStore.getItems().filter(x => goal.todoIDs.includes(x.id)));
-                goal.routines = markRaw(routineStore.getItems().filter(x => goal.routineIDs.includes(x.id)));
+                goal.parents  = markRaw(pickByID(goal.parentIDs, goalIndex));
+                goal.children = markRaw(pickByID(goal.childIDs, goalIndex));
+                goal.metrics  = markRaw(pickByID(goal.metricIDs, metricIndex));
+                goal.todos    = markRaw(pickByID(goal.todoIDs, todoIndex));
+                goal.routines = markRaw(pickByID(goal.routineIDs, routineIndex));
             })
         },
         getItems() {
             return this.goals;
         },
         getItem(id) {
-            return this.goals.find(x => x.id == id);
+            return getByID(id, this.goalIndex);
+        },
+        getItemsByID(ids) {
+            return pickByID(ids, this.goalIndex);
         },
         getTimeframeItems(start, end) {
             return getGoalsWithTimeframe(start, end)
@@ -119,8 +128,7 @@ export const useGoalStore = defineStore('goal', {
         getPoints(goalID) {
             let iterationIDs = this.getIterationIDs(goalID);
             let iterationStore = useIterationStore();
-            let iterations = iterationStore.iterations
-                .filter(task => iterationIDs.includes(task.id));
+            let iterations = iterationStore.getLoadedIterationsWithIDs(iterationIDs);
             let iterations_Attempted = iterations.filter(task => task.completedAt || task.attemptedAt);
             let iterations_WithPoints = iterations_Attempted.filter(x => x.points);
             let points = sum(iterations_WithPoints, 'points');
@@ -150,7 +158,7 @@ export const useGoalStore = defineStore('goal', {
         getDescendantIterationsFromGoal(goalID, idsChecked) {
             if (!idsChecked.goals.includes(goalID)) {
                 idsChecked.goals.push(goalID);
-                let goal = this.goals.find(goal => goal.id == goalID);
+                let goal = this.getItem(goalID);
                 
                 /* Loop through todos */
                 goal.todoIDs.forEach(todoID => {
