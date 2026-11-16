@@ -165,7 +165,8 @@ export default {
             addRows(T.TODO, lookupIDs(blurb.todoIDs, id => this.todoStore?.getItem(id)?.text));
             addRows(T.TODOTIMEPAIR, lookupIDs(blurb.todoTimePairIDs, () => undefined));
             addRows(T.TODOREPEAT, lookupIDs(blurb.todoRepeatIDs, () => undefined));
-            addRows(T.ITERATION, lookupIDs(blurb.iterationIDs, id => this.iterationStore?.getIteration(id)?.text));
+            // Read-only lookup: BlogTimeline batch-fetches the iterations for every card in one request
+            addRows(T.ITERATION, lookupIDs(blurb.iterationIDs, id => this.iterationStore?.getLoadedIterationsWithIDs([id])[0]?.text));
             addRows(T.FOODITEM, lookupIDs(blurb.foodItemIDs, id => this.physicalStore?.getFoodItem(id)?.name));
             addRows(T.MEAL, lookupIDs(blurb.mealIDs, () => undefined));
             addRows(T.WORKOUT, lookupIDs(blurb.workoutIDs, id => this.workoutStore?.getWorkout(id)?.name));

@@ -18,6 +18,7 @@
 <script>
 import { usePlannerStore } from '@/store/plannerStore'
 import { useUniversalStore } from '@/store/universalStore'
+import { useIterationStore } from '@/store/iterationStore'
 import { TIMEFRAME } from '../../model/constants'
 import { toLongDateString, toShortTimeString, formatInputDateTime, getTimeframeEndpoints, today } from '../../../utility/timeUtility'
 import { sortDateDesc } from '../../../utility'
@@ -34,6 +35,8 @@ export default {
         return {
             plannerStore: undefined,
             universalStore: undefined,
+            iterationStore: undefined,
+            requestedIterationIDs: new Set(),
             blurbs: [],
             newPost: {
                 isShown: false,
@@ -44,6 +47,7 @@ export default {
     created: async function() {
         this.plannerStore = usePlannerStore();
         this.universalStore = useUniversalStore();
+        this.iterationStore = useIterationStore();
 
         // this.initBlurbs();
         this.universalStore.getBlurbs(TIMEFRAME.MONTH, this.selectedDate);
@@ -63,6 +67,7 @@ export default {
     },
     methods: {
         initBlurbs,
+        fetchBlurbIterations,
         onNewPost,
         onBlurbSaved,
         cancelBlurb
@@ -70,8 +75,26 @@ export default {
     watch: {
         selectedDate() {
             this.initBlurbs();
+        },
+        blurbIDs() {
+            this.fetchBlurbIterations();
         }
     }
+}
+
+/* Fetch the iterations the blurb cards show, in one request, instead of one GetIteration per card lookup.
+ * Skips iterations already loaded (e.g. by GetIterationsInRange) or already requested. */
+function fetchBlurbIterations() {
+    if (!this.universalStore || !this.iterationStore) return;
+
+    let ids = [...new Set(this.universalStore.blurbs
+        .flatMap(blurb => (blurb.iterationIDs || []).map(x => x.id)))];
+    let loadedIDs = new Set(this.iterationStore.getLoadedIterationsWithIDs(ids).map(x => x.id));
+    let missingIDs = ids.filter(id => !loadedIDs.has(id) && !this.requestedIterationIDs.has(id));
+    if (missingIDs.length == 0) return;
+
+    missingIDs.forEach(id => this.requestedIterationIDs.add(id));
+    this.iterationStore.getIterationsWithIDs(missingIDs);
 }
 
 async function initBlurbs() {
