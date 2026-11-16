@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { markRaw } from 'vue'
 import { getGoals, getGoalsWithTimeframe, getGoalKanban as fetchGoalKanban } from '../api/goalAPI'
 import { capitalize, replaceOrAddItem, sortAsc, sum, indexByID, pickByID, getByID } from '../../utility';
-import { getSocketConnection, deferUpdate } from './socket'
+import { getSocketConnection, deferUpdate, withUpdatedItems } from './socket'
 import { useMetricStore } from '@/store/metricStore'
 import { useTodoStore } from '@/store/todoStore'
 import { useRoutineStore } from '@/store/routineStore'
@@ -48,17 +48,19 @@ export const useGoalStore = defineStore('goal', {
             let promise = getGoals().then(res => this.goals = res);
             return promise;
         },
-        initializeItems(goals, allGoals) {
+        initializeItems(goals, allGoals, updates) {
             let metricStore = useMetricStore();
             let todoStore = useTodoStore();
             let routineStore = useRoutineStore();
 
             allGoals = allGoals || this.goals;
             goals = goals || allGoals;
+            // The other stores apply socket updates in a deferred tick, so their indexes don't have
+            // items created in this same update yet - layer the incoming items over them
             let goalIndex    = indexByID(allGoals);
-            let metricIndex  = metricStore.metricIndex;
-            let todoIndex    = todoStore.todoIndex;
-            let routineIndex = routineStore.routineIndex;
+            let metricIndex  = withUpdatedItems(metricStore.metrics, metricStore.metricIndex, updates?.metrics);
+            let todoIndex    = withUpdatedItems(todoStore.todos, todoStore.todoIndex, updates?.todos);
+            let routineIndex = withUpdatedItems(routineStore.routines, routineStore.routineIndex, updates?.routines);
             goals.forEach(goal => {
                 goal.parents  = markRaw(pickByID(goal.parentIDs, goalIndex));
                 goal.children = markRaw(pickByID(goal.childIDs, goalIndex));
@@ -295,7 +297,7 @@ export const useGoalStore = defineStore('goal', {
             let goals = [...this.goals];
             if (hasGoals) {
                 updates.goals.forEach(goal => replaceOrAddItem(goal, goals));
-                this.initializeItems(updates.goals, goals);
+                this.initializeItems(updates.goals, goals, updates);
             }
             if (hasRemovals) {
                 updates.goalIDsRemoved.forEach(id => removeItemByID(id, goals));

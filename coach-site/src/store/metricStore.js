@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { markRaw } from 'vue'
 import { getMetrics, getLogItems, deleteLogEntry, getMetricKanban as fetchMetricKanban } from '../api/metricAPI'
 import { replaceOrAddItem, sortAsc, clone, capitalize, indexByID, pickByID, getByID } from '../../utility';
-import { getSocketConnection, deferUpdate } from './socket'
+import { getSocketConnection, deferUpdate, withUpdatedItems } from './socket'
 import { useGoalStore } from '@/store/goalStore'
 import { useTodoStore } from '@/store/todoStore'
 import { useRoutineStore } from '@/store/routineStore'
@@ -31,7 +31,7 @@ export const useMetricStore = defineStore('metric', {
         async fill() {
             return getMetrics().then(res => this.metrics = res);
         },
-        initializeItems(metrics, allMetrics) {
+        initializeItems(metrics, allMetrics, updates) {
             let goalStore = useGoalStore();
             let todoStore = useTodoStore();
             let routineStore = useRoutineStore();
@@ -39,9 +39,9 @@ export const useMetricStore = defineStore('metric', {
             allMetrics = allMetrics || this.metrics;
             metrics = metrics || allMetrics;
             let metricIndex  = indexByID(allMetrics);
-            let goalIndex    = goalStore.goalIndex;
-            let todoIndex    = todoStore.todoIndex;
-            let routineIndex = routineStore.routineIndex;
+            let goalIndex    = withUpdatedItems(goalStore.goals, goalStore.goalIndex, updates?.goals);
+            let todoIndex    = withUpdatedItems(todoStore.todos, todoStore.todoIndex, updates?.todos);
+            let routineIndex = withUpdatedItems(routineStore.routines, routineStore.routineIndex, updates?.routines);
             metrics.forEach(metric => {
                 metric.parents  = markRaw(pickByID(metric.parentIDs, metricIndex));
                 metric.children = markRaw(pickByID(metric.childIDs, metricIndex));
@@ -162,7 +162,7 @@ export const useMetricStore = defineStore('metric', {
 
             let metrics = [...this.metrics];
             updates.metrics.forEach(metric => replaceOrAddItem(metric, metrics));
-            this.initializeItems(updates.metrics, metrics);
+            this.initializeItems(updates.metrics, metrics, updates);
             deferUpdate(() => { this.metrics = sortAsc(metrics); });
         },
         connectSocket() {

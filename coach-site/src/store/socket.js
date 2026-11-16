@@ -1,5 +1,6 @@
 import { URL } from '../api/api';
 import { HubConnectionBuilder, HubConnectionState } from '@microsoft/signalr';
+import { replaceOrAddItem, sortAsc, indexByID } from '../../utility';
 
 var hubConnections = {
     coachHub: undefined,
@@ -55,4 +56,13 @@ export function deferUpdate(fn) {
             fns.forEach(f => f());
         }, 0);
     }
+}
+
+// Stores apply socket updates in a deferred tick, so another store's index doesn't have items from the
+// same update yet - this returns that index with the incoming items layered in, sorted the way the stores sort
+export function withUpdatedItems(items, index, updatedItems) {
+    if (!updatedItems?.length) return index;
+    let merged = [...items];
+    updatedItems.forEach(item => replaceOrAddItem(item, merged));
+    return indexByID(sortAsc(merged));
 }

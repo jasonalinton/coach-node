@@ -3,7 +3,7 @@ import { markRaw } from 'vue'
 import { getRoutines, refreshRepetitionForRepeat } from '../api/routineAPI'
 import { capitalize, replaceOrAddItem, sortAsc, indexByID, pickByID, getByID } from '../../utility';
 import { ROUTINETYPES } from '../model/constants';
-import { getSocketConnection, deferUpdate } from './socket'
+import { getSocketConnection, deferUpdate, withUpdatedItems } from './socket'
 import { useMetricStore } from '@/store/metricStore'
 import { useTodoStore } from '@/store/todoStore'
 import { useGoalStore } from '@/store/goalStore'
@@ -29,7 +29,7 @@ export const useRoutineStore = defineStore('routine', {
         async fill() {
             return getRoutines().then(res => this.routines = res);
         },
-        initializeItems(routines, allRoutines) {
+        initializeItems(routines, allRoutines, updates) {
             let metricStore = useMetricStore();
             let todoStore = useTodoStore();
             let goalStore = useGoalStore();
@@ -37,9 +37,9 @@ export const useRoutineStore = defineStore('routine', {
             allRoutines = allRoutines || this.routines;
             routines = routines || allRoutines;
             let routineIndex = indexByID(allRoutines);
-            let metricIndex  = metricStore.metricIndex;
-            let todoIndex    = todoStore.todoIndex;
-            let goalIndex    = goalStore.goalIndex;
+            let metricIndex  = withUpdatedItems(metricStore.metrics, metricStore.metricIndex, updates?.metrics);
+            let todoIndex    = withUpdatedItems(todoStore.todos, todoStore.todoIndex, updates?.todos);
+            let goalIndex    = withUpdatedItems(goalStore.goals, goalStore.goalIndex, updates?.goals);
             routines.forEach(routine => {
                 routine.parents  = markRaw(pickByID(routine.parentIDs, routineIndex));
                 routine.children = markRaw(pickByID(routine.childIDs, routineIndex));
@@ -105,7 +105,7 @@ export const useRoutineStore = defineStore('routine', {
             let routines = [...this.routines];
             if (hasRoutines) {
                 updates.routines.forEach(routine => replaceOrAddItem(routine, routines));
-                this.initializeItems(updates.routines, routines);
+                this.initializeItems(updates.routines, routines, updates);
             }
             if (hasRemovals) {
                 updates.routineIDsRemoved.forEach(id => removeItemByID(id, routines));

@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { markRaw, nextTick } from 'vue'
 import { getTodos } from '../api/todoAPI';
 import { replaceOrAddItem, removeItemByID, sortAsc, capitalize, indexByID, pickByID, getByID } from '../../utility';
-import { getSocketConnection, deferUpdate } from './socket'
+import { getSocketConnection, deferUpdate, withUpdatedItems } from './socket'
 import { useMetricStore } from '@/store/metricStore'
 import { useGoalStore } from '@/store/goalStore'
 import { useRoutineStore } from '@/store/routineStore'
@@ -39,7 +39,7 @@ export const useTodoStore = defineStore('todo', {
         async fill() {
             return this.requestTodos();
         },
-        initializeItems(todos, allTodos) {
+        initializeItems(todos, allTodos, updates) {
             let metricStore = useMetricStore();
             let goalStore = useGoalStore();
             let routineStore = useRoutineStore();
@@ -48,9 +48,9 @@ export const useTodoStore = defineStore('todo', {
             todos = todos || allTodos;
             let start = perfStart();
             let todoIndex    = indexByID(allTodos);
-            let metricIndex  = metricStore.metricIndex;
-            let goalIndex    = goalStore.goalIndex;
-            let routineIndex = routineStore.routineIndex;
+            let metricIndex  = withUpdatedItems(metricStore.metrics, metricStore.metricIndex, updates?.metrics);
+            let goalIndex    = withUpdatedItems(goalStore.goals, goalStore.goalIndex, updates?.goals);
+            let routineIndex = withUpdatedItems(routineStore.routines, routineStore.routineIndex, updates?.routines);
             todos.forEach(todo => {
                 todo.parents  = markRaw(pickByID(todo.parentIDs, todoIndex));
                 todo.children = markRaw(pickByID(todo.childIDs, todoIndex));
@@ -361,7 +361,7 @@ export const useTodoStore = defineStore('todo', {
             perfMeasure('todos:update', () => {
                 if (hasTodos) {
                     updates.todos.forEach(todo => replaceOrAddItem(todo, todos));
-                    this.initializeItems(updates.todos, todos);
+                    this.initializeItems(updates.todos, todos, updates);
                 }
                 if (hasRemovals) {
                     updates.todoIDsRemoved.forEach(id => removeItemByID(id, todos));
