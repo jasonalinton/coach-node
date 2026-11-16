@@ -279,14 +279,12 @@ export default {
                     vm = viewModels.find(_vm => _vm.todoID == iteration.todoID);
                 }
                 if (vm == undefined) {
-                    if (todo == undefined) {
-                        console.log("Todo undefined")
-                    }
                     vm = {
                         id: iteration.id,
                         timeframeID: undefined,
                         todoID: iteration.todoID,
-                        text: todo.text,
+                        // The todo may not be loaded yet (iterations can arrive before GetTodos); this recomputes once it is
+                        text: todo ? todo.text : iteration.text,
                         children: [],
                         iterationIDs: [],
                         // completeIDs: [],
@@ -310,7 +308,7 @@ export default {
 
                 if (iteration.isRepeat) {
                     let todo = _this.todoStore.getItem(vm.todoID);
-                    let repeat = todo.repeats.find(x => x.id == iteration.repeatID);
+                    let repeat = todo?.repeats.find(x => x.id == iteration.repeatID);
                     if (repeat)
                     {
                         vm.repeatID = repeat.id;
@@ -319,16 +317,13 @@ export default {
                         vm.isRepeatOwner = (repeat.ownerID == vm.todoID);
                         vm.isRepeatChild = (repeat.parentID != null && repeatIDs.includes(repeat.id));
                     }
-                    else
-                    {
-                        console.log(`Not repeat for todo, ${todo.text}`)
-                    }
                 }
             });
 
             if (_this.showHierarchy) {
                 viewModels.forEach(vm => {
-                    let todo = _this.todoStore.getItem(vm.todoID); 
+                    let todo = _this.todoStore.getItem(vm.todoID);
+                    if (!todo) return;
                     todo.children.forEach(_child => {
                         let children = [];
                         if (vm.repeatID != undefined) {
@@ -341,8 +336,6 @@ export default {
                             child.isChild = true;
                             vm.children.push(child);
                         })
-                        // if (child != undefined) {
-                        // }
                     });
                 });
     
