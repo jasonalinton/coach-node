@@ -176,8 +176,9 @@ export default {
                 .filter(position => position.parentType == 'Timeframe')
                 .map(position => {
                     let timeframe = timeframes.find(t => t.id == position.parentID);
-                    let metric = this.getMetric(position.idMetric);
-                    return `${timeframe ? timeframe.text : ''} / ${metric ? metric.text : ''}`;
+                    // Metric is optional on briefing blurbs
+                    let metric = position.idMetric ? this.getMetric(position.idMetric) : null;
+                    return [timeframe?.text, metric?.text].filter(Boolean).join(' / ');
                 }));
 
             // Keep the blurb's primary mapping type first

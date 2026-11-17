@@ -79,12 +79,12 @@
                                 <option v-for="timeframe in timeframes" :key="timeframe.id" :value="timeframe.id">{{ timeframe.text }}</option>
                             </select>
                             <select class="mapping-select mt-2" v-model.number="briefingIdMetric">
-                                <option :value="undefined" disabled>Metric...</option>
+                                <option :value="undefined">No metric</option>
                                 <option v-for="metric in metricStore.getItems()" :key="metric.id" :value="metric.id">{{ metric.text }}</option>
                             </select>
                             <div class="picker-footer">
                                 <span class="btn-cancel-picker" @click="closePicker">Cancel</span>
-                                <span class="btn-confirm-picker" :class="{ disabled: !briefingIdTimeframe || !briefingIdMetric }"
+                                <span class="btn-confirm-picker" :class="{ disabled: !briefingIdTimeframe }"
                                       @click="confirmBriefingMapping">Add</span>
                             </div>
                         </div>
@@ -434,21 +434,26 @@ export default {
             this.closePicker();
         },
         confirmBriefingMapping() {
-            if (!this.briefingIdTimeframe || !this.briefingIdMetric) return;
+            // Metric is optional: a general briefing note maps to a timeframe only
+            if (!this.briefingIdTimeframe) return;
 
-            let timeframe = this.timeframes.find(t => t.id == this.briefingIdTimeframe);
-            let metric = this.metricStore.getItem(this.briefingIdMetric);
             this.activeGroup.mappings.push({
                 mappingType: this.BLURB_MAPPING_TYPE.BRIEFING,
                 idEntity: null,
-                text: `${timeframe ? timeframe.text : ''} / ${metric ? metric.text : ''}`,
+                text: this.briefingLabel(this.briefingIdTimeframe, this.briefingIdMetric),
                 idTimeframe: this.briefingIdTimeframe,
-                idMetric: this.briefingIdMetric
+                idMetric: this.briefingIdMetric ?? null
             });
 
             this.briefingIdTimeframe = undefined;
             this.briefingIdMetric = undefined;
             this.closePicker();
+        },
+        // "Week / Physical", or just "Week" for a briefing with no metric
+        briefingLabel(idTimeframe, idMetric) {
+            let timeframe = this.timeframes.find(t => t.id == idTimeframe);
+            let metric = idMetric ? this.metricStore.getItem(idMetric) : null;
+            return [timeframe?.text, metric?.text].filter(Boolean).join(' / ');
         },
         removeMapping(groupIndex, index) {
             this.mappingGroups[groupIndex].mappings.splice(index, 1);
@@ -499,15 +504,11 @@ export default {
             }));
             pushGroup(T.BRIEFING, (this.blurb.positions || [])
                 .filter(position => position.parentType == 'Timeframe')
-                .map(position => {
-                    let timeframe = this.timeframes.find(t => t.id == position.parentID);
-                    let metric = this.metricStore.getItem(position.idMetric);
-                    return {
-                        mappingType: T.BRIEFING, idEntity: null,
-                        text: `${timeframe ? timeframe.text : ''} / ${metric ? metric.text : ''}`,
-                        idTimeframe: position.parentID, idMetric: position.idMetric ?? null
-                    };
-                }));
+                .map(position => ({
+                    mappingType: T.BRIEFING, idEntity: null,
+                    text: this.briefingLabel(position.parentID, position.idMetric),
+                    idTimeframe: position.parentID, idMetric: position.idMetric ?? null
+                })));
 
             // Keep the blurb's primary mapping type first
             groups.sort((a, b) => (b.idMappingType == this.blurb.idMappingType) - (a.idMappingType == this.blurb.idMappingType));
