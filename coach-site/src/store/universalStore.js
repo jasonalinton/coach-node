@@ -99,10 +99,14 @@ export const useUniversalStore = defineStore('universal', {
             const hasRemovals = updates.blurbIDsRemoved?.length > 0;
             if (!hasBlurbs && !hasRemovals) return;
 
-            let blurbs = [...this.blurbs];
-            if (hasBlurbs) updates.blurbs.forEach(blurb => replaceOrAddItem(blurb, blurbs));
-            if (hasRemovals) updates.blurbIDsRemoved.forEach(id => removeItemByID(id, blurbs));
-            deferUpdate(() => { this.blurbs = sortAsc(blurbs); });
+            // Copy the list inside the deferred fn, so updates queued in the same tick build on each other
+            // instead of each overwriting the list with its own stale copy
+            deferUpdate(() => {
+                let blurbs = [...this.blurbs];
+                if (hasBlurbs) updates.blurbs.forEach(blurb => replaceOrAddItem(blurb, blurbs));
+                if (hasRemovals) updates.blurbIDsRemoved.forEach(id => removeItemByID(id, blurbs));
+                this.blurbs = sortAsc(blurbs);
+            });
         },
         addMetricBlurb(idMetric, datetime, text, title, json) {
             return postEndpoint("Universal", "AddMetricBlurb", { idMetric, datetime, text, title, json })

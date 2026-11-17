@@ -294,15 +294,19 @@ export const useGoalStore = defineStore('goal', {
             const hasRemovals = updates.goalIDsRemoved?.length > 0;
             if (!hasGoals && !hasRemovals) return;
 
-            let goals = [...this.goals];
-            if (hasGoals) {
-                updates.goals.forEach(goal => replaceOrAddItem(goal, goals));
-                this.initializeItems(updates.goals, goals, updates);
-            }
-            if (hasRemovals) {
-                updates.goalIDsRemoved.forEach(id => removeItemByID(id, goals));
-            }
-            deferUpdate(() => { this.goals = sortAsc(goals); });
+            // Copy the list inside the deferred fn, so updates queued in the same tick build on each other
+            // instead of each overwriting the list with its own stale copy
+            deferUpdate(() => {
+                let goals = [...this.goals];
+                if (hasGoals) {
+                    updates.goals.forEach(goal => replaceOrAddItem(goal, goals));
+                    this.initializeItems(updates.goals, goals, updates);
+                }
+                if (hasRemovals) {
+                    updates.goalIDsRemoved.forEach(id => removeItemByID(id, goals));
+                }
+                this.goals = sortAsc(goals);
+            });
         },
         connectSocket() {
             if (!initialized) {

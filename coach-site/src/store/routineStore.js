@@ -102,15 +102,19 @@ export const useRoutineStore = defineStore('routine', {
             const hasRemovals = updates.routineIDsRemoved?.length > 0;
             if (!hasRoutines && !hasRemovals) return;
 
-            let routines = [...this.routines];
-            if (hasRoutines) {
-                updates.routines.forEach(routine => replaceOrAddItem(routine, routines));
-                this.initializeItems(updates.routines, routines, updates);
-            }
-            if (hasRemovals) {
-                updates.routineIDsRemoved.forEach(id => removeItemByID(id, routines));
-            }
-            deferUpdate(() => { this.routines = sortAsc(routines); });
+            // Copy the list inside the deferred fn, so updates queued in the same tick build on each other
+            // instead of each overwriting the list with its own stale copy
+            deferUpdate(() => {
+                let routines = [...this.routines];
+                if (hasRoutines) {
+                    updates.routines.forEach(routine => replaceOrAddItem(routine, routines));
+                    this.initializeItems(updates.routines, routines, updates);
+                }
+                if (hasRemovals) {
+                    updates.routineIDsRemoved.forEach(id => removeItemByID(id, routines));
+                }
+                this.routines = sortAsc(routines);
+            });
         },
         connectSocket() {
             if (!initialized) {

@@ -160,10 +160,14 @@ export const useMetricStore = defineStore('metric', {
         runUpdates(updates) {
             if (!updates.metrics?.length) return;
 
-            let metrics = [...this.metrics];
-            updates.metrics.forEach(metric => replaceOrAddItem(metric, metrics));
-            this.initializeItems(updates.metrics, metrics, updates);
-            deferUpdate(() => { this.metrics = sortAsc(metrics); });
+            // Copy the list inside the deferred fn, so updates queued in the same tick build on each other
+            // instead of each overwriting the list with its own stale copy
+            deferUpdate(() => {
+                let metrics = [...this.metrics];
+                updates.metrics.forEach(metric => replaceOrAddItem(metric, metrics));
+                this.initializeItems(updates.metrics, metrics, updates);
+                this.metrics = sortAsc(metrics);
+            });
         },
         connectSocket() {
             if (!initialized) {

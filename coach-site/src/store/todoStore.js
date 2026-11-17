@@ -357,17 +357,19 @@ export const useTodoStore = defineStore('todo', {
             if (!hasTodos && !hasRemovals) return;
 
             let detail = { updated: updates.todos?.length || 0, removed: updates.todoIDsRemoved?.length || 0 };
-            let todos = [...this.todos];
-            perfMeasure('todos:update', () => {
-                if (hasTodos) {
-                    updates.todos.forEach(todo => replaceOrAddItem(todo, todos));
-                    this.initializeItems(updates.todos, todos, updates);
-                }
-                if (hasRemovals) {
-                    updates.todoIDsRemoved.forEach(id => removeItemByID(id, todos));
-                }
-            }, detail);
+            // Copy the list inside the deferred fn, so updates queued in the same tick build on each other
+            // instead of each overwriting the list with its own stale copy
             deferUpdate(() => {
+                let todos = [...this.todos];
+                perfMeasure('todos:update', () => {
+                    if (hasTodos) {
+                        updates.todos.forEach(todo => replaceOrAddItem(todo, todos));
+                        this.initializeItems(updates.todos, todos, updates);
+                    }
+                    if (hasRemovals) {
+                        updates.todoIDsRemoved.forEach(id => removeItemByID(id, todos));
+                    }
+                }, detail);
                 let start = perfStart();
                 perfMeasure('todos:apply', () => { this.todos = sortAsc(todos); }, detail);
                 this.trackRender(start, detail);
