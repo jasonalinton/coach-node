@@ -1,15 +1,28 @@
 <template>
     <div v-if="goal" class="briefing-goal d-flex flex-column">
-        <span @click="showBlurbs = !showBlurbs" class="text-start goal">{{ goal.text }}</span>
-        <div v-if="showBlurbs" class="blurbs">
-            <ul>
-                <li v-for="reason in reasons" :key="reason.id" 
-                    class="text-start reason mb-2">{{ reason.text }}</li>
-            </ul>
+        <div class="goal-row d-flex flex-row align-items-center">
+            <span class="text-start goal flex-grow-1">{{ goal.text }}</span>
+            <span v-if="reasons.length > 1" class="reasons-toggle d-flex flex-row align-items-center"
+                  :class="{ expanded: showAllReasons }"
+                  @click="showAllReasons = !showAllReasons">
+                {{ showAllReasons ? 'Hide' : `+${reasons.length - 1}` }}
+                <img class="caret" src='/icon/caret-down.png' width="8" height="5"/>
+            </span>
         </div>
-        <!-- <div class="d-flex flex-column">
-            <p v-for="reason in reasons" :key="reason.id" class="text-start reason">{{ reason.text }}</p>
-        </div> -->
+        <!-- Top reason -->
+        <div v-if="!showAllReasons && topReason" class="reason d-flex flex-row">
+            <span class="bar"></span>
+            <span class="text-start">{{ topReason.text }}</span>
+        </div>
+        <!-- All reasons -->
+        <div v-if="showAllReasons" class="reasons d-flex flex-column">
+            <div v-for="(reason, index) in reasons" :key="reason.id"
+                 class="reason d-flex flex-row" :class="{ top: index == 0 }">
+                <span class="bar"></span>
+                <span class="text-start flex-grow-1">{{ reason.text }}</span>
+                <span v-if="index == 0" class="top-pill">Top</span>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -33,7 +46,7 @@ export default {
             goalStore: undefined,
             plannerStore: undefined,
             universalStore: undefined,
-            showBlurbs: true,
+            showAllReasons: false,
         }
     },
     created: async function() {
@@ -60,14 +73,15 @@ export default {
         blurbs() {
             let blurbs = [];
             if (this.universalStore) {
-                this.goal.blurbs.forEach(_blurb => {
+                // Ordered by the blurb's position in this goal, so the first reason is the top reason
+                sortAsc([...this.goal.blurbs], "position").forEach(_blurb => {
                     let blurb = this.universalStore.getBlurb(_blurb.id);
                     if (blurb) {
                         blurbs.push(blurb);
                     }
                 })
             }
-            return sortAsc([...blurbs], "position");
+            return blurbs;
         },
         reasons() {
             if (this.goal) {
@@ -85,7 +99,7 @@ export default {
                 }).map(x => x.id);
                 // Reasons in the same timeframe or with no timeframe
                 let reasons = this.blurbs.filter(x => {
-                    let isReason = x.typeIDs.findIndex(typeID => typeID.id == BLURBTYPE.REASON) > -1;
+                    let isReason = x.idType == BLURBTYPE.REASON;
                     if (isReason) {
                         if (x.goalTimePairs.length == 0)
                             return true;
@@ -97,26 +111,92 @@ export default {
                 })
                 return reasons;
             }
+            return [];
+        },
+        topReason() {
+            return this.reasons[0];
         }
     },
     methods: {
-        
+
     },
 }
-
-// Get timepairs in timeframe
-// Get blurbs in goal
-// Get blurbs that match goal timepair that are a reason
 
 </script>
 
 <style scoped>
+.briefing-goal {
+    gap: 2px;
+}
+
+.goal-row {
+    gap: 8px;
+}
+
 .goal {
     color: #3B99FC;
 }
 
-ul {
-    margin: 0px;
-    /* list-style-type: none; */
+.reasons-toggle {
+    gap: 4px;
+    padding: 1px 6px;
+    font-size: 12px;
+    line-height: 16px;
+    font-weight: 500;
+    color: #8A8A8A;
+    border-radius: 8px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.reasons-toggle:hover, .reasons-toggle.expanded {
+    background-color: #F1F3F4;
+}
+
+.reasons-toggle.expanded .caret {
+    transform: rotate(180deg);
+}
+
+.reasons {
+    gap: 6px;
+    padding-top: 2px;
+}
+
+.reason {
+    gap: 8px;
+    padding-left: 2px;
+    font-size: 14px;
+    line-height: 20px;
+    color: #565656;
+}
+
+.bar {
+    flex-shrink: 0;
+    width: 2px;
+    border-radius: 1px;
+    background-color: #BAD8F1;
+}
+
+.reasons .bar {
+    background-color: #E6E6E6;
+}
+
+.reasons .reason.top {
+    color: #212529;
+}
+
+.reasons .reason.top .bar {
+    background-color: #3B99FC;
+}
+
+.top-pill {
+    align-self: flex-start;
+    padding: 2px 5px;
+    font-size: 11px;
+    line-height: 14px;
+    font-weight: 500;
+    color: #3B99FC;
+    background-color: var(--pill-default);
+    border-radius: 4px;
 }
 </style>

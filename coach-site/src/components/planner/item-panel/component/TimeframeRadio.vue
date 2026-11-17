@@ -1,5 +1,5 @@
 <template>
-    <div class="timeframe-radio d-flex flex-column">
+    <div class="timeframe-radio d-flex flex-column" :class="{ segmented }">
         <div v-if="isToggle" class="btn-group" role="group" :aria-label="`moment`">
             <!-- eslint-disable-next-line vue/no-template-key -->
             <template v-for="timeframe in timeframesFirstRow" :key="-timeframe.id">
@@ -51,7 +51,8 @@ export default {
             type: Array,
             default: function() { return []}
         },
-        isToggle: Boolean
+        isToggle: Boolean,
+        segmented: Boolean
     },
     data: function() {
         return {
@@ -131,5 +132,28 @@ export default {
 .btn:hover {
     color: #343434;
     background-color: rgba(60, 64, 67, .08);
+}
+
+/* Segmented */
+.segmented {
+    padding: 8px 8px 4px 8px;
+}
+
+.segmented .btn-group {
+    height: auto;
+    gap: 2px;
+    padding: 2px;
+    background-color: #F1F3F4;
+    border-radius: 6px;
+}
+
+.segmented .btn-group label {
+    border-radius: 4px !important;
+}
+
+.segmented .btn-check:checked + .btn-outline-primary {
+    color: #0D6EFD;
+    background-color: #FFFFFF;
+    box-shadow: 0px 1px 2px rgba(0, 0, 0, .12) !important;
 }
 </style>

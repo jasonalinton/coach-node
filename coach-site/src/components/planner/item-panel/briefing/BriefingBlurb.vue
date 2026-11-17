@@ -1,29 +1,37 @@
 <template>
     <div class="briefing-blurb d-flex flex-column p-2">
-        <h4 class="text-start" @click="isShown = !isShown">Blurbs</h4>
+        <BriefingSectionHeader title="Blurbs" :count="blurbs.length" :isShown="isShown" @toggle="isShown = !isShown" />
         <div v-if="isShown" class="d-flex flex-column">
-            <MetricSelector class="metric-selector mt-1" :selected="selectedMetrics"></MetricSelector>
-            <div v-for="metric in metrics" :key="metric.id" class="briefing-blurb-metric d-flex flex-column">
-                <BlurbFormControl :header="metric.title" :placeholder="`Click to add ${metric.title} blurb`" 
-                                  :blurbs="metric.prop" :idBlurbType="BLURBTYPE.BRIEFING"
-                                  class="mt-2" 
-                                  @addBlurb="addBlurb($event, metric.id)"
+            <div v-for="entry in shownEntries" :key="entry.key" class="briefing-blurb-entry d-flex flex-column">
+                <BlurbFormControl :ref="el => controls[entry.key] = el"
+                                  :header="entry.title" :placeholder="entry.placeholder"
+                                  :blurbs="entry.blurbs" :idBlurbType="BLURBTYPE.BRIEFING"
+                                  class="mt-2"
+                                  @addBlurb="addBlurb($event, entry.id)"
                                   @saveBlurb="saveBlurb" />
+            </div>
+            <!-- Entries with no blurbs -->
+            <div v-if="emptyEntries.length > 0" class="empty-entries d-flex flex-row flex-wrap align-items-center">
+                <span class="add-to">Add to</span>
+                <span v-for="entry in emptyEntries" :key="entry.key"
+                      class="app-pill d-flex flex-row align-items-center"
+                      @click="openEntry(entry)">
+                    <img src="/icon/button/add.png" width="10" height="10"/>{{ entry.title }}
+                </span>
             </div>
         </div>
     </div>
 </template>
 
 <script>
-import MetricSelector from '../component/MetricSelector.vue';
 import BlurbFormControl from '../../../items/form/component/BlurbFormControl.vue';
-import TimeframeRadio from '../component/TimeframeRadio.vue';
-import { sortAsc, today, clone } from '../../../../../utility';
+import BriefingSectionHeader from './BriefingSectionHeader.vue';
+import { today, clone } from '../../../../../utility';
 import { BLURBTYPE, METRIC } from '../../../../model/constants';
 
 export default {
     name: 'BriefingBlurb',
-    components: { TimeframeRadio, MetricSelector, BlurbFormControl },
+    components: { BlurbFormControl, BriefingSectionHeader },
     props: {
         idTimeframe: {
             type: Number,
@@ -34,19 +42,16 @@ export default {
         return {
             plannerStore: undefined,
             universalStore: undefined,
-            METRIC: clone(METRIC),
             BLURBTYPE: clone(BLURBTYPE),
-            selectedMetrics: {
-                physical: false,
-                emotional: false,
-                mental: false,
-                social: false,
-                financial: false
-            },
             isShown: false,
+            // Keys of empty entries opened from the "Add to" pills
+            openedEntryKeys: [],
         }
     },
     created: async function() {
+        // BlurbFormControl instances by entry key, for opening the editor from the "Add to" pills
+        this.controls = {};
+
         let universalStore = await import(`@/store/universalStore`);
         this.universalStore = universalStore.useUniversalStore();
 
@@ -64,81 +69,33 @@ export default {
             if (this.universalStore) {
                 blurbs = this.universalStore.blurbs;
             }
-            // blurbs = blurbs.filter(x => x.idType == BLURBTYPE.BRIEFING && +new Date(x.datetime) == this.selectedDate );
             blurbs = blurbs.filter(x => x.idType == BLURBTYPE.BRIEFING );
             blurbs = blurbs.filter(x => +new Date(x.datetime) == +this.selectedDate );
 
             return blurbs;
         },
-        metrics() {
+        entries() {
+            // General blurbs aren't tied to a metric
             return [
-                {
-                    id: this.METRIC.PHYSICAL,
-                    idBriefingType: 172,
-                    title: "Physical",
-                    prop: this.physicalBlurbs,
-                },
-                {
-                    id: this.METRIC.SOCIAL,
-                    idBriefingType: undefined,
-                    title: "Social",
-                    prop: this.socialBlurbs,
-                },
-                {
-                    id: this.METRIC.MENTAL,
-                    idBriefingType: undefined,
-                    title: "Mental",
-                    prop: this.mentalBlurbs,
-                },
-                {
-                    id: this.METRIC.EMOTIONAL,
-                    idBriefingType: undefined,
-                    title: "Emotional",
-                    prop: this.emotionalBlurbs,
-                },
-                {
-                    id: this.METRIC.FINANCIAL,
-                    idBriefingType: undefined,
-                    title: "Financial",
-                    prop: this.financialBlurbs,
-                },
-            ]
+                { id: null, title: "General" },
+                { id: METRIC.PHYSICAL, title: "Physical" },
+                { id: METRIC.SOCIAL, title: "Social" },
+                { id: METRIC.MENTAL, title: "Mental" },
+                { id: METRIC.EMOTIONAL, title: "Emotional" },
+                { id: METRIC.FINANCIAL, title: "Financial" },
+            ].map(entry => ({
+                ...entry,
+                key: entry.id ?? "general",
+                placeholder: (entry.id == null) ? "Click to add a blurb not tied to a metric" : `Click to add ${entry.title} blurb`,
+                // TODO: Sort
+                blurbs: this.blurbs.filter(x => (x.idMetric ?? null) === entry.id)
+            }));
         },
-        physicalBlurbs() {
-            // TODO: Sort
-            let blurbs = this.blurbs.filter(x => x.idMetric == METRIC.PHYSICAL);
-            return blurbs
+        shownEntries() {
+            return this.entries.filter(x => x.blurbs.length > 0 || this.openedEntryKeys.includes(x.key));
         },
-        socialBlurbs() {
-            // TODO: Sort
-            let blurbs = this.blurbs.filter(x => x.idMetric == METRIC.SOCIAL);
-            return blurbs
-        },
-        mentalBlurbs() {
-            // TODO: Sort
-            let blurbs = this.blurbs.filter(x => x.idMetric == METRIC.MENTAL);
-            return blurbs
-        },
-        emotionalBlurbs() {
-            // TODO: Sort
-            let blurbs = this.blurbs.filter(x => x.idMetric == METRIC.EMOTIONAL);
-            return blurbs
-        },
-        financialBlurbs() {
-            // TODO: Sort
-            let blurbs = this.blurbs.filter(x => x.idMetric == METRIC.FINANCIAL);
-            return blurbs
-        },
-        nextPostition() {
-            let count = this.physicalBlurbs.length;
-            let nextPostition = (count > 0) ? this.physicalBlurbs[count -1].position + 1 : 1; 
-            return nextPostition;
-        },
-        nextTempID() {
-            let blurbs = sortAsc([...this.physicalBlurbs], 'id');
-            let count = blurbs.length;
-            let nextTempID = (count > 0 && blurbs[0].id < 0) ? blurbs[0].id - 1: -1; 
-            return nextTempID;
+        emptyEntries() {
+            return this.entries.filter(x => !this.shownEntries.includes(x));
         }
     },
     methods: {
@@ -148,9 +105,9 @@ export default {
         saveBlurb(blurb) {
             return this.universalStore.updateBlurb(blurb.id, undefined, [], [], blurb.text, blurb.title, undefined, [], [], blurb.json);
         },
-        selectType(metric, id) {
-            metric.idBriefingType = undefined;
-            console.log(id);
+        openEntry(entry) {
+            this.openedEntryKeys.push(entry.key);
+            this.$nextTick(() => this.controls[entry.key]?.onAddBlurb());
         }
     },
     watch: {
@@ -163,7 +120,22 @@ export default {
 </script>
 
 <style scoped>
-.metric-selector {
-    margin-bottom: 16px;
+.briefing-blurb-entry :deep(.form-head) {
+    font-size: 16px;
+}
+
+.empty-entries {
+    gap: 6px;
+    margin-top: 12px;
+}
+
+.add-to {
+    font-size: 14px;
+    color: #8A8A8A;
+}
+
+.app-pill {
+    gap: 4px;
+    padding: 4px 8px;
 }
 </style>

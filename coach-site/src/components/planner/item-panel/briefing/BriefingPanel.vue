@@ -5,9 +5,9 @@
                 <ItemPanelNavbar v-show="showHead" />
                 <div class="body d-flex flex-column flex-grow-1 overflow-scroll">
                     <!-- Toolbar -->
-                    <TimeframeRadio class="sticky-top" :timeframe="timeframe" :isToggle="false" container="briefing-panel"
+                    <TimeframeRadio class="sticky-top" :timeframe="timeframe" :isToggle="false" container="briefing-panel" segmented
                                     @timeframeSelected="selectTimeframe" />
-                    <BriefingGoals :idTimeframe="idTimeframe" :goalIDs="goalIDs" />
+                    <BriefingGoals :idTimeframe="idTimeframe" :goalGroups="goalGroups" />
                     <BriefingBlurb :idTimeframe="idTimeframe" />
                     <DebriefingPoints />
                 </div>
@@ -23,7 +23,11 @@ import BriefingGoals from './BriefingGoals.vue';
 import BriefingBlurb from './BriefingBlurb.vue';
 import DebriefingPoints from './DebriefingPoints.vue';
 import { timeframes } from '../../../../model/types';
+import { TIMEFRAME } from '../../../../model/constants';
 import { clone, today } from '../../../../../utility';
+
+// Goals in the selected timeframe are shown along with goals in every longer timeframe
+const GOAL_TIMEFRAMES = [ TIMEFRAME.DAY, TIMEFRAME.WEEK, TIMEFRAME.MONTH, TIMEFRAME.YEAR ];
 
 export default {
     name: 'BriefingPanel',
@@ -54,12 +58,22 @@ export default {
         selectedDate() {
             return (this.plannerStore) ? this.plannerStore.selectedDate : today();
         },
-        goalIDs() {
-            if (this.goalStore) {
-                let goals = this.goalStore.getGoalsInTimeframe(this.idTimeframe, this.selectedDate);
-                return goals.map(x => x.id);
-            }
-            return [];
+        goalGroups() {
+            if (!this.goalStore) return [];
+
+            let index = GOAL_TIMEFRAMES.indexOf(this.idTimeframe);
+            let timeframeIDs = GOAL_TIMEFRAMES.slice((index > -1) ? index : 0);
+
+            // A goal in more than one timeframe is only shown in the shortest one
+            let shownIDs = [];
+            let groups = timeframeIDs.map(idTimeframe => {
+                let goalIDs = this.goalStore.getGoalsInTimeframe(idTimeframe, this.selectedDate)
+                    .map(x => x.id)
+                    .filter(id => !shownIDs.includes(id));
+                shownIDs.push(...goalIDs);
+                return { idTimeframe, goalIDs };
+            });
+            return groups.filter(x => x.goalIDs.length > 0);
         }
     },
     methods: {
