@@ -1,15 +1,15 @@
 <template>
     <div class="debriefing-points d-flex flex-column p-2">
-        <h4 class="text-start" @click="isShown = !isShown">Debriefing Points</h4>
-        <div v-if="isShown" class="d-flex flex-column">
+        <BriefingSectionHeader title="Debriefing Points" :isShown="isShown" @toggle="isShown = !isShown" />
+        <div v-if="isShown" class="d-flex flex-column mt-2">
             <!-- Dates -->
-            <div class="d-flex justify-content-end gap-2">
+            <div class="dates d-flex justify-content-end gap-2">
                 <span v-for="(date, index) in dates" :key="index"
-                      class="pill">{{ getMonthDate(date) }}</span>
+                      class="pill" :class="{ current: index == dates.length - 1 }">{{ getMonthDate(date) }}</span>
             </div>
             <!-- Types -->
             <div v-for="(item, index) in items" :key="index"
-                 class="d-flex">
+                 class="points-row d-flex" :class="{ striped: index % 2 == 0 }">
                     <!-- Label -->
                     <div class="d-flex">
                         <span class="label" :style="{ 'padding-left': `${level * 10}px`}">{{ item.label }}</span>
@@ -20,8 +20,8 @@
                     </div>
                     <!-- Points -->
                     <div class="d-flex justify-content-end gap-2 flex-grow-1">
-                        <TypePointsTimeframe v-for="(date, index) in dates" :key="index"
-                                             class="pill"
+                        <TypePointsTimeframe v-for="(date, dateIndex) in dates" :key="dateIndex"
+                                             class="pill" :class="{ current: dateIndex == dates.length - 1 }"
                                              :idTimeframe="idTimeframe" 
                                              :date="date" 
                                              :item="item"/>
@@ -35,11 +35,12 @@
 import { today, addDay, addWeek, addMonth, addYear, getMonthDate, firstDayOfWeek, firstDayOfMonth, firstDayOfYear } from '../../../../../utility/timeUtility';
 import { TIMEFRAME } from '../../../../model/constants';
 import TypePointsTimeframe from '../../../points/TypePointsTimeframe.vue';
+import BriefingSectionHeader from './BriefingSectionHeader.vue';
 
 
 export default {
     name: 'DebriefingPoints',
-    components: { TypePointsTimeframe },
+    components: { TypePointsTimeframe, BriefingSectionHeader },
     props: {
         idTimeframe: {
             type: Number,
@@ -179,5 +180,32 @@ export default {
 .pill {
     width: 34px;
     text-align: center;
+}
+
+.dates .pill {
+    font-size: 12px;
+    line-height: 20px;
+    color: #8A8A8A;
+}
+
+.dates .pill.current {
+    font-weight: 600;
+    color: #0D6EFD;
+}
+
+.points-row.striped {
+    background-color: #FAFAFA;
+}
+
+.points-row .pill.current {
+    font-weight: 600;
+    background-color: #DEECF9;
+}
+
+.dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 2.5px;
+    margin: auto 0;
 }
 </style>
