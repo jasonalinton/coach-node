@@ -5,7 +5,8 @@
 </template>
 
 <script>
-import { firstDayOfWeek, lastDayOfWeek, firstDayOfMonth, lastDayOfMonth, firstDayOfYear, lastDayOfYear } from '../../../utility/timeUtility';
+import { getTimeframeEndpoints } from '../../../utility/timeUtility';
+import { getPoints } from '../../../utility/pointsUtility';
 import { TIMEFRAME } from '../../model/constants';
 
 export default {
@@ -37,135 +38,17 @@ export default {
     },
     computed: {
         start() {
-            if (this.idTimeframe == TIMEFRAME.WEEK) {
-                return firstDayOfWeek(this.date);
-            } else if (this.idTimeframe == TIMEFRAME.MONTH) {
-                return firstDayOfMonth(this.date);
-            } else if (this.idTimeframe == TIMEFRAME.YEAR) {
-                return firstDayOfYear(this.date);
-            }
-            return this.date;
+            return ([TIMEFRAME.WEEK, TIMEFRAME.MONTH, TIMEFRAME.YEAR].includes(this.idTimeframe))
+                ? getTimeframeEndpoints(this.idTimeframe, this.date).start : this.date;
         },
         end() {
-            if (this.idTimeframe == TIMEFRAME.WEEK) {
-                return lastDayOfWeek(this.date);
-            } else if (this.idTimeframe == TIMEFRAME.MONTH) {
-                return lastDayOfMonth(this.date);
-            } else if (this.idTimeframe == TIMEFRAME.YEAR) {
-                return lastDayOfYear(this.date);
-            }
-            return this.date;
-        },
-        iterations() {
-            let iterations = [];
-            if (this.iterationStore) {
-                iterations = this.iterationStore.iterations;
-                iterations = iterations.filter(iteration => {
-                    return +(new Date(iteration.startAt)) >= +this.start && 
-                           +(new Date(iteration.endAt)) <= +this.end
-                });
-            }
-            return iterations;
+            return ([TIMEFRAME.WEEK, TIMEFRAME.MONTH, TIMEFRAME.YEAR].includes(this.idTimeframe))
+                ? getTimeframeEndpoints(this.idTimeframe, this.date).end : this.date;
         },
         points() {
-            if (this.todoStore == undefined || this.goalStore == undefined || this.iterationStore == undefined) {
-                return 0;
-            }
-
-            let iterations = this.iterationStore.iterations;
-            iterations = iterations.filter(iteration => {
-                return +(new Date(iteration.startAt)) >= +this.start && 
-                        +(new Date(iteration.endAt)) <= +this.end
-            });
-
-            if (this.item.type == 'iteration') {
-                iterations = this.iterations.filter(x => x.attemptedAt != null || x.completedAt != null);
-                let points = iterations.filter(x => x.points != null)
-                .reduce((accumulator, currentValue) => accumulator + currentValue.points, 0,);
-                return points;
-            } else if (['type', 'goal', 'metric'].includes(this.item.type)) {
-                let _this = this;
-                var matchingIterations = [];
-                this.iterations.filter(x => x.attemptedAt != null || x.completedAt != null)
-                .forEach(task => {
-                    if (task.todoID) {
-                        _this.isTodoOfType(task, task.todoID, matchingIterations);
-                    }
-                });
-                let points = matchingIterations.filter(x => x.points != null)
-                .reduce((accumulator, currentValue) => accumulator + currentValue.points, 0,);
-                return points;
-            }
-            return 10;
+            let stores = { iterationStore: this.iterationStore, todoStore: this.todoStore, goalStore: this.goalStore };
+            return getPoints(stores, this.item, this.start, this.end);
         }
-    },
-    methods: {
-        isTodoOfType(iteration, todoID, matchingIterations) {
-            let _this = this;
-            if (todoID) {
-                var todo = this.todoStore.getItem(todoID);
-                if (todo) {
-                    var typeIDs = todo[`${_this.item.type}s`].map(y => y.id);
-                    let isType = false;
-                    if (this.item.id) {
-                        isType = typeIDs.includes(this.item.id);
-                    } else if (this.item.ids) {
-                        for (let i = 0; i < this.item.ids.length && !isType; i++) {
-                            isType = typeIDs.includes(this.item.ids[i]);
-                        }
-                    }
-                    if (isType) {
-                        var id = matchingIterations.findIndex(x => x.id == iteration.id);
-                        if (id == -1) {
-                            matchingIterations.push(iteration);
-                        }
-                        return;
-                    } else {
-                        todo.parents.forEach(todo => {
-                            _this.isTodoOfType(iteration, todo.id, matchingIterations)
-                        });
-                        if (_this.item.type == "goal" || _this.item.type == "metric") {
-                            todo.goals.forEach(goal => {
-                                _this.isGoalOfType(iteration, goal.id, matchingIterations)
-                            });
-                        }
-                    }
-                }
-            }
-        },
-        isGoalOfType(iteration, goalID, matchingIterations) {
-            let _this = this;
-            if (goalID) {
-                var goal = this.goalStore.getItem(goalID);
-                if (goal) {
-                    var typeIDs = [];
-                    if (_this.item.type == "goal") {
-                        typeIDs = goal.parents.map(y => y.id);
-                    } else if (_this.item.type == "metric") {
-                        typeIDs = goal.metrics.map(y => y.id);
-                    }
-                    let isType = false;
-                    if (this.item.id) {
-                        isType = typeIDs.includes(this.item.id);
-                    } else if (this.item.ids) {
-                        for (let i = 0; i < this.item.ids.length && !isType; i++) {
-                            isType = typeIDs.includes(this.item.ids[i]);
-                        }
-                    }
-                    if (isType) {
-                        var id = matchingIterations.findIndex(x => x.id == iteration.id);
-                        if (id == -1) {
-                            matchingIterations.push(iteration);
-                        }
-                        return;
-                    } else {
-                        goal.parents.forEach(goal => {
-                            _this.isGoalOfType(iteration, goal.id, matchingIterations)
-                        });
-                    }
-                }
-            }
-        },
     },
 }
 
