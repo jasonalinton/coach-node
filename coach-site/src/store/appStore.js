@@ -48,7 +48,11 @@ export const useAppStore = defineStore('app', {
                 ? undefined : localStorage.getItem(`selected-item-panel`) 
                     || "todo",
             briefing: {
-                title: "Briefing"
+                title: "Briefing",
+                // Header toggles for the BriefingRethink variant
+                noteFilter: 'all', // 'all' | 'brief' | 'debrief'
+                showReasons: true,
+                showPoints: true,
             },
             todo: {
                 selectedTask: undefined,
