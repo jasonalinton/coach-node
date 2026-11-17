@@ -14,7 +14,7 @@
 </template>
 
 <script>
-import { endOfDay } from '../../../../../utility/timeUtility';
+import { today, endOfDay } from '../../../../../utility/timeUtility';
 
 export default {
     name: 'DashboardMeal',
@@ -80,8 +80,9 @@ export default {
 }
 
 function toggleVerification() {
+    let isVerified = !this.isVerified;
     this.iterations.forEach(iteration => {
-        this.iterationStore.toggleVerification(iteration.id, !this.isVerified);
+        this.iterationStore.toggleVerification(iteration.id, isVerified);
     })
 }
 

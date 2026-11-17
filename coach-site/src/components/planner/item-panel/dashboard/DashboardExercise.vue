@@ -55,7 +55,8 @@ export default {
         },
         iterations() {
             if (this.iterationStore) {
-                let iterations = this.workouts.map(workout => workout.iteration);
+                let ids = this.workouts.map(workout => workout.iteration.id);
+                let iterations = this.iterationStore.getIterationsWithIDs(ids);
                 return iterations;
             }
             return [];
@@ -76,8 +77,9 @@ export default {
 }
 
 function toggleVerification() {
+    let isVerified = !this.isVerified;
     this.iterations.forEach(iteration => {
-        this.iterationStore.toggleVerification(iteration.id, !this.isVerified);
+        this.iterationStore.toggleVerification(iteration.id, isVerified);
     })
 }
 

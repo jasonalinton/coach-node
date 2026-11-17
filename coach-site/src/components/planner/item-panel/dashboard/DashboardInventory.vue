@@ -66,8 +66,9 @@ export default {
 }
 
 function toggleVerification() {
+    let isVerified = !this.isVerified;
     this.iterations.forEach(iteration => {
-        this.iterationStore.toggleVerification(iteration.id, !this.isVerified);
+        this.iterationStore.toggleVerification(iteration.id, isVerified);
     })
 }
 

@@ -40,13 +40,13 @@ export const useIterationStore = defineStore('iteration', {
         // async fill() {
         //     return getIterations().then(res => this.iterations = res);
         // },
-        isRangeLoaded(startAt, endAt) {
+        isRangeLoaded(startAt, endAt, endpoint = "GetIterationsInRange") {
             let start = +new Date(startAt);
             let end = +new Date(endAt);
             let covers = (s, e) => +new Date(s) <= start && +new Date(e) >= end;
 
             return this.requests.some(r =>
-                r.endpoint == "GetIterationsInRange" && r.requestProps
+                r.endpoint == endpoint && r.requestProps
                 && covers(r.requestProps.startAt, r.requestProps.endAt));
         },
         getIteration(id) {
@@ -90,9 +90,22 @@ export const useIterationStore = defineStore('iteration', {
             return pickByID(ids, this.iterationIndex);
         },
         getIterationsInRange(startAt, endAt) {
-            if (!this.isRangeLoaded(startAt, endAt)) {
+            this.requestIterationsInRange("GetIterationsInRange", startAt, endAt);
+            return this.iterations.filter(iteration => {
+                return iteration.startAt && +iteration.startAt.toDate() >= startAt && +iteration.startAt.toDate() <= endAt;
+            });
+        },
+        /** Like getIterationsInRange, but the server also returns routine iterations and the todo iterations mapped to them */
+        getAllIterationsInRange(startAt, endAt) {
+            this.requestIterationsInRange("GetAllIterationsInRange", startAt, endAt);
+            return this.iterations.filter(iteration => {
+                return iteration.startAt && +iteration.startAt.toDate() >= startAt && +iteration.startAt.toDate() <= endAt;
+            });
+        },
+        requestIterationsInRange(endpoint, startAt, endAt) {
+            if (!this.isRangeLoaded(startAt, endAt, endpoint)) {
                 let request = {
-                    endpoint: "GetIterationsInRange",
+                    endpoint,
                     requestProps: { startAt, endAt },
                     requestTime: new Date(),
                     isProcessing: true
@@ -101,7 +114,7 @@ export const useIterationStore = defineStore('iteration', {
                 
                 let dropRequest = () => { this.requests = this.requests.filter(r => r !== request); };
 
-                postEndpoint("Planner", "GetIterationsInRange", { startAt, endAt })
+                postEndpoint("Planner", endpoint, { startAt, endAt })
                 .then(response => {
                     if (!response || !response.status || !response.status.success) {
                         dropRequest();
@@ -118,10 +131,6 @@ export const useIterationStore = defineStore('iteration', {
                 })
                 .catch(dropRequest);
             }
-
-            return this.iterations.filter(iteration => {
-                return iteration.startAt && +iteration.startAt.toDate() >= startAt && +iteration.startAt.toDate() <= endAt;
-            });
         },
         // getIterationsInRange(startAt, endAt, shouldRequestServer) {
         //     let _this = this;
@@ -249,7 +258,13 @@ export const useIterationStore = defineStore('iteration', {
         },
         toggleVerification(iterationID, isVerified) {
             return postEndpoint("Planner", "ToggleIterationVerification", { iterationID, isVerified })
-            .then(response => response.result);
+            .then(response => {
+                // Apply the result now instead of waiting on the socket, which may be slow or disconnected
+                if (response?.status?.success && response.result) {
+                    this.runUpdates({ iterations: [response.result] });
+                }
+                return response?.result;
+            });
         },
         deleteIteration(iterationID) {
             return postEndpoint("Planner", "DeleteIteration", { iterationID })
@@ -260,14 +275,18 @@ export const useIterationStore = defineStore('iteration', {
             const hasRemovals = updates.iterationIDsRemoved?.length > 0;
             if (!hasIterations && !hasRemovals) return;
 
-            let iterations = [...this.iterations];
-            if (hasIterations) {
-                updates.iterations.forEach(iteration => replaceOrAddItem(iteration, iterations));
-            }
-            if (hasRemovals) {
-                updates.iterationIDsRemoved.forEach(id => removeItemByID(id, iterations));
-            }
-            deferUpdate(() => { this.iterations = sortAsc(iterations); });
+            // Copy the list inside the deferred fn, so updates queued in the same tick build on each other
+            // instead of each overwriting the list with its own stale copy
+            deferUpdate(() => {
+                let iterations = [...this.iterations];
+                if (hasIterations) {
+                    updates.iterations.forEach(iteration => replaceOrAddItem(iteration, iterations));
+                }
+                if (hasRemovals) {
+                    updates.iterationIDsRemoved.forEach(id => removeItemByID(id, iterations));
+                }
+                this.iterations = sortAsc(iterations);
+            });
         },
         connectSocket() {
             if (!initialized) {

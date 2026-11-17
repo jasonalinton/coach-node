@@ -14,7 +14,7 @@
 </template>
 
 <script>
-import { endOfDay } from '../../../../../utility/timeUtility';
+import { today, endOfDay } from '../../../../../utility/timeUtility';
 
 export default {
     name: 'DashboardRoutine',
@@ -58,7 +58,7 @@ export default {
         },
         routineIteration() {
             if (this.iterationStore) {
-                let iterations = this.iterationStore.getIterationsInRange(this.selectedDate, endOfDay(this.selectedDate), false);
+                let iterations = this.iterationStore.getAllIterationsInRange(this.selectedDate, endOfDay(this.selectedDate), false);
                 let iteration = iterations.find(x => x.idRoutine == this.idRoutine);
                 return iteration;
             }
@@ -85,6 +85,7 @@ export default {
 }
 
 function toggleVerification() {
+    if (!this.routineIteration) return;
     this.iterationStore.toggleVerification(this.routineIteration.id, !this.isVerified);
 }
 
