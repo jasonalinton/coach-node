@@ -62,7 +62,7 @@ import RethinkNoteComposer from './RethinkNoteComposer.vue';
 import { getGoalGroups, getGoalReasons, getPeriods, getPaceRanges, timeframeUnit } from '../briefingUtility';
 import { getPoints } from '../../../../../../utility/pointsUtility';
 import { BLURBTYPE, BLURB_MAPPING_TYPE, TIMEFRAME } from '../../../../../model/constants';
-import { today, isToday, endOfDay } from '../../../../../../utility/timeUtility';
+import { today, isToday, endOfDay, getTimeframeEndpoints } from '../../../../../../utility/timeUtility';
 
 const TABS = [
     { id: TIMEFRAME.DAY, text: 'Day' },
@@ -172,10 +172,15 @@ export default {
         /* Notes */
         notes() {
             if (!this.universalStore) return [];
+            // Any note dated within the selected period (e.g. anywhere in this week on the Week tab)
+            let { start, end } = getTimeframeEndpoints(this.idTimeframe, this.selectedDate);
             return this.universalStore.blurbs
                 .filter(x => x.idType == BLURBTYPE.BRIEFING || x.idType == BLURBTYPE.DEBRIEFING)
                 .filter(x => x.idTimeframe == this.idTimeframe)
-                .filter(x => +new Date(x.datetime) == +this.selectedDate)
+                .filter(x => {
+                    let datetime = +new Date(x.datetime);
+                    return datetime >= +start && datetime <= +end;
+                })
                 .sort((a, b) => b.id - a.id);
         },
         filteredNotes() {
