@@ -244,7 +244,7 @@ export default {
             this.universalStore?.getBriefingBlurbs(this.idTimeframe, this.selectedDate);
         },
         async saveNote({ text, json, idMetric, idBlurbType, idGoal }) {
-            let blurb = await this.universalStore.addBriefingBlurb(text, this.selectedDate, idBlurbType, idMetric, this.idTimeframe, json);
+            let blurb = await this.universalStore.addBriefingBlurb(text, new Date(),idBlurbType, idMetric, this.idTimeframe, json);
             if (!blurb) throw new Error("AddBriefingBlurb returned no blurb");
 
             if (idGoal) {

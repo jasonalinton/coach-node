@@ -100,7 +100,7 @@ export default {
     },
     methods: {
         addBlurb(blurb, idMetric) {
-            return this.universalStore.addBriefingBlurb(blurb.text, this.selectedDate, blurb.idBlurbType, idMetric, this.idTimeframe, blurb.json)
+            return this.universalStore.addBriefingBlurb(blurb.text, new Date(),blurb.idBlurbType, idMetric, this.idTimeframe, blurb.json)
         },
         saveBlurb(blurb) {
             return this.universalStore.updateBlurb(blurb.id, undefined, [], [], blurb.text, blurb.title, undefined, [], [], blurb.json);
