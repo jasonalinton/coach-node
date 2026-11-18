@@ -26,6 +26,23 @@
                     </span>
                 </div>
             </div>
+            <div class="d-flex flex-row justify-content-between">
+                <!-- Type: the blurb's primary type (what e.g. the briefing panel filters on) -->
+                <div class="field">
+                    <div class="field-label"><span>Type</span></div>
+                    <select class="mapping-select" :value="idType" @change="setType(Number($event.target.value))">
+                        <option v-for="type in blurbTypes" :key="type.id" :value="type.id">{{ type.text }}</option>
+                    </select>
+                </div>
+                <!-- Mapping Type: the blurb's primary mapping type; Auto uses the first mapping below -->
+                <div class="field">
+                    <div class="field-label"><span>Mapping Type</span></div>
+                    <select class="mapping-select" v-model.number="primaryIdMappingType">
+                        <option :value="undefined">Auto{{ derivedIdMappingType ? ` (${mappingTypeText(derivedIdMappingType)})` : '' }}</option>
+                        <option v-for="type in primaryMappingTypes" :key="type.id" :value="type.id">{{ type.text }}</option>
+                    </select>
+                </div>
+            </div>
             <!-- Mapping Details -->
             <div class="field mapping-section">
                 <div class="field-label"><span>Mapping Details</span></div>
@@ -106,7 +123,7 @@ import ItemMapper from '../items/form/component/ItemMapper.vue';
 import EditorJS from '../controls/input/EditorJS.vue';
 import { clone, toDateString, addDay } from '../../../utility';
 import { extractPlainText, isEmptyOutputData, legacyTextToOutputData } from '../../../utility/editorjsUtility';
-import { BLURB_MAPPING_TYPE } from '../../model/constants';
+import { BLURB_MAPPING_TYPE, BLURBTYPE } from '../../model/constants';
 import { blurbTypes, blurbMappingTypes, timeframes } from '../../model/types';
 
 const ITEM_MAPPER_KIND_BY_TYPE = {
@@ -145,6 +162,9 @@ export default {
 
             title: '',
             json: null,
+            idType: BLURBTYPE.BLURB,
+            // Explicit primary mapping type; undefined = derive from the mappings
+            primaryIdMappingType: undefined,
             selectedTypeIDs: [],
             mappingGroups: [{ idMappingType: undefined, mappings: [] }],
             originalMappings: [],
@@ -200,8 +220,15 @@ export default {
         },
         // Primary mapping type stored on the blurb itself
         idMappingType() {
+            return this.primaryIdMappingType ?? this.derivedIdMappingType;
+        },
+        // Fallback: the first mapping group that has items
+        derivedIdMappingType() {
             let group = this.mappingGroups.find(g => g.idMappingType && g.mappings.length) || this.mappingGroups.find(g => g.idMappingType);
             return group?.idMappingType;
+        },
+        primaryMappingTypes() {
+            return blurbMappingTypes.filter(type => !EXCLUDED_MAPPING_TYPES.includes(type.id));
         },
         activeGroup() {
             return this.mappingGroups[this.activePickerIndex];
@@ -238,6 +265,20 @@ export default {
     methods: {
         isTypeSelected(id) {
             return this.selectedTypeIDs.includes(id);
+        },
+        // Changing the primary type swaps it in the Types pills, matching how the backend retypes it
+        mappingTypeText(idMappingType) {
+            return blurbMappingTypes.find(type => type.id == idMappingType)?.text;
+        },
+        setType(idType) {
+            let index = this.selectedTypeIDs.indexOf(this.idType);
+            if (!this.selectedTypeIDs.includes(idType)) {
+                if (index == -1) this.selectedTypeIDs.unshift(idType);
+                else this.selectedTypeIDs.splice(index, 1, idType);
+            } else if (index != -1) {
+                this.selectedTypeIDs.splice(index, 1);
+            }
+            this.idType = idType;
         },
         toggleType(id) {
             let index = this.selectedTypeIDs.indexOf(id);
@@ -464,6 +505,8 @@ export default {
             this.title = this.blurb.title || '';
             this.json = this.blurb.json ? JSON.parse(this.blurb.json) : legacyTextToOutputData(this.blurb.text);
             this.selectedTypeIDs = (this.blurb.typeIDs || []).map(x => x.id);
+            this.idType = this.blurb.idType ?? BLURBTYPE.BLURB;
+            this.primaryIdMappingType = this.blurb.idMappingType ?? undefined;
 
             const T = this.BLURB_MAPPING_TYPE;
             const idListsByType = {
@@ -560,10 +603,11 @@ export default {
                     this.blurb.id, this.idMappingType,
                     typeIDs_Added, typeIDs_Removed,
                     text, this.title, datetime,
-                    mappings_Added, mappings_Removed, json
+                    mappings_Added, mappings_Removed, json,
+                    (this.idType != this.blurb.idType) ? this.idType : undefined
                 );
             } else {
-                await this.universalStore.addBlurb(this.idMappingType, typeIDs, text, this.title, datetime, mappings.map(this.toMappingProps), json);
+                await this.universalStore.addBlurb(this.idMappingType, typeIDs, text, this.title, datetime, mappings.map(this.toMappingProps), json, this.idType);
             }
 
             this.$emit('saved');
