@@ -1,6 +1,6 @@
 <template>
     <div class="blurb-form">
-        <div>
+        <div v-if="blurb">
             {{ blurb.id }}
         </div>
         <div class="form-fields">
