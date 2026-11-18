@@ -624,15 +624,14 @@ export default {
     background-color: white;
     border-radius: 16px;
     box-shadow: 0px 8px 12px rgba(0, 0, 0, 0.03);
-    padding: 48px;
+    padding: 28px;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 18px;
     width: 100%;
     max-width: 720px;
     text-align: start;
     margin: auto;
-    margin-bottom: 32px;
 }
 
 .form-header {
@@ -657,7 +656,7 @@ export default {
 .form-fields {
     display: flex;
     flex-direction: column;
-    gap: 32px;
+    gap: 12px;
 }
 
 .field {
@@ -691,7 +690,7 @@ export default {
 }
 
 .field-input {
-    height: 44px;
+    height: 36px;
 }
 
 .field-input::placeholder,
@@ -723,7 +722,7 @@ export default {
 
 .type-pill {
     cursor: pointer;
-    padding: 8px 16px;
+    padding: 4px 8px;
     border-radius: 999px;
     font-size: 14px;
     font-weight: 600;
@@ -753,7 +752,7 @@ export default {
 
 .mapping-select {
     width: 160px;
-    height: 44px;
+    height: 36px;
     appearance: none;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
     background-repeat: no-repeat;
@@ -763,7 +762,7 @@ export default {
 .mapping-id-input {
     flex: 1;
     min-width: 0;
-    height: 44px;
+    height: 36px;
     background-color: white;
     border: 1px solid #e5e7eb;
     border-radius: 10px;
@@ -920,7 +919,7 @@ export default {
 
 .btn-cancel {
     cursor: pointer;
-    padding: 10px 16px;
+    padding: 8px 16px;
     color: #6b7280;
     font-weight: 600;
     font-size: 15px;
@@ -928,7 +927,7 @@ export default {
 
 .btn-submit {
     cursor: pointer;
-    padding: 12px 32px;
+    padding: 8px 16px;
     border-radius: 999px;
     background-color: #00897b;
     color: white;

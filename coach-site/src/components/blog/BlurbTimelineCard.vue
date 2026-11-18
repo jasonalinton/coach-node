@@ -223,7 +223,6 @@ export default {
     max-width: 720px;
     text-align: start;
     margin: auto;
-    margin-bottom: 32px;
     cursor: pointer;
 }
 

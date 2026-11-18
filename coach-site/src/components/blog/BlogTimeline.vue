@@ -1,8 +1,8 @@
 <template>
     <div class="blog-timeline px-3">
-        <div class="d-flex flex-column">
+        <div class="d-flex flex-column py-4 gap-4">
             <!-- Button - New Post -->
-            <button v-if="!newPost.isShown" type="button" class="btn btn-primary mt-3 mb-2" 
+            <button v-if="!newPost.isShown" type="button" class="btn btn-primary" 
                     @click="onNewPost">
                     New Post
             </button>
