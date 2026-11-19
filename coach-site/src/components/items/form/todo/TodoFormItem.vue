@@ -8,7 +8,7 @@
                     <div class="d-flex flex-row">
                         <span class="id">{{ todo.id }}</span>
                         <span v-if="mapperId" class="mapper-id">{{ mapperId }}</span>
-                        <span class="text">{{ todo.text }}</span>
+                        <span class="text" @click.stop="openForm">{{ todo.text }}</span>
                     </div>
                     <button class="btn-close mt-auto mb-auto" type="button" aria-label="close"
                             @click.stop="$emit('removeItem')"></button>
@@ -30,6 +30,7 @@
 import { useTodoStore } from "@/store/todoStore";
 import { clone, listToString } from "../../../../../utility";
 import RepeatControl from "../component/RepeatControl.vue";
+import { Modal } from "bootstrap";
 
 export default {
     name: "TodoFormItem",
@@ -46,11 +47,14 @@ export default {
     data: function() {
         return {
             store: null,
+            appStore: null,
             repeatsShown: false 
         }
     },
     created: async function() {
         this.store = useTodoStore();
+        let appStore = await import(`@/store/appStore`);
+        this.appStore = appStore.useAppStore();
     },
     computed: {
         todo() {
@@ -96,8 +100,16 @@ export default {
         }
     },
     methods: {
-        
+        openForm
     },
+}
+
+function openForm() {
+    let modalEl = this.$el.closest('.modal');
+    if (modalEl) {
+        Modal.getInstance(modalEl)?.hide();
+    }
+    this.appStore.selectTodoForm(this.id);
 }
 </script>
 
@@ -126,6 +138,11 @@ img {
 
 .text {
     color: #3B99FC;
+}
+
+.text:hover {
+    cursor: pointer;
+    text-decoration: underline;
 }
 
 .metric {

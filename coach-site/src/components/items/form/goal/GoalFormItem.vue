@@ -6,7 +6,7 @@
             <div class="d-flex flex-column">
                 <div class="d-flex flex-row">
                     <span class="id">{{ goal.id }}</span>
-                    <span class="text">{{ goal.text }}</span>
+                    <span class="text" @click.stop="openForm">{{ goal.text }}</span>
                 </div>
                 <!-- <div class="d-flex flex-row">
                     <span class="metrics">{{ metricString }}</span>
@@ -25,6 +25,7 @@
 import { useGoalStore } from "@/store/goalStore";
 import { clone, listToString } from "../../../../../utility";
 import RepeatControl from "../component/RepeatControl.vue";
+import { Modal } from "bootstrap";
 
 export default {
     name: "GoalFormItem",
@@ -39,11 +40,14 @@ export default {
     data: function() {
         return {
             store: null,
+            appStore: null,
             repeatsShown: false 
         }
     },
     created: async function() {
         this.store = useGoalStore();
+        let appStore = await import(`@/store/appStore`);
+        this.appStore = appStore.useAppStore();
     },
     computed: {
         goal() {
@@ -80,8 +84,16 @@ export default {
         }
     },
     methods: {
-        
+        openForm
     },
+}
+
+function openForm() {
+    let modalEl = this.$el.closest('.modal');
+    if (modalEl) {
+        Modal.getInstance(modalEl)?.hide();
+    }
+    this.appStore.selectGoalForm(this.id);
 }
 </script>
 
@@ -110,6 +122,11 @@ img {
 
 .text {
     color: #3B99FC;
+}
+
+.text:hover {
+    cursor: pointer;
+    text-decoration: underline;
 }
 
 .metric {

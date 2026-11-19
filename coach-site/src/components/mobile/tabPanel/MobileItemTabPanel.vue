@@ -6,8 +6,8 @@
             <ItemTableAndToolbar v-if="selectedItemTab == 'todo'" itemType="todo" />
             <ItemTableAndToolbar v-if="selectedItemTab == 'routine'" itemType="routine" />
         </template>
-        <GoalForm v-else-if="selectedPage == 'goalForm'" :id="selectedGoalFormId" />
-        <TodoForm v-else-if="selectedPage == 'todoForm'" :id="selectedTodoFormId" />
+        <GoalForm v-else-if="selectedPage == 'goalForm'" :id="selectedGoalFormId" :key="`goal-form-${selectedGoalFormId}`" />
+        <TodoForm v-else-if="selectedPage == 'todoForm'" :id="selectedTodoFormId" :key="`todo-form-${selectedTodoFormId}`" />
         <template v-else>
             <DashboardPanel v-show="selectedPanel == 'dashboard'" class="item-panel" :showHead="false" />
             <MetricPanel v-show="selectedPanel == 'metric'" class="item-panel" :showHead="false" />

@@ -15,8 +15,8 @@
                 <Planner v-show="selectedPage == 'planner'" />
                 <ItemTabs v-show="selectedPage == 'items'" />
                 <BlogTimeline v-show="selectedPage == 'timeline'" />
-                <GoalForm v-if="selectedPage == 'goalForm'" :id="selectedGoalFormId" />
-                <TodoForm v-if="selectedPage == 'todoForm'" :id="selectedTodoFormId" />
+                <GoalForm v-if="selectedPage == 'goalForm'" :id="selectedGoalFormId" :key="`goal-form-${selectedGoalFormId}`" />
+                <TodoForm v-if="selectedPage == 'todoForm'" :id="selectedTodoFormId" :key="`todo-form-${selectedTodoFormId}`" />
                 <PhysicalView v-show="selectedPage == 'physical'" />
                 <MentalView v-show="selectedPage == 'mental'" />
                 <EmotionalView v-show="selectedPage == 'emotional'" />
