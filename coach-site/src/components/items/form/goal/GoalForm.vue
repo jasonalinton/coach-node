@@ -3,7 +3,8 @@
         <div class="modal-content">
         <div class="modal-header">
             <span class="me-2">Goal {{ (goal) ? goal.id : "" }}</span>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+                    @click="close"></button>
         </div>
         <div class="modal-body">
             <div v-if="!mapper.isShown" class="container-fluid">
@@ -138,7 +139,7 @@
             </div>  
         </div>
         <div v-if="!mapper.isShown" class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @click="close">Close</button>
             <button type="button" class="btn btn-primary" @click="save()">Save changes</button>
         </div>
         </div>
@@ -168,6 +169,7 @@ export default {
     data: function() {
         return {
             store: null,
+            appStore: null,
             plannerStore: null,
             todoStore: null,
             BLURBTYPE: BLURBTYPE,
@@ -220,6 +222,9 @@ export default {
     created: async function() {
         let goalStore = await import(`@/store/goalStore`);
         this.store = goalStore.useGoalStore();
+
+        let appStore = await import(`@/store/appStore`);
+        this.appStore = appStore.useAppStore();
 
         let plannerStore = await import(`@/store/plannerStore`);
         this.plannerStore = plannerStore.usePlannerStore();
@@ -421,6 +426,9 @@ export default {
         },
         addItem(itemType, itemText) {
             this.store.createAndMapItem(this.id, itemType, itemText);
+        },
+        close() {
+            this.appStore.selectPage('items');
         },
         addItemClicked(itemType) {
             this.mapper.isShown = true;

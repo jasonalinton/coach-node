@@ -160,7 +160,7 @@
         <div v-if="!fullscreen" class="form-footer flex gap-1 justify-content-end">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @click="fullscreen = 'blurbs'">Blurbs</button>
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @click="createTask">{{`Create Task ${dateString}`}}</button>
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @click="close">Close</button>
             <button type="button" class="btn btn-primary" @click="save">Save</button>
         </div>
     </div>
