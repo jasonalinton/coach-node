@@ -134,6 +134,10 @@ export const usePhysicalStore = defineStore('physical', {
             return postEndpoint("Physical", "RemoveFoodItem", { mealID, foodItemID })
             .then(response => response.result);
         },
+        async setFoodItemQuantity(mealID, foodItemID, quantity) {
+            return postEndpoint("Physical", "SetFoodItemQuantity", { mealID, foodItemID, quantity })
+            .then(response => response.result);
+        },
         runUpdates(updates) {
             let _this = this;
             const deferred = [];

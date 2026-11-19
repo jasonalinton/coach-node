@@ -17,7 +17,13 @@
             <tbody>
                 <tr v-for="item in foodItems" :key="item.id">
                     <!-- <td><img :src="item.thumbURL" height="30" width="30"/></td> -->
-                    <td>{{item.quantity}}</td>
+                    <td>
+                        <span v-if="item.isOG">{{ item.quantity }}</span>
+                        <input v-else class="quantity-input" type="number" min="0" step="any"
+                               :value="item.quantity"
+                               @change="onChangeQuantity($event, item)"
+                               @keyup.enter="$event.target.blur()">
+                    </td>
                     <td>{{ item.unit }}</td>
                     <td>{{ item.name }}</td>
                     <td>{{ float(item.calories,0) }}</td>
@@ -59,7 +65,8 @@ export default {
     },
     methods: {
         float,
-        onDeleteItem
+        onDeleteItem,
+        onChangeQuantity
     },
     watch: {
         meal(value) {
@@ -72,10 +79,33 @@ function onDeleteItem(item) {
     this.physicalStore.removeFoodItem(this.meal.id, item.id);
 }
 
+function onChangeQuantity(event, item) {
+    let quantity = parseFloat(event.target.value);
+    if (!(quantity > 0)) {
+        event.target.value = item.quantity;
+        return;
+    }
+    if (quantity == item.quantity) return;
+    this.physicalStore.setFoodItemQuantity(this.meal.id, item.id, quantity);
+}
+
 </script>
 
 <style scoped>
 table {
     font-size: 10px;
+}
+
+.quantity-input {
+    width: 40px;
+    font-size: 10px;
+    padding: 0 2px;
+    border: 1px solid transparent;
+    background: transparent;
+}
+
+.quantity-input:hover,
+.quantity-input:focus {
+    border-color: #ced4da;
 }
 </style>
