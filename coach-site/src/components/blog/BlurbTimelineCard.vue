@@ -1,6 +1,6 @@
 <template>
     <BlurbForm v-if="blurb && isEditing" :blurb="rawBlurb" @saved="onSaved" @cancel="onCancel"/>
-    <div v-else-if="blurb" class="blurb-timeline-card" @click="startEditing">
+    <div v-else-if="blurb" class="blurb-timeline-card" @dblclick="startEditing">
         <div class="universal-content">
             <div class="title-badges">
                 <div class="badges-row">
@@ -25,7 +25,9 @@
                     <div v-for="(row, index) in mappingRows" :key="index" class="mapping-row">
                         <img :src="row.icon" class="mapping-icon" alt="" />
                         <span class="mapping-label">{{ row.label }}</span>
-                        <span class="mapping-value">{{ row.value }}</span>
+                        <span class="mapping-value" :class="{ link: row.link }"
+                              @click="openForm(row.link)"
+                              @dblclick="onValueDblClick($event, row)">{{ row.value }}</span>
                     </div>
                 </div>
             </div>
@@ -80,10 +82,13 @@ export default {
             workoutStore: undefined,
             metricStore: undefined,
             physicalStore: undefined,
+            appStore: undefined,
             isEditing: false,
         }
     },
     created: async function() {
+        let appStore = await import(`@/store/appStore`);
+        this.appStore = appStore.useAppStore();
         let universalStore = await import(`@/store/universalStore`);
         this.universalStore = universalStore.useUniversalStore();
         let goalStore = await import(`@/store/goalStore`);
@@ -150,19 +155,25 @@ export default {
 
             const T = BLURB_MAPPING_TYPE;
             let rows = [];
-            let addRows = (idMappingType, values) => {
+            // links (optional) parallels values: { itemType, id } of the form to open on click
+            let addRows = (idMappingType, values, links = []) => {
                 let label = `${blurbMappingTypes.find(x => x.id == idMappingType)?.text || ''}:`;
                 let icon = MAPPING_ICONS[idMappingType] || iconActivity;
-                values.forEach(value => rows.push({ idMappingType, icon, label, value }));
+                values.forEach((value, index) => rows.push({ idMappingType, icon, label, value, link: links[index] }));
             };
+            let toLinks = (itemType, ids) => ids.map(id => ({ itemType, id }));
             let lookupIDs = (childIDs, lookup) => (childIDs || []).map(childID => lookup(childID.id) || `#${childID.id}`);
 
             addRows(T.METRIC, lookupIDs(blurb.metricIDs, id => this.getMetric(id)?.text));
-            addRows(T.GOAL, lookupIDs(blurb.goalIDs, id => this.goalStore?.getItem(id)?.text));
-            addRows(T.FITNESSGOAL, lookupIDs(blurb.fitnessGoalIDs, id => this.goalStore?.getItem(id)?.text));
+            addRows(T.GOAL, lookupIDs(blurb.goalIDs, id => this.goalStore?.getItem(id)?.text),
+                toLinks('goal', (blurb.goalIDs || []).map(x => x.id)));
+            addRows(T.FITNESSGOAL, lookupIDs(blurb.fitnessGoalIDs, id => this.goalStore?.getItem(id)?.text),
+                toLinks('goal', (blurb.fitnessGoalIDs || []).map(x => x.id)));
             addRows(T.GOALTIMEPAIR, (blurb.goalTimePairs || []).map(tp => this.timePairLabel(tp)));
-            addRows(T.GOALTIMEPAIRTODO, (blurb.goalTimePairTodos || []).map(gtpt => this.todoStore?.getItem(gtpt.todoID)?.text || `#${gtpt.id}`));
-            addRows(T.TODO, lookupIDs(blurb.todoIDs, id => this.todoStore?.getItem(id)?.text));
+            addRows(T.GOALTIMEPAIRTODO, (blurb.goalTimePairTodos || []).map(gtpt => this.todoStore?.getItem(gtpt.todoID)?.text || `#${gtpt.id}`),
+                toLinks('todo', (blurb.goalTimePairTodos || []).map(x => x.todoID)));
+            addRows(T.TODO, lookupIDs(blurb.todoIDs, id => this.todoStore?.getItem(id)?.text),
+                toLinks('todo', (blurb.todoIDs || []).map(x => x.id)));
             addRows(T.TODOTIMEPAIR, lookupIDs(blurb.todoTimePairIDs, () => undefined));
             addRows(T.TODOREPEAT, lookupIDs(blurb.todoRepeatIDs, () => undefined));
             // Read-only lookup: BlogTimeline batch-fetches the iterations for every card in one request
@@ -196,6 +207,18 @@ export default {
         },
         getMetric(idMetric) {
             return metrics.find(x => x.id == idMetric);
+        },
+        onValueDblClick(event, row) {
+            // Linked values open their form on click, so double-clicking one shouldn't also start editing the card
+            if (row.link) event.stopPropagation();
+        },
+        openForm(link) {
+            if (!link) return;
+            if (link.itemType == 'goal') {
+                this.appStore.selectGoalForm(link.id);
+            } else if (link.itemType == 'todo') {
+                this.appStore.selectTodoForm(link.id);
+            }
         },
         startEditing() {
             this.isEditing = true;
@@ -336,5 +359,14 @@ export default {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+.mapping-value.link {
+    flex: 0 1 auto;
+    user-select: none;
+}
+
+.mapping-value.link:hover {
+    text-decoration: underline;
 }
 </style>
