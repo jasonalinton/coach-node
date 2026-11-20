@@ -318,7 +318,7 @@ function onDrop(ev) {
 
 function selectEvent() {
     this.appStore.setSelectedEvent(this._event);
-    // this.plannerStore.selectDate(new Date(this._event.startAt));
+    this.plannerStore.selectDate(new Date(this._event.startAt));
 }
 </script>
 
