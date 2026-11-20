@@ -57,6 +57,24 @@ export const useEventStore = defineStore('event', {
             let nextID = (negativeIDs.length > 0) ? Math.min(...negativeIDs) + - 1 : -1;
             return nextID;
         },
+        async saveEvent(clientId, text, start, end, isAllDay, isRecommended) {
+            const response = await postEndpoint("Event", "SaveEvent", { clientId, text, start, end, isAllDay, isRecommended });
+            if (!response?.status?.success) return;
+
+            // Swap the client-side (negative ID) event for the saved one, keeping its loaded tasks
+            const saved = response.result.event;
+            const clientEvent = this.events.find(e => e.id == response.result.clientId);
+            if (clientEvent && (!saved.iterations || saved.iterations.length == 0)) {
+                saved.iterations = clientEvent.iterations;
+            }
+            // Keep the routine repeat so the planner can match it to its phantom
+            if (clientEvent?.repeat) saved.repeat = clientEvent.repeat;
+            let events = [...this.events];
+            removeItemByID(response.result.clientId, events);
+            replaceOrAddItem(saved, events);
+            this.events = sortAsc(events);
+            return saved;
+        },
         async updateEvent(eventID, text, start, end) {
             return postEndpoint("Event", "UpdateEvent", {eventID, text, start, end});
         },

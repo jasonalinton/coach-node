@@ -108,7 +108,13 @@ function onStart() {
     let now = new Date();
     this.event.startAt = now.toJSON();
     this.event.endAt = new Date(now.getTime() + duration).toJSON();
-    this.eventStore.updateEvent(this.event.id, this.event.text, this.event.startAt, this.event.endAt);
+    // Phantom block events only exist client-side (negative ID), so they have to be created
+    if (this.event.id < 0) {
+        this.eventStore.saveEvent(this.event.id, this.event.text, this.event.startAt, this.event.endAt,
+            this.event.isAllDay, this.event.isRecommended);
+    } else {
+        this.eventStore.updateEvent(this.event.id, this.event.text, this.event.startAt, this.event.endAt);
+    }
     this.isExpanded = true;
 }
 

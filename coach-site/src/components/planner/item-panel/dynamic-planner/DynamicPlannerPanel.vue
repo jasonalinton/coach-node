@@ -21,7 +21,7 @@
             <div class="divider"></div>
         </div>
         <div class="timeline d-flex flex-column">
-            <div v-for="item in timeline" :key="item.id" class="time-block d-flex flex-row">
+            <div v-for="item in timeline" :key="timelineKey(item)" class="time-block d-flex flex-row">
                 <div class="time-rail d-flex flex-column align-items-center">
                     <span class="start-time">{{ toNumberTimeString(item.startAt) }}</span>
                     <span class="end-time">{{ toNumberTimeString(item.endAt) }}</span>
@@ -192,21 +192,33 @@ export default {
             // return sortAsc([...this.phantomEvents, ...this.blockEvents], 'startAt');
             return sortAsc([...this.blockEvents], 'startAt');
         },
+        savedBlockEventCount() {
+            return this.blockEvents.filter(e => e.id > 0).length;
+        },
         planButtonText() {
             return this.blockEvents.length === 0 ? 'Plan' : 'Replan';
         },
     },
     methods: {
-        onPlanClick, onTrimClick, syncPhantomEvents, fetchBlockEvents, getTodosInOrder,
+        onPlanClick, onTrimClick, syncPhantomEvents, fetchBlockEvents, getTodosInOrder, timelineKey,
     },
     watch: {
         phantomEvents() {
+            this.syncPhantomEvents();
+        },
+        savedBlockEventCount() {
             this.syncPhantomEvents();
         },
         selectedDate() {
             this.fetchBlockEvents();
         }
     }
+}
+
+/* Key by routine repeat when there is one, so a phantom keeps its DyBlockEvent (and expanded state)
+ * when it's saved and its ID changes from negative to the real one */
+function timelineKey(item) {
+    return item.repeat ? `repeat-${item.repeat.id}` : item.id;
 }
 
 function fetchBlockEvents() {
@@ -218,8 +230,16 @@ function fetchBlockEvents() {
 
 function syncPhantomEvents() {
     if (!this.eventStore) return;
+    // Skip phantoms that have already been saved, matched by repeat, or by text after a reload
+    let savedEvents = this.blockEvents.filter(e => e.id > 0);
+    let isSaved = p => savedEvents.some(e => (e.repeat && e.repeat.id == p.repeat.id) || e.text == p.text);
     this.phantomEvents.forEach(p => {
-        this.eventStore.replaceOrAddEvent(p);
+        if (!isSaved(p)) {
+            this.eventStore.replaceOrAddEvent(p);
+        } else if (this.eventStore.events.some(e => e.id == p.id)) {
+            // Saved events loaded after the phantom was added (e.g. on reload)
+            this.eventStore.events = this.eventStore.events.filter(e => e.id != p.id);
+        }
     });
 }
 
