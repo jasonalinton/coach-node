@@ -4,7 +4,7 @@ import { getRepetitiveTodoIterations } from '../api/todoAPI';
 import { getAllIterationsInRange, getUnplannedIterations } from '../api/plannerAPI'
 import { removeItemByID, replaceOrAddItem, sortAsc, indexByID, pickByID, getByID } from '../../utility'
 import { attemptPostEndpoint, postEndpoint } from '../api/api';
-import { getTimeframeEndpoints } from '../../utility/timeUtility';
+import { getTimeframeEndpoints, startOfDay, endOfDay } from '../../utility/timeUtility';
 
 let initialized = false;
 
@@ -20,8 +20,9 @@ export const useIterationStore = defineStore('iteration', {
         iterationsByTodoID: (state) => {
             let groups = new Map();
             state.iterations.forEach(iteration => {
-                if (iteration.todoID == null) return;
-                let todoID = Number(iteration.todoID);
+                let todoID = iteration.idTodo ?? iteration.todoID;
+                if (todoID == null) return;
+                todoID = Number(todoID);
                 if (!groups.has(todoID)) groups.set(todoID, []);
                 groups.get(todoID).push(iteration);
             });
@@ -186,6 +187,16 @@ export const useIterationStore = defineStore('iteration', {
             // Copy, since callers sort the result in place
             return [...(this.iterationsByTodoID.get(Number(todoID)) || [])];
         },
+        /** A todo's iterations that start on the given day, whether date-only or scheduled to a specific time */
+        getTodoIterationsOnDate(todoID, date) {
+            let start = +startOfDay(date);
+            let end = +endOfDay(date);
+            return this.getIterationsForTodo(todoID).filter(iteration => {
+                if (!iteration.startAt || iteration.id < 0) return false;
+                let startAt = +iteration.startAt.toDate();
+                return startAt >= start && startAt <= end;
+            });
+        },
         getIterationsOfTodoType(idType, startAt, endAt) {
             let data = { idType, startAt, endAt };
             return postEndpoint("Planner", "GetIterationsOfTodoType", data)
@@ -198,6 +209,10 @@ export const useIterationStore = defineStore('iteration', {
             .then(response => response.result);
         },
         newTask(todo, repeat) {
+            // Reuse the unsaved task for this todo + repeat so recomputes don't keep adding new ones
+            let existing = this.iterations.find(x => x.id < 0 && x.idTodo == todo?.id && x.repeatID == repeat?.id);
+            if (existing) return existing;
+
             let negativeIDs = this.iterations.filter(x => x.id < 0).map(x => x.id);
             let nextID = (negativeIDs.length > 0) ? Math.min(...negativeIDs) + - 1 : -1;
             let newTask = { 
@@ -235,8 +250,8 @@ export const useIterationStore = defineStore('iteration', {
             return postEndpoint("Planner", "CompleteTimePairIteration", data)
             .then(response => response.result);
         },
-        completeRepeatIteration(idTodo, idRepeat, text, points, datetime, startAt, endAt) {
-            let data = { idTodo, idRepeat, text, points, datetime, startAt, endAt };
+        completeRepeatIteration(idTodo, idRepeat, text, points, datetime, startAt, endAt, idEvent) {
+            let data = { idTodo, idRepeat, text, points, datetime, startAt, endAt, idEvent };
             return postEndpoint("Planner", "CompleteRepeatIteration", data)
             .then(response => response.result);
         },

@@ -7,6 +7,11 @@
                              :sort="sort" 
                              @onSortChange="onSortChange" />
             <template v-if="!iteration_Form">
+                <div v-if="canGoBack" class="back-row d-flex flex-row align-items-center">
+                    <img class="icon-button"
+                         src='/icon/previous.png' width="20" height="20"
+                         @click.prevent="appStore.onBackEventPanel()"/>
+                </div>
                 <!-- Body -->
                 <DynamicPlannerPanel v-if="!type" />
                 <EventTodoPanel v-if="type == EVENTTYPE.TODO"
@@ -95,6 +100,9 @@ export default {
         eventt() { 
             return (this.appStore) ? this.appStore.itemPanel.event.event : undefined; 
         },
+        canGoBack() {
+            return !!this.appStore && this.appStore.itemPanel.event.panelQueue.length > 0;
+        },
     },
     methods: {
         onSortChange
@@ -103,11 +111,18 @@ export default {
 
 function onSortChange(sortBy) {
     this.appStore.itemPanel.event.type = undefined;
+    this.appStore.itemPanel.event.panelQueue = [];
     // this.sort.by = sortBy;
     // localStorage.setItem(`event-panel-sort-by`, sortBy);
 }
 </script>
 
 <style scoped>
+.back-row {
+    padding: 4px 8px;
+}
 
+.back-row .icon-button {
+    cursor: pointer;
+}
 </style>

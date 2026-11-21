@@ -29,12 +29,14 @@ export default {
     components: {  },
     props: {
         iterationId: { type: Number },
-        // phantomTask: { type: Object }
+        // Resolves to the block's saved event (creating it if needed) so completed iterations can be mapped to it
+        saveEvent: { type: Function },
     },
     data: function () {
         return {
             todoStore: undefined,
             iterationStore: undefined,
+            eventStore: undefined,
             appStore: undefined,
             plannerStore: undefined,
             clickTimer: null,
@@ -48,6 +50,8 @@ export default {
         this.todoStore = todoStore.useTodoStore();
         let iterationStore = await import('@/store/iterationStore');
         this.iterationStore = iterationStore.useIterationStore();
+        let eventStore = await import('@/store/eventStore');
+        this.eventStore = eventStore.useEventStore();
         let appStore = await import('@/store/appStore');
         this.appStore = appStore.useAppStore();
         let plannerStore = await import('@/store/plannerStore');
@@ -78,9 +82,17 @@ export default {
             }
             return this.iteration ? this.iteration.text : "";
         },
+        idTodo() {
+            return this.iteration ? (this.iteration.idTodo ?? this.iteration.todoID) : undefined;
+        },
+        /* The todo's iterations on the selected day, including ones scheduled to a specific time */
+        dayIterations() {
+            if (!this.iterationStore || !this.selectedDate || this.idTodo == null) return [];
+            return this.iterationStore.getTodoIterationsOnDate(this.idTodo, this.selectedDate);
+        },
         status() {
             if (!this.iteration) return 'incomplete';
-            if (this.iteration.completedAt) return 'complete';
+            if (this.iteration.completedAt || this.dayIterations.some(i => i.completedAt)) return 'complete';
             if (this.iteration.attemptedAt) return 'partial';
             return 'incomplete';
         },
@@ -92,19 +104,28 @@ export default {
     },
 }
 
-function markComplete() {
+async function markComplete() {
     let now = new Date().toJSON();
-    this.iteration.attemptedAt = now;
-    this.iteration.completedAt = now;
+    let iteration = this.iteration;
+    iteration.attemptedAt = now;
+    iteration.completedAt = now;
 
-    if (this.iteration.id < 0) {
-        this.iterationStore.completeRepeatIteration(this.iteration.idTodo, this.iteration.repeatID, null, this.iteration.points, now, this.selectedDate, this.selectedDate);
+    let event = this.saveEvent ? await this.saveEvent() : undefined;
+    if (iteration.id < 0) {
+        this.iterationStore.completeRepeatIteration(this.idTodo, iteration.repeatID, null, iteration.points, now, 
+            this.selectedDate, this.selectedDate, event?.id);
     } else {
-        this.iterationStore.toggleCompletion(this.iteration.id, now, now);
+        this.iterationStore.toggleCompletion(iteration.id, now, now);
+        // Map it to the block event, unless it's already mapped to an event
+        if (event && iteration.eventID == null) {
+            this.eventStore.mapIterationToEvent(event.id, iteration.id);
+        }
     }
 }
 
 function markIncomplete() {
+    // Shown complete because of another matching iteration that day, rather than this task
+    if (!this.iteration.completedAt) return;
     this.iteration.attemptedAt = null;
     this.iteration.completedAt = null;
     this.iterationStore.toggleCompletion(this.iteration.id, this.iteration.attemptedAt, this.iteration.completedAt);
@@ -120,7 +141,7 @@ function openTaskForm() {
 }
 
 function openTodoForm() {
-    this.appStore.selectTodoForm(this.iteration.todoID);
+    this.appStore.selectTodoForm(this.idTodo);
 }
 
 function onTextClick() {

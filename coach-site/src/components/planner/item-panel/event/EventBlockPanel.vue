@@ -1,5 +1,5 @@
 <template>
-    <div class="event-routine-panel d-flex flex-column flex-grow-1">
+    <div class="event-block-panel d-flex flex-column flex-grow-1">
         <!-- Header -->
         <div class="head d-flex flex-column px-2 pt-2">
             <div v-if="!showForm" class="d-flex flex-column">
@@ -57,7 +57,8 @@
             <!-- Pending -->
              <div class="children d-flex flex-grow-1 flex-column">
                  <RepeatListItem v-for="(item, index) in items" v-bind:key="index"
-                                 :idRepeat="item.idRepeat" :idTodo="item.idTodo" :idTimeframe="item.idTimeframe"/>
+                                 :idRepeat="item.idRepeat" :idTodo="item.idTodo" :idTimeframe="item.idTimeframe"
+                                 :matchDayIterations="true" :saveEvent="saveEvent"/>
              </div>
             <!-- Complete -->
             <div class="complete d-flex flex-column">
@@ -65,7 +66,7 @@
                 <div class="children d-flex flex-column">
                     <RepeatListItem v-for="(item, index) in items" v-bind:key="index"
                                     :idRepeat="item.idRepeat" :idTodo="item.idTodo" :idTimeframe="item.idTimeframe"
-                                    :showComplete="true"/>
+                                    :showComplete="true" :matchDayIterations="true" :saveEvent="saveEvent"/>
                 </div>
             </div>
         </div>
@@ -79,6 +80,7 @@ import { toShortWeekdayString, startOfDay, isToday, toShortTimeString } from '..
 import { replaceItem, removeItem, today, sortAsc, idRepeatToIdTimeframe } from '../../../../../utility';
 import DateTimeSelector from '../../../controls/select/DateTimeSelector.vue';
 import RepeatListItem from '../todo/RepeatListItem.vue';
+import { EVENTTYPE } from '../../../../model/constants';
 
 
 export default {
@@ -92,6 +94,9 @@ export default {
             todoStore: undefined,
             routineStore: undefined,
             eventStore: undefined,
+            plannerStore: undefined,
+            iterationStore: undefined,
+            appStore: undefined,
             iterations: { 
                 new: null
             },
@@ -115,6 +120,12 @@ export default {
 
         let routineStore = await import(`@/store/routineStore`);
         this.routineStore = routineStore.useRoutineStore();
+        let plannerStore = await import(`@/store/plannerStore`);
+        this.plannerStore = plannerStore.usePlannerStore();
+        let iterationStore = await import(`@/store/iterationStore`);
+        this.iterationStore = iterationStore.useIterationStore();
+        let appStore = await import(`@/store/appStore`);
+        this.appStore = appStore.useAppStore();
         
         this.original.id = this._event.id;
         this.original.text = this._event.text;
@@ -132,14 +143,20 @@ export default {
         endAt() {
             return (this.eventt) ? this.eventt.endAt.toDate() : undefined;
         },
+        /* Unsaved events carry their repeat; saved ones only have its ID */
+        repeat() {
+            if (!this._event) return undefined;
+            if (this._event.repeat) return this._event.repeat;
+            return this.plannerStore ? this.plannerStore.repeats.find(r => r.id == this._event.idRepeat) : undefined;
+        },
         items() {
             let items = [];
-            if (this.todoStore && this.routineStore) {
+            if (this.todoStore && this.routineStore && this.repeat) {
                 let todos = [];
-                let repeat = this._event.repeat;
+                let repeat = this.repeat;
                 if (repeat.isRoutineRepeat) {
                     let routine = this.routineStore.routines.find(routine => routine.id == repeat.idRoutine);
-                    todos = this.todoStore.todos.filter(todo => routine.todoIDs.some(id => id == todo.id));
+                    todos = routine ? this.todoStore.todos.filter(todo => routine.todoIDs.some(id => id == todo.id)) : [];
                 }
                 if (repeat.isTodoRepeat) {
                     let todo = this.todoStore.todos.find(todo => todo.id == repeat.idTodo);
@@ -156,21 +173,24 @@ export default {
             }
             return items;
         },
+        /* Each item's matching iterations on the day (including ones scheduled to a time), same as the RepeatListItems */
+        itemStatuses() {
+            if (!this.iterationStore || !this.eventt) return [];
+            let date = startOfDay(this.eventt.startAt);
+            return this.items.map(item => {
+                let iterations = this.iterationStore.getTodoIterationsOnDate(item.idTodo, date);
+                let complete = iterations.find(i => i.attemptedAt);
+                let todo = this.todoStore.getItem(item.idTodo);
+                let todoRepeat = this.repeat?.todo_Repeats?.find(x => x.idTodo == item.idTodo);
+                let points = complete?.points || todoRepeat?.points || todo?.points || 0;
+                return { ...item, isComplete: !!complete, points };
+            });
+        },
         completeIterations() { 
-            if (this.eventt) {
-                var complete = this.eventt.iterations.filter(task => task.attemptedAt && task.routineIterationID)
-                return sortAsc(complete, 'id');
-            } else {
-                return [];
-            }
+            return this.itemStatuses.filter(x => x.isComplete);
         },
         incompleteIterations() { 
-            if (this.eventt) {
-                var incomplete = this.eventt.iterations.filter(task => !task.attemptedAt && task.routineIterationID) 
-                return sortAsc(incomplete, 'id');
-            } else {
-                return [];
-            }
+            return this.itemStatuses.filter(x => !x.isComplete);
         },
         date() {
             if (this.eventt) {
@@ -220,7 +240,8 @@ export default {
         today,
         toShortWeekdayString,
         sortAsc,
-        save
+        save,
+        saveEvent
     },
     watch: {
         _event(value) {
@@ -285,22 +306,34 @@ function cancelAddTask() {
     this.iterations.new = null;
 }
 
-function save() {
-    this.isProcessing = true;
+/* Resolves to the saved event, creating it first if it only exists client-side, and shows the saved event */
+async function saveEvent(event = this._event) {
+    if (event.id > 0) return event;
+    let saved = await this.eventStore.saveOrUpdateEvent(event, { idType: EVENTTYPE.BLOCKROUTINE, idRepeat: this.repeat?.id });
+    if (saved) this.appStore.setSelectedEvent(saved, true);
+    return saved;
+}
+
+async function save() {
     var title = this._event.text.trim();
     if (title == "") return;
-
-    this.eventStore.updateEvent(this._event.id, title, this._event.startAt, this._event.endAt)
-    .then(result => {
-        this.isProcessing = false;
+    this.isProcessing = true;
+    try {
+        if (this._event.id < 0) {
+            await this.saveEvent({ ...this._event, text: title });
+        } else {
+            await this.eventStore.updateEvent(this._event.id, title, this._event.startAt, this._event.endAt);
+        }
         this.showForm = false;
-    });
+    } finally {
+        this.isProcessing = false;
+    }
 }
 
 </script>
 
 <style scoped>
-.event-routine-panel {
+.event-block-panel {
     height: calc(100vh - 64px);
     overflow: scroll;
 }

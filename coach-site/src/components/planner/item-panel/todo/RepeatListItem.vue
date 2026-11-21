@@ -120,7 +120,14 @@ export default {
         showComplete: {
             type: Boolean,
             default: () => false
-        }
+        },
+        // Match any of the todo's iterations on the selected day (incl. ones scheduled to a time), not just this repeat's
+        matchDayIterations: {
+            type: Boolean,
+            default: () => false
+        },
+        // Resolves to an event to map completed iterations to (e.g. a block event), creating it if needed
+        saveEvent: Function
     },
     data: function () {
         return {
@@ -252,6 +259,11 @@ export default {
             return this.todoRepeat.points || this.todo.points || 0;
         },
         iterations() {
+            if (this.iterationStore && this.matchDayIterations) {
+                // Completed ones first, so the item shows complete if any matching iteration was completed
+                let iterations = this.iterationStore.getTodoIterationsOnDate(this.todoID, this.selectedDate);
+                return [...iterations.filter(x => x.attemptedAt), ...iterations.filter(x => !x.attemptedAt)];
+            }
             if (this.iterationStore) {
                 let iterations = this.iterationStore.getIterationsInTimeframe(this.idTimeframe, this.selectedDate);
                 iterations = iterations.filter(x => x.repeatID == this.idRepeat && x.todoID == this.todoID);
@@ -296,12 +308,18 @@ function repeatAt(endpoint) {
     return (!this.repeat[`${endpoint}Date`] && !this.repeat[`${endpoint}Time`]) ? undefined : datetime;
 }
 
-function markComplete() {
+async function markComplete() {
     let now = new Date().toJSON();
+    let event = this.saveEvent ? await this.saveEvent() : undefined;
     if (this.iteration) {
         this.iterationStore.toggleCompletion(this.iteration.id, now, now);
+        // Map it to the event, unless it's already mapped to one
+        if (event && this.iteration.eventID == null) {
+            let eventStore = (await import(`@/store/eventStore`)).useEventStore();
+            eventStore.mapIterationToEvent(event.id, this.iteration.id);
+        }
     } else {
-        this.iterationStore.completeRepeatIteration(this.todoID, this.idRepeat, null, null, now, this.selectedDate, this.selectedDate);
+        this.iterationStore.completeRepeatIteration(this.todoID, this.idRepeat, null, null, now, this.selectedDate, this.selectedDate, event?.id);
     }
 }
 

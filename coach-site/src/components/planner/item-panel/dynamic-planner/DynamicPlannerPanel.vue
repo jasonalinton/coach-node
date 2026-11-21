@@ -21,12 +21,12 @@
             <div class="divider"></div>
         </div>
         <div class="timeline d-flex flex-column">
-            <div v-for="item in timeline" :key="timelineKey(item)" class="time-block d-flex flex-row">
+            <div v-for="block in timeline" :key="block.key" class="time-block d-flex flex-row">
                 <div class="time-rail d-flex flex-column align-items-center">
-                    <span class="start-time">{{ toNumberTimeString(item.startAt) }}</span>
-                    <span class="end-time">{{ toNumberTimeString(item.endAt) }}</span>
+                    <span class="start-time">{{ toNumberTimeString(block.event.startAt) }}</span>
+                    <span class="end-time">{{ toNumberTimeString(block.event.endAt) }}</span>
                 </div>
-                <DyBlockEvent class="flex-grow-1" :event-id="item.id" />
+                <DyBlockEvent class="flex-grow-1" :block="block" />
             </div>
         </div>
     </div>
@@ -76,7 +76,6 @@ export default {
         this.iterationStore = iterationStore.useIterationStore();
         let goalStore = await import('@/store/goalStore');
         this.goalStore = goalStore.useGoalStore();
-        this.syncPhantomEvents();
         this.fetchBlockEvents();
     },
     computed: {
@@ -93,132 +92,54 @@ export default {
             let blockRepeats = (this.plannerStore) ? this.plannerStore.activeBlockRepeats : [];
             return blockRepeats;
         },
-        phantomEvents() {
+        /* A block is a routine block repeat on the selected day. Its event is the saved block event for that
+         * repeat + day, or an unsaved (negative ID) one until it's started. Tasks don't need to be mapped to
+         * the event: each routine todo's task is found from that day's iterations */
+        blocks() {
             if (!this.selectedDate || !this.routineStore || !this.todoStore || !this.iterationStore) return [];
 
-            // var newID = this.eventStore.newID();
-            let newID = -1;
-
-            let events = this.blockRepeats.map(repeat => {
-                const [sh, sm] = repeat.startTime.split(':').map(Number);
-                let startAt = startOfDay(this.selectedDate);
-                startAt.setHours(sh, sm, 0, 0);
-
-                /* Create end date based on repeat end time */
-                let endAt;
-                if (repeat.endTime) {
-                    const [eh, em] = repeat.endTime.split(':').map(Number);
-                    endAt = startOfDay(this.selectedDate);
-                    endAt.setHours(eh, em, 0, 0);
-                } else if (repeat.duration) {
-                    endAt = new Date(startAt.getTime() + repeat.duration * 60000);
-                } else {
-                    endAt = new Date(startAt.getTime() + 60 * 60000);
-                }
-
+            let phantomID = -1;
+            let blocks = this.blockRepeats.map(repeat => {
                 let routine = this.routineStore.routines.find(routine => routine.id == repeat.idRoutine);
-                let text = routine ? routine.text : "";
-
-                let event = {
-                    id: newID--,
-                    repeat: repeat,
-                    text: text,
-                    startAt: startAt.toJSON(),
-                    endAt: endAt.toJSON(),
-                    isBlock: true,
-                    isAllDay: false,
-                    isRecommended: false,
-                    isVisible: true,
-                    itemType: "event",
-                    iterations: [],
-                    type: {
-                        altText: "",
-                        description: "Event",
-                        id: EVENTTYPE.BLOCKROUTINE,
-                        parentID: EVENTTYPE.EVENTTYPE,
-                        position: null,
-                        iterations: [],
-                        text: "Block",
-                    }
+                let event = this.blockEvents.find(e => e.idRepeat == repeat.id)
+                    || this.newBlockEvent(repeat, routine, phantomID--);
+                return {
+                    key: `repeat-${repeat.id}`,
+                    repeat,
+                    event,
+                    tasks: this.getBlockTasks(event, repeat, routine),
                 };
-
-                if (routine) {
-                    routine.todoIDs.forEach(idTodo => {
-                        let todo = this.todoStore.getItem(idTodo);
-                        if (todo) {
-                            /* Get iterations for todo, that belong to the routine's repeat */
-                            let repeat_Todo = todo.repeats.find(r => r.routineRepeatID == repeat.id);
-                            let iterations = this.iterationStore.getIterationsForTodo(idTodo);
-                            iterations = sortAsc(iterations, 'attemptedAt');
-
-                            /* Get the first task for the selected date, attempted first */
-                            let task = iterations.find(iteration => {
-                                return iteration.startAt
-                                    && +iteration.startAt.toDate() == +this.selectedDate
-                                    && +iteration.endAt.toDate() == +this.selectedDate;
-                            });
-                            if (!task) {
-                                task = this.iterationStore.newTask(todo, repeat_Todo);
-                            }
-
-                            // First check if the task/iteration has a time estimate, then check the repeat. Default to 15 minutes.
-                            task.timeEstimate = task.timeEstimate || repeat_Todo?.timeEstimate || todo.timeEstimate || DEFAULT_TIME_ESTIMATE_MINUTES;
-
-                            // If todo's repeat has points set it to the iteration (should this override the tasks points?)
-                            if (repeat_Todo?.points) {
-                                task.points = repeat_Todo.points;
-                            }
-
-                            event.iterations.push(task);
-                        }
-                    });
-                }
-                
-                return event;
             });
 
-            events = events.filter(e => e.iterations.length > 0);
-            return events;
+            // Saved block events that aren't tied to an active repeat (e.g. created before events stored their repeat)
+            this.blockEvents
+                .filter(e => !blocks.some(b => b.event === e))
+                .forEach(event => blocks.push({ key: `event-${event.id}`, repeat: undefined, event, tasks: this.getBlockTasks(event) }));
+
+            return blocks.filter(b => b.tasks.length > 0);
         },
         blockEvents() {
-            // Temporary for testing: returns today's persisted block events.
             if (!this.eventStore || !this.selectedDate) return [];
             let start = +startOfDay(this.selectedDate);
             let end = +endOfDay(this.selectedDate);
             let events = this.eventStore.getEvents(start, end, false);
-            return events.filter(e => e.type && e.type.id == EVENTTYPE.BLOCKROUTINE);
+            return events.filter(e => e.id > 0 && e.type && e.type.id == EVENTTYPE.BLOCKROUTINE);
         },
         timeline() {
-            // return sortAsc([...this.phantomEvents, ...this.blockEvents], 'startAt');
-            return sortAsc([...this.blockEvents], 'startAt');
-        },
-        savedBlockEventCount() {
-            return this.blockEvents.filter(e => e.id > 0).length;
+            return [...this.blocks].sort((a, b) => +new Date(a.event.startAt) - +new Date(b.event.startAt));
         },
         planButtonText() {
             return this.blockEvents.length === 0 ? 'Plan' : 'Replan';
         },
     },
     methods: {
-        onPlanClick, onTrimClick, syncPhantomEvents, fetchBlockEvents, getTodosInOrder, timelineKey,
+        onPlanClick, onTrimClick, fetchBlockEvents, getTodosInOrder, newBlockEvent, getBlockTasks,
     },
     watch: {
-        phantomEvents() {
-            this.syncPhantomEvents();
-        },
-        savedBlockEventCount() {
-            this.syncPhantomEvents();
-        },
         selectedDate() {
             this.fetchBlockEvents();
         }
     }
-}
-
-/* Key by routine repeat when there is one, so a phantom keeps its DyBlockEvent (and expanded state)
- * when it's saved and its ID changes from negative to the real one */
-function timelineKey(item) {
-    return item.repeat ? `repeat-${item.repeat.id}` : item.id;
 }
 
 function fetchBlockEvents() {
@@ -226,21 +147,84 @@ function fetchBlockEvents() {
     let start = startOfDay(this.selectedDate);
     let end = endOfDay(this.selectedDate);
     this.eventStore.getEvents(start, end, true);
+    // The day's iterations, so tasks can find matching iterations (incl. ones scheduled to a time)
+    if (this.iterationStore) this.iterationStore.getIterationsInRange(+start, +end);
 }
 
-function syncPhantomEvents() {
-    if (!this.eventStore) return;
-    // Skip phantoms that have already been saved, matched by repeat, or by text after a reload
-    let savedEvents = this.blockEvents.filter(e => e.id > 0);
-    let isSaved = p => savedEvents.some(e => (e.repeat && e.repeat.id == p.repeat.id) || e.text == p.text);
-    this.phantomEvents.forEach(p => {
-        if (!isSaved(p)) {
-            this.eventStore.replaceOrAddEvent(p);
-        } else if (this.eventStore.events.some(e => e.id == p.id)) {
-            // Saved events loaded after the phantom was added (e.g. on reload)
-            this.eventStore.events = this.eventStore.events.filter(e => e.id != p.id);
+/* Unsaved block event for a repeat on the selected day. It's created when it's started or a task is completed */
+function newBlockEvent(repeat, routine, id) {
+    const [sh, sm] = repeat.startTime.split(':').map(Number);
+    let startAt = startOfDay(this.selectedDate);
+    startAt.setHours(sh, sm, 0, 0);
+
+    let endAt;
+    if (repeat.endTime) {
+        const [eh, em] = repeat.endTime.split(':').map(Number);
+        endAt = startOfDay(this.selectedDate);
+        endAt.setHours(eh, em, 0, 0);
+    } else {
+        endAt = new Date(startAt.getTime() + 60 * 60000);
+    }
+
+    return {
+        id,
+        repeat,
+        idRepeat: repeat.id,
+        text: routine ? routine.text : "",
+        startAt: startAt.toJSON(),
+        endAt: endAt.toJSON(),
+        isBlock: true,
+        isAllDay: false,
+        isRecommended: false,
+        isVisible: true,
+        itemType: "event",
+        iterations: [],
+        type: {
+            altText: "",
+            description: "Event",
+            id: EVENTTYPE.BLOCKROUTINE,
+            parentID: EVENTTYPE.EVENTTYPE,
+            position: null,
+            iterations: [],
+            text: "Block",
         }
+    };
+}
+
+/* One task per routine todo, plus any iterations mapped to the event. A todo's task is, in order: the iteration
+ * mapped to the event, its iteration completed that day, any iteration that day, or a new unsaved task */
+function getBlockTasks(event, repeat, routine) {
+    let mapped = (event.iterations || []).map(i => this.iterationStore.getLoadedIterationsWithIDs([i.id])[0] || i);
+    let todoIDOf = iteration => iteration.idTodo ?? iteration.todoID;
+    let tasks = [];
+
+    (routine ? routine.todoIDs : []).forEach(idTodo => {
+        let todo = this.todoStore.getItem(idTodo);
+        if (!todo) return;
+
+        let repeat_Todo = todo.repeats.find(r => r.routineRepeatID == repeat.id);
+        let iterations = sortAsc(this.iterationStore.getTodoIterationsOnDate(idTodo, this.selectedDate), 'attemptedAt');
+        let task = mapped.find(i => todoIDOf(i) == idTodo)
+            || iterations.find(i => i.completedAt)
+            || iterations[0]
+            || this.iterationStore.newTask(todo, repeat_Todo);
+
+        // First check if the task/iteration has a time estimate, then check the repeat. Default to 15 minutes.
+        task.timeEstimate = task.timeEstimate || repeat_Todo?.timeEstimate || todo.timeEstimate || DEFAULT_TIME_ESTIMATE_MINUTES;
+
+        // If todo's repeat has points set it to the iteration (should this override the tasks points?)
+        if (repeat_Todo?.points) {
+            task.points = repeat_Todo.points;
+        }
+
+        tasks.push(task);
     });
+
+    // Mapped iterations for todos that aren't in the routine
+    mapped.filter(i => !tasks.includes(i) && !tasks.some(t => todoIDOf(t) == todoIDOf(i)))
+        .forEach(i => tasks.push(i));
+
+    return tasks;
 }
 
 async function onPlanClick() {
@@ -253,13 +237,13 @@ async function onPlanClick() {
     //    (used later to trim tasks that won't be completed in time)
     let todoIDs = await this.getTodosInOrder();
 
-    let timeEstimate = this.blockEvents
-        .flatMap(event => event.iterations)
+    let timeEstimate = this.blocks
+        .flatMap(block => block.tasks)
         .reduce((total, task) => total + (task.timeEstimate || 0), 0);
 
     // Get incomplete tasks in phantomEvents
-    let incompleteTasks = this.blockEvents
-        .flatMap(event => event.iterations)
+    let incompleteTasks = this.blocks
+        .flatMap(block => block.tasks)
         .filter(task => !task.completedAt);
 
     // Sort them based on the todo order using iteration.idTodo

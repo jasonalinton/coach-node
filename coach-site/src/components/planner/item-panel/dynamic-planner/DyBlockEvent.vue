@@ -19,7 +19,7 @@
             </div>
         </div>
         <div v-if="isExpanded" class="task-list d-flex flex-column">
-            <DyTaskItem v-for="task in tasks" :key="task.id" :iteration-id="task.id" />
+            <DyTaskItem v-for="task in tasks" :key="task.idTodo ?? task.id" :iteration-id="task.id" :save-event="saveEvent" />
         </div>
     </div>
 </template>
@@ -30,12 +30,14 @@ import iconComplete from '@/assets/icons/icon-block-complete.svg';
 import iconStart from '@/assets/icons/icon-block-start.svg';
 import iconStop from '@/assets/icons/icon-block-stop.png';
 import iconDeleteX from '@/assets/icons/icon-delete-x.svg';
+import { EVENTTYPE } from '../../../../model/constants';
 
 export default {
     name: 'DyBlockEvent',
     components: { DyTaskItem },
     props: {
-        eventId: { type: Number, required: true },
+        // { repeat, event, tasks } from DynamicPlannerPanel
+        block: { type: Object, required: true },
     },
     data: function () {
         return {
@@ -59,7 +61,10 @@ export default {
     },
     computed: {
         event() {
-            return this.eventStore ? this.eventStore.getEvent(this.eventId) : undefined;
+            return this.block.event;
+        },
+        eventId() {
+            return this.event ? this.event.id : undefined;
         },
         isPending() {
             return true;
@@ -72,7 +77,7 @@ export default {
             return false;
         },
         tasks() {
-            return this.event ? this.event.iterations.filter(t => t.wontFit == undefined || !t.wontFit) : [];
+            return this.block.tasks.filter(t => t.wontFit == undefined || !t.wontFit);
         },
         points() {
             let actual = 0;
@@ -87,7 +92,7 @@ export default {
         },
     },
     methods: {
-        onStart, onEnd, onPointsClick, openEventForm, onDeleteEvent, fetchTaskIterations,
+        onStart, onEnd, onPointsClick, openEventForm, onDeleteEvent, fetchTaskIterations, saveEvent,
     },
     watch: {
         isExpanded(isExpanded) {
@@ -99,20 +104,27 @@ export default {
 /* Load every task's iteration in one GetIterations request before the DyTaskItems render,
  * instead of one GetIteration per item. Only requests when some aren't loaded yet. */
 function fetchTaskIterations() {
-    if (!this.iterationStore || this.tasks.length == 0) return;
-    this.iterationStore.getIterationsWithIDs(this.tasks.map(t => t.id));
+    let ids = this.tasks.map(t => t.id).filter(id => id > 0);
+    if (!this.iterationStore || ids.length == 0) return;
+    this.iterationStore.getIterationsWithIDs(ids);
+}
+
+/* Resolves to the saved event, creating it first if it only exists client-side */
+function saveEvent(event = this.event) {
+    if (event.id > 0) return Promise.resolve(event);
+    return this.eventStore.saveOrUpdateEvent(event, { idType: EVENTTYPE.BLOCKROUTINE, idRepeat: this.block.repeat?.id });
 }
 
 function onStart() {
     let duration = (new Date(this.event.endAt)).getTime() - (new Date(this.event.startAt)).getTime();
     let now = new Date();
-    this.event.startAt = now.toJSON();
-    this.event.endAt = new Date(now.getTime() + duration).toJSON();
-    // Phantom block events only exist client-side (negative ID), so they have to be created
+    let startAt = now.toJSON();
+    let endAt = new Date(now.getTime() + duration).toJSON();
     if (this.event.id < 0) {
-        this.eventStore.saveEvent(this.event.id, this.event.text, this.event.startAt, this.event.endAt,
-            this.event.isAllDay, this.event.isRecommended);
+        this.saveEvent({ ...this.event, startAt, endAt });
     } else {
+        this.event.startAt = startAt;
+        this.event.endAt = endAt;
         this.eventStore.updateEvent(this.event.id, this.event.text, this.event.startAt, this.event.endAt);
     }
     this.isExpanded = true;
@@ -122,7 +134,7 @@ function onEnd() {
     let now = new Date().toJSON();
     this.event.endAt = now;
     this.eventStore.updateEvent(this.event.id, this.event.text, this.event.startAt, this.event.endAt);
-    this.tasks.filter(t => !t.completedAt).forEach(t => this.iterationStore.deleteIteration(t.id));
+    this.tasks.filter(t => t.id > 0 && !t.completedAt).forEach(t => this.iterationStore.deleteIteration(t.id));
     this.isExpanded = false;
 }
 
@@ -135,6 +147,7 @@ function openEventForm() {
 }
 
 function onDeleteEvent() {
+    if (this.event.id < 0) return;
     this.eventStore.deleteEvent(this.event.id);
 }
 </script>

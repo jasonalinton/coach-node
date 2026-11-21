@@ -5,6 +5,7 @@ import { removeItemByID, replaceOrAddItem, sortAsc } from '../../utility'
 import { getSocketConnection, deferUpdate } from './socket'
 
 let initialized = false;
+const pendingSaves = new Map();
 
 export const useEventStore = defineStore('event', {
     state: () => ({
@@ -57,23 +58,38 @@ export const useEventStore = defineStore('event', {
             let nextID = (negativeIDs.length > 0) ? Math.min(...negativeIDs) + - 1 : -1;
             return nextID;
         },
-        async saveEvent(clientId, text, start, end, isAllDay, isRecommended) {
-            const response = await postEndpoint("Event", "SaveEvent", { clientId, text, start, end, isAllDay, isRecommended });
+        async saveEvent(clientId, text, start, end, { idType, idRepeat, isAllDay, isRecommended } = {}) {
+            const response = await postEndpoint("Event", "SaveEvent", 
+                { clientId, text, start, end, idType, idRepeat, isAllDay: !!isAllDay, isRecommended: !!isRecommended });
             if (!response?.status?.success) return;
 
-            // Swap the client-side (negative ID) event for the saved one, keeping its loaded tasks
             const saved = response.result.event;
-            const clientEvent = this.events.find(e => e.id == response.result.clientId);
-            if (clientEvent && (!saved.iterations || saved.iterations.length == 0)) {
-                saved.iterations = clientEvent.iterations;
-            }
-            // Keep the routine repeat so the planner can match it to its phantom
-            if (clientEvent?.repeat) saved.repeat = clientEvent.repeat;
             let events = [...this.events];
             removeItemByID(response.result.clientId, events);
             replaceOrAddItem(saved, events);
             this.events = sortAsc(events);
             return saved;
+        },
+        /* Creates the event if it only exists client-side (negative ID), otherwise updates it. Resolves to the saved event.
+         * Saves of the same unsaved event share one request, so e.g. Start + a task toggle don't create two events */
+        async saveOrUpdateEvent(event, { idType, idRepeat } = {}) {
+            if (event.id > 0) {
+                await this.updateEvent(event.id, event.text, event.startAt, event.endAt);
+                return event;
+            }
+
+            const key = idRepeat ?? event.id;
+            if (!pendingSaves.has(key)) {
+                const promise = this.saveEvent(event.id, event.text, event.startAt, event.endAt, 
+                    { idType, idRepeat, isAllDay: event.isAllDay, isRecommended: event.isRecommended })
+                    .finally(() => pendingSaves.delete(key));
+                pendingSaves.set(key, promise);
+            }
+            return pendingSaves.get(key);
+        },
+        async mapIterationToEvent(idEvent, idIteration) {
+            return postEndpoint("Event", "MapIterationToEvent", { idEvent, idIteration })
+            .then(response => response?.result);
         },
         async updateEvent(eventID, text, start, end) {
             return postEndpoint("Event", "UpdateEvent", {eventID, text, start, end});

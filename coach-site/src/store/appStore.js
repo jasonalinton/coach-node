@@ -102,7 +102,8 @@ export const useAppStore = defineStore('app', {
             },
             event: {
                 type: undefined,
-                event: undefined
+                event: undefined,
+                panelQueue: []
             },
             workout: {
                 selectedView: "dashboard",
@@ -268,7 +269,19 @@ export const useAppStore = defineStore('app', {
             this.itemPanel[panel].sort.by = value;
             localStorage.setItem(`${panel}-panel-sort-by`, value);
         },
-        async setSelectedEvent(eevent) {
+        /* replace: swap the shown event (e.g. a phantom for its saved event) without adding a back step */
+        async setSelectedEvent(eevent, replace) {
+            let eventPanel = this.itemPanel.event;
+            let isEventPanelType = [EVENTTYPE.TODO, EVENTTYPE.ROUTINE, EVENTTYPE.BLOCKROUTINE].includes(eevent.type.id);
+            if (isEventPanelType && !replace) {
+                // Only keep history while navigating within the event panel
+                if (this.itemPanel.selected == "event") {
+                    eventPanel.panelQueue.push({ type: eventPanel.type, event: eventPanel.event });
+                } else {
+                    eventPanel.panelQueue = [];
+                }
+            }
+
             if (eevent.type.id == EVENTTYPE.WORKOUT) {
                 let workoutStore = useWorkoutStore();
                 let workoutID = await workoutStore.getWorkoutIDFromEvent(eevent.id);
@@ -362,6 +375,11 @@ export const useAppStore = defineStore('app', {
         },
         onBackWorkoutPanel() {
             this.itemPanel.workout.selectedView = this.itemPanel.workout.panelQueue.pop();
+        },
+        onBackEventPanel() {
+            let previous = this.itemPanel.event.panelQueue.pop();
+            this.itemPanel.event.type = previous ? previous.type : undefined;
+            this.itemPanel.event.event = previous ? previous.event : undefined;
         }
     },
 })
