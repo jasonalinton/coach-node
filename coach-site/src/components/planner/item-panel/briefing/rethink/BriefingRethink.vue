@@ -3,7 +3,7 @@
         <!-- Header -->
         <div class="header d-flex flex-column">
             <span class="date">{{ dateText }}</span>
-            <span class="subtitle">{{ inFocusGoals.length }} {{ inFocusGoals.length == 1 ? 'goal' : 'goals' }} in focus · {{ notes.length }} {{ notes.length == 1 ? 'note' : 'notes' }} so far</span>
+            <span class="subtitle">{{ subtitle }}</span>
         </div>
 
         <!-- Timeframe tabs -->
@@ -44,25 +44,35 @@
                          @toggle="toggleGoal(openAlsoTrackingGoal.id)" />
 
         <!-- Notes -->
-        <div class="label-row d-flex align-items-center">
-            <span class="label">NOTES</span>
+        <div class="label-row d-flex align-items-center justify-content-between">
+            <div class="d-flex align-items-center notes-title">
+                <span class="label">NOTES</span>
+                <span class="label-count">{{ notes.length }}</span>
+            </div>
+            <button class="sort-toggle d-flex align-items-center" @click="toggleSort">
+                <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true">
+                    <path :d="newestFirst ? 'M5 1.5V8.5M2 5.5L5 8.5L8 5.5' : 'M5 8.5V1.5M2 4.5L5 1.5L8 4.5'"
+                          stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+                {{ newestFirst ? 'Newest first' : 'Oldest first' }}
+            </button>
         </div>
-        <RethinkNoteComposer variant="main" :goals="linkableGoals" :save="saveNote" />
-        <div class="notes-feed d-flex flex-column">
-            <RethinkNote v-for="note in filteredNotes" :key="note.id" :note="note" :goalStore="goalStore" />
-        </div>
+        <RethinkNoteComposer variant="main" :goals="linkableGoals" :save="saveNote"
+                             :placeholder="`What matters ${PERIOD_LABELS[idTimeframe]}?`" />
+        <RethinkNotesFeed :notes="filteredNotes" :idTimeframe="idTimeframe" :date="selectedDate"
+                          :newestFirst="newestFirst" :goalStore="goalStore" />
     </div>
 </template>
 
 <script>
 import moment from 'moment';
 import RethinkGoalCard from './RethinkGoalCard.vue';
-import RethinkNote from './RethinkNote.vue';
 import RethinkNoteComposer from './RethinkNoteComposer.vue';
-import { getGoalGroups, getGoalReasons, getPeriods, getPaceRanges, timeframeUnit } from '../briefingUtility';
+import RethinkNotesFeed from './RethinkNotesFeed.vue';
+import { GOAL_TIMEFRAMES, getGoalGroups, getGoalReasons, getPeriods, getPaceRanges, timeframeUnit } from '../briefingUtility';
 import { getPoints } from '../../../../../../utility/pointsUtility';
 import { BLURBTYPE, BLURB_MAPPING_TYPE, TIMEFRAME } from '../../../../../model/constants';
-import { today, isToday, endOfDay, getTimeframeEndpoints } from '../../../../../../utility/timeUtility';
+import { today, isToday, startOfDay, endOfDay, getTimeframeEndpoints } from '../../../../../../utility/timeUtility';
 
 const TABS = [
     { id: TIMEFRAME.DAY, text: 'Day' },
@@ -80,10 +90,11 @@ const PERIOD_LABELS = {
 
 export default {
     name: 'BriefingRethink',
-    components: { RethinkGoalCard, RethinkNote, RethinkNoteComposer },
+    components: { RethinkGoalCard, RethinkNoteComposer, RethinkNotesFeed },
     data: function () {
         return {
             TABS,
+            PERIOD_LABELS,
             appStore: undefined,
             goalStore: undefined,
             plannerStore: undefined,
@@ -128,8 +139,30 @@ export default {
         showPoints() {
             return this.settings.showPoints ?? true;
         },
+        newestFirst() {
+            return (this.settings.noteSort ?? 'newest') == 'newest';
+        },
         dateText() {
-            return moment(this.selectedDate).format('dddd, MMMM D');
+            let date = moment(this.selectedDate);
+            if (this.idTimeframe == TIMEFRAME.WEEK) return `Week of ${date.clone().startOf('week').format('MMMM D')}`;
+            if (this.idTimeframe == TIMEFRAME.MONTH) return date.format('MMMM YYYY');
+            if (this.idTimeframe == TIMEFRAME.YEAR) return date.format('YYYY');
+            return date.format('dddd, MMMM D');
+        },
+        subtitle() {
+            let notes = `${this.notes.length} ${this.notes.length == 1 ? 'note' : 'notes'}`;
+            if (this.idTimeframe == TIMEFRAME.DAY) {
+                let goals = `${this.inFocusGoals.length} ${this.inFocusGoals.length == 1 ? 'goal' : 'goals'}`;
+                return `${goals} in focus · ${notes} today`;
+            }
+            if (this.idTimeframe == TIMEFRAME.WEEK) {
+                let { start, end } = getTimeframeEndpoints(TIMEFRAME.WEEK, this.selectedDate);
+                let range = moment(start).isSame(end, 'month')
+                    ? `${moment(start).format('MMM D')} – ${moment(end).format('D')}`
+                    : `${moment(start).format('MMM D')} – ${moment(end).format('MMM D')}`;
+                return `${range} · ${notes}`;
+            }
+            return `${notes} ${PERIOD_LABELS[this.idTimeframe]}`;
         },
         pointsTimeframeText() {
             return TABS.find(x => x.id == this.idPointsTimeframe)?.text;
@@ -170,24 +203,30 @@ export default {
             return getPaceRanges(this.idPointsTimeframe, now);
         },
         /* Notes */
-        notes() {
+        // Briefing notes from every timeframe, after the header's brief/debrief filter; the feed groups them
+        filteredNotes() {
             if (!this.universalStore) return [];
-            // Any note dated within the selected period (e.g. anywhere in this week on the Week tab)
-            let { start, end } = getTimeframeEndpoints(this.idTimeframe, this.selectedDate);
-            return this.universalStore.blurbs
-                .filter(x => x.idType == BLURBTYPE.BRIEFING || x.idType == BLURBTYPE.DEBRIEFING)
-                .filter(x => x.idTimeframe == this.idTimeframe)
+            let filter = this.settings.noteFilter ?? 'all';
+            return this.universalStore.blurbs.filter(x => {
+                if (filter == 'brief') return x.idType == BLURBTYPE.BRIEFING;
+                if (filter == 'debrief') return x.idType == BLURBTYPE.DEBRIEFING;
+                return x.idType == BLURBTYPE.BRIEFING || x.idType == BLURBTYPE.DEBRIEFING;
+            });
+        },
+        // Notes filed under the selected timeframe or a shorter one, dated within the selected period
+        // (e.g. the week's notes and its days' notes on the Week tab)
+        notes() {
+            let { start, end } = (this.idTimeframe == TIMEFRAME.DAY)
+                ? { start: startOfDay(this.selectedDate), end: endOfDay(this.selectedDate) }
+                : getTimeframeEndpoints(this.idTimeframe, this.selectedDate);
+            let timeframeIDs = GOAL_TIMEFRAMES.slice(0, GOAL_TIMEFRAMES.indexOf(this.idTimeframe) + 1);
+            return this.filteredNotes
+                .filter(x => timeframeIDs.includes(x.idTimeframe))
                 .filter(x => {
                     let datetime = +new Date(x.datetime);
                     return datetime >= +start && datetime <= +end;
                 })
-                .sort((a, b) => b.id - a.id);
-        },
-        filteredNotes() {
-            let filter = this.settings.noteFilter ?? 'all';
-            if (filter == 'brief') return this.notes.filter(x => x.idType == BLURBTYPE.BRIEFING);
-            if (filter == 'debrief') return this.notes.filter(x => x.idType == BLURBTYPE.DEBRIEFING);
-            return this.notes;
+                .sort((a, b) => +new Date(b.datetime) - +new Date(a.datetime));
         },
     },
     methods: {
@@ -240,8 +279,12 @@ export default {
             this.idTimeframe = TIMEFRAME.DAY;
             this.openGoalID = null;
         },
+        toggleSort() {
+            this.appStore.setItemPanelSetting('briefing', 'noteSort', this.newestFirst ? 'oldest' : 'newest');
+        },
+        // Every timeframe is loaded, since each tab also shows notes filed under shorter and longer ones
         loadNotes() {
-            this.universalStore?.getBriefingBlurbs(this.idTimeframe, this.selectedDate);
+            GOAL_TIMEFRAMES.forEach(idTimeframe => this.universalStore?.getBriefingBlurbs(idTimeframe, this.selectedDate));
         },
         async saveNote({ text, json, idMetric, idBlurbType, idGoal }) {
             let blurb = await this.universalStore.addBriefingBlurb(text, new Date(),idBlurbType, idMetric, this.idTimeframe, json);
@@ -261,7 +304,6 @@ export default {
     watch: {
         idTimeframe() {
             this.openGoalID = null;
-            this.loadNotes();
         },
         selectedDate() {
             this.loadNotes();
@@ -409,7 +451,25 @@ export default {
     color: var(--rt-text);
 }
 
-.notes-feed {
-    gap: 8px;
+.notes-title {
+    gap: 6px;
+}
+
+.label-count {
+    font-size: 11px;
+    line-height: 14px;
+    color: #C2B9AD;
+}
+
+.sort-toggle {
+    gap: 4px;
+    padding: 3px 8px;
+    border: 1px solid #E2D9CC;
+    border-radius: 10px;
+    background: transparent;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 16px;
+    color: var(--rt-text-secondary);
 }
 </style>

@@ -6,7 +6,7 @@
             <span class="placeholder">+ Add a note to this goal</span>
         </template>
         <template v-else>
-            <span class="placeholder flex-grow-1">What matters today?</span>
+            <span class="placeholder flex-grow-1">{{ placeholder }}</span>
             <span class="metric-dots d-flex">
                 <span v-for="tag in METRIC_TAGS" :key="tag.id" class="dot" :title="tag.text"
                       :style="{ backgroundColor: tag.color }" @click.stop="open(tag.id)"></span>
@@ -25,7 +25,7 @@
         </div>
 
         <EditorJS ref="editor" class="editor" v-model="json"
-                  :placeholder="variant == 'goal' ? 'What about this goal?' : 'What matters today?'" />
+                  :placeholder="variant == 'goal' ? 'What about this goal?' : placeholder" />
 
         <!-- Metric: pick one, or none -->
         <button v-if="variant == 'goal' && !showMetrics" class="link-button align-self-start" @click="showMetrics = true">
@@ -86,6 +86,8 @@ export default {
         goal: Object,
         // Goals the main composer can link to: [{ id, text }]
         goals: { type: Array, default: () => [] },
+        // The main composer's prompt, e.g. "What matters this week?"
+        placeholder: { type: String, default: 'What matters today?' },
         // async ({ text, json, idMetric, idBlurbType, idGoal }) => void
         save: { type: Function, required: true },
     },
