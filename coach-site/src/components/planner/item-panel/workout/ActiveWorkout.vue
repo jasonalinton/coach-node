@@ -354,13 +354,13 @@ export default {
             if (!this.activeExercise) return
             const set = this.activeSet(this.activeExercise)
             if (set) {
-                this.workoutStore.logSet(set.id, new Date().toISOString())
+                this.workoutStore.logSet(set.id, new Date())
             }
         },
         logAllRemaining() {
             if (!this.activeExercise) return
             const remaining = this.activeExercise.sets.filter(s => !s.iteration || !s.iteration.completedAt)
-            const now = new Date().toISOString()
+            const now = new Date()
             remaining.forEach(set => this.workoutStore.logSet(set.id, now))
         },
         prevExercise() {
@@ -381,7 +381,7 @@ export default {
         },
         stopWorkout() {
             // Kick off completion via the existing store flow
-            const now = new Date().toISOString()
+            const now = new Date()
             this.workoutStore.completeWorkout(this.workout.id, this.startAt, now, true)
                 .then(() => this.back())
         },
