@@ -22,24 +22,27 @@
             </div>
             <div class="reps d-flex flex-column align-items-center">
                 <input class="prop form-control form-control-sm me-2" type="number" min="0" ref="repsInput"
-                        v-model="set.reps"
-                        :style="{'width': inputWidth(set.reps)}"
+                        v-model="form.reps"
+                        :style="{'width': inputWidth(form.reps)}"
+                        @input="isDirty = true"
                         @keyup.enter.esc="doneEditing"
                         @blur="blur"/>
                 <span class="field me-2">REPS</span>
             </div>
             <div class="time d-flex flex-column align-items-center">
                 <input class="prop form-control form-control-sm me-2" type="number" min="0" ref="timeInput"
-                        v-model="set.timeSeconds"
-                        :style="{'width': inputWidth(set.timeSeconds)}" 
+                        v-model="form.timeSeconds"
+                        :style="{'width': inputWidth(form.timeSeconds)}"
+                        @input="isDirty = true"
                         @keyup.enter.esc="doneEditing"
                         @blur="blur"/>
                 <span class="field me-2">TIME</span>
             </div>
             <div class="weight d-flex flex-column align-items-center">
                 <input class="prop form-control form-control-sm me-2" type="number" min="0" ref="weightInput"
-                        v-model="set.weight"
-                        :style="{'width': inputWidth(set.weight)}" 
+                        v-model="form.weight"
+                        :style="{'width': inputWidth(form.weight)}"
+                        @input="isDirty = true"
                         @keyup.enter.esc="doneEditing"
                         @blur="blur"/>
                 <span class="fieldme-2">LBS</span>
@@ -76,12 +79,26 @@ export default {
             appStore: undefined,
             workoutStore: undefined,
             showVariationSelector: false,
-            isProcessing: false
+            isProcessing: false,
+            /* Local edits, so a store refresh from another set's save doesn't overwrite them */
+            form: { reps: undefined, timeSeconds: undefined, weight: undefined },
+            isDirty: false
         }
     },
     created: function() {
         this.appStore = useAppStore();
         this.workoutStore = useWorkoutStore();
+        this.syncForm();
+    },
+    watch: {
+        set: {
+            handler() {
+                if (!this.isDirty) {
+                    this.syncForm();
+                }
+            },
+            deep: true
+        }
     },
     computed: {
         variationIDs() {
@@ -148,14 +165,25 @@ export default {
                 this.isProcessing = false;
             });
         },
+        syncForm() {
+            this.form = {
+                reps: this.set.reps,
+                timeSeconds: this.set.timeSeconds,
+                weight: this.set.weight
+            };
+        },
         blur(e) {
-            if (!e.relatedTarget || !e.relatedTarget.classList.contains("prop")) {
+            /* Only defer the save when moving to another field of this same set */
+            let isSameSetField = e.relatedTarget && e.relatedTarget.classList.contains("prop") &&
+                                 this.$el.contains(e.relatedTarget);
+            if (!isSameSetField && this.isDirty) {
                 this.save();
             }
         },
         save() {
             this.isProcessing = true;
-            this.workoutStore.saveSet(this.set)
+            this.isDirty = false;
+            this.workoutStore.saveSet({ ...this.set, ...this.form })
             .then(result => {
                 this.isProcessing = false;
             });
