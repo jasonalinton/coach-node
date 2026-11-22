@@ -39,7 +39,8 @@ export default {
 
                 let iterations = this.iterationStore.iterations;
                 iterations = iterations.filter(iteration => {
-                    return +new Date(iteration.startAt) >= +start && 
+                    return iteration.startAt && iteration.endAt &&
+                           +new Date(iteration.startAt) >= +start &&
                            +new Date(iteration.endAt) <= +end &&
                            !iteration.isRepeat;
                 });
