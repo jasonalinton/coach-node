@@ -198,6 +198,7 @@ function getBlockTasks(event, repeat, routine) {
     let todoIDOf = iteration => iteration.idTodo ?? iteration.todoID;
     let tasks = [];
 
+    // routine.todoIDs comes from the API in the routine's sort order (RoutineTodo.PositionTodo)
     (routine ? routine.todoIDs : []).forEach(idTodo => {
         let todo = this.todoStore.getItem(idTodo);
         if (!todo) return;
