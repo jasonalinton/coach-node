@@ -31,7 +31,7 @@
             <span class="section-label">NOTES ON THIS GOAL<template v-if="notes.length"> · {{ notes.length }}</template></span>
             <div v-for="note in notes" :key="note.id" class="linked-note d-flex align-items-start">
                 <RethinkMetricTag v-if="note.idMetric" :idMetric="note.idMetric" />
-                <BlurbContent class="note-text" :blurb="note" compact />
+                <BlurbContent class="note-text" :blurb="note" />
             </div>
             <RethinkNoteComposer variant="goal" :goal="goal" :save="saveNote" />
         </div>
@@ -200,6 +200,9 @@ export default {
 }
 
 .note-text {
+    flex: 1;
+    min-width: 0;
+    overflow-wrap: break-word;
     font-size: 13px;
     line-height: 18px;
     color: var(--rt-text);

@@ -10,11 +10,11 @@
                 <span v-if="time" class="time">{{ time }}</span>
             </div>
         </div>
-        <BlurbContent class="text" :blurb="note" />
         <div v-if="goalNames.length" class="linked-goal d-flex align-items-center">
             <img src="/icon/briefing/goal-link.svg" width="12" height="12" alt="" />
             <span>{{ goalNames.join(', ') }}</span>
         </div>
+        <BlurbContent class="text" :blurb="note" />
     </div>
 </template>
 
