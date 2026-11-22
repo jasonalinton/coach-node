@@ -39,10 +39,6 @@ export default {
         return {
             appStore: undefined,
             title: 'Goals',
-            sort: {
-                by: 'Timeframe',
-                items: sortItems
-            },
         }
     },
     created: async function() {

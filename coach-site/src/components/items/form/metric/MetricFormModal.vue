@@ -5,7 +5,7 @@
             <span class="me-2">Metric {{ (metric) ? metric.id : "" }}</span>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        <div class="modal-body">
+        <div class="modal-body" :class="{ 'kanban-body': isKanbanShown }">
             <div v-if="!mapper.isShown && !isKanbanShown" class="container-fluid">
                 <div class="label row gx-0">
                     <div class="col">
@@ -69,7 +69,7 @@
                     </div>
                 </div>
             </div>
-            <div v-if="isKanbanShown" class="container-fluid">
+            <div v-if="isKanbanShown" class="container-fluid kanban-container">
                 <ItemKanban :idParent="id" :idKanbanType="ITEMTYPES.METRIC" />
             </div>
         </div>
@@ -267,6 +267,21 @@ export default {
 
 .modal-body {
     padding: 0px;
+}
+
+/* Kanban fills the modal at a fixed height so its columns scroll individually instead of the body */
+.modal-body.kanban-body {
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.kanban-container {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
 }
 
 .label.row {

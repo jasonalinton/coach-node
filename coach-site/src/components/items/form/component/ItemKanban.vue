@@ -32,13 +32,13 @@
         <!-- Columns -->
         <div class="item-kanban-columns d-flex flex-row">
             <KanbanColumn :idParent="idParent" :idKanbanType="idKanbanType" :idItemType="idItemType" :idColumn="KANBAN_COLUMN.ON_DECK"
-                        :idTimeframe="idTimeframe" :items="onDeckItems" @update:items="loadKanbanCards" />
+                        :idTimeframe="idTimeframe" :items="onDeckItems" @move="applyMove" @update:items="loadKanbanCards" />
             <KanbanColumn :idParent="idParent" :idKanbanType="idKanbanType" :idItemType="idItemType" :idColumn="KANBAN_COLUMN.ON_HOLD"
-                        :idTimeframe="idTimeframe" :items="onHoldItems" @update:items="loadKanbanCards" />
+                        :idTimeframe="idTimeframe" :items="onHoldItems" @move="applyMove" @update:items="loadKanbanCards" />
             <KanbanColumn :idParent="idParent" :idKanbanType="idKanbanType" :idItemType="idItemType" :idColumn="KANBAN_COLUMN.ACTIVE"
-                        :idTimeframe="idTimeframe" :items="activeItems" @update:items="loadKanbanCards" />
+                        :idTimeframe="idTimeframe" :items="activeItems" @move="applyMove" @update:items="loadKanbanCards" />
             <KanbanColumn :idParent="idParent" :idKanbanType="idKanbanType" :idItemType="idItemType" :idColumn="KANBAN_COLUMN.COMPLETE"
-                        :idTimeframe="idTimeframe" :items="completeItems" @update:items="loadKanbanCards" />
+                        :idTimeframe="idTimeframe" :items="completeItems" @move="applyMove" @update:items="loadKanbanCards" />
         </div>
     </div>
 </template>
@@ -48,11 +48,11 @@ import KanbanColumn from './KanbanColumn.vue';
 import { KANBAN_COLUMN, ITEMTYPES, TIMEFRAME } from '../../../../model/constants';
 
 const TIMEFRAMES = [
-    { id: TIMEFRAME.MILESTONE, label: "Milestone" },
-    { id: TIMEFRAME.YEAR, label: "Year" },
-    { id: TIMEFRAME.MONTH, label: "Month" },
+    { id: TIMEFRAME.DAY, label: "Day" },
     { id: TIMEFRAME.WEEK, label: "Week" },
-    { id: TIMEFRAME.DAY, label: "Day" }
+    { id: TIMEFRAME.MONTH, label: "Month" },
+    { id: TIMEFRAME.MILESTONE, label: "Milestone" },
+    { id: TIMEFRAME.YEAR, label: "Year" }
 ];
 
 async function loadOwnerStore(idKanbanType) {
@@ -124,13 +124,17 @@ export default {
         onDeckItems() {
             let items_OnDeck = this.kanbanItems
                 .filter(item => item.idColumn == KANBAN_COLUMN.ON_DECK && !item.dateRemoved);
-            let items_Other = this.kanbanItems
-                .filter(item => !item.dateRemoved);
-            let otherIDs = items_Other.map(item => item.idItem);
+            // An item already sits in another lane of this view if its current row is open, not On Deck,
+            // and (when a timeframe tab is selected) belongs to that timeframe
+            let placedIDs = Object.values(this.currentByDescendant)
+                .filter(item => !item.dateRemoved && item.idColumn != KANBAN_COLUMN.ON_DECK
+                                && (!this.idTimeframe || item.idTimeframe == this.idTimeframe))
+                .map(item => item.idItem);
+            let onDeckIDs = items_OnDeck.map(item => item.idItem);
 
             let positionDescendant = (items_OnDeck.length > 0) ? Math.max(...items_OnDeck.map(item => item.positionDescendant)) + 1 : 1;
-            let descendantTypeIDs = (!this.idTimeframe) 
-                ? this.descendantTypeIDs.filter(idItem => !otherIDs.includes(idItem)) : this.descendantTypeIDs;
+            let descendantTypeIDs = this.descendantTypeIDs
+                .filter(idItem => !placedIDs.includes(idItem) && !onDeckIDs.includes(idItem));
             let placeholders = descendantTypeIDs
                 .map(idItem => ({
                     idParent: this.idParent,
@@ -224,6 +228,13 @@ export default {
                 this.idItemType = id;
             }
         },
+        // Optimistically applies a column's move to the shared rows so every lane updates at once -
+        // the source column drops the card without waiting for loadKanbanCards. New rows get idType
+        // since placeholders (On Deck descendants with no row yet) don't carry one.
+        applyMove({ newRows, removedRowIDs, dateRemoved }) {
+            let cards = this.kanbanCards.map(item => removedRowIDs.includes(item.id) ? { ...item, dateRemoved } : item);
+            this.kanbanCards = cards.concat(newRows.map(row => ({ ...row, idType: this.idItemType })));
+        },
         // Re-fetches the full set of kanban rows from the backend rather than merging the
         // partial per-column payload KanbanColumn emits, since that payload only reflects the
         // one lane/column a drag landed in - the backend is the simplest source of truth here.
@@ -246,6 +257,8 @@ export default {
     text-align: start;
     gap: 24px;
     padding: 16px;
+    flex: 1 1 auto;
+    min-height: 0;
 }
 
 .title {
@@ -289,11 +302,13 @@ export default {
     margin-top: 16px;
 }
 
+/* Takes the height left under the title/toolbar; each column scrolls its own cards */
 .item-kanban-columns {
     gap: 20px;
-    overflow-x: scroll;
-    /* overflow-y: hidden; */
+    overflow-x: auto;
+    overflow-y: hidden;
     align-items: stretch;
-    height: 100%;
+    flex: 1 1 auto;
+    min-height: 0;
 }
 </style>

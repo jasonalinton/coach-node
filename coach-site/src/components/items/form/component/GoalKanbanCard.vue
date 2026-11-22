@@ -1,13 +1,13 @@
 <template>
     <div v-if="goal" class="goal-kanban-card d-flex flex-column">
         <!-- Head -->
-        <div class="d-flex flex-row justify-content-between align-items-center">
-            <!-- <span class="flag-pill d-flex flex-row align-items-center" :style="flagStyle">
+        <!-- <div class="d-flex flex-row justify-content-between align-items-center">
+            <span class="flag-pill d-flex flex-row align-items-center" :style="flagStyle">
                 <span class="flag-dot"></span>
                 {{ flag }}
-            </span> -->
+            </span>
             <i class="fa-solid fa-ellipsis more-icon" @click.stop="togglePriority"></i>
-        </div>
+        </div> -->
         <!-- Text -->
          <div class="d-flex gap-1">
              <div class="text">{{ goal.id }}</div>
@@ -16,7 +16,7 @@
         <!-- Blurb -->
         <BlurbContent v-if="blurb" class="blurb" :blurb="blurb" compact/>
         <!-- Footer -->
-        <div class="d-flex flex-row justify-content-between align-items-center footer">
+        <!-- <div class="d-flex flex-row justify-content-between align-items-center footer">
             <div class="d-flex flex-row align-items-center gap-3">
                 <span class="d-flex flex-row align-items-center gap-1">
                     <i class="fa-solid fa-list-check"></i>
@@ -28,7 +28,7 @@
                 </span>
             </div>
             <span v-if="isPriorityShown" class="priority-pill">{{ priority }}</span>
-        </div>
+        </div> -->
     </div>
 </template>
 

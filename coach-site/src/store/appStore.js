@@ -78,15 +78,15 @@ export const useAppStore = defineStore('app', {
                 showTimeline: false,
                 showHierarchy: true,
                 sort: {
-                    by: 'Timeframe',
+                    by: 'Priority',
                     items: [
                         { id: 1, text: "Dashboard" },
-                        { id: 2, text: "Timeframe" },
-                        { id: 3, text: "Custom" },
-                        { id: 4, text: "Repetition" },
-                        { id: 5, text: "Metric" },
-                        { id: 6, text: "Date" },
-                        { id: 7, text: "Priority" },
+                        { id: 2, text: "Priority" },
+                        { id: 3, text: "Timeframe" },
+                        { id: 4, text: "Custom" },
+                        { id: 5, text: "Repetition" },
+                        { id: 6, text: "Metric" },
+                        { id: 7, text: "Date" }
                     ]
                 },
             },

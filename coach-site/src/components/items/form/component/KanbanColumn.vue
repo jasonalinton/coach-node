@@ -204,7 +204,7 @@ export default {
         // affected row's position in one pass is what keeps positions contiguous. Each row
         // that moves gets a freshly inserted replacement (SetKanbanTask) and its old row is
         // explicitly closed out (RemoveKanbanTask) rather than left dangling.
-        moveItem(draggedItem, referenceDescendantID, position) {
+        async moveItem(draggedItem, referenceDescendantID, position) {
             let orderedIDs = this.laneItems
                 .map(item => item.idItem)
                 .filter(idItem => idItem != draggedItem.idItem);
@@ -226,12 +226,15 @@ export default {
                     ? draggedItem
                     : this.laneItems.find(item => item.idItem == idItem);
 
-                let hasMoved = (idItem == draggedItem.idItem) || (sourceItem.positionDescendant != newPosition);
+                // Only the dragged item takes on this lane's column/timeframe - the rest are just being
+                // renumbered, and with no timeframe selected the lane mixes items from every timeframe
+                let isDragged = (idItem == draggedItem.idItem);
+                let hasMoved = isDragged || (sourceItem.positionDescendant != newPosition);
                 if (hasMoved) {
                     newRows.push({
                         ...sourceItem,
-                        idColumn: this.idColumn,
-                        idTimeframe: this.idTimeframe,
+                        idColumn: (isDragged) ? this.idColumn : sourceItem.idColumn,
+                        idTimeframe: (isDragged) ? this.idTimeframe : sourceItem.idTimeframe,
                         positionDescendant: newPosition,
                         dateAdded: now,
                         dateRemoved: null
@@ -242,23 +245,29 @@ export default {
 
             let closeOutRemovedRows = item => removedRowIDs.includes(item.id) ? { ...item, dateRemoved: now } : item;
             this.localItems = this.localItems.map(closeOutRemovedRows).concat(newRows);
-            this.$emit('update:items', this.items.map(closeOutRemovedRows).concat(newRows));
+            // Lets the parent update every lane right away (e.g. drop the card from its source column)
+            this.$emit('move', { newRows, removedRowIDs: removedRowIDs.filter(id => id != undefined), dateRemoved: now });
 
-            newRows.forEach(row => {
+            let writes = newRows.map(row => {
                 if (this.idItemType == ITEMTYPES.GOAL) {
-                    this.ownerStore.setKanbanTask(row.idParent, row.idItem, null, null, row.idColumn, row.idTimeframe,
+                    return this.ownerStore.setKanbanTask(row.idParent, row.idItem, null, null, row.idColumn, row.idTimeframe,
                         row.positionDescendant, row.date, row.dateAdded, row.dateRemoved);
                 } else if (this.idItemType == ITEMTYPES.TODO) {
-                    this.ownerStore.setKanbanTask(row.idParent, null, row.idItem, null, row.idColumn, row.idTimeframe,
+                    return this.ownerStore.setKanbanTask(row.idParent, null, row.idItem, null, row.idColumn, row.idTimeframe,
                         row.positionDescendant, row.date, row.dateAdded, row.dateRemoved);
-                }else if (this.idItemType == ITEMTYPES.TASK) {
-                    this.ownerStore.setKanbanTask(row.idParent, null, null, row.idItem, row.idColumn, row.idTimeframe,
+                } else if (this.idItemType == ITEMTYPES.TASK) {
+                    return this.ownerStore.setKanbanTask(row.idParent, null, null, row.idItem, row.idColumn, row.idTimeframe,
                         row.positionDescendant, row.date, row.dateAdded, row.dateRemoved);
                 }
             });
             removedRowIDs.filter(id => id != undefined).forEach(id => {
-                this.ownerStore.removeKanbanTask(id, now);
+                writes.push(this.ownerStore.removeKanbanTask(id, now));
             });
+
+            // The parent re-fetches from the backend on update:items, so only signal it once the
+            // writes have landed - otherwise it reloads the old rows and the card snaps back
+            await Promise.allSettled(writes);
+            this.$emit('update:items', this.items.map(closeOutRemovedRows).concat(newRows));
         }
     }
 }
@@ -267,7 +276,7 @@ export default {
 <style scoped>
 .kanban-column {
     min-width: 250px;
-    min-height: 100%;
+    min-height: 0;
     flex-basis: 0;
     gap: 20px;
     background-color: #F9FAFB;
@@ -322,10 +331,14 @@ export default {
     border-color: #6366F1;
 }
 
+/* Fills the column under its header/search (so empty space is still a drop target) and scrolls */
 .cards {
     width: 100%;
     gap: 12px;
-    min-height: 100%;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 2px; /* keeps the card borders and drop-indicator shadows from being clipped */
 }
 
 .kanban-item {
