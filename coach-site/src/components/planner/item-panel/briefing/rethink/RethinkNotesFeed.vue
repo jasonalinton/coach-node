@@ -26,6 +26,7 @@ import RethinkNote from './RethinkNote.vue';
 import RethinkDayGroup from './RethinkDayGroup.vue';
 import { TIMEFRAME } from '../../../../../model/constants';
 import { getTimeframeEndpoints, startOfDay, endOfDay } from '../../../../../../utility/timeUtility';
+import { getNotePeriod, isNoteInRange } from '../briefingUtility';
 
 const TIMEFRAMES = [ TIMEFRAME.DAY, TIMEFRAME.WEEK, TIMEFRAME.MONTH, TIMEFRAME.YEAR ];
 
@@ -114,19 +115,17 @@ export default {
         filedIn(timeframeIDs, start, end) {
             return this.order(this.notes
                 .filter(x => timeframeIDs.includes(x.idTimeframe))
-                .filter(x => {
-                    let datetime = +new Date(x.datetime);
-                    return datetime >= +start && datetime <= +end;
-                })
+                .filter(x => isNoteInRange(x, start, end))
                 .sort((a, b) => +new Date(a.datetime) - +new Date(b.datetime) || a.id - b.id));
         },
         dayGroups(start, end) {
             let groups = [];
             this.filedIn([ TIMEFRAME.DAY ], start, end).forEach(note => {
-                let key = moment(note.datetime).format('YYYY-MM-DD');
+                let day = getNotePeriod(note).start;
+                let key = moment(day).format('YYYY-MM-DD');
                 let group = groups.find(x => x.key == key);
                 if (!group) {
-                    group = { key, date: moment(note.datetime).startOf('day').toDate(), notes: [] };
+                    group = { key, date: day, notes: [] };
                     groups.push(group);
                 }
                 group.notes.push(note);

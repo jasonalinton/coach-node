@@ -28,6 +28,7 @@ import BlurbFormControl from '../../../items/form/component/BlurbFormControl.vue
 import BriefingSectionHeader from './BriefingSectionHeader.vue';
 import { today, clone } from '../../../../../utility';
 import { BLURBTYPE, METRIC } from '../../../../model/constants';
+import { isNoteInRange } from './briefingUtility';
 
 export default {
     name: 'BriefingBlurb',
@@ -70,7 +71,7 @@ export default {
                 blurbs = this.universalStore.blurbs;
             }
             blurbs = blurbs.filter(x => x.idType == BLURBTYPE.BRIEFING );
-            blurbs = blurbs.filter(x => +new Date(x.datetime) == +this.selectedDate );
+            blurbs = blurbs.filter(x => x.idTimeframe == this.idTimeframe && isNoteInRange(x, this.selectedDate, this.selectedDate));
 
             return blurbs;
         },
@@ -100,7 +101,7 @@ export default {
     },
     methods: {
         addBlurb(blurb, idMetric) {
-            return this.universalStore.addBriefingBlurb(blurb.text, new Date(),blurb.idBlurbType, idMetric, this.idTimeframe, blurb.json)
+            return this.universalStore.addBriefingBlurb(blurb.text, new Date(), this.selectedDate, blurb.idBlurbType, idMetric, this.idTimeframe, blurb.json)
         },
         saveBlurb(blurb) {
             return this.universalStore.updateBlurb(blurb.id, undefined, [], [], blurb.text, blurb.title, undefined, [], [], blurb.json);

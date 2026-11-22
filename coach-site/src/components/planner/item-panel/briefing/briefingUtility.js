@@ -1,6 +1,6 @@
 import moment from 'moment';
 import { BLURBTYPE, METRIC, TIMEFRAME } from '../../../../model/constants';
-import { getTimeframeEndpoints } from '../../../../../utility/timeUtility';
+import { getTimeframeEndpoints, startOfDay, endOfDay } from '../../../../../utility/timeUtility';
 import { extractPlainText } from '../../../../../utility/editorjsUtility';
 import { sortAsc } from '../../../../../utility';
 
@@ -15,6 +15,23 @@ export const METRIC_TAGS = [
 
 export function getMetricTag(idMetric) {
     return METRIC_TAGS.find(x => x.id == idMetric);
+}
+
+/*
+ * The period a briefing note is filed under. briefingDatetime is the start of that period;
+ * datetime is when the note was written, used only for older notes without briefingDatetime.
+ */
+export function getNotePeriod(note) {
+    let date = new Date(note.briefingDatetime ?? note.datetime);
+    if (note.idTimeframe == TIMEFRAME.DAY) return { start: startOfDay(date), end: endOfDay(date) };
+    let period = getTimeframeEndpoints(note.idTimeframe, date);
+    return (period.start) ? period : { start: date, end: date };
+}
+
+// Whether the note's period overlaps start-end, e.g. a week straddling the start of the month
+export function isNoteInRange(note, start, end) {
+    let period = getNotePeriod(note);
+    return +period.start <= +end && +period.end >= +start;
 }
 
 // A blurb's display text: its editor blocks when present, otherwise the legacy text

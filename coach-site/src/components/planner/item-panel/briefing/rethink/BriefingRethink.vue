@@ -69,7 +69,7 @@ import moment from 'moment';
 import RethinkGoalCard from './RethinkGoalCard.vue';
 import RethinkNoteComposer from './RethinkNoteComposer.vue';
 import RethinkNotesFeed from './RethinkNotesFeed.vue';
-import { GOAL_TIMEFRAMES, getGoalGroups, getGoalReasons, getPeriods, getPaceRanges, timeframeUnit } from '../briefingUtility';
+import { GOAL_TIMEFRAMES, getGoalGroups, getGoalReasons, getPeriods, getPaceRanges, timeframeUnit, isNoteInRange } from '../briefingUtility';
 import { getPoints } from '../../../../../../utility/pointsUtility';
 import { BLURBTYPE, BLURB_MAPPING_TYPE, TIMEFRAME } from '../../../../../model/constants';
 import { today, isToday, startOfDay, endOfDay, getTimeframeEndpoints } from '../../../../../../utility/timeUtility';
@@ -213,8 +213,8 @@ export default {
                 return x.idType == BLURBTYPE.BRIEFING || x.idType == BLURBTYPE.DEBRIEFING;
             });
         },
-        // Notes filed under the selected timeframe or a shorter one, dated within the selected period
-        // (e.g. the week's notes and its days' notes on the Week tab)
+        // Notes filed under the selected timeframe or a shorter one, for a period within the selected one
+        // (e.g. the week's notes and its days' notes on the Week tab). Newest written first.
         notes() {
             let { start, end } = (this.idTimeframe == TIMEFRAME.DAY)
                 ? { start: startOfDay(this.selectedDate), end: endOfDay(this.selectedDate) }
@@ -222,10 +222,7 @@ export default {
             let timeframeIDs = GOAL_TIMEFRAMES.slice(0, GOAL_TIMEFRAMES.indexOf(this.idTimeframe) + 1);
             return this.filteredNotes
                 .filter(x => timeframeIDs.includes(x.idTimeframe))
-                .filter(x => {
-                    let datetime = +new Date(x.datetime);
-                    return datetime >= +start && datetime <= +end;
-                })
+                .filter(x => isNoteInRange(x, start, end))
                 .sort((a, b) => +new Date(b.datetime) - +new Date(a.datetime));
         },
     },
@@ -287,7 +284,7 @@ export default {
             GOAL_TIMEFRAMES.forEach(idTimeframe => this.universalStore?.getBriefingBlurbs(idTimeframe, this.selectedDate));
         },
         async saveNote({ text, json, idMetric, idBlurbType, idGoal }) {
-            let blurb = await this.universalStore.addBriefingBlurb(text, new Date(),idBlurbType, idMetric, this.idTimeframe, json);
+            let blurb = await this.universalStore.addBriefingBlurb(text, new Date(), this.selectedDate, idBlurbType, idMetric, this.idTimeframe, json);
             if (!blurb) throw new Error("AddBriefingBlurb returned no blurb");
 
             if (idGoal) {

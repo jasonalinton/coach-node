@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia';
+import moment from 'moment';
 import { getSocketConnection, deferUpdate } from './socket';
 import { replaceOrAddItem, sortAsc } from '../../utility';
 import { getTimeframeEndpoints } from '../../utility/timeUtility';
@@ -84,8 +85,11 @@ export const useUniversalStore = defineStore('universal', {
             let blurbs = this.blurbs.filter(blurb => blurb.idType == BLURBTYPE.BRIEFING || blurb.idType == BLURBTYPE.DEBRIEFING);
             return blurbs;
         },
-        addBriefingBlurb(text, datetime, idBlurbType, idMetric, idTimeframe, json) {
-            let data = { text, json, datetime, idBlurbType, idMetric, idTimeframe };
+        // datetime: when the note was written. briefingDatetime: any date in the briefing's period,
+        // sent as local wall-clock time so the server files it under the user's day, not the UTC one
+        addBriefingBlurb(text, datetime, briefingDatetime, idBlurbType, idMetric, idTimeframe, json) {
+            briefingDatetime = moment(briefingDatetime).format('YYYY-MM-DDTHH:mm:ss');
+            let data = { text, json, datetime, briefingDatetime, idBlurbType, idMetric, idTimeframe };
             return postEndpoint("Universal", "AddBriefingBlurb", data)
                 .then(this.onResponse);
         },
