@@ -30,7 +30,7 @@ import { getNotePeriod, isNoteInRange } from '../briefingUtility';
 
 const TIMEFRAMES = [ TIMEFRAME.DAY, TIMEFRAME.WEEK, TIMEFRAME.MONTH, TIMEFRAME.YEAR ];
 
-// Day tab: notes filed under the longer timeframes that contain the day
+// Day, Week and Month tabs: notes filed under the longer timeframes that contain the selected period
 const ALSO_LABELS = {
     [TIMEFRAME.WEEK]: 'Also filed this week',
     [TIMEFRAME.MONTH]: 'This month',
@@ -78,11 +78,15 @@ export default {
         daySections() {
             let start = startOfDay(this.date), end = endOfDay(this.date);
             let sections = [ this.section('day', undefined, this.filedIn([ TIMEFRAME.DAY ], start, end)) ];
-            TIMEFRAMES.slice(1).forEach(idTimeframe => {
+            return [ ...sections, ...this.alsoSections() ];
+        },
+        // Notes filed under each timeframe longer than the selected one, for the period containing the date
+        // (e.g. "This month" and "This year" on the Day and Week tabs, "This year" on the Month tab)
+        alsoSections() {
+            return TIMEFRAMES.slice(TIMEFRAMES.indexOf(this.idTimeframe) + 1).map(idTimeframe => {
                 let period = getTimeframeEndpoints(idTimeframe, this.date);
-                sections.push(this.section(`also-${idTimeframe}`, ALSO_LABELS[idTimeframe], this.filedIn([ idTimeframe ], period.start, period.end)));
+                return this.section(`also-${idTimeframe}`, ALSO_LABELS[idTimeframe], this.filedIn([ idTimeframe ], period.start, period.end));
             });
-            return sections;
         },
         // Week, Month and Year tabs: notes filed under the timeframe, then its days (Week)
         // or its weeks (Month) / months (Year), each with their own notes and days
@@ -92,7 +96,7 @@ export default {
 
             if (this.idTimeframe == TIMEFRAME.WEEK) {
                 let byDay = this.section('days', 'By day', [], this.dayGroups(start, end));
-                return [ pinned, byDay ];
+                return [ pinned, byDay, ...this.alsoSections() ];
             }
 
             // Timeframes between Day and the selected one, e.g. Week notes inside a month
@@ -107,10 +111,11 @@ export default {
                 defaultCollapsed: !(index == selected || index == selected - 1),
                 cap: DAY_NOTE_CAP,
             }));
-            return [ pinned, ...this.order(subSections) ];
+            return [ pinned, ...this.order(subSections), ...this.alsoSections() ];
         },
+        // Every labeled section can be collapsed; the unlabeled Day section has no header to click
         section(key, label, notes, days = []) {
-            return { key, label, notes, days, accent: false, collapsible: false, defaultCollapsed: false, cap: 0 };
+            return { key, label, notes, days, accent: false, collapsible: !!label, defaultCollapsed: false, cap: 0 };
         },
         filedIn(timeframeIDs, start, end) {
             return this.order(this.notes
@@ -159,6 +164,15 @@ export default {
             if (!section.collapsible) return false;
             let toggled = this.toggledSections.includes(section.key);
             return section.defaultCollapsed != toggled;
+        },
+        hasOpenSection() {
+            return this.sections.some(section => section.collapsible && !section.collapsed);
+        },
+        // Collapse or expand every collapsible section (the panel's "Collapse all")
+        setAllSectionsCollapsed(collapse) {
+            this.toggledSections = this.sections
+                .filter(section => section.collapsible && section.defaultCollapsed != collapse)
+                .map(section => section.key);
         },
         toggleSection(section) {
             let index = this.toggledSections.indexOf(section.key);

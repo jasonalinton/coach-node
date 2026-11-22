@@ -29,6 +29,14 @@
                                 <rect x="15" y="10" width="3" height="8" rx="1" />
                             </svg>
                         </button>
+                        <!-- Collapse / expand all note sections -->
+                        <button class="header-button me-1" :title="sectionsCollapsed ? 'Expand all' : 'Collapse all'"
+                                @click.prevent="toggleAllSections">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#5f6368" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                                <path v-if="sectionsCollapsed" d="M8 9.5l4-4 4 4M8 14.5l4 4 4-4" />
+                                <path v-else d="M8 6l4 4 4-4M8 18l4-4 4 4" />
+                            </svg>
+                        </button>
                         <!-- Jump to today -->
                         <button class="header-button me-1" title="Jump to today" @click.prevent="jumpToToday">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#5f6368" stroke-width="1.6">
@@ -71,6 +79,8 @@ export default {
             appStore: undefined,
             plannerStore: undefined,
             designVariant: 'BriefingRethink',
+            // Whether the last "Collapse all" collapsed the note sections (sets the button's icon and title)
+            sectionsCollapsed: false,
         }
     },
     created: async function() {
@@ -122,6 +132,9 @@ export default {
         cycleNoteFilter() {
             let next = NOTE_FILTERS[(NOTE_FILTERS.indexOf(this.noteFilter) + 1) % NOTE_FILTERS.length];
             this.appStore.setItemPanelSetting('briefing', 'noteFilter', next);
+        },
+        toggleAllSections() {
+            this.sectionsCollapsed = this.$refs.rethink?.toggleAllSections() ?? false;
         },
         jumpToToday() {
             this.plannerStore?.selectDate(today());

@@ -32,9 +32,15 @@
         </div>
 
         <!-- Also tracking: goals from longer timeframes; a chip opens the goal inline -->
+        <!-- Collapsed by default; the label toggles the chips -->
         <div v-if="alsoTrackingGoals.length" class="also-tracking d-flex flex-wrap align-items-center">
-            <span class="also-label">Also tracking</span>
-            <button v-for="goal in alsoTrackingGoals" :key="goal.id" class="chip d-flex"
+            <button class="also-label d-flex align-items-center" :aria-expanded="alsoTrackingOpen"
+                    @click="toggleAlsoTracking">
+                <span>Also tracking</span>
+                <span v-if="!alsoTrackingOpen" class="also-count">{{ alsoTrackingGoals.length }}</span>
+                <span class="also-toggle">{{ alsoTrackingOpen ? 'Hide' : 'Show ›' }}</span>
+            </button>
+            <button v-for="goal in (alsoTrackingOpen ? alsoTrackingGoals : [])" :key="goal.id" class="chip d-flex"
                     :class="{ open: goal.id == openGoalID }" @click="toggleGoal(goal.id)">
                 <span class="chip-text">{{ goal.text }}</span>
                 <span v-if="showPoints" class="chip-points">{{ currentPoints(goal.id) }}</span>
@@ -59,7 +65,7 @@
         </div>
         <RethinkNoteComposer variant="main" :goals="linkableGoals" :save="saveNote"
                              :placeholder="`What matters ${PERIOD_LABELS[idTimeframe]}?`" />
-        <RethinkNotesFeed :notes="filteredNotes" :idTimeframe="idTimeframe" :date="selectedDate"
+        <RethinkNotesFeed ref="feed" :notes="filteredNotes" :idTimeframe="idTimeframe" :date="selectedDate"
                           :newestFirst="newestFirst" :goalStore="goalStore" />
     </div>
 </template>
@@ -106,6 +112,7 @@ export default {
             // Which period the scores and bars use (the "Week ▾" dropdown)
             idPointsTimeframe: TIMEFRAME.WEEK,
             openGoalID: null,
+            alsoTrackingOpen: false,
         }
     },
     created: async function() {
@@ -180,6 +187,7 @@ export default {
             return this.goalGroups.slice(1).flatMap(group => this.goalsOf(group));
         },
         openAlsoTrackingGoal() {
+            if (!this.alsoTrackingOpen) return undefined;
             return this.alsoTrackingGoals.find(x => x.id == this.openGoalID);
         },
         linkableGoals() {
@@ -275,6 +283,20 @@ export default {
         resetTimeframe() {
             this.idTimeframe = TIMEFRAME.DAY;
             this.openGoalID = null;
+        },
+        toggleAlsoTracking() {
+            this.alsoTrackingOpen = !this.alsoTrackingOpen;
+        },
+        // Called by the panel header's "Collapse all". Collapses the open goal card, Also tracking and the
+        // note sections; when everything is already collapsed, expands Also tracking and the note sections.
+        // Returns whether everything is now collapsed.
+        toggleAllSections() {
+            let feed = this.$refs.feed;
+            let anyOpen = this.openGoalID != null || this.alsoTrackingOpen || (feed?.hasOpenSection() ?? false);
+            this.openGoalID = null;
+            this.alsoTrackingOpen = !anyOpen;
+            feed?.setAllSectionsCollapsed(anyOpen);
+            return anyOpen;
         },
         toggleSort() {
             this.appStore.setItemPanelSetting('briefing', 'noteSort', this.newestFirst ? 'oldest' : 'newest');
@@ -423,7 +445,21 @@ export default {
 }
 
 .also-label {
+    gap: 6px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    font: inherit;
     color: var(--rt-text-muted);
+}
+
+.also-count {
+    font-weight: 600;
+}
+
+.also-toggle {
+    font-weight: 500;
+    color: var(--rt-accent);
 }
 
 .chip {
