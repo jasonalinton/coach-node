@@ -230,6 +230,7 @@ async function addFoodItem(foodItem, type) {
         unit: (['upc','recent'].includes(type)) ? foodItem.unit : foodItem.serving_unit,
         quantity: this.quantity,
         dateString: datetime.toLocaleString(),
+        dateTime: datetime,
         foodItem: (['upc','recent'].includes(type)) ? foodItem : undefined
     }
     this.physicalStore.addFoodItemToMeal(model);
