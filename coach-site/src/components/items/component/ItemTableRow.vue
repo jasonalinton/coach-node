@@ -46,6 +46,7 @@ import TextItemTableCell from './table_cell/TextItemTableCell.vue'
 import StringItemTableCell from './table_cell/StringItemTableCell.vue'
 import ObjectArrayItemTableCell from './table_cell/ObjectArrayItemTableCell.vue'
 import { toCamelCase } from '../../../../utility';
+import { useItemTableStore } from '@/store/itemTableStore'
 
 export default {
     name: "ItemTableRow",
@@ -69,9 +70,8 @@ export default {
             position: ""
         }
     },
-    created: async function() {
-        let itemTableStore = await import(`@/store/itemTableStore`);
-        this.itemTableStore = itemTableStore.useItemTableStore();
+    created: function() {
+        this.itemTableStore = useItemTableStore();
     },
     methods: {
         toCamelCase,
