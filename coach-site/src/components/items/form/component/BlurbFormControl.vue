@@ -58,7 +58,7 @@
                     <img src="/icon/button/add.png" width="10" height="10"/>Add
                 </button>
                 <!-- Briefing Type -->
-                <div v-if="idBlurbType == BLURBTYPE.BRIEFING || idBlurbType == BLURBTYPE.DEBRIEFING" class="briefing-type pills d-flex flex-row justify-content-between mt-1 gap-1">
+                <div v-if="isBriefing" class="briefing-type pills d-flex flex-row justify-content-between mt-1 gap-1">
                     <span class="app-pill flex-grow-1" :class="{ 'selected': idBriefingType == BLURBTYPE.BRIEFING }"
                           @click="idBriefingType = BLURBTYPE.BRIEFING">
                         Briefing
@@ -67,6 +67,9 @@
                           @click="idBriefingType = BLURBTYPE.DEBRIEFING">
                         Debriefing
                     </span>
+                    <!-- Briefing period; only when adding, since a saved blurb's period can't be changed yet -->
+                    <input v-if="!selectedID" class="textbox briefing-date" type="date" aria-label="Briefing date"
+                           v-model="briefingDate" />
                 </div>
                 <!-- Save Button -->
                 <div class="d-flex flex-row align-items-center mt-1 justify-content-end">
@@ -99,6 +102,7 @@
 </template>
 
 <script>
+import moment from 'moment';
 import { getShortDateString } from '../../../../../utility/timeUtility';
 import { clone, sortAsc } from '../../../../../utility';
 import { extractPlainText, legacyTextToOutputData } from '../../../../../utility/editorjsUtility';
@@ -157,7 +161,9 @@ export default {
             type: Boolean,
             default: () => false
         },
-        idBlurbType: Number
+        idBlurbType: Number,
+        // Briefing blurbs: the date the period picker starts on (e.g. the planner's selected date)
+        defaultBriefingDate: Date
     },
     data: function () {
         return {
@@ -178,6 +184,7 @@ export default {
             originalMappings: [],
             pickerGroupIndex: undefined,
             idBriefingType: undefined,
+            briefingDate: undefined,
             emptyWarning: false
         }
     },
@@ -205,9 +212,15 @@ export default {
     watch: {
         json() {
             this.emptyWarning = false;
+        },
+        defaultBriefingDate() {
+            this.briefingDate = toDateInputValue(this.defaultBriefingDate);
         }
     },
     computed: {
+        isBriefing() {
+            return this.idBlurbType == this.BLURBTYPE.BRIEFING || this.idBlurbType == this.BLURBTYPE.DEBRIEFING;
+        },
         blurbs_Sorted() {
             let blurbs = [];
             if (this.universalStore) {
@@ -253,8 +266,14 @@ export default {
     },
 }
 
+// A date as an <input type="date"> value (YYYY-MM-DD, local); today when no date is given
+function toDateInputValue(date) {
+    return moment(date ?? new Date()).format('YYYY-MM-DD');
+}
+
 function reset() {
     this.emptyWarning = false;
+    this.briefingDate = toDateInputValue(this.defaultBriefingDate);
     this.selectedID = undefined;
     this.title = undefined;
     this.json = undefined;
@@ -420,7 +439,9 @@ async function saveBlurb() {
         datetime: (!idBlurb) ? new Date() : undefined,
         goalTimePairIDs: originalIDsOfType(T.GOALTIMEPAIR),
         goalTimePairTodoIDs: originalIDsOfType(T.GOALTIMEPAIRTODO),
-        idBlurbType: this.idBriefingType
+        idBlurbType: this.idBriefingType,
+        // Local midnight of the picked day, so the note is filed under that day's period
+        briefingDatetime: (!idBlurb && this.isBriefing && this.briefingDate) ? moment(this.briefingDate, 'YYYY-MM-DD').toDate() : undefined
     };
 
     let saving;
@@ -580,6 +601,12 @@ button.btn-close.mapping-remove {
 
 .add-btn {
     align-self: flex-start;
+}
+
+.briefing-date {
+    flex-shrink: 0;
+    width: auto;
+    border: 1px solid rgba(0, 0, 0, .08) !important;
 }
 
 .add-btn:disabled {

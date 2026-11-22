@@ -123,11 +123,12 @@ export const useUniversalStore = defineStore('universal', {
                 .then(this.onResponse);
         },
         // idType: the blurb's primary type (e.g. BLURBTYPE.BRIEFING/DEBRIEFING); undefined leaves it unchanged
-        updateBlurb(idBlurb, idMappingType, typeIDs_Added, typeIDs_Removed, text, title, datetime, mappings_Added, mappings_Removed, json, idType) {
+        // mappings_Updated: existing mapping rows (by id) to change in place; currently briefing mappings only
+        updateBlurb(idBlurb, idMappingType, typeIDs_Added, typeIDs_Removed, text, title, datetime, mappings_Added, mappings_Removed, json, idType, mappings_Updated = []) {
             let data = {
                 idBlurb, idMappingType, idType, text, title, json, datetime,
                 typeIDs_Added, typeIDs_Removed,
-                mappings_Added, mappings_Removed
+                mappings_Added, mappings_Removed, mappings_Updated
             };
             return postEndpoint("Universal", "UpdateBlurb", data)
                 .then(this.onResponse);

@@ -6,6 +6,7 @@
                 <BlurbFormControl :ref="el => controls[entry.key] = el"
                                   :header="entry.title" :placeholder="entry.placeholder"
                                   :blurbs="entry.blurbs" :idBlurbType="BLURBTYPE.BRIEFING"
+                                  :defaultBriefingDate="selectedDate"
                                   class="mt-2"
                                   @addBlurb="addBlurb($event, entry.id)"
                                   @saveBlurb="saveBlurb" />
@@ -101,7 +102,7 @@ export default {
     },
     methods: {
         addBlurb(blurb, idMetric) {
-            return this.universalStore.addBriefingBlurb(blurb.text, new Date(), this.selectedDate, blurb.idBlurbType, idMetric, this.idTimeframe, blurb.json)
+            return this.universalStore.addBriefingBlurb(blurb.text, new Date(), blurb.briefingDatetime ?? this.selectedDate, blurb.idBlurbType, idMetric, this.idTimeframe, blurb.json)
         },
         saveBlurb(blurb) {
             return this.universalStore.updateBlurb(blurb.id, undefined, [], [], blurb.text, blurb.title, undefined, [], [], blurb.json);

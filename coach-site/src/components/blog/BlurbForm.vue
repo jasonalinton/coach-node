@@ -60,10 +60,13 @@
                         <span v-if="mappingGroups.length > 1" class="mapping-group-remove" @click="removeMappingGroup(groupIndex)">&times;</span>
                     </div>
                     <div v-if="group.mappings.length" class="mapping-chips">
-                        <span v-for="(mapping, index) in group.mappings" :key="index" class="mapping-chip">
+                        <!-- Briefing chips open the briefing picker to edit them -->
+                        <span v-for="(mapping, index) in group.mappings" :key="index" class="mapping-chip"
+                              :class="{ editable: mapping.mappingType == BLURB_MAPPING_TYPE.BRIEFING }"
+                              @click="mapping.mappingType == BLURB_MAPPING_TYPE.BRIEFING && editBriefingMapping(groupIndex, index)">
                             <span v-if="mapping.idEntity != null" class="mapping-chip-id">{{ mapping.idEntity }}</span>
                             <span v-if="mappingDisplayText(mapping)">{{ mappingDisplayText(mapping) }}</span>
-                            <span class="mapping-chip-remove" @click="removeMapping(groupIndex, index)">&times;</span>
+                            <span class="mapping-chip-remove" @click.stop="removeMapping(groupIndex, index)">&times;</span>
                         </span>
                     </div>
                     <!-- Picker popover -->
@@ -99,9 +102,12 @@
                                 <option :value="undefined">No metric</option>
                                 <option v-for="metric in metricStore.getItems()" :key="metric.id" :value="metric.id">{{ metric.text }}</option>
                             </select>
+                            <!-- Any day in the briefing's period; filed under that day's week/month/year -->
+                            <input class="mapping-select briefing-date mt-2" type="date" aria-label="Briefing date"
+                                   v-model="briefingDate" />
                             <div class="picker-footer">
                                 <span class="btn-cancel-picker" @click="closePicker">Cancel</span>
-                                <span class="btn-confirm-picker" :class="{ disabled: !briefingIdTimeframe }"
+                                <span class="btn-confirm-picker" :class="{ disabled: !briefingIdTimeframe || !briefingDate }"
                                       @click="confirmBriefingMapping">Add</span>
                             </div>
                         </div>
@@ -119,12 +125,31 @@
 </template>
 
 <script>
+import moment from 'moment';
 import ItemMapper from '../items/form/component/ItemMapper.vue';
 import EditorJS from '../controls/input/EditorJS.vue';
 import { clone, toDateString, addDay } from '../../../utility';
 import { extractPlainText, isEmptyOutputData, legacyTextToOutputData } from '../../../utility/editorjsUtility';
-import { BLURB_MAPPING_TYPE, BLURBTYPE } from '../../model/constants';
+import { BLURB_MAPPING_TYPE, BLURBTYPE, TIMEFRAME } from '../../model/constants';
 import { blurbTypes, blurbMappingTypes, timeframes } from '../../model/types';
+
+// Start of the period a briefing on this date is filed under (matches the server's StartOfTimeframe)
+function briefingPeriodStart(date, idTimeframe) {
+    let unit = { [TIMEFRAME.WEEK]: 'week', [TIMEFRAME.MONTH]: 'month', [TIMEFRAME.YEAR]: 'year' }[idTimeframe] ?? 'day';
+    return moment(date).startOf(unit).toDate();
+}
+
+// "Nov 8, 2026", "Week of Nov 8, 2026", "November 2026" or "2026"
+function briefingPeriodLabel(timeframe, datetime) {
+    let date = moment(datetime);
+    switch (timeframe?.id) {
+        case TIMEFRAME.WEEK: return `Week of ${date.format('MMM D, YYYY')}`;
+        case TIMEFRAME.MONTH: return date.format('MMMM YYYY');
+        case TIMEFRAME.YEAR: return date.format('YYYY');
+        case TIMEFRAME.DAY: return date.format('MMM D, YYYY');
+        default: return [timeframe?.text, date.format('MMM D, YYYY')].filter(Boolean).join(' ');
+    }
+}
 
 const ITEM_MAPPER_KIND_BY_TYPE = {
     [BLURB_MAPPING_TYPE.GOAL]: 'goal',
@@ -179,6 +204,10 @@ export default {
 
             briefingIdTimeframe: undefined,
             briefingIdMetric: undefined,
+            // <input type="date"> value (YYYY-MM-DD); defaults to the planner's selected date
+            briefingDate: undefined,
+            // Index (in the active group) of the briefing chip being edited; undefined when adding
+            editingMappingIndex: undefined,
 
             blurbTypes: clone(blurbTypes),
             timeframes: clone(timeframes),
@@ -204,6 +233,7 @@ export default {
         this.physicalStore = physicalStore.usePhysicalStore();
         let plannerStore = await import('@/store/plannerStore');
         this.plannerStore = plannerStore.usePlannerStore();
+        this.resetBriefingDate();
 
         this.initFromBlurb();
     },
@@ -312,6 +342,8 @@ export default {
             this.pickerTodo = undefined;
             this.pickerTimePair = undefined;
             this.localPickerSearch = '';
+            this.editingMappingIndex = undefined;
+            this.resetBriefingDate();
 
             if (this.mappingKind == 'local') {
                 this.setLocalPickerItems();
@@ -319,6 +351,7 @@ export default {
         },
         closePicker() {
             this.activePickerIndex = undefined;
+            this.editingMappingIndex = undefined;
             this.pickerStep = 1;
             this.pickerGoal = undefined;
             this.pickerTodo = undefined;
@@ -474,27 +507,48 @@ export default {
             });
             this.closePicker();
         },
+        // A new briefing mapping starts on the planner's selected date; editing a chip uses the chip's date
+        resetBriefingDate() {
+            this.briefingDate = moment(this.plannerStore?.selectedDate ?? new Date()).format('YYYY-MM-DD');
+        },
+        // Opens the briefing picker filled in with an existing chip's values
+        editBriefingMapping(groupIndex, index) {
+            this.openItemPicker(groupIndex);
+            let mapping = this.mappingGroups[groupIndex].mappings[index];
+            this.editingMappingIndex = index;
+            this.briefingIdTimeframe = mapping.idTimeframe ?? undefined;
+            this.briefingIdMetric = mapping.idMetric ?? undefined;
+            if (mapping.datetime) this.briefingDate = moment(mapping.datetime).format('YYYY-MM-DD');
+        },
         confirmBriefingMapping() {
             // Metric is optional: a general briefing note maps to a timeframe only
-            if (!this.briefingIdTimeframe) return;
+            if (!this.briefingIdTimeframe || !this.briefingDate) return;
 
-            this.activeGroup.mappings.push({
+            let datetime = briefingPeriodStart(moment(this.briefingDate, 'YYYY-MM-DD').toDate(), this.briefingIdTimeframe);
+            let mapping = {
                 mappingType: this.BLURB_MAPPING_TYPE.BRIEFING,
                 idEntity: null,
-                text: this.briefingLabel(this.briefingIdTimeframe, this.briefingIdMetric),
+                text: this.briefingLabel(this.briefingIdTimeframe, this.briefingIdMetric, datetime),
                 idTimeframe: this.briefingIdTimeframe,
-                idMetric: this.briefingIdMetric ?? null
-            });
+                idMetric: this.briefingIdMetric ?? null,
+                datetime
+            };
+
+            // Editing replaces the chip and keeps its row id, so saving updates that row in place
+            let editing = this.activeGroup.mappings[this.editingMappingIndex];
+            if (editing) this.activeGroup.mappings.splice(this.editingMappingIndex, 1, { ...mapping, id: editing.id });
+            else this.activeGroup.mappings.push(mapping);
 
             this.briefingIdTimeframe = undefined;
             this.briefingIdMetric = undefined;
             this.closePicker();
         },
-        // "Week / Physical", or just "Week" for a briefing with no metric
-        briefingLabel(idTimeframe, idMetric) {
+        // "Week of Nov 8, 2026 / Physical", or just "Week of Nov 8, 2026" for a briefing with no metric
+        briefingLabel(idTimeframe, idMetric, datetime) {
             let timeframe = this.timeframes.find(t => t.id == idTimeframe);
             let metric = idMetric ? this.metricStore.getItem(idMetric) : null;
-            return [timeframe?.text, metric?.text].filter(Boolean).join(' / ');
+            let period = datetime ? briefingPeriodLabel(timeframe, datetime) : timeframe?.text;
+            return [period, metric?.text].filter(Boolean).join(' / ');
         },
         removeMapping(groupIndex, index) {
             this.mappingGroups[groupIndex].mappings.splice(index, 1);
@@ -549,8 +603,10 @@ export default {
                 .filter(position => position.parentType == 'Timeframe')
                 .map(position => ({
                     mappingType: T.BRIEFING, idEntity: null,
-                    text: this.briefingLabel(position.parentID, position.idMetric),
-                    idTimeframe: position.parentID, idMetric: position.idMetric ?? null
+                    text: this.briefingLabel(position.parentID, position.idMetric, position.datetime),
+                    id: position.id ?? null,
+                    idTimeframe: position.parentID, idMetric: position.idMetric ?? null,
+                    datetime: position.datetime ? new Date(position.datetime) : null
                 })));
 
             // Keep the blurb's primary mapping type first
@@ -561,15 +617,19 @@ export default {
             this.originalMappings = groups.flatMap(g => g.mappings);
         },
         mappingKey(mapping) {
-            return `${mapping.mappingType}|${mapping.idEntity}|${mapping.idTimeframe}|${mapping.idMetric}`;
+            let day = mapping.datetime ? moment(mapping.datetime).format('YYYY-MM-DD') : null;
+            return `${mapping.mappingType}|${mapping.idEntity}|${mapping.idTimeframe}|${mapping.idMetric}|${day}`;
         },
         toMappingProps(mapping) {
             return {
+                id: mapping.id ?? null,
                 mappingType: mapping.mappingType,
                 idEntity: mapping.idEntity ?? null,
                 position: null,
                 idTimeframe: mapping.idTimeframe ?? null,
                 idMetric: mapping.idMetric ?? null,
+                // Briefing period, as local wall-clock time so the server files it under the user's day
+                datetime: mapping.datetime ? moment(mapping.datetime).format('YYYY-MM-DDTHH:mm:ss') : null,
             };
         },
         async save() {
@@ -590,13 +650,24 @@ export default {
                     .filter(id => !this.selectedTypeIDs.includes(id))
                     .map(id => ({ id, position: null }));
 
-                let originalKeys = this.originalMappings.map(this.mappingKey);
-                let currentKeys = mappings.map(this.mappingKey);
+                // Mappings with a row id (briefings) are matched by id: changed values are updates, a missing id a removal.
+                // The rest are matched by their values.
+                let currentIDs = mappings.filter(m => m.id != null).map(m => m.id);
+                let mappings_Updated = mappings
+                    .filter(m => m.id != null)
+                    .filter(m => {
+                        let original = this.originalMappings.find(o => o.id == m.id);
+                        return original && this.mappingKey(original) != this.mappingKey(m);
+                    })
+                    .map(this.toMappingProps);
+
+                let originalKeys = this.originalMappings.filter(m => m.id == null).map(this.mappingKey);
+                let currentKeys = mappings.filter(m => m.id == null).map(this.mappingKey);
                 let mappings_Added = mappings
-                    .filter(m => !originalKeys.includes(this.mappingKey(m)))
+                    .filter(m => m.id == null && !originalKeys.includes(this.mappingKey(m)))
                     .map(this.toMappingProps);
                 let mappings_Removed = this.originalMappings
-                    .filter(m => !currentKeys.includes(this.mappingKey(m)))
+                    .filter(m => (m.id != null) ? !currentIDs.includes(m.id) : !currentKeys.includes(this.mappingKey(m)))
                     .map(this.toMappingProps);
 
                 await this.universalStore.updateBlurb(
@@ -604,7 +675,8 @@ export default {
                     typeIDs_Added, typeIDs_Removed,
                     text, this.title, datetime,
                     mappings_Added, mappings_Removed, json,
-                    (this.idType != this.blurb.idType) ? this.idType : undefined
+                    (this.idType != this.blurb.idType) ? this.idType : undefined,
+                    mappings_Updated
                 );
             } else {
                 await this.universalStore.addBlurb(this.idMappingType, typeIDs, text, this.title, datetime, mappings.map(this.toMappingProps), json, this.idType);
@@ -691,6 +763,10 @@ export default {
 
 .field-input {
     height: 36px;
+}
+
+.briefing-date {
+    background-image: none;
 }
 
 .field-input::placeholder,
@@ -825,6 +901,10 @@ export default {
     padding: 4px 8px;
     font-size: 12px;
     font-weight: 500;
+}
+
+.mapping-chip.editable {
+    cursor: pointer;
 }
 
 .mapping-chip-id {
