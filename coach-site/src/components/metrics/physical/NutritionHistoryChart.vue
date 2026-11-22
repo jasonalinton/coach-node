@@ -5,13 +5,21 @@
                 <span class="title">Nutrition History</span>
                 <span class="subtitle">Daily macro &amp; nutrient totals</span>
             </div>
-            <div class="timeframe-toggle d-flex flex-row me-2">
-                <button v-for="option in timeframeOptions" :key="option.id"
-                        type="button"
-                        class="toggle-option"
-                        :class="{ selected: timeframe === option.id }"
-                        @click="timeframe = option.id">
-                    {{ option.text }}
+            <div class="d-flex flex-row align-items-start me-2">
+                <div class="timeframe-toggle d-flex flex-row">
+                    <button v-for="option in timeframeOptions" :key="option.id"
+                            type="button"
+                            class="toggle-option"
+                            :class="{ selected: timeframe === option.id }"
+                            @click="timeframe = option.id">
+                        {{ option.text }}
+                    </button>
+                </div>
+                <button type="button" class="refresh-btn has-tooltip"
+                        data-tooltip="Recalculate nutrient history"
+                        :disabled="isRefreshing"
+                        @click="refresh">
+                    <i class="fa-solid fa-rotate" :class="{ 'fa-spin': isRefreshing }"></i>
                 </button>
             </div>
         </div>
@@ -81,7 +89,7 @@ import { useAppStore } from '@/store/appStore'
 import { usePhysicalStore } from '@/store/physicalStore'
 import { TIMEFRAME } from '../../../model/constants'
 import { timeframes } from '../../../model/types'
-import { startOfDay, firstDayOfWeek, firstDayOfMonth, addDay, addWeek, addMonth, addYear, getMonthDate } from '../../../../utility/timeUtility';
+import { startOfDay, firstDayOfWeek, firstDayOfMonth, addDay, addWeek, addMonth, getMonthDate } from '../../../../utility/timeUtility';
 
 const TIMEFRAME_CONFIG = {
     [TIMEFRAME.DAY]: { start: startOfDay, step: addDay, noun: 'day' },
@@ -107,25 +115,26 @@ export default {
         return {
             appStore: undefined,
             physicalStore: undefined,
-            nutrientHistory: [],
             periodCount: 30,
             timeframe: TIMEFRAME.WEEK,
             revealedCount: 0,
             shiftCount: 10,
             macroOrder: MACROS.map(m => m.id),
-            hiddenMacros: []
+            hiddenMacros: [],
+            isRefreshing: false
         }
     },
     created: async function () {
         this.appStore = useAppStore();
         this.physicalStore = usePhysicalStore();
-        let now = new Date();
-        this.nutrientHistory = await this.physicalStore.getNutrientHistory(addYear(now, -1), addDay(now, 1)) || [];
     },
     mounted: function () {
         this.scrollToLatest();
     },
     computed: {
+        nutrientHistory() {
+            return this.physicalStore ? this.physicalStore.nutrientHistory : [];
+        },
         width() {
             return (this.appStore && this.appStore.bodyOuterWidth) ? this.appStore.bodyOuterWidth : 0
         },
@@ -265,6 +274,14 @@ export default {
                 ? this.hiddenMacros.filter(id => id !== macroId)
                 : [...this.hiddenMacros, macroId];
         },
+        async refresh() {
+            this.isRefreshing = true;
+            try {
+                await this.physicalStore.populateNutrientHistory();
+            } finally {
+                this.isRefreshing = false;
+            }
+        },
         pageBack() {
             this.revealedCount = Math.min(this.earliestDataBucketCount, this.effectiveRevealedCount + this.shiftCount);
         },
@@ -318,6 +335,23 @@ export default {
     border-radius: 20px;
     padding: 2px;
     width: fit-content;
+}
+
+.refresh-btn {
+    margin-top: 16px;
+    margin-left: 8px;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 1px solid #e5e5e5;
+    background-color: #fff;
+    color: #767676;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.refresh-btn:disabled {
+    cursor: wait;
 }
 
 .toggle-option {

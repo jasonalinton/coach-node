@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import { getSocketConnection, deferUpdate } from './socket';
-import { getNutritionHistory, getMealsInRange, getWaterLogs } from '../api/physicalAPI';
+import { getMealsInRange, getWaterLogs } from '../api/physicalAPI';
 import { sortAsc, replaceOrAddItem, removeItemByID, addDay } from '../../utility';
 import { postEndpoint } from '../api/api';
 import { addYear } from '../../utility/timeUtility';
@@ -8,12 +8,14 @@ import { addYear } from '../../utility/timeUtility';
 let initialized = false;
 // Food item IDs already requested by getFoodItem, so missing items aren't fetched on every render
 let pendingFoodItemIDs = new Set();
+// Debounces nutrient history rebuilds so a burst of meal/water updates triggers one request
+let nutrientHistoryRefreshTimer = undefined;
 
 export const usePhysicalStore = defineStore('physical', {
     state: () => ({
         foodItems: [],
         meals: [],
-        mealHistories: [],
+        nutrientHistory: [],
         waterLogs: [],
         bodyMeasurements: []
     }),
@@ -24,11 +26,13 @@ export const usePhysicalStore = defineStore('physical', {
         async initialize() {
             this.connectSocket();
             let now = new Date();
-            this.getNutritionHistory(null, addYear(now, -1), addDay(now, 1))
-            .then(result => {  
-                this.mealHistories = result.meals;
-                this.waterLogs = result.waterLogs;
-             });
+            // Daily totals only exist once PopulateNutrientHistory has run, so rebuild the
+            // most recent day(s) on load; it returns the full history
+            this.populateNutrientHistory(false, 7);
+            postEndpoint("Physical", "GetWaterLogsInRange", { startAt: addYear(now, -1), endAt: addDay(now, 1) })
+                .then(response => {
+                    if (response?.result) this.waterLogs = response.result;
+                });
              postEndpoint("Physical", "GetBodyMeasurements")
                 .then(response => {
                     this.bodyMeasurements = response.result
@@ -43,6 +47,17 @@ export const usePhysicalStore = defineStore('physical', {
         async getNutrientHistory(startAt, endAt) {
             return postEndpoint("Physical", "GetNutrientHistory", { startAt, endAt })
             .then(response => response.result);
+        },
+        async populateNutrientHistory(overwriteAll = false, overwriteXDays = 30) {
+            return postEndpoint("Physical", "PopulateNutrientHistory", { overwriteAll, overwriteXDays })
+            .then(response => {
+                if (response?.result) this.nutrientHistory = response.result;
+                return response?.result;
+            });
+        },
+        queueNutrientHistoryRefresh() {
+            clearTimeout(nutrientHistoryRefreshTimer);
+            nutrientHistoryRefreshTimer = setTimeout(() => this.populateNutrientHistory(false, 7), 2000);
         },
         getMealsInRange(startAt, endAt, shouldRequestServer) {
             let _this = this;
@@ -144,17 +159,16 @@ export const usePhysicalStore = defineStore('physical', {
             /* Meal */
             if (updates.meals?.length > 0 || updates.mealIDsRemoved?.length > 0) {
                 let meals = [..._this.meals];
-                let mealHistories = [..._this.mealHistories];
                 if (updates.meals?.length > 0) {
                     updates.meals.forEach(meal => {
                         replaceOrAddItem(meal, meals);
-                        replaceOrAddItem({ id: meal.id, name: meal.name, dateTime: meal.dateTime, calories: meal.calories, carbs: meal.carbohydrates, protein: meal.protein, fat: meal.fat }, mealHistories);
                     });
                 }
                 if (updates.mealIDsRemoved?.length > 0) {
-                    updates.mealIDsRemoved.forEach(id => { removeItemByID(id, meals); removeItemByID(id, mealHistories); });
+                    updates.mealIDsRemoved.forEach(id => { removeItemByID(id, meals); });
                 }
-                deferred.push(() => { _this.meals = sortAsc(meals); _this.mealHistories = mealHistories; });
+                deferred.push(() => { _this.meals = sortAsc(meals); });
+                _this.queueNutrientHistoryRefresh();
             }
             /* Food Item */
             if (updates.foodItems?.length > 0 || updates.foodItemIDsRemoved?.length > 0) {
@@ -169,6 +183,7 @@ export const usePhysicalStore = defineStore('physical', {
                 if (updates.waterLogs?.length > 0) updates.waterLogs.forEach(log => replaceOrAddItem(log, waterLogs));
                 if (updates.waterLogIDsRemoved?.length > 0) updates.waterLogIDsRemoved.forEach(id => removeItemByID(id, waterLogs));
                 deferred.push(() => { _this.waterLogs = sortAsc(waterLogs); });
+                _this.queueNutrientHistoryRefresh();
             }
             deferred.forEach(fn => deferUpdate(fn));
         },

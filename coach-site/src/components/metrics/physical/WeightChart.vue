@@ -64,39 +64,12 @@ export default {
             return weights
         },
         mealHistories() {
-            if (this.physicalStore) {
-                let mealHistories = [];
-                let meals = this.physicalStore.mealHistories;
-                if (meals.length > 0) {
-                    let nutrients = undefined;
-                    meals = sortDateAsc(meals, 'dateTime');
-                    let date = new Date(1970, 0, 1);
-                    meals.forEach(meal => {
-                        let mealDate = startOfDay(new Date(meal.dateTime));
-                        // if (+mealDate < +this.startDate) {
-                        //     return;
-                        // } else 
-                        if (+date == +mealDate) {
-                            nutrients.calories += meal.calories;
-                            nutrients.carbs += meal.carbs;
-                            nutrients.protein += meal.protein;
-                            nutrients.fat += meal.fat;
-                        } else {
-                            date = mealDate;
-                            nutrients = {
-                                calories: meal.calories,
-                                carbs: meal.carbs,
-                                protein: meal.protein,
-                                fat: meal.fat
-                            };
-                            mealHistories.push({ date, nutrients });
-                        }
-                    });
-                }
-                return mealHistories;
-            } else {
-                return []
-            }
+            if (!this.physicalStore) return [];
+            let days = sortDateAsc(this.physicalStore.nutrientHistory, 'date');
+            return days.map(day => ({
+                date: startOfDay(new Date(day.date)),
+                nutrients: { calories: day.calories, carbs: day.carbs, protein: day.protein, fat: day.fat }
+            }));
         },
     },
     methods: {

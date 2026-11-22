@@ -103,6 +103,7 @@ export default {
     beforeUnmount () {
         if (typeof window !== 'undefined') {
             window.removeEventListener('resize', this.onResize, { passive: true });
+            this._bodyResizeObserver?.disconnect();
             document.removeEventListener('mouseup', this.resetEventStartY, { passive: true })
         }
     },
@@ -110,6 +111,10 @@ export default {
         this.onResize()
         window.addEventListener('resize', this.onResize, { passive: true });
         window.addEventListener('mouseup', this.resetEventStartY, { passive: true });
+        // The body's width also changes without a window resize (panels toggling, async
+        // content, scrollbars), so observe the element itself
+        this._bodyResizeObserver = new ResizeObserver(() => this.onResize());
+        this.observeBody();
         // document.addEventListener('mousemove', (e) => {
         //     this.appStore.setMouseXY(e.clientX, e.clientY);
         // });
@@ -152,6 +157,14 @@ export default {
             this.appStore.setRightPanelWidth(width);
         },
         resetEventStartY,
+        observeBody() {
+            // isExtraSmall can change before mounted() creates the observer
+            if (!this._bodyResizeObserver) return;
+            this._bodyResizeObserver.disconnect();
+            if (this.$refs['body']) {
+                this._bodyResizeObserver.observe(this.$refs['body']);
+            }
+        },
         startPanelResize(e) {
             this._resizeStartX = e.clientX;
             this._resizeStartWidth = this.rightPanelWidth;
@@ -202,9 +215,10 @@ export default {
                 this.appStore.setLeftPanelVisibility(false);
             }
         },
-        gridColumns: {
+        isExtraSmall: {
+            // The desktop body element is recreated when switching out of the mobile layout
             handler() {
-                this.onResize();
+                this.observeBody();
             },
             flush: 'post'
         }
