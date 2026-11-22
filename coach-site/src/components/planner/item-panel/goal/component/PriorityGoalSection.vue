@@ -43,6 +43,26 @@ export default {
 
         let iterationStore = await import(`@/store/iterationStore`);
         this.iterationStore = iterationStore.useIterationStore();
+
+        this.loadIterationsInRange();
+    },
+    watch: {
+        timeframeID() {
+            this.loadIterationsInRange();
+        },
+        selectedDate() {
+            this.loadIterationsInRange();
+        }
+    },
+    methods: {
+        // Make sure every iteration in the section's day/week is loaded, not just the days viewed so far
+        loadIterationsInRange() {
+            if (!this.iterationStore) {
+                return;
+            }
+            let { start, end } = getTimeframeEndpoints(this.timeframeID, this.selectedDate);
+            this.iterationStore.getIterationsInRange(start, end);
+        }
     },
     computed: {
         fraction() {
@@ -57,7 +77,7 @@ export default {
             ['PRIMARY', 'SECONDARY', 'TERTIARY'].forEach(key => {
                 let tree = resolveCardTree(this.kanbanRows[key], this.timeframeID, this.goalStore, this.todoStore);
                 tree.forEach(node => {
-                    let resolved = computeNodePoints(node, this.iterationStore, this.goalStore, start, end);
+                    let resolved = computeNodePoints(node, this.iterationStore, this.goalStore, start, end, this.timeframeID);
                     potential += resolved.potentialPoints;
                     completed += resolved.completedPoints;
                 });
@@ -79,7 +99,7 @@ export default {
 }
 .title {
     font-size: 16px;
-    font-weight: 700;
+    font-weight: 500;
     color: #111827;
 }
 .fraction {

@@ -53,7 +53,7 @@ export default {
 
 <style scoped>
 .goal-panel-priority {
-    padding: 24px 20px 32px 20px;
-    gap: 24px;
+    padding: 12px 12px 16px 12px;
+    gap: 12px;
 }
 </style>

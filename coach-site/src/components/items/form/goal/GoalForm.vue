@@ -148,7 +148,7 @@
 
 <script>
 // import TimeframeControl from '../component/TimeframeControl.vue';
-import RepeatControl from '../component/RepeatControl.vue';
+import RepeatControl from '../component/RepeatControl2.vue';
 import GoalTimePairControl from '../component/GoalTimePairControl.vue';
 import FormItemList from '../component/FormItemList.vue';
 import ItemMapper from '../component/ItemMapper.vue';
@@ -316,6 +316,11 @@ export default {
                 this.timeframes.original.push(x);
             })
 
+            this.repeats.value = clone(goal.repeats || []);
+            this.repeats.added = [];
+            this.repeats.updated = [];
+            this.repeats.deletedIDs = [];
+
             this.timePairs.value = clone(goal.timePairs),
             this.timePairs.added = [];
             this.timePairs.updated = [];
@@ -386,10 +391,6 @@ export default {
         },
         saveRepeat(repeat) {
             let _repeat = clone(repeat);
-            _repeat.startRepeat = _repeat.startRepeat.value;
-            _repeat.endRepeat = (_repeat.endRepeat) ? _repeat.endRepeat.value : null;
-            _repeat.startIteration = (_repeat.startIteration) ? _repeat.startIteration.value : null;
-            _repeat.endIteration = (_repeat.endIteration) ? _repeat.endIteration.value : null;
             replaceItem(_repeat, this.repeats.value);
             
             let savedRepeat = clone(repeat);
@@ -437,6 +438,8 @@ export default {
         addRepeatClicked() {
             let repeats = sortAsc(this.repeats.value, 'id');
             let newRepeat = this.plannerStore.createRepeat();
+            newRepeat.idInheritance = INHERITANCE.SELF;
+            newRepeat.idTodoMappingType = null;
             newRepeat.id = (repeats.length > 0 && repeats[0].id < 0) ? repeats[0].id - 1 : -1;
             this.repeats.value.unshift(newRepeat);
         },

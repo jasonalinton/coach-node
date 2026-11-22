@@ -51,7 +51,7 @@ export default {
                 return [];
             }
             let { start, end } = this.dateRange;
-            return this.tree.map(node => computeNodePoints(node, this.iterationStore, this.goalStore, start, end));
+            return this.tree.map(node => computeNodePoints(node, this.iterationStore, this.goalStore, start, end, this.timeframeID));
         }
     }
 }
@@ -138,43 +138,65 @@ function findNearestAncestorInSet(node, byID, visited) {
     return null;
 }
 
-// Leaf: complete if it has an iteration in range with completedAt or attemptedAt set
-// (matches goalStore.getPoints's "attempted" semantics). Parent: aggregates its in-set
-// children (all complete -> complete, none -> incomplete, mixed -> partial).
-export function computeNodePoints(node, iterationStore, goalStore, start, end) {
+// Points are earned by iterations in the period with completedAt or attemptedAt set
+// (matches goalStore.getPoints's "attempted" semantics).
+// Goals: the target is the points of the goal's most recent repeat in this timeframe
+// (complete when earned >= target, partial when some earned). With no repeat, the goal is
+// complete as soon as any todo under it has a completed iteration in the period.
+// Todos: complete if they have a completed iteration in the period.
+export function computeNodePoints(node, iterationStore, goalStore, start, end, timeframeID) {
     let hasChildren = node.children && node.children.length > 0;
+    let children = (hasChildren)
+        ? node.children.map(child => computeNodePoints(child, iterationStore, goalStore, start, end, timeframeID))
+        : [];
 
-    if (!hasChildren) {
+    let inRange, attempted;
+    if (hasChildren) {
+        inRange = [];
+        attempted = [];
+    } else {
         let iterations = (node.idType == ITEMTYPES.TODO)
             ? iterationStore.getIterationsForTodo(node.item.id)
             : getGoalIterations(node.item.id, iterationStore, goalStore);
-
-        let inRange = iterations.filter(it => it.startAt
-            && +new Date(it.startAt) >= +start && +new Date(it.startAt) <= +end);
-        let attempted = inRange.filter(it => it.completedAt || it.attemptedAt);
-
-        let potentialPoints = (inRange.length > 0)
-            ? inRange.reduce((total, it) => total + (it.points || 0), 0)
-            : (node.item.points || 0);
-        let completedPoints = attempted.reduce((total, it) => total + (it.points || 0), 0);
-
-        return {
-            item: node.item,
-            idType: node.idType,
-            children: [],
-            potentialPoints,
-            completedPoints,
-            status: (attempted.length > 0) ? 'complete' : 'incomplete'
-        };
+        inRange = iterations.filter(it => isInRange(it.startAt, start, end));
+        attempted = inRange.filter(it => it.completedAt || it.attemptedAt);
     }
 
-    let children = node.children.map(child => computeNodePoints(child, iterationStore, goalStore, start, end));
-    let potentialPoints = children.reduce((total, c) => total + c.potentialPoints, 0);
-    let completedPoints = children.reduce((total, c) => total + c.completedPoints, 0);
-    let statuses = children.map(c => c.status);
-    let status = statuses.every(s => s === 'complete') ? 'complete'
-        : statuses.every(s => s === 'incomplete') ? 'incomplete'
-        : 'partial';
+    let scheduledPoints = (hasChildren)
+        ? children.reduce((total, c) => total + c.scheduledPoints, 0)
+        : (inRange.length > 0)
+            ? inRange.reduce((total, it) => total + (it.points || 0), 0)
+            : (node.item.points || 0);
+    let completedPoints = (hasChildren)
+        ? children.reduce((total, c) => total + c.completedPoints, 0)
+        : attempted.reduce((total, it) => total + (it.points || 0), 0);
+    let hasCompletedTodo = (hasChildren)
+        ? children.some(c => c.hasCompletedTodo)
+        : attempted.length > 0;
+
+    let targetRepeat = (node.idType == ITEMTYPES.GOAL)
+        ? getTargetRepeat(node.item, timeframeID, start, end)
+        : null;
+
+    let potentialPoints, status;
+    if (targetRepeat) {
+        potentialPoints = targetRepeat.points;
+        status = (completedPoints >= potentialPoints) ? 'complete'
+            : (completedPoints > 0) ? 'partial'
+            : 'incomplete';
+    } else if (node.idType == ITEMTYPES.GOAL) {
+        potentialPoints = scheduledPoints;
+        status = (hasCompletedTodo) ? 'complete' : 'incomplete';
+    } else if (hasChildren) {
+        potentialPoints = scheduledPoints;
+        let statuses = children.map(c => c.status);
+        status = statuses.every(st => st === 'complete') ? 'complete'
+            : statuses.every(st => st === 'incomplete') ? 'incomplete'
+            : 'partial';
+    } else {
+        potentialPoints = scheduledPoints;
+        status = (hasCompletedTodo) ? 'complete' : 'incomplete';
+    }
 
     return {
         item: node.item,
@@ -182,8 +204,64 @@ export function computeNodePoints(node, iterationStore, goalStore, start, end) {
         children,
         potentialPoints,
         completedPoints,
+        scheduledPoints,
+        hasCompletedTodo,
+        targetRepeat,
         status
     };
+}
+
+// The goal's most recent repeat (latest startDate, then highest id) in the given timeframe
+// that is active during [start, end] and has points set.
+export function getTargetRepeat(goal, timeframeID, start, end) {
+    let repeats = (goal && goal.repeats) || [];
+    let candidates = repeats.filter(repeat => {
+        if (repeat.idTimeframe != timeframeID || !repeat.points) {
+            return false;
+        }
+        let repeatStart = parseDateOnly(repeat.startDate);
+        let repeatEnd = parseDateOnly(repeat.endDate);
+        if (repeatStart && +repeatStart > +end) {
+            return false;
+        }
+        if (repeatEnd && +endOfDateOnly(repeatEnd) < +start) {
+            return false;
+        }
+        return true;
+    });
+
+    candidates.sort((a, b) => {
+        let aStart = +(parseDateOnly(a.startDate) || 0);
+        let bStart = +(parseDateOnly(b.startDate) || 0);
+        return (bStart - aStart) || (b.id - a.id);
+    });
+    return candidates[0] || null;
+}
+
+function isInRange(startAt, start, end) {
+    if (!startAt) {
+        return false;
+    }
+    let time = +((typeof startAt.toDate === 'function') ? startAt.toDate() : new Date(startAt));
+    return time >= +start && time <= +end;
+}
+
+// DateOnly values arrive as "YYYY-MM-DD"; parse them as local dates, not UTC
+function parseDateOnly(value) {
+    if (!value) {
+        return null;
+    }
+    if (value instanceof Date) {
+        return value;
+    }
+    let [year, month, day] = String(value).substring(0, 10).split('-').map(Number);
+    return new Date(year, month - 1, day);
+}
+
+function endOfDateOnly(date) {
+    let end = new Date(date);
+    end.setHours(23, 59, 59, 999);
+    return end;
 }
 
 function getGoalIterations(goalID, iterationStore, goalStore) {
@@ -200,7 +278,7 @@ function getGoalIterations(goalID, iterationStore, goalStore) {
     padding: 16px;
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 8px;
     width: 100%;
 }
 .category-tag {

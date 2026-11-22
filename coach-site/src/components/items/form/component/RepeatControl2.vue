@@ -282,6 +282,7 @@ export default {
         return {
             todoStore: undefined,
             routineStore: undefined,
+            goalStore: undefined,
             plannerStore: undefined,
             timeframes: clone(timeframes),
             MOMENT: clone(MOMENT),
@@ -303,6 +304,9 @@ export default {
 
         let routineStore = await import(`@/store/routineStore`);
         this.routineStore = routineStore.useRoutineStore();
+
+        let goalStore = await import(`@/store/goalStore`);
+        this.goalStore = goalStore.useGoalStore();
 
         let plannerStore = await import(`@/store/plannerStore`);
         this.plannerStore = plannerStore.usePlannerStore();
@@ -448,7 +452,9 @@ export default {
         },
         'updatedRepeat.idInheritance'(value) {
             if (value == INHERITANCE.SELF) {
-                if (this.updatedRepeat.idTodoMappingType != TODO_MAPPING_TYPE.CLASS 
+                // null means no mapping type was chosen (goal repeats default to it), so leave it alone
+                if (this.updatedRepeat.idTodoMappingType != null
+                    && this.updatedRepeat.idTodoMappingType != TODO_MAPPING_TYPE.CLASS 
                     && this.updatedRepeat.idTodoMappingType != TODO_MAPPING_TYPE.GROUP) {
                         this.updatedRepeat.idTodoMappingType = TODO_MAPPING_TYPE.GROUP
                 }
@@ -579,6 +585,8 @@ function save() {
         this.routineStore.saveRepeat(repeat);
     } else if (this.itemType.toLowerCase() == "todo") {
         this.todoStore.saveRepeat(repeat);
+    } else if (this.itemType.toLowerCase() == "goal" && this.itemID > 0) {
+        this.goalStore.saveRepeat(repeat);
     }
 
     this.$emit("saveRepeat", repeat);

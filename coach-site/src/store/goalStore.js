@@ -161,6 +161,7 @@ export const useGoalStore = defineStore('goal', {
             if (!idsChecked.goals.includes(goalID)) {
                 idsChecked.goals.push(goalID);
                 let goal = this.getItem(goalID);
+                if (!goal) return; // Not loaded yet (or deleted)
                 
                 /* Loop through todos */
                 goal.todoIDs.forEach(todoID => {
@@ -179,7 +180,8 @@ export const useGoalStore = defineStore('goal', {
                 /* Loop through todo's children */
                 let todoStore = useTodoStore();
                 let todo = todoStore.getItem(todoID);
-                todo.childIDs.forEach(childID => {
+                // The todo may not be loaded yet (or was deleted); its iterations are still recorded below
+                (todo?.childIDs || []).forEach(childID => {
                     this.getDescendantIterationsFromTodo(childID, idsChecked);
                 })
                 
@@ -212,6 +214,12 @@ export const useGoalStore = defineStore('goal', {
         mapItems(goalID, itemType, addedIDs, removedIDs) {
             let data = { goalID, itemType, addedIDs, removedIDs };
             return postEndpoint("Goal", "MapItemsToGoal", data)
+            .then(response => response.result);
+        },
+        /** Saves a goal repeat. Its points are the goal's completion target for the repeat's timeframe.
+         * The updated goal arrives through the socket (runUpdates), which re-links parents/children. */
+        saveRepeat(repeat) {
+            return postEndpoint("Goal", "SaveGoalRepeat", { repeat })
             .then(response => response.result);
         },
         deleteTimePair(goalTimePairID) {

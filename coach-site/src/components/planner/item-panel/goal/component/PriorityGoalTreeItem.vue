@@ -3,7 +3,7 @@
         <div class="row-line d-flex align-items-center" :style="{ paddingLeft: depth * 24 + 'px' }">
             <span v-if="depth > 0" class="tree-connector"></span>
             <span class="status-dot" :class="statusClass"></span>
-            <span class="label" :class="{ 'is-parent': hasChildren }">{{ node.item.text }}</span>
+            <span class="label" :class="{ 'is-parent': hasChildren }" @click="openForm">{{ node.item.text }}</span>
         </div>
         <PriorityGoalTreeItem v-for="child in node.children" :key="child.item.id"
                                :node="child" :depth="depth + 1" />
@@ -11,11 +11,22 @@
 </template>
 
 <script>
+import { ITEMTYPES } from '../../../../../model/constants';
+
 export default {
     name: 'PriorityGoalTreeItem',
     props: {
         node: { type: Object, required: true },
         depth: { type: Number, default: 0 }
+    },
+    data: function() {
+        return {
+            appStore: undefined
+        }
+    },
+    created: async function() {
+        let appStore = await import(`@/store/appStore`);
+        this.appStore = appStore.useAppStore();
     },
     computed: {
         hasChildren() {
@@ -23,6 +34,16 @@ export default {
         },
         statusClass() {
             return `status-${this.node.status}`;
+        }
+    },
+    methods: {
+        // Nodes can be goals or todos (a card's set mixes both), so open the matching form
+        openForm() {
+            if (this.node.idType == ITEMTYPES.TODO) {
+                this.appStore.selectTodoForm(this.node.item.id);
+            } else {
+                this.appStore.selectGoalForm(this.node.item.id);
+            }
         }
     }
 }
@@ -76,11 +97,16 @@ export default {
     font-weight: 400;
     color: #4b5563;
     word-break: break-word;
+    cursor: pointer;
+}
+.label:hover {
+    color: #111827;
+    text-decoration: underline;
 }
 .label.is-parent {
     font-size: 14px;
-    font-weight: 600;
-    color: #111827;
+    /* font-weight: 500; */
+    color: #4b5563;
 }
 .tree-connector {
     width: 10px;
