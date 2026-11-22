@@ -16,7 +16,7 @@
                                        :item="item" :ordered="block.data.style == 'ordered'"/>
                     </component>
                     <ul v-else-if="block.type == 'checklist'" class="checklist">
-                        <li v-for="(item, i) in block.data.items" :key="i">
+                        <li v-for="(item, i) in block.data.items" :key="i" class="d-flex gap-2">
                             <input type="checkbox" disabled :checked="item.checked"/>
                             <span v-html="sanitizeInlineHtml(item.text)"></span>
                         </li>
