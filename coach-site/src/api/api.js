@@ -1,8 +1,10 @@
 // export const URL = "http://192.168.1.129:7104"; // Home network
 // export const URL = "http://172.20.10.11:7104"; // Hotspot
 // export const URL = "http://localhost:7104" // HTTP/1.1 only - requests queue behind Chrome's 6-connection limit
-export const URL = "https://localhost:7105"
-// export const URL = "https://coach-eea3hnh7fje3gxhw.canadacentral-01.azurewebsites.net"
+const DEV_URL = "https://localhost:7105"
+const PROD_URL = "https://coach-eea3hnh7fje3gxhw.canadacentral-01.azurewebsites.net"
+// `vite build` uses PROD_URL, `vite` (dev) uses DEV_URL. Set VITE_API_URL to override either.
+export const URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? PROD_URL : DEV_URL)
 import { isHubConnected } from "../store/socket";
 
 import { useMetricStore } from '@/store/metricStore'
