@@ -97,6 +97,15 @@ const PERIOD_LABELS = {
 export default {
     name: 'BriefingRethink',
     components: { RethinkGoalCard, RethinkNoteComposer, RethinkNotesFeed },
+    // Lets any RethinkNote (feed, day groups) open itself for editing
+    provide() {
+        return {
+            noteEditor: {
+                update: this.updateNote,
+                goals: () => this.linkableGoals,
+            },
+        };
+    },
     data: function () {
         return {
             TABS,
@@ -317,6 +326,34 @@ export default {
             }
 
             // Don't wait on SignalR to show the note
+            this.universalStore.runUpdates({ blurbs: [blurb] });
+        },
+        // Saves an edited note: its text, Brief/Debrief, metric (on its briefing row, updated in place) and linked goal
+        async updateNote(note, { text, json, idMetric, idBlurbType, idGoal }) {
+            let mappings_Updated = [];
+            let briefing = (note.positions ?? []).find(x => x.parentType == 'Timeframe' && x.id != null);
+            if (briefing && (briefing.idMetric ?? null) != (idMetric ?? null)) {
+                mappings_Updated.push({
+                    id: briefing.id, mappingType: BLURB_MAPPING_TYPE.BRIEFING, idEntity: null, position: null,
+                    idTimeframe: briefing.parentID, idMetric: idMetric ?? null, datetime: briefing.datetime ?? null,
+                });
+            }
+
+            // The composer links one goal: swap the note's first linked goal, leaving any others alone
+            let goalMapping = idEntity => ({ mappingType: BLURB_MAPPING_TYPE.GOAL, idEntity, position: null, idTimeframe: null, idMetric: null });
+            let idOriginalGoal = note.goalIDs?.[0]?.id ?? null;
+            let mappings_Added = [], mappings_Removed = [];
+            if ((idGoal ?? null) != idOriginalGoal) {
+                if (idOriginalGoal) mappings_Removed.push(goalMapping(idOriginalGoal));
+                if (idGoal) mappings_Added.push(goalMapping(idGoal));
+            }
+
+            let idType = (idBlurbType != note.idType) ? idBlurbType : undefined;
+            let blurb = await this.universalStore.updateBlurb(note.id, undefined, [], [], text, undefined, undefined,
+                mappings_Added, mappings_Removed, json, idType, mappings_Updated);
+            if (!blurb) throw new Error("UpdateBlurb returned no blurb");
+
+            // Don't wait on SignalR to show the change
             this.universalStore.runUpdates({ blurbs: [blurb] });
         },
     },

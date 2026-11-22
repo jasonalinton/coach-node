@@ -1,5 +1,9 @@
 <template>
-    <div class="rethink-note d-flex flex-column" :class="filedClass">
+    <!-- Double-click a note to edit it in the composer -->
+    <RethinkNoteComposer v-if="isEditing" variant="main" :note="note" :goals="noteEditor.goals()"
+                         :save="values => noteEditor.update(note, values)" @close="isEditing = false" />
+    <div v-else class="rethink-note d-flex flex-column" :class="filedClass"
+         :title="noteEditor ? 'Double-click to edit' : undefined" @dblclick="edit">
         <div class="meta d-flex align-items-center justify-content-between">
             <div class="d-flex align-items-center left">
                 <RethinkMetricTag v-if="note.idMetric" :idMetric="note.idMetric" />
@@ -21,6 +25,7 @@
 <script>
 import RethinkMetricTag from './RethinkMetricTag.vue';
 import BlurbContent from '../../../../controls/display/BlurbContent.vue';
+import RethinkNoteComposer from './RethinkNoteComposer.vue';
 import { BLURBTYPE, TIMEFRAME } from '../../../../../model/constants';
 
 // Notes filed under a longer timeframe get a tinted card and a chip (Figma: Rethink v2 / Timed Note)
@@ -32,7 +37,21 @@ const FILED = {
 
 export default {
     name: 'RethinkNote',
-    components: { RethinkMetricTag, BlurbContent },
+    components: { RethinkMetricTag, BlurbContent, RethinkNoteComposer },
+    // From BriefingRethink: { update(note, values), goals() }; absent outside the briefing panel
+    inject: { noteEditor: { default: null } },
+    data: function () {
+        return {
+            isEditing: false,
+        }
+    },
+    methods: {
+        edit() {
+            if (!this.noteEditor) return;
+            window.getSelection()?.removeAllRanges();
+            this.isEditing = true;
+        },
+    },
     props: {
         note: Object,
         goalStore: Object,

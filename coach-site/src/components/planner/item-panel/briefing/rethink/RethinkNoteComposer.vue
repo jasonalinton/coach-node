@@ -61,7 +61,7 @@
             <div class="actions d-flex align-items-center">
                 <button v-if="variant == 'main' && !linkedGoal && goals.length" class="link-button"
                         @click="isPickingGoal = !isPickingGoal">+ Goal</button>
-                <button v-if="variant == 'goal' || !plainText" class="link-button" @click="close">Cancel</button>
+                <button v-if="note || variant == 'goal' || !plainText" class="link-button" @click="close">Cancel</button>
                 <button class="save" :disabled="!canSave" @click="submit">Save&nbsp;&nbsp;⌘↵</button>
             </div>
         </div>
@@ -74,7 +74,7 @@ import RethinkMetricTag from './RethinkMetricTag.vue';
 import EditorJS from '../../../../controls/input/EditorJS.vue';
 import { METRIC_TAGS } from '../briefingUtility';
 import { BLURBTYPE } from '../../../../../model/constants';
-import { extractPlainText } from '../../../../../../utility/editorjsUtility';
+import { extractPlainText, legacyTextToOutputData } from '../../../../../../utility/editorjsUtility';
 
 export default {
     name: 'RethinkNoteComposer',
@@ -90,6 +90,8 @@ export default {
         placeholder: { type: String, default: 'What matters today?' },
         // async ({ text, json, idMetric, idBlurbType, idGoal }) => void
         save: { type: Function, required: true },
+        // Editing: the note to fill the composer with; it opens straight into writing
+        note: Object,
     },
     data: function () {
         return {
@@ -106,6 +108,19 @@ export default {
             isSaving: false,
             error: undefined,
         }
+    },
+    created() {
+        if (!this.note) return;
+        let json = null;
+        try { json = this.note.json ? JSON.parse(this.note.json) : null; } catch (e) { /* fall back to text */ }
+        Object.assign(this.$data, {
+            isWriting: true,
+            json: json ?? legacyTextToOutputData(this.note.text),
+            idMetric: this.note.idMetric ?? null,
+            idBlurbType: this.note.idType ?? BLURBTYPE.BRIEFING,
+            idLinkedGoal: this.note.goalIDs?.[0]?.id ?? null,
+        });
+        this.$nextTick(() => this.$refs.editor?.focus());
     },
     computed: {
         linkedGoal() {
