@@ -1,7 +1,7 @@
 <template>
     <div class="exercise-set d-flex flex-column flex-grow-1 mt-2" :class="{ complete: isComplete }">
         <div v-if="!showVariationSelector && variationString" class="d-flex flex-row"
-             @click="showVariationSelector = true">
+             @click="openVariations">
             <span class="variations text-start">{{variationString}}</span>
         </div>
         <div v-if="showVariationSelector" class="d-flex flex-row"
@@ -51,7 +51,7 @@
             <div class="button-group d-flex flex-column" :class="{ active: isActive }">
                 <img class="icon-button" 
                     src='/icon/edit-button.png' width="16" height="16"
-                        @click.stop.prevent="showVariationSelector = !showVariationSelector"/>
+                        @click.stop.prevent="openVariations"/>
                 <img class="icon-button" 
                     src='/icon/delete-button.png' width="16" height="16"
                         @click.stop="deleteSet"/>
@@ -73,6 +73,8 @@ export default {
         set: Object,
         setNumber: Number,
         isActive: Boolean,
+        /* Parent shows the variation picker as a sheet; emit instead of opening inline */
+        variationSheet: Boolean,
     },
     data: function () {
         return {
@@ -131,6 +133,13 @@ export default {
                 return "37px";
             } else {
                 return "45px";
+            }
+        },
+        openVariations() {
+            if (this.variationSheet) {
+                this.$emit('openVariations', this.set.id);
+            } else {
+                this.showVariationSelector = !this.showVariationSelector;
             }
         },
         variationClicked(variation) {

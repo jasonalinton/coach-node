@@ -74,6 +74,8 @@
             <ExerciseSet v-for="(set, index) in sets" :key="set.id"
                          :set="set" :isActive="set.id == activeSetID"
                          :setNumber="index + 1" :idExercise="exercise && exercise.id"
+                         variationSheet
+                         @openVariations="variationSetID = $event"
                          @removeActiveSet="activeSetID = undefined"
                          @click="activeSetID = set.id" />
             <button class="btn btn-link add-set-btn text-start ps-0 mt-2" type="button" @click="addSet">
@@ -155,6 +157,30 @@
                 </div>
             </div>
         </div>
+
+        <!-- Variation Sheet -->
+        <div v-if="variationSet" class="sheet-scrim d-flex flex-column justify-content-end" @click.self="variationSetID = undefined">
+            <div class="settings-sheet d-flex flex-column">
+                <div class="sheet-handle align-self-center"></div>
+                <div class="d-flex flex-row justify-content-between align-items-center">
+                    <div class="d-flex flex-column text-start">
+                        <span class="sheet-title">Variations</span>
+                        <span class="sheet-subtitle">Set {{ variationSetNumber }}</span>
+                    </div>
+                    <span class="sheet-done" @click.prevent="variationSetID = undefined">Done</span>
+                </div>
+                <div v-if="potentialVariations.length > 0" class="variation-list d-flex flex-column">
+                    <div v-for="variation in potentialVariations" :key="variation.id"
+                         class="variation-option d-flex flex-row justify-content-between align-items-center"
+                         :class="{ selected: isVariationSelected(variation) }"
+                         @click="toggleVariation(variation)">
+                        <span>{{ variation.name }}</span>
+                        <span class="variation-check">{{ isVariationSelected(variation) ? '✓' : '' }}</span>
+                    </div>
+                </div>
+                <span v-else class="sheet-empty">This exercise has no variations yet. Add them from Edit.</span>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -177,6 +203,7 @@ export default {
             restIntervalID: undefined,
             isProcessing: false,
             showSettings: false,
+            variationSetID: undefined,
             tempoType: undefined,
             TEMPTYPES: { FOURDIGIT: 1, CONTRACTRELAX: 2, BPM: 3 },
             localTempoCR: { contract: 1, relax: 1 },
@@ -322,6 +349,18 @@ export default {
                 { label: 'ORDER', obj: this, key: 'localPosition', step: 1 },
             ];
             return [tempo, order];
+        },
+        variationSet() {
+            return this.sets.find(s => s.id == this.variationSetID);
+        },
+        variationSetNumber() {
+            return this.sets.findIndex(s => s.id == this.variationSetID) + 1;
+        },
+        potentialVariations() {
+            if (this.exercise) {
+                return this.workoutStore.getExercise(this.exercise.id)?.variations ?? [];
+            }
+            return [];
         },
     },
     watch: {
@@ -493,6 +532,24 @@ export default {
         inputWidth(value) {
             const length = String(value ?? '').length || 1;
             return `${length + 1}ch`;
+        },
+        isVariationSelected(variation) {
+            return this.variationSet.variations.some(x => x.id == variation.id);
+        },
+        toggleVariation(variation) {
+            /* Same save shape as ExerciseSet.variationClicked: removals send only the removed ID */
+            const set = this.variationSet;
+            if (this.isVariationSelected(variation)) {
+                const index = set.variations.findIndex(x => x.id == variation.id);
+                set.variations.splice(index, 1);
+                this.workoutStore.saveSet({
+                    ...set,
+                    variations: [{ id: variation.id, isRemoved: true }]
+                });
+            } else {
+                set.variations.push({ id: variation.id, name: variation.name });
+                this.workoutStore.saveSet(set);
+            }
         },
         cancelSettings() {
             this.stopTempo();
@@ -714,6 +771,46 @@ export default {
     font-weight: 600;
     color: #0f766e;
     cursor: pointer;
+}
+
+.sheet-subtitle {
+    font-size: 13px;
+    color: #71717a;
+}
+
+.sheet-empty {
+    padding: 8px 0 12px;
+    text-align: start;
+    font-size: 14px;
+    color: #71717a;
+}
+
+.variation-list {
+    gap: 8px;
+}
+
+.variation-option {
+    padding: 12px 14px;
+    font-size: 15px;
+    font-weight: 500;
+    color: #18181b;
+    background-color: #f4f4f0;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.variation-option.selected {
+    color: #0f766e;
+    background-color: #ccfbf1;
+    border-color: #0f766e;
+}
+
+.variation-check {
+    width: 16px;
+    font-weight: 700;
+    text-align: center;
 }
 
 .sheet-eyebrow {
