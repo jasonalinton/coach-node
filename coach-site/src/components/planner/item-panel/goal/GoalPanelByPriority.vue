@@ -27,7 +27,8 @@
                           @drop-node="beforeItemID => moveGoal(lane.key, beforeItemID)"
                           @points="setPoints"
                           @remove="node => removeGoal(lane.key, node)"
-                          @add-sub="(parent, payload) => addSubGoal(lane.key, parent, payload)" />
+                          @add-sub="(parent, payload) => addSubGoal(lane.key, parent, payload)"
+                          @reorder="ids => reorderSiblings(lane.key, ids)" />
         </div>
     </div>
 </template>
@@ -186,6 +187,10 @@ export default {
         // The updated repeat comes back through the socket, which refreshes the points
         setPoints(goal, points) {
             this.goalStore.setPriorityGoalPoints(goal, KANBAN_TO_REPEAT_TIMEFRAME[this.idTimeframe], points);
+        },
+        async reorderSiblings(laneKey, siblingIDs) {
+            await this.goalStore.reorderPrioritySiblings(PRIORITY_GOAL[laneKey], this.idTimeframe, this.kanbanRows[laneKey], siblingIDs);
+            await this.loadKanbanRows();
         },
         async addSubGoal(laneKey, parent, payload) {
             await this.goalStore.addPrioritySubGoal(parent.id, PRIORITY_GOAL[laneKey], this.idTimeframe, this.kanbanRows[laneKey], payload);

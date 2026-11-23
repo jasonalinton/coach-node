@@ -20,7 +20,8 @@
                                      @drag-start="$emit('drag-start', $event)" @drag-end="$emit('drag-end')"
                                      @points="(goal, points) => $emit('points', goal, points)"
                                      @remove="$emit('remove', $event)"
-                                     @add-sub="(parent, payload) => $emit('add-sub', parent, payload)" />
+                                     @add-sub="(parent, payload) => $emit('add-sub', parent, payload)"
+                                     @reorder="$emit('reorder', $event)" />
                 </div>
             </template>
             <div v-if="isDropTarget && dropBeforeID == null && nodes.length > 0" class="drop-indicator"></div>
@@ -37,7 +38,7 @@ import PriorityGoalRow from './PriorityGoalRow.vue';
 export default {
     name: 'PriorityLane',
     components: { PriorityGoalRow },
-    emits: ['drag-start', 'drag-end', 'drop-node', 'points', 'remove', 'add-sub'],
+    emits: ['drag-start', 'drag-end', 'drop-node', 'points', 'remove', 'add-sub', 'reorder'],
     props: {
         lane: { type: Object, required: true },
         nodes: { type: Array, default: () => [] },

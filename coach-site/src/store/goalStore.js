@@ -348,6 +348,26 @@ export const useGoalStore = defineStore('goal', {
                     KANBAN_COLUMN.ACTIVE, idTimeframe, position, null, now, null);
             }));
         },
+        /** Reorders sub-goals under one parent. The siblings trade places in the lane's position order, so
+         * nothing else in the lane moves; the lane is renumbered 1..n and only changed rows are written. */
+        async reorderPrioritySiblings(idPriority, idTimeframe, rows, siblingIDs) {
+            let laneRows = Object.values(currentKanbanRows(rows))
+                .filter(row => !row.dateRemoved && row.idTimeframe == idTimeframe)
+                .sort((a, b) => a.positionDescendant - b.positionDescendant);
+            let ordered = laneRows.slice();
+            let slots = ordered.map((row, index) => siblingIDs.includes(row.idItem) ? index : -1).filter(index => index >= 0);
+            let byID = Object.fromEntries(laneRows.map(row => [row.idItem, row]));
+            slots.forEach((slot, i) => ordered[slot] = byID[siblingIDs[i]]);
+
+            let now = new Date();
+            await Promise.all(ordered.map((row, index) => {
+                let position = index + 1;
+                if (row.positionDescendant == position) return null;
+                let isTodo = (row.idType == ITEMTYPES.TODO);
+                return this.setKanbanTask(idPriority, isTodo ? null : row.idItem, isTodo ? row.idItem : null, null,
+                    KANBAN_COLUMN.ACTIVE, idTimeframe, position, null, now, null);
+            }));
+        },
         /** Takes a lane node (and its in-lane descendants) out of the priority. Mappings are left as they are. */
         removePriorityGoal(node, rows) {
             let current = currentKanbanRows(rows);

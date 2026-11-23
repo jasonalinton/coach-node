@@ -30,12 +30,24 @@
             <span v-if="isPlanning && isGoal" class="remove" title="Remove from priority" @click="$emit('remove', node)">×</span>
         </div>
         <!-- Children -->
-        <div v-if="hasChildren" class="children d-flex flex-column">
-            <PriorityGoalRow v-for="child in node.children" :key="child.item.id"
-                             :node="child" :depth="depth + 1" :isPlanning="isPlanning"
-                             @points="(goal, value) => $emit('points', goal, value)"
-                             @remove="$emit('remove', $event)"
-                             @add-sub="(parent, payload) => $emit('add-sub', parent, payload)" />
+        <div v-if="hasChildren" class="children d-flex flex-column"
+             @dragover="onChildDragOver" @drop="onChildDrop">
+            <template v-for="child in node.children" :key="child.item.id">
+                <div v-if="draggedChildID != null && dropBeforeChildID == child.item.id" class="drop-indicator"
+                     :style="{ marginLeft: (10 + (depth + 1) * 22) + 'px' }"></div>
+                <div class="child-node" :data-item-id="child.item.id">
+                    <PriorityGoalRow :node="child" :depth="depth + 1" :isPlanning="isPlanning"
+                                     :isDragging="draggedChildID == child.item.id"
+                                     @drag-start="draggedChildID = $event.item.id"
+                                     @drag-end="draggedChildID = null"
+                                     @points="(goal, value) => $emit('points', goal, value)"
+                                     @remove="$emit('remove', $event)"
+                                     @add-sub="(parent, payload) => $emit('add-sub', parent, payload)"
+                                     @reorder="ids => $emit('reorder', ids)" />
+                </div>
+            </template>
+            <div v-if="draggedChildID != null && dropBeforeChildID == null" class="drop-indicator"
+                 :style="{ marginLeft: (10 + (depth + 1) * 22) + 'px' }"></div>
         </div>
         <!-- Add sub-goal -->
         <template v-if="isPlanning && isGoal && depth == 0">
@@ -62,7 +74,7 @@ import { ITEMTYPES } from '../../../../../model/constants';
 
 export default {
     name: 'PriorityGoalRow',
-    emits: ['drag-start', 'drag-end', 'points', 'remove', 'add-sub'],
+    emits: ['drag-start', 'drag-end', 'points', 'remove', 'add-sub', 'reorder'],
     props: {
         node: { type: Object, required: true },
         depth: { type: Number, default: 0 },
@@ -76,6 +88,8 @@ export default {
             pendingPoints: null,
             sentPoints: null,
             pointsTimer: null,
+            draggedChildID: null,
+            dropBeforeChildID: null,
             isAddingSub: false,
             subText: '',
             highlight: -1
@@ -95,9 +109,10 @@ export default {
         hasChildren() {
             return this.node.children && this.node.children.length > 0;
         },
-        // Only top-level goals are dragged; their in-lane children move with them
+        // Top-level goals drag between lanes (their in-lane children move with them);
+        // sub-goals drag to reorder among their siblings
         canDrag() {
-            return this.isPlanning && this.isGoal && this.depth == 0;
+            return this.isPlanning && (this.depth > 0 || this.isGoal);
         },
         // The goal's own target for this day/week (0 when it has none)
         points() {
@@ -134,9 +149,34 @@ export default {
         },
         onDragStart(event) {
             if (!this.canDrag) return;
+            event.stopPropagation();
             event.dataTransfer.effectAllowed = 'move';
             event.dataTransfer.setData('text/plain', String(this.node.item.id));
             this.$emit('drag-start', this.node);
+        },
+        // Only this row's own children are handled here; a deeper drag is left to its own parent row
+        onChildDragOver(event) {
+            if (this.draggedChildID == null) return;
+            event.preventDefault();
+            event.stopPropagation();
+            let rows = [...event.currentTarget.children].filter(el => el.classList.contains('child-node'));
+            let before = rows.find(row => {
+                let rect = row.getBoundingClientRect();
+                return event.clientY < rect.top + rect.height / 2;
+            });
+            this.dropBeforeChildID = (before) ? Number(before.dataset.itemId) : null;
+        },
+        onChildDrop(event) {
+            if (this.draggedChildID == null) return;
+            event.preventDefault();
+            event.stopPropagation();
+            let ids = this.node.children.map(child => child.item.id).filter(id => id != this.draggedChildID);
+            let index = ids.indexOf(this.dropBeforeChildID);
+            ids.splice((index < 0) ? ids.length : index, 0, this.draggedChildID);
+            let changed = ids.some((id, i) => id != this.node.children[i].item.id);
+            this.draggedChildID = null;
+            this.dropBeforeChildID = null;
+            if (changed) this.$emit('reorder', ids);
         },
         // Clicks are batched so tapping + three times saves once
         stepPoints(delta) {
@@ -219,6 +259,11 @@ export default {
 .planning > .children {
     gap: 6px;
     padding-top: 6px;
+}
+.drop-indicator {
+    height: 2px;
+    border-radius: 1px;
+    background-color: #1f6f5c;
 }
 .drag-handle {
     flex-shrink: 0;
