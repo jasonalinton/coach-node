@@ -1,60 +1,6 @@
-<template>
-    <div v-if="treeWithPoints.length > 0" class="priority-goal-card">
-        <span class="category-tag" :class="tagClass">{{ tagLabel }}</span>
-        <div class="goal-rows d-flex flex-column">
-            <PriorityGoalTreeItem v-for="node in treeWithPoints" :key="node.item.id" :node="node" :depth="0" />
-        </div>
-    </div>
-</template>
-
-<script>
-import PriorityGoalTreeItem from './PriorityGoalTreeItem.vue';
-import { ITEMTYPES } from '../../../../../model/constants';
-import { getTimeframeEndpoints } from '../../../../../../utility/timeUtility';
-
-export default {
-    name: 'PriorityGoalCard',
-    components: { PriorityGoalTreeItem },
-    props: {
-        tagLabel: { type: String, required: true },
-        tagClass: { type: String, default: '' },
-        rows: { type: Array, default: () => [] },
-        timeframeID: { type: Number, required: true },
-        selectedDate: { type: Date, required: true }
-    },
-    data: function() {
-        return {
-            goalStore: null,
-            todoStore: null,
-            iterationStore: null
-        }
-    },
-    created: async function() {
-        let goalStore = await import(`@/store/goalStore`);
-        this.goalStore = goalStore.useGoalStore();
-
-        let todoStore = await import(`@/store/todoStore`);
-        this.todoStore = todoStore.useTodoStore();
-
-        let iterationStore = await import(`@/store/iterationStore`);
-        this.iterationStore = iterationStore.useIterationStore();
-    },
-    computed: {
-        tree() {
-            return resolveCardTree(this.rows, this.timeframeID, this.goalStore, this.todoStore);
-        },
-        dateRange() {
-            return getTimeframeEndpoints(this.timeframeID, this.selectedDate);
-        },
-        treeWithPoints() {
-            if (!this.iterationStore || !this.goalStore) {
-                return [];
-            }
-            let { start, end } = this.dateRange;
-            return this.tree.map(node => computeNodePoints(node, this.iterationStore, this.goalStore, start, end, this.timeframeID));
-        }
-    }
-}
+// Tree and points logic for the Priority goals panel: turns a priority goal's kanban rows into
+// nested goal/todo nodes and works out each node's points for a day or week.
+import { ITEMTYPES, KANBAN_TO_REPEAT_TIMEFRAME } from '../../../../../model/constants';
 
 // Dedup by idItem (keep latest dateAdded), filter to this timeframe, resolve idItem/idType
 // to real Goal/Todo objects, then nest each item under the nearest in-set ancestor so the
@@ -175,7 +121,7 @@ export function computeNodePoints(node, iterationStore, goalStore, start, end, t
         : attempted.length > 0;
 
     let targetRepeat = (node.idType == ITEMTYPES.GOAL)
-        ? getTargetRepeat(node.item, timeframeID, start, end)
+        ? getTargetRepeat(node.item, KANBAN_TO_REPEAT_TIMEFRAME[timeframeID] ?? timeframeID, start, end)
         : null;
 
     let potentialPoints, status;
@@ -212,7 +158,7 @@ export function computeNodePoints(node, iterationStore, goalStore, start, end, t
 }
 
 // The goal's most recent repeat (latest startDate, then highest id) in the given timeframe
-// that is active during [start, end] and has points set.
+// that is active during [start, end] and has points set. timeframeID is a REPETITION id.
 export function getTargetRepeat(goal, timeframeID, start, end) {
     let repeats = (goal && goal.repeats) || [];
     let candidates = repeats.filter(repeat => {
@@ -268,39 +214,3 @@ function getGoalIterations(goalID, iterationStore, goalStore) {
     let iterationIDs = goalStore.getIterationIDs(goalID);
     return iterationStore.getLoadedIterationsWithIDs(iterationIDs);
 }
-</script>
-
-<style scoped>
-.priority-goal-card {
-    background-color: #f9fafb;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    padding: 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    width: 100%;
-}
-.category-tag {
-    align-self: flex-start;
-    font-size: 11px;
-    font-weight: 600;
-    padding: 2px 8px;
-    border-radius: 6px;
-}
-.category-tag.tag-primary {
-    background-color: #eff6ff;
-    color: #1e40af;
-}
-.category-tag.tag-secondary {
-    background-color: #f3f4f6;
-    color: #4b5563;
-}
-.category-tag.tag-tertiary {
-    background-color: #fdf4ff;
-    color: #86198f;
-}
-.goal-rows {
-    gap: 2px;
-}
-</style>

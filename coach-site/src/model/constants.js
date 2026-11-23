@@ -240,6 +240,12 @@ export let PRIORITY_GOAL = {
     TERTIARY: 428
 }
 
+// Kanban rows use TIMEFRAME ids while goal repeats use REPETITION ids for the same period
+export let KANBAN_TO_REPEAT_TIMEFRAME = {
+    [TIMEFRAME.DAY]: REPETITION.DAILY,
+    [TIMEFRAME.WEEK]: REPETITION.WEEKLY
+};
+
 export let KANBAN_COLUMN = {
     KANBAN_COLUMN: 217,
     COMPLETE: 218,

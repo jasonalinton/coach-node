@@ -7,7 +7,8 @@ import { useMetricStore } from '@/store/metricStore'
 import { useTodoStore } from '@/store/todoStore'
 import { useRoutineStore } from '@/store/routineStore'
 import { useIterationStore } from '@/store/iterationStore'
-import { GOAL_TYPE } from '../model/constants';
+import { usePlannerStore } from '@/store/plannerStore'
+import { GOAL_TYPE, ITEMTYPES, KANBAN_COLUMN, INHERITANCE } from '../model/constants';
 import { postEndpoint } from '../api/api';
 
         
@@ -297,6 +298,128 @@ export const useGoalStore = defineStore('goal', {
             return postEndpoint("Goal", "RemoveGoalKanbanTask", { id, dateRemoved })
             .then(response => response.result);
         },
+        /* ---- Priority goals (Primary/Secondary/Tertiary) ----
+         * A goal is in a priority lane when its newest kanban row under that priority goal is open,
+         * Active, and in the lane's timeframe. `rows` is that priority goal's GetGoalKanban result. */
+        /** Makes goals Active in a priority lane, mapping them under the priority goal if they aren't descendants yet */
+        async addPriorityGoals(idPriority, idTimeframe, goalIDs, rows) {
+            let descendantIDs = this.getDescendantIDs(idPriority).goalIDs;
+            let unmappedIDs = goalIDs.filter(id => !descendantIDs.includes(id));
+            if (unmappedIDs.length > 0) {
+                await this.mapItems(idPriority, 'child', unmappedIDs, []);
+            }
+            let position = nextKanbanPosition(rows, idTimeframe);
+            let now = new Date();
+            await Promise.all(goalIDs.map(id =>
+                this.setKanbanTask(idPriority, id, null, null, KANBAN_COLUMN.ACTIVE, idTimeframe, position++, null, now, null)));
+        },
+        /** Moves a lane node (with its in-lane descendants) to another priority, or to a new spot in the same one.
+         * beforeItemID is the item it's dropped above; null drops it at the end. */
+        async movePriorityGoal(node, fromPriority, toPriority, idTimeframe, fromRows, toRows, beforeItemID) {
+            let movedItems = flattenNode(node);
+            let movedIDs = movedItems.map(x => x.item.id);
+            let now = new Date();
+
+            if (fromPriority != toPriority) {
+                let current = currentKanbanRows(fromRows);
+                await Promise.all(movedIDs
+                    .filter(id => current[id] && !current[id].dateRemoved)
+                    .map(id => this.removeKanbanTask(current[id].id, now)));
+
+                if (node.idType == ITEMTYPES.GOAL && !this.getDescendantIDs(toPriority).goalIDs.includes(node.item.id)) {
+                    await this.mapItems(toPriority, 'child', [node.item.id], []);
+                }
+            }
+
+            // Renumber the target lane with the moved items inserted, writing only rows that change
+            let laneRows = Object.values(currentKanbanRows(toRows))
+                .filter(row => !row.dateRemoved && row.idTimeframe == idTimeframe && !movedIDs.includes(row.idItem))
+                .sort((a, b) => a.positionDescendant - b.positionDescendant);
+            let ordered = laneRows.map(row => ({ id: row.idItem, idType: row.idType, position: row.positionDescendant }));
+            let insertAt = ordered.findIndex(x => x.id == beforeItemID);
+            if (insertAt < 0) insertAt = ordered.length;
+            ordered.splice(insertAt, 0, ...movedItems.map(x => ({ id: x.item.id, idType: x.idType, isMoved: true })));
+
+            await Promise.all(ordered.map((x, index) => {
+                let position = index + 1;
+                if (!x.isMoved && x.position == position) return null;
+                let isTodo = (x.idType == ITEMTYPES.TODO);
+                return this.setKanbanTask(toPriority, isTodo ? null : x.id, isTodo ? x.id : null, null,
+                    KANBAN_COLUMN.ACTIVE, idTimeframe, position, null, now, null);
+            }));
+        },
+        /** Takes a lane node (and its in-lane descendants) out of the priority. Mappings are left as they are. */
+        removePriorityGoal(node, rows) {
+            let current = currentKanbanRows(rows);
+            let now = new Date();
+            return Promise.all(flattenNode(node)
+                .map(x => current[x.item.id])
+                .filter(row => row && !row.dateRemoved)
+                .map(row => this.removeKanbanTask(row.id, now)));
+        },
+        /** Sets the goal's points target for a day/week by saving them on its repeat for that timeframe,
+         * creating a plain repeat (every 1 day/week) when it has none */
+        setPriorityGoalPoints(goal, repeatTimeframeID, points) {
+            let existing = (goal.repeats || [])
+                .filter(repeat => repeat.idTimeframe == repeatTimeframeID)
+                .sort((a, b) => b.id - a.id)[0];
+            let base = existing || { ...usePlannerStore().createRepeat(), id: -1, idInheritance: INHERITANCE.SELF, idTodoMappingType: null };
+            let repeat = {
+                id: base.id,
+                idInheritance: base.idInheritance,
+                idTodoMappingType: base.idTodoMappingType,
+                isOwner: true,
+                itemID: goal.id,
+                itemType: 'goal',
+                idTimeframe: repeatTimeframeID,
+                idType: base.idType,
+                points: points || null,
+                interval: base.interval || 1,
+                frequency: base.frequency || 1,
+                dayIndecies: base.dayIndecies || [],
+                startDate: base.startDate,
+                endDate: base.endDate,
+                startTime: base.startTime,
+                endTime: base.endTime,
+                isBlock: base.isBlock,
+                isEventVisible: base.isEventVisible,
+                isRecommended: base.isRecommended,
+            };
+            return this.saveRepeat(repeat);
+        },
+        /** Adds a sub-goal under a goal already in a lane: maps an existing goal (goalID) or creates one (text) */
+        async addPrioritySubGoal(parentGoalID, idPriority, idTimeframe, rows, { goalID, text }) {
+            if (goalID == null) {
+                goalID = (await this.createGoalUnder(parentGoalID, text))?.id;
+                if (goalID == null) return;
+            } else {
+                await this.mapItems(parentGoalID, 'child', [goalID], []);
+            }
+            let now = new Date();
+            return this.setKanbanTask(idPriority, goalID, null, null, KANBAN_COLUMN.ACTIVE, idTimeframe,
+                nextKanbanPosition(rows, idTimeframe), null, now, null);
+        },
+        /** Creates a new goal under the priority goal and makes it Active in the lane */
+        async createPriorityGoal(idPriority, idTimeframe, rows, text) {
+            let goal = await this.createGoalUnder(idPriority, text);
+            if (!goal) return;
+            let now = new Date();
+            return this.setKanbanTask(idPriority, goal.id, null, null, KANBAN_COLUMN.ACTIVE, idTimeframe,
+                nextKanbanPosition(rows, idTimeframe), null, now, null);
+        },
+        // CreateAndMapItemToGoal doesn't return the new goal, so wait for it to arrive over the socket.
+        // The known ids are captured before the request, in case the update lands before it resolves.
+        async createGoalUnder(parentGoalID, text, timeout = 5000) {
+            let existingIDs = new Set(this.goals.map(goal => goal.id));
+            await this.createAndMapItem(parentGoalID, 'child', text);
+            let deadline = Date.now() + timeout;
+            while (Date.now() < deadline) {
+                let goal = this.goals.find(g => !existingIDs.has(g.id) && g.text == text);
+                if (goal) return goal;
+                await new Promise(resolve => setTimeout(resolve, 150));
+            }
+            return null;
+        },
         runUpdates(updates) {
             const hasGoals = updates.goals?.length > 0;
             const hasRemovals = updates.goalIDsRemoved?.length > 0;
@@ -326,3 +449,28 @@ export const useGoalStore = defineStore('goal', {
         }
     },
 })
+
+// Newest kanban row per item (by dateAdded), keyed by item id
+function currentKanbanRows(rows) {
+    let latest = {};
+    (rows || []).forEach(row => {
+        let existing = latest[row.idItem];
+        if (!existing || new Date(row.dateAdded) > new Date(existing.dateAdded)) {
+            latest[row.idItem] = row;
+        }
+    });
+    return latest;
+}
+
+// Position after the last open row in the timeframe
+function nextKanbanPosition(rows, idTimeframe) {
+    let positions = Object.values(currentKanbanRows(rows))
+        .filter(row => !row.dateRemoved && row.idTimeframe == idTimeframe)
+        .map(row => row.positionDescendant || 0);
+    return (positions.length > 0) ? Math.max(...positions) + 1 : 1;
+}
+
+// A lane node and all its in-lane descendants, parent first
+function flattenNode(node) {
+    return [node, ...(node.children || []).flatMap(flattenNode)];
+}
