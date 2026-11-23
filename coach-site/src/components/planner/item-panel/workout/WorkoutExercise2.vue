@@ -13,7 +13,8 @@
         <div class="media position-relative">
             <!-- Demo on repeat (YouTube/Vimeo embed or a direct video file), else the thumbnail -->
             <iframe v-if="demoEmbedUrl" :src="demoEmbedUrl" class="media-content" frameborder="0"
-                    allow="autoplay; encrypted-media; picture-in-picture"></iframe>
+                    allow="autoplay; encrypted-media; picture-in-picture"
+                    referrerpolicy="strict-origin-when-cross-origin"></iframe>
             <video v-else-if="demoVideoUrl" :key="demoVideoUrl" class="media-content"
                    autoplay loop muted playsinline :poster="thumbnailUrl">
                 <source :src="demoVideoUrl" />
@@ -376,6 +377,9 @@ export default {
             const params = { autoplay: 1, mute: 1, muted: 1, loop: 1, playsinline: 1, controls: 0 };
             if (this.demoMedia.embedProvider == 'youtube') {
                 params.playlist = embed.pathname.split('/').pop();
+                /* YouTube rejects embeds it can't attribute to a site (Error 153); name ours in case no Referer arrives */
+                params.origin = window.location.origin;
+                params.widget_referrer = window.location.origin;
             }
             Object.entries(params).forEach(([key, value]) => embed.searchParams.set(key, value));
             return embed.toString();
