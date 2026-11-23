@@ -1,5 +1,6 @@
 <template>
-    <div class="workout-exercise-2 d-flex flex-column flex-grow-1 overflow-scroll">
+    <div class="workout-exercise-2 d-flex flex-column flex-grow-1 position-relative overflow-hidden">
+    <div class="exercise-scroll d-flex flex-column flex-grow-1 overflow-scroll">
         <!-- Header -->
         <div class="header d-flex flex-row align-items-center pt-2 pb-2 sticky-top">
             <img class="icon-button me-2" src="/icon/previous.png" width="20" height="20" @click.prevent="back" />
@@ -40,51 +41,6 @@
             <div class="toolbar-item d-flex flex-column align-items-center gap-1" @click.prevent="showSettings = !showSettings">
                 <img src="/icon/dots-vertical.png" width="22" height="22" />
                 <span class="toolbar-label">More</span>
-            </div>
-        </div>
-
-        <!-- Settings Card -->
-        <div v-if="showSettings" class="settings-card mx-3 mt-3">
-            <div class="settings-header d-flex flex-row justify-content-between align-items-center pb-2">
-                <span class="cancel-btn" @click.prevent="cancelSettings">Cancel</span>
-                <span class="fw-bold">Settings</span>
-                <span class="done-btn" @click.prevent="saveSettings">Done</span>
-            </div>
-            <hr class="m-0" />
-            <div class="setting-row d-flex flex-row align-items-center justify-content-between py-2">
-                <span class="setting-label">Circuit</span>
-                <input class="setting-input form-control form-control-sm" type="number" min="0" v-model="localCircuit" />
-            </div>
-            <hr class="m-0" />
-            <div class="setting-row d-flex flex-row align-items-center justify-content-between py-2">
-                <span class="setting-label">Position</span>
-                <input class="setting-input form-control form-control-sm" type="number" min="0" v-model="localPosition" />
-            </div>
-            <hr class="m-0" />
-            <div class="setting-row d-flex flex-row align-items-center justify-content-between py-2">
-                <span class="setting-label tempo-toggle" @click.prevent="toggleTempoType">Tempo</span>
-                <div v-if="tempoType == TEMPTYPES.FOURDIGIT" class="d-flex flex-row align-items-center">
-                    <input class="setting-input-sm form-control form-control-sm" type="number" min="0" v-model="localTempo.eccentric" />
-                    <span class="mx-1">-</span>
-                    <input class="setting-input-sm form-control form-control-sm" type="number" min="0" v-model="localTempo.bottomIso" />
-                    <span class="mx-1">-</span>
-                    <input class="setting-input-sm form-control form-control-sm" type="number" min="0" v-model="localTempo.concentric" />
-                    <span class="mx-1">-</span>
-                    <input class="setting-input-sm form-control form-control-sm" type="number" min="0" v-model="localTempo.topIso" />
-                </div>
-                <div v-else-if="tempoType == TEMPTYPES.CONTRACTRELAX" class="d-flex flex-row align-items-center">
-                    <input class="setting-input-sm form-control form-control-sm" type="number" min="0" v-model="localTempoCR.contract" />
-                    <span class="mx-1">-</span>
-                    <input class="setting-input-sm form-control form-control-sm" type="number" min="0" v-model="localTempoCR.relax" />
-                </div>
-                <div v-else-if="tempoType == TEMPTYPES.BPM" class="d-flex flex-row align-items-center">
-                    <input class="setting-input form-control form-control-sm" type="number" min="0" v-model="localTempoBPM" />
-                </div>
-            </div>
-            <hr class="m-0" />
-            <div class="setting-row d-flex flex-row align-items-center justify-content-between py-2">
-                <span class="setting-label">Rest</span>
-                <input class="setting-input form-control form-control-sm" type="number" min="0" v-model="localRest" />
             </div>
         </div>
 
@@ -163,6 +119,41 @@
              class="log-buttons d-flex flex-row mt-auto ps-3 pe-3 pb-3 pt-2 gap-2 position-sticky bottom-0">
             <button type="button" class="btn btn-log-set flex-grow-1" @click="logSet">Log Set</button>
             <button type="button" class="btn btn-log-all flex-grow-1" @click="logAllSets">Log All Sets</button>
+        </div>
+    </div>
+
+        <!-- Settings Sheet -->
+        <div v-if="showSettings" class="sheet-scrim d-flex flex-column justify-content-end" @click.self="cancelSettings">
+            <div class="settings-sheet d-flex flex-column">
+                <div class="sheet-handle align-self-center"></div>
+                <div class="d-flex flex-row justify-content-between align-items-center">
+                    <span class="sheet-title">Exercise settings</span>
+                    <span class="sheet-done" @click.prevent="saveSettings">Done</span>
+                </div>
+                <span class="sheet-eyebrow">TEMPO</span>
+                <div class="tempo-type d-flex flex-row">
+                    <span v-for="option in tempoTypeOptions" :key="option.id"
+                          class="tempo-type-option flex-fill text-center"
+                          :class="{ selected: tempoType == option.id }"
+                          @click="tempoType = option.id">{{ option.text }}</span>
+                </div>
+                <div v-for="(group, groupIndex) in stepperGroups" :key="groupIndex" class="stepper-grid">
+                    <div v-for="stepper in group" :key="stepper.label"
+                         class="stepper d-flex flex-column align-items-center" :class="{ full: stepper.isFull }">
+                        <span class="stepper-label">{{ stepper.label }}</span>
+                        <div class="d-flex flex-row align-items-center w-100">
+                            <button type="button" class="stepper-button" @click="stepValue(stepper, -1)">−</button>
+                            <div class="d-flex flex-row align-items-baseline justify-content-center flex-fill">
+                                <input class="stepper-input" type="number" min="0"
+                                       v-model="stepper.obj[stepper.key]"
+                                       :style="{ width: inputWidth(stepper.obj[stepper.key]) }" />
+                                <span v-if="stepper.unit" class="stepper-unit">{{ stepper.unit }}</span>
+                            </div>
+                            <button type="button" class="stepper-button" @click="stepValue(stepper, 1)">+</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </template>
@@ -307,6 +298,31 @@ export default {
             }
             return [];
         },
+        tempoTypeOptions() {
+            return [
+                { id: this.TEMPTYPES.FOURDIGIT, text: '4-phase' },
+                { id: this.TEMPTYPES.CONTRACTRELAX, text: 'Contract / relax' },
+                { id: this.TEMPTYPES.BPM, text: 'BPM' },
+            ];
+        },
+        stepperGroups() {
+            let tempo = [];
+            if (this.tempoType === this.TEMPTYPES.FOURDIGIT) {
+                tempo = [['LOWER', 'eccentric'], ['PAUSE', 'bottomIso'], ['RAISE', 'concentric'], ['HOLD', 'topIso']]
+                    .map(([label, key]) => ({ label, obj: this.localTempo, key, step: 1 }));
+            } else if (this.tempoType === this.TEMPTYPES.CONTRACTRELAX) {
+                tempo = [['CONTRACT', 'contract'], ['RELAX', 'relax']]
+                    .map(([label, key]) => ({ label, obj: this.localTempoCR, key, step: 1 }));
+            } else if (this.tempoType === this.TEMPTYPES.BPM) {
+                tempo = [{ label: 'BPM', obj: this, key: 'localTempoBPM', step: 5, isFull: true }];
+            }
+            const order = [
+                { label: 'REST', obj: this, key: 'localRest', step: 15, unit: 's', isFull: true },
+                { label: 'CIRCUIT', obj: this, key: 'localCircuit', step: 1 },
+                { label: 'ORDER', obj: this, key: 'localPosition', step: 1 },
+            ];
+            return [tempo, order];
+        },
     },
     watch: {
         workoutExercise(val) {
@@ -348,9 +364,9 @@ export default {
                 this.tempoType = this.TEMPTYPES.CONTRACTRELAX;
                 const parts = we.tempo_CR.split('-').map(Number);
                 this.localTempoCR = { contract: parts[0], relax: parts[1] };
-            } else if (we.tempo_bpm) {
+            } else if (we.tempo_BPM) {
                 this.tempoType = this.TEMPTYPES.BPM;
-                this.localTempoBPM = we.tempo_bpm;
+                this.localTempoBPM = we.tempo_BPM;
             } else {
                 this.tempoType = this.TEMPTYPES.FOURDIGIT;
                 if (we.tempo_4DigitCode) {
@@ -470,12 +486,13 @@ export default {
             this.loopsTotal = 1;
             this.loopsRemaining = 1;
         },
-        toggleTempoType() {
-            if (this.tempoType) {
-                this.tempoType = (this.tempoType % Object.keys(this.TEMPTYPES).length) + 1;
-            } else {
-                this.tempoType = this.TEMPTYPES.FOURDIGIT;
-            }
+        stepValue(stepper, direction) {
+            const value = Number(stepper.obj[stepper.key]) || 0;
+            stepper.obj[stepper.key] = Math.max(0, value + direction * stepper.step);
+        },
+        inputWidth(value) {
+            const length = String(value ?? '').length || 1;
+            return `${length + 1}ch`;
         },
         cancelSettings() {
             this.stopTempo();
@@ -658,49 +675,144 @@ export default {
     font-size: 11px;
 }
 
-.settings-card {
+.exercise-scroll {
+    min-height: 0;
+}
+
+/* Settings Sheet */
+.sheet-scrim {
+    position: absolute;
+    inset: 0;
+    z-index: 20;
+    background-color: rgba(24, 24, 27, 0.45);
+}
+
+.settings-sheet {
+    max-height: 90%;
+    overflow-y: auto;
+    gap: 16px;
+    padding: 10px 20px 20px;
     background-color: #fff;
-    border-radius: 12px;
-    border: 1px solid #e0e0e0;
-    padding: 12px 16px;
+    border-radius: 24px 24px 0 0;
 }
 
-.settings-header {
+.sheet-handle {
+    width: 36px;
+    height: 4px;
+    border-radius: 2px;
+    background-color: #e4e4e7;
+}
+
+.sheet-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #18181b;
+}
+
+.sheet-done {
     font-size: 15px;
-}
-
-.cancel-btn {
-    color: #888;
-    cursor: pointer;
-    font-style: italic;
-}
-
-.done-btn {
-    color: #2563eb;
-    cursor: pointer;
     font-weight: 600;
+    color: #0f766e;
+    cursor: pointer;
 }
 
-.setting-label {
-    font-size: 15px;
-    color: #333;
+.sheet-eyebrow {
+    text-align: start;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: #71717a;
 }
 
-.tempo-toggle {
+.tempo-type {
+    gap: 2px;
+    padding: 3px;
+    background-color: #f4f4f0;
+    border-radius: 10px;
+}
+
+.tempo-type-option {
+    padding: 7px 0;
+    font-size: 13px;
+    font-weight: 500;
+    color: #71717a;
+    border-radius: 8px;
     cursor: pointer;
     user-select: none;
 }
 
-.setting-input {
-    width: 64px;
-    text-align: center;
-    border-radius: 8px;
+.tempo-type-option.selected {
+    font-weight: 600;
+    color: #18181b;
+    background-color: #fff;
 }
 
-.setting-input-sm {
-    width: 40px;
+.stepper-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.stepper {
+    gap: 8px;
+    padding: 12px;
+    background-color: #f4f4f0;
+    border-radius: 16px;
+}
+
+.stepper.full {
+    grid-column: 1 / -1;
+}
+
+.stepper-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: #71717a;
+}
+
+.stepper-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    font-size: 18px;
+    line-height: 1;
+    color: #18181b;
+    background-color: #fff;
+    border: 1px solid #e4e4e7;
+    border-radius: 16px;
+}
+
+.stepper-input {
+    min-width: 2ch;
+    max-width: 100%;
+    padding: 0;
     text-align: center;
-    border-radius: 8px;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 34px;
+    font-weight: 600;
+    color: #18181b;
+    background: transparent;
+    border: none;
+    outline: none;
+    -moz-appearance: textfield;
+}
+
+.stepper-input::-webkit-outer-spin-button,
+.stepper-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.stepper-unit {
+    margin-left: 3px;
+    font-size: 12px;
+    font-weight: 500;
+    color: #71717a;
 }
 
 .sets-header {
