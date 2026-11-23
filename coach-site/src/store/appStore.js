@@ -33,8 +33,8 @@ export const useAppStore = defineStore('app', {
         /* Calendar */
         isMobileCalendarShown: false,
         calendarMobile: {
-            isShown: true,
-            type: CALENDAR_TYPES.WEEK
+            isShown: false,
+            type: undefined
         },
         thumbnailCalendar: {
             monthCount: 1
@@ -256,6 +256,10 @@ export const useAppStore = defineStore('app', {
             } else {
                 this.setSelectedItemPanel(panel);
                 this.navbar.active = "itemPanel";
+            }
+            // Auto-close the tab bar when the workout panel is selected
+            if (panel == "workout") {
+                this.isTabBarShown = false;
             }
         },
         setSelectedItemPanel(panel) {

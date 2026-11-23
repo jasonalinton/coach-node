@@ -11,6 +11,14 @@
 
         <!-- Media -->
         <div class="media position-relative">
+            <!-- Demo on repeat (YouTube/Vimeo embed or a direct video file), else the thumbnail -->
+            <iframe v-if="demoEmbedUrl" :src="demoEmbedUrl" class="media-content" frameborder="0"
+                    allow="autoplay; encrypted-media; picture-in-picture"></iframe>
+            <video v-else-if="demoVideoUrl" :key="demoVideoUrl" class="media-content"
+                   autoplay loop muted playsinline :poster="thumbnailUrl">
+                <source :src="demoVideoUrl" />
+            </video>
+            <img v-else-if="thumbnailUrl" :src="thumbnailUrl" class="media-content" :alt="name" />
             <img class="chart-icon position-absolute bottom-0 end-0 mb-2 me-2"
                  src="/icon/chart-line-solid.png" width="28" height="28"
                  @click.prevent="showHistory" />
@@ -34,13 +42,13 @@
                 <img src="/icon/briefing.png" width="22" height="22" />
                 <span class="toolbar-label">Notes</span>
             </div>
-            <div class="toolbar-item d-flex flex-column align-items-center gap-1" @click.prevent="editExercise">
-                <img src="/icon/slider-icon.png" width="22" height="22" />
-                <span class="toolbar-label">Edit</span>
-            </div>
             <div class="toolbar-item d-flex flex-column align-items-center gap-1" @click.prevent="showSettings = !showSettings">
                 <img src="/icon/dots-vertical.png" width="22" height="22" />
                 <span class="toolbar-label">More</span>
+            </div>
+            <div class="toolbar-item d-flex flex-column align-items-center gap-1" @click.prevent="editExercise">
+                <img src="/icon/slider-icon.png" width="22" height="22" />
+                <span class="toolbar-label">Edit</span>
             </div>
         </div>
 
@@ -187,6 +195,7 @@
 <script>
 import { useAppStore } from '@/store/appStore';
 import { useWorkoutStore } from '@/store/workoutStore';
+import { useMediaStore } from '@/store/mediaStore';
 import ExerciseSet from './ExerciseSet.vue';
 import { clone } from '../../../../../utility';
 
@@ -197,6 +206,7 @@ export default {
         return {
             appStore: undefined,
             workoutStore: undefined,
+            mediaStore: undefined,
             activeSetID: undefined,
             restRemaining: undefined,
             restTotal: undefined,
@@ -225,6 +235,7 @@ export default {
     created() {
         this.appStore = useAppStore();
         this.workoutStore = useWorkoutStore();
+        this.mediaStore = useMediaStore();
     },
     beforeUnmount() {
         this.stopTempo();
@@ -350,6 +361,38 @@ export default {
             ];
             return [tempo, order];
         },
+        /* Read through the store (not a local copy) so SignalR status updates, e.g. processing -> ready, show up */
+        demoMedia() {
+            return this.mediaStore?.getMedia(this.exercise?.idDemoMediaAsset);
+        },
+        thumbnailMedia() {
+            return this.mediaStore?.getMedia(this.exercise?.idThumbnailMediaAsset);
+        },
+        demoEmbedUrl() {
+            const url = this.demoMedia?.embedUrl;
+            if (!url) return undefined;
+            /* Autoplay needs mute; YouTube only loops when the video is also its own playlist */
+            const embed = new URL(url);
+            const params = { autoplay: 1, mute: 1, muted: 1, loop: 1, playsinline: 1, controls: 0 };
+            if (this.demoMedia.embedProvider == 'youtube') {
+                params.playlist = embed.pathname.split('/').pop();
+            }
+            Object.entries(params).forEach(([key, value]) => embed.searchParams.set(key, value));
+            return embed.toString();
+        },
+        demoVideoUrl() {
+            /* Same "is Url a playable file" check as MediaViewer.isDirectFile */
+            const media = this.demoMedia;
+            const isDirectFile = media?.source == 'upload' || !!media?.mimeType?.startsWith('video/');
+            if (media?.kind == 'video' && media.status == 'ready' && isDirectFile) {
+                return media.url;
+            }
+            return undefined;
+        },
+        thumbnailUrl() {
+            const media = this.thumbnailMedia;
+            return media?.posterUrl || media?.url || this.demoMedia?.posterUrl || undefined;
+        },
         variationSet() {
             return this.sets.find(s => s.id == this.variationSetID);
         },
@@ -368,6 +411,14 @@ export default {
             if (val && this.localCircuit === undefined) {
                 this.initLocalSettings();
             }
+        },
+        'exercise.idDemoMediaAsset': {
+            handler(id) { this.mediaStore?.ensure(id); },
+            immediate: true,
+        },
+        'exercise.idThumbnailMediaAsset': {
+            handler(id) { this.mediaStore?.ensure(id); },
+            immediate: true,
         },
         restRemaining(value) {
             if (value != null && value === 0) {
@@ -663,6 +714,14 @@ export default {
 .media {
     min-height: 300px;
     background-color: #f0efdf;
+}
+
+.media-content {
+    display: block;
+    width: 100%;
+    height: 300px;
+    object-fit: cover;
+    border: 0;
 }
 
 .chart-icon {
