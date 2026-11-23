@@ -18,31 +18,31 @@
                         spellcheck="true"/>
                 </div>
                 <!-- Toolbar -->
-                <div class="toolbar d-flex flex-col @3xl:flex-row mt-1">
+                <div class="toolbar flex flex-col @3xl:flex-row @3xl:items-center gap-2.5 @3xl:gap-6 mt-1">
                     <!-- Metrics -->
-                    <div class="metrics d-flex flex-row overflow-scroll">
+                    <div class="metrics flex flex-row items-center gap-1 overflow-scroll">
                         <span v-for="metric in metrics" :key="metric.id"
-                                class="metric" :class="{ 'active': hasMetric(metric.id)}"
+                                class="app-pill metric" :class="{ 'selected': hasMetric(metric.id)}"
                                 @click="toggleMetric(metric.id)">{{ metric.text }}</span>
                     </div>
-                    <div class="flex mx-2">          
+                    <div class="flex flex-wrap gap-x-4 gap-y-2">
                         <!-- Points -->
                         <div class="input-wrrapper d-flex flex-row">
-                            <label class="me-1" :for="`todo-${id}-points`">Points</label>
+                            <label :for="`todo-${id}-points`">Points</label>
                             <input type="number" class="form-control form-control-sm" :id="`todo-${id}-points`"
                                     :value="points.value"
                                     @blur="points.value = $event.target.value">
                         </div>
                         <!-- Time Estimate -->
                         <div class="input-wrrapper d-flex flex-row">
-                            <label class="me-1" :for="`todo-${id}-time-estimate`">Time Estimate</label>
+                            <label :for="`todo-${id}-time-estimate`">Time Estimate</label>
                             <input type="number" class="form-control form-control-sm" :id="`todo-${id}-time-estimate`"
                                     :value="todoClone.timeEstimate"
                                     @blur="todoClone.timeEstimate = $event.target.value">
                         </div>
                         <!-- Type -->
                         <div class="input-wrrapper d-flex flex-row">
-                            <label class="me-1" :for="`todo-${id}-type`">Type</label>
+                            <label :for="`todo-${id}-type`">Type</label>
                             <select :id="`todo-${id}-type`" class="form-select form-select-sm" aria-label="select" v-model="typeID.value"> 
                                 <option :value="null">None</option> 
                                 <option v-for="todoType in todoTypes" v-bind:key="todoType.id" :value="todoType.id">{{todoType.text}}</option> 
@@ -50,7 +50,7 @@
                         </div>
                         <!-- Meduim -->
                         <div class="input-wrrapper d-flex flex-row">
-                            <label class="me-1" :for="`todo-${id}-type`">Meduim</label>
+                            <label :for="`todo-${id}-type`">Meduim</label>
                             <select :id="`todo-${id}-type`" class="form-select form-select-sm" aria-label="select" v-model="mediumID.value"> 
                                 <option :value="null">None</option> 
                                 <option v-for="medium in mediums" v-bind:key="medium.id" :value="medium.id">{{medium.text}}</option> 
@@ -59,9 +59,8 @@
                     </div>
                 </div>
             </div>
-            <div class="form-body d-flex flex-col @xl:flex-row flex-wrap g-2 pt-2">
-                <!-- <div class="col-12 col-sm-4"> -->
-                <div class="grow-1 min-w-0 @xl:basis-full @5xl:basis-0">
+            <div class="form-body flex flex-col @5xl:flex-row gap-4 @5xl:gap-6 pt-2">
+                <div class="flex flex-col gap-2 min-w-0 @5xl:flex-[3]">
                     <!-- Description -->
                     <div class="d-flex flex-column">
                         <div class="header d-flex flex-column">
@@ -78,14 +77,14 @@
                     <!-- Blurbs -->
                     <BlurbFormControl header="Blurbs" placeholder="Click to add Blurb" :blurbs="blurbs" :showTitle="true"
                         @addBlurb="addBlurb($event)" @saveBlurb="updateBlurb($event)" />
-                    <DescendantBlurbs class="mt-2" header="Blurbs From Descendants" :descendants="descendantRefs" />
+                    <DescendantBlurbs header="Blurbs From Descendants" :descendants="descendantRefs" />
                     <!-- Media -->
-                    <MediaGallery v-if="id" class="mt-2" itemType="todo" :itemId="id" header="Photos & Videos" />
-                    <DescendantMedia class="mt-2" header="Media From Descendants" :descendants="descendantRefs" />
+                    <MediaGallery v-if="id" itemType="todo" :itemId="id" header="Photos & Videos" />
+                    <DescendantMedia header="Media From Descendants" :descendants="descendantRefs" />
                 </div>
-                <div class="flex flex-col @xl:flex-row flex-wrap grow-1 min-w-0 @5xl:basis-0 g-2 pt-2">
+                <div class="flex flex-col @xl:flex-row gap-4 @xl:gap-6 min-w-0 @5xl:flex-[4]">
                     <!-- Item Mapping -->
-                    <div class="form-column grow-1">
+                    <div class="form-column flex flex-col gap-4 grow-1 min-w-0">
                         <!-- Parents -->
                         <FormItemList itemType="todo" :itemIDs="parentIDs" :isParent="true"
                                         parentType="todo" :parentID="id" :repeatIDs="repeatIDs"
@@ -99,15 +98,16 @@
                                         parentType="todo" :parentID="id" :repeatIDs="repeatIDs"
                                         @addItemClicked="addItemClicked" @addItem="addItem"/>
                     </div>
-                    <div class="d-flex flex-column">
+                    <div class="flex flex-col gap-4 shrink-0 @xl:w-[260px]">
                         <!-- Repetition -->
                         <div>
-                            <span class="form-head">Repetition</span>
-                            <!-- Quick Add Item -->
-                            <div class="d-flex justify-content-between mt-1 mb-1">
-                                <button class="add-btn my-auto" type="button" @click="addRepeatClicked">
-                                    <img src="/icon/button/add.png" width="10" height="10"/>Add
-                                </button>
+                            <div class="header d-flex flex-column">
+                                <div class="d-flex flex-row">
+                                    <span class="text-start">Repetition</span>
+                                    <img class="icon-button ms-1 my-auto" src="/icon/add-button.png" width="14" height="14"
+                                         @click="addRepeatClicked"/>
+                                </div>
+                                <hr/>
                             </div>
                             <div>
                                 <RepeatControl v-for="repeat in repeats.value" :key="repeat.id"
@@ -119,12 +119,13 @@
                         </div>
                         <!-- Time -->
                         <div>
-                            <span class="form-head">Time</span>
-                            <!-- Quick Add Item -->
-                            <div class="d-flex justify-content-between mt-1 mb-1">
-                                <button class="add-btn my-auto" type="button" @click="addTimeClicked">
-                                    <img src="/icon/button/add.png" width="10" height="10"/>Add
-                                </button>
+                            <div class="header d-flex flex-column">
+                                <div class="d-flex flex-row">
+                                    <span class="text-start">Time</span>
+                                    <img class="icon-button ms-1 my-auto" src="/icon/add-button.png" width="14" height="14"
+                                         @click="addTimeClicked"/>
+                                </div>
+                                <hr/>
                             </div>
                             <div>
                                 <TimePairControl v-for="timePair in timePairs.value" :key="timePair.id"
@@ -157,10 +158,9 @@
                 @addBlurb="addBlurb($event)" @saveBlurb="updateBlurb($event)" />
         </div>
         <!-- Footer -->
-        <div v-if="!fullscreen" class="form-footer flex gap-1 justify-content-end">
+        <div v-if="!fullscreen" class="form-footer flex gap-2 justify-content-end">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @click="fullscreen = 'blurbs'">Blurbs</button>
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @click="createTask">{{`Create Task ${dateString}`}}</button>
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @click="close">Close</button>
             <button type="button" class="btn btn-primary" @click="save">Save</button>
         </div>
     </div>
@@ -651,6 +651,8 @@ export default {
 
 <style scoped>
 .todo-form {
+    /* Tailwind's :root theme doesn't match under scoped styles, so its spacing scale is undefined here */
+    --spacing: 0.25rem;
     padding: 16px 0;
 }
 
@@ -689,38 +691,54 @@ export default {
     font-size: 32px;
 }
 
+@container (max-width: 36rem) {
+    #text {
+        height: 40px;
+        font-size: 24px;
+    }
+}
+
 .input-wrrapper {
     height: 31px;
     line-height: 31px;
+    gap: 6px;
+}
+
+.input-wrrapper label {
+    color: #6C757D;
+    white-space: nowrap;
+}
+
+.input-wrrapper .form-control {
+    width: 64px;
+}
+
+.input-wrrapper .form-select {
+    width: 110px;
 }
 
 .form-column {
     overflow: auto;
 }
 
-.form-head {
-    font-size: 20px;
-    text-align: start;
-    width: 100%;
-    display: inline-block;
-}
-
 .toolbar {
-    /* height: 60px; */
-    padding: 6px 0;
+    padding: 8px 16px;
     background-color: #F5F5F5;
 }
 
 .toolbar .metric {
-    font-size: 20px;
-    padding: 8px;
-    margin: auto 0 auto 0;
-    border: solid 1px transparent;
+    padding: 4px 8px;
+    white-space: nowrap;
 }
 
-.toolbar .metric.active {
-    border: solid 1px black;
-    border-radius: 10px;
+.icon-button {
+    cursor: pointer;
+}
+
+.form-footer {
+    margin-top: 16px;
+    padding: 12px 16px 0;
+    border-top: 1px solid #DEE2E6;
 }
 
 .header {
