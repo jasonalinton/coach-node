@@ -61,7 +61,7 @@
             </div>
             <div class="form-body d-flex flex-col @xl:flex-row flex-wrap g-2 pt-2">
                 <!-- <div class="col-12 col-sm-4"> -->
-                <div class="grow-1 @xl:basis-full @5xl:basis-auto">
+                <div class="grow-1 min-w-0 @xl:basis-full @5xl:basis-0">
                     <!-- Description -->
                     <div class="d-flex flex-column">
                         <div class="header d-flex flex-column">
@@ -83,7 +83,7 @@
                     <MediaGallery v-if="id" class="mt-2" itemType="todo" :itemId="id" header="Photos & Videos" />
                     <DescendantMedia class="mt-2" header="Media From Descendants" :descendants="descendantRefs" />
                 </div>
-                <div class="flex flex-col @xl:flex-row flex-wrap grow-1 g-2 pt-2">
+                <div class="flex flex-col @xl:flex-row flex-wrap grow-1 min-w-0 @5xl:basis-0 g-2 pt-2">
                     <!-- Item Mapping -->
                     <div class="form-column grow-1">
                         <!-- Parents -->
