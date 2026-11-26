@@ -59,7 +59,18 @@
                     </div>
                 </div>
             </div>
-            <div class="form-body flex flex-col @5xl:flex-row gap-4 @5xl:gap-6 pt-2">
+            <!-- Tabs -->
+            <div class="form-tabs d-flex flex-row" role="tablist">
+                <button v-for="tabOption in tabs" :key="tabOption.id" type="button" role="tab"
+                        class="form-tab" :class="{ active: tab == tabOption.id }" :aria-selected="tab == tabOption.id"
+                        @click="tab = tabOption.id">{{ tabOption.text }}</button>
+            </div>
+            <TodoPlanning v-if="tab == 'planning'" :todo="todo" :repeats="repeats.value" :timePairs="timePairs.value"/>
+            <div v-if="tab == 'blurbs'" class="form-body pt-2">
+                <BlurbFormControl header="Blurbs" placeholder="Click to add Blurb" :blurbs="blurbs" :showTitle="true"
+                    @addBlurb="addBlurb($event)" @saveBlurb="updateBlurb($event)" />
+            </div>
+            <div v-if="tab == 'details'" class="form-body flex flex-col @5xl:flex-row gap-4 @5xl:gap-6 pt-2">
                 <div class="flex flex-col gap-2 min-w-0 @5xl:flex-[3]">
                     <!-- Description -->
                     <div class="d-flex flex-column">
@@ -152,16 +163,10 @@
                 </div>
             </div>
         </div>
-        <div v-if="fullscreen == 'blurbs'" class="flex flex-col">
-            <!-- Blurbs -->
-            <BlurbFormControl header="Blurbs" placeholder="Click to add Blurb" :blurbs="blurbs" :showTitle="true"
-                @addBlurb="addBlurb($event)" @saveBlurb="updateBlurb($event)" />
-        </div>
         <!-- Footer -->
         <div v-if="!fullscreen" class="form-footer flex gap-2 justify-content-end">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @click="fullscreen = 'blurbs'">Blurbs</button>
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @click="createTask">{{`Create Task ${dateString}`}}</button>
-            <button type="button" class="btn btn-primary" @click="save">Save</button>
+            <CreateTaskButton :selectedDate="selectedDate" :dateString="dateString" @create="createTask"/>
+            <button type="button" class="form-btn primary" @click="save">Save</button>
         </div>
     </div>
 </template>
@@ -175,6 +180,8 @@ import BlurbFormControl from '../component/BlurbFormControl.vue';
 import MediaGallery from '../component/media/MediaGallery.vue';
 import DescendantBlurbs from '../component/DescendantBlurbs.vue';
 import DescendantMedia from '../component/DescendantMedia.vue';
+import CreateTaskButton from '../component/CreateTaskButton.vue';
+import TodoPlanning from './planning/TodoPlanning.vue';
 import { clone, replaceItem, addOrReplaceItem, sortItems, sortAsc } from '../../../../../utility';
 import { metrics, todoTypes, mediums, todoActivityTypes } from '../../../../model/types';
 import { today, toShortWeekdayString } from '../../../../../utility/timeUtility';
@@ -182,7 +189,7 @@ import { BLURBTYPE } from '../../../../model/constants';
 
 export default {
     name: "TodoForm",
-    components: { RepeatControl, TimePairControl, ItemMapper, FormItemList, BlurbFormControl, MediaGallery, DescendantBlurbs, DescendantMedia },
+    components: { RepeatControl, TimePairControl, ItemMapper, FormItemList, BlurbFormControl, MediaGallery, DescendantBlurbs, DescendantMedia, CreateTaskButton, TodoPlanning },
     props: {
       id: Number
     },
@@ -251,7 +258,13 @@ export default {
                 isShown: false,
                 type: undefined
             },
-            fullscreen: undefined
+            fullscreen: undefined,
+            tab: 'details',
+            tabs: [
+                { id: 'details', text: 'Details' },
+                { id: 'planning', text: 'Planning' },
+                { id: 'blurbs', text: 'Blurbs' }
+            ]
         }
     },
     created: async function() {
@@ -520,8 +533,8 @@ export default {
         hasMetric(metricID) {
             return (this.metricIDs.value.includes(metricID)) ? true : false;
         },
-        createTask() {
-            this.store.createTask(this.id, this.plannerStore.selectedDate);
+        createTask(date) {
+            this.store.createTask(this.id, date || this.plannerStore.selectedDate);
         },
         addItem(itemType, itemText) {
             this.store.createAndMapItem(this.id, itemType, itemText);
@@ -733,6 +746,31 @@ export default {
 
 .icon-button {
     cursor: pointer;
+}
+
+.form-tabs {
+    gap: 4px;
+    padding: 0 16px;
+    border-bottom: 1px solid #DEE2E6;
+}
+
+.form-tab {
+    padding: 8px 12px 7px;
+    border: none;
+    border-bottom: 2px solid transparent;
+    background: none;
+    font-size: 16px;
+    color: #6C757D;
+}
+
+.form-tab:hover {
+    color: #212529;
+}
+
+.form-tab.active {
+    border-bottom-color: #0D6EFD;
+    color: #212529;
+    font-weight: 500;
 }
 
 .form-footer {

@@ -258,31 +258,37 @@ export let repetitions = [
     {
         id: 63,
         text: "Daily",
+        unit: "day",
         isActive: true
     },
     {
         id: 68,
         text: "Weekly",
+        unit: "week",
         isActive: true
     },
     {
         id: 69,
         text: "Monthly",
+        unit: "month",
         isActive: true
     },
     {
         id: 72,
         text: "Tri-Annually",
+        unit: "tri",
         isActive: false
     },
     {
         id: 74,
         text: "Semi-Annually",
+        unit: "semi",
         isActive: false
     },
     {
         id: 75,
         text: "Anually",
+        unit: "year",
         isActive: false
     },
     {

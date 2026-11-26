@@ -484,4 +484,44 @@ body {
 .app-pill:active {
     background-color: var(--pill-background-selected);
 }
+/* Compact form button - matches the 28-30px inputs and selects in forms */
+.form-btn {
+    height: 30px;
+    padding: 0 12px;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 28px;
+    white-space: nowrap;
+}
+.form-btn.sm {
+    height: 26px;
+    padding: 0 8px;
+    font-size: 13px;
+    line-height: 24px;
+}
+.form-btn.primary {
+    background-color: #0D6EFD;
+    color: white;
+}
+.form-btn.primary:hover {
+    background-color: #0B5ED7;
+}
+.form-btn.outline {
+    background-color: white;
+    border-color: #CED4DA;
+    color: #343A40;
+}
+.form-btn.outline:hover {
+    background-color: #F8F9FA;
+}
+.form-btn.danger {
+    background-color: white;
+    border-color: #F1AEB5;
+    color: #DC3545;
+}
+.form-btn:disabled {
+    opacity: .5;
+}
 </style>
